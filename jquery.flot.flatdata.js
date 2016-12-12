@@ -23,7 +23,7 @@ You can use series.step to specify the interval between consecutive indexes of t
     function process1DRawData(plot, series, data, datapoints) {
         if (series.flatdata === true) {
             var start = series.start || 0;
-            var step = series.step || 1;
+            var step = typeof series.step === 'number' ? series.step : 1;
             datapoints.pointsize = 2;
             for (var i = 0, j=0; i < data.length; i++, j+=2) {
                 datapoints.points[j] = start + (i * step);
