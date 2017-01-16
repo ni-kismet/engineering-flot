@@ -824,14 +824,14 @@ Licensed under the MIT license.
                     var delta;
 
                     switch (s.bars.align) {
-                    case "left":
-                        delta = 0;
-                        break;
-                    case "right":
-                        delta = -s.bars.barWidth;
-                        break;
-                    default:
-                        delta = -s.bars.barWidth / 2;
+                        case "left":
+                            delta = 0;
+                            break;
+                        case "right":
+                            delta = -s.bars.barWidth;
+                            break;
+                        default:
+                            delta = -s.bars.barWidth / 2;
                     }
 
                     if (s.bars.horizontal) {
@@ -2455,14 +2455,14 @@ Licensed under the MIT license.
             var barLeft;
 
             switch (series.bars.align) {
-            case "left":
-                barLeft = 0;
-                break;
-            case "right":
-                barLeft = -series.bars.barWidth;
-                break;
-            default:
-                barLeft = -series.bars.barWidth / 2;
+                case "left":
+                    barLeft = 0;
+                    break;
+                case "right":
+                    barLeft = -series.bars.barWidth;
+                    break;
+                default:
+                    barLeft = -series.bars.barWidth / 2;
             }
 
             var fillStyleCallback = series.bars.fill ? function(bottom, top) {
