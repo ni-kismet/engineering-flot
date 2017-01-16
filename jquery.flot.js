@@ -1685,15 +1685,11 @@ Licensed under the MIT license.
         function drawTickMarks(axis) {
             var t = axis.tickLength,
                 minorTicks = axis.showMinorTicks,
-				minorTicksNr = MINOR_TICKS_COUNT_CONSTANT,
-                edges,
-                x = 0,
-                y = 0,
+                minorTicksNr = MINOR_TICKS_COUNT_CONSTANT,
+                edges = findEdges(axis),
+                x = edges.x,
+                y = edges.y,
                 i = 0;
-
-            edges = findEdges(axis);
-            x = edges.x;
-            y = edges.y;
 
             // draw major tick marks
             ctx.strokeStyle = axis.options.color;
