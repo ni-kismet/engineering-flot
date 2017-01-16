@@ -256,6 +256,8 @@ Licensed under the MIT license.
         plot.hooks = hooks;
 
         // initialize
+		var MINOR_TICKS_COUNT_CONSTANT = $.plot.uiConstants.MINOR_TICKS_COUNT_CONSTANT;
+        var TICK_LENGTH_CONSTANT = $.plot.uiConstants.TICK_LENGTH_CONSTANT;
         initPlugins(plot);
         parseOptions(options_);
         setupCanvases();
@@ -1042,7 +1044,7 @@ Licensed under the MIT license.
 
             // Set the default tickLength if necessary
             if (tickLength == null) {
-                tickLength = 10;
+                tickLength = TICK_LENGTH_CONSTANT;
             }
 
             // By default, major tick marks are visible
@@ -1644,17 +1646,17 @@ Licensed under the MIT license.
                 y : y
                 };
         };
-
+		
+		function alignPosition(lineWidth, pos) {
+				return ((lineWidth % 2) !== 0) ? Math.floor(pos) + 0.5 : pos;
+		};
+			
         function drawTickBar(axis) {
             ctx.lineWidth = 1;
             var box = axis.box,
-                edges,
-                x = 0,
-                y = 0;
-
-            edges = findEdges(axis);
-            x = edges.x;
-            y = edges.y;
+                edges = findEdges(axis),
+                x = edges.x,
+                y = edges.y;
 
             // draw tick bar
             if (axis.show) {
@@ -1667,14 +1669,13 @@ Licensed under the MIT license.
                     xoff = plotWidth + 1;
                 else
                     yoff = plotHeight + 1;
-
-                if (ctx.lineWidth == 1) {
-                    if (axis.direction == "x") {
-                        y = Math.floor(y) + 0.5;
-                    } else {
-                        x = Math.floor(x) + 0.5;
-                    }
+            
+                if (axis.direction == "x") {
+                    y = alignPosition(ctx.lineWidth, y);
+                } else {
+                    x = alignPosition(ctx.lineWidth, x);
                 }
+                
                 ctx.moveTo(x, y);
                 ctx.lineTo(x + xoff, y + yoff);
                 ctx.stroke();
@@ -1684,6 +1685,7 @@ Licensed under the MIT license.
         function drawTickMarks(axis) {
             var t = axis.tickLength,
                 minorTicks = axis.showMinorTicks,
+				minorTicksNr = MINOR_TICKS_COUNT_CONSTANT,
                 edges,
                 x = 0,
                 y = 0,
@@ -1693,38 +1695,40 @@ Licensed under the MIT license.
             x = edges.x;
             y = edges.y;
 
-			// draw major tick marks
+            // draw major tick marks
             ctx.strokeStyle = axis.options.color;
             ctx.beginPath();
 
             for (i = 0; i < axis.ticks.length; ++i) {
                 var v = axis.ticks[i].v,
                     xoff = 0,
-                    yoff = 0;           
+                    yoff = 0,
+                    xminor = 0,
+                    yminor = 0,
+					j;					
 
                 if (!isNaN(v) && v >= axis.min && v <= axis.max) {       
-                    if (axis.direction == "x") {
+                    if (axis.direction === "x") {
                         x = axis.p2c(v);
                         yoff = t;
                         
-                        if (axis.position == "top") {
+                        if (axis.position === "top") {
                             yoff = -yoff;
                         }
                     } else {
                         y = axis.p2c(v);
                         xoff = t;
 
-                        if (axis.position == "left") {
+                        if (axis.position === "left") {
                             xoff = -xoff;
                         }
                     }
-
-                    if (ctx.lineWidth == 1) {
-                        if (axis.direction == "x")
-                            x = Math.floor(x) + 0.5;
-                        else
-                            y = Math.floor(y) + 0.5;
-                    }
+               
+                    if (axis.direction === "x")
+                        x = alignPosition(ctx.lineWidth, x);
+                    else
+                        y = alignPosition(ctx.lineWidth, y);
+                    
 
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + xoff, y + yoff);
@@ -1733,27 +1737,19 @@ Licensed under the MIT license.
                 //draw minor tick marks
                 if(minorTicks == true && i < axis.ticks.length - 1)
                 {
-                    var minorTicksNr = 4; // default number of minor ticks
                     var v1 = axis.ticks[i].v,
                         v2 = axis.ticks[i + 1].v,
-                        step = (v2 - v1) / (minorTicksNr + 1),
-                        xminor = 0,
-                        yminor = 0,
-                        j;
+                        step = (v2 - v1) / (minorTicksNr + 1);
 
                     for(j = 1; j <= minorTicksNr; j++)
                     {
                         // compute minor tick position
-                        if(axis.direction == "x")
+                        if(axis.direction === "x")
                         {
                             yminor = t / 2; // minor ticks are half length
-                            x = axis.p2c(v1 + j*step);
+                            x = alignPosition(ctx.lineWidth, axis.p2c(v1 + j*step))
 
-                            if (ctx.lineWidth == 1) {
-                                x = Math.floor(x) + 0.5;
-                            }
-
-                            if (axis.position == "top") {
+                            if (axis.position === "top") {
                                 yminor = -yminor;
                             }
 
@@ -1762,13 +1758,9 @@ Licensed under the MIT license.
                                 continue;
                         } else {
                             xminor = t / 2; // minor ticks are half length
-                            y = axis.p2c(v1 + j*step);
+                            y = alignPosition(ctx.lineWidth, axis.p2c(v1 + j*step));
 
-                            if (ctx.lineWidth == 1) {
-                                y = Math.floor(y) + 0.5;
-                            }
-
-                            if (axis.position == "left") {
+                            if (axis.position === "left") {
                                 xminor = -xminor;
                             }
 
@@ -1810,7 +1802,7 @@ Licensed under the MIT license.
                 if (overlappedWithBorder(v))
                     continue;
 
-                if (axis.direction == "x") {
+                if (axis.direction === "x") {
                     x = axis.p2c(v);
                     y = plotHeight;
                     yoff = -plotHeight;
@@ -1820,12 +1812,11 @@ Licensed under the MIT license.
                     xoff = plotWidth;
                 }
 
-                if (ctx.lineWidth == 1) {
-                    if (axis.direction == "x")
-                        x = Math.floor(x) + 0.5;
-                    else
-                        y = Math.floor(y) + 0.5;
-                }
+                if (axis.direction === "x")
+                    x = alignPosition(ctx.lineWidth, x);
+                else
+                    y = alignPosition(ctx.lineWidth, y);
+                
 
                 ctx.moveTo(x, y);
                 ctx.lineTo(x + xoff, y + yoff);
