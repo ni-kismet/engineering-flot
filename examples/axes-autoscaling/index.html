@@ -63,21 +63,22 @@
 				{ position: 'bottom' }
 			],
 			yaxes: [
-				{ position: 'left' },
+				{ position: 'left' }
 			]
 		});
 
         function update () {
-            index += 0.1;
+            index += 0.01;
             data = [
     			{ data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
     		];
             plot.setData(data);
             plot.setupGrid();
             plot.draw();
+            window.requestAnimationFrame(update);
         }
 
-        setInterval(update, 100);
+        window.requestAnimationFrame(update);
 
         $('#myForm input').on('change', function() {
             var val = $('input[name="myRadio"]:checked', '#myForm').val()

@@ -113,7 +113,7 @@ Licensed under the MIT license.
                     margin: 0, // distance from the canvas edge to the grid
                     labelMargin: 5, // in pixels
                     axisMargin: 8, // in pixels
-                    borderWidth: 2, // in pixels
+                    borderWidth: 1, // in pixels
                     minBorderMargin: null, // in pixels, null means taken from points radius
                     markings: null, // array of ranges or fn: axes -> array of ranges
                     markingsColor: "#f4f4f4",
@@ -629,6 +629,13 @@ Licensed under the MIT license.
                 if (axis.options.growOnly !== true) {
                     axis.datamin = topSentry;
                     axis.datamax = bottomSentry;
+                } else {
+                    if (axis.datamin === undefined) {
+                        axis.datamin = topSentry;
+                    }
+                    if (axis.datamax === undefined) {
+                        axis.datamax = bottomSentry;
+                    }
                 }
                 axis.used = false;
             });
