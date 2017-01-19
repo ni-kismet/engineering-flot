@@ -1070,7 +1070,11 @@ Licensed under the MIT license.
 
             // By default, grid lines are visible
             if (gridLines == null) {
-                gridLines = true;
+                if (innermost) {
+                    gridLines = true;
+                } else {
+                    gridLines = false;
+                }
             }
 
             if (!isNaN(+tickLength))
