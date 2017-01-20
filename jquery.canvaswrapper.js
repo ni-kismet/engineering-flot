@@ -166,7 +166,11 @@
                                 }
 
                                 if (positions.length == 0) {
-                                    delete styleCache[key];
+                                    if (styleCache[key].measured) {
+                                        styleCache[key].measured = false;
+                                    } else {
+                                        delete styleCache[key];
+                                    }
                                 }
                             }
                         }
@@ -202,8 +206,7 @@
                         left: 0,
                         bottom: 0,
                         right: 0,
-                        'font-size': "smaller",
-                        color: "#545454"
+                        color: "inherit"
                     })
                     .insertAfter(this.element);
             }
@@ -372,6 +375,7 @@
             info = styleCache[text] = {
                 width: element.outerWidth(true),
                 height: element.outerHeight(true),
+                measured: true,
                 element: element,
                 positions: []
             };
@@ -379,6 +383,7 @@
             element.detach();
         }
 
+        info.measured = true;
         return info;
     };
 
