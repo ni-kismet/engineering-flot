@@ -54,7 +54,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             || typeof div.style.transition != 'undefined';
     }
 
-    
     function AxisLabel(axisName, position, padding, plot, opts) {
         this.axisName = axisName;
         this.position = position;
@@ -69,7 +68,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     CanvasAxisLabel.prototype = new AxisLabel();
     CanvasAxisLabel.prototype.constructor = CanvasAxisLabel;
-    
+
     function CanvasAxisLabel(axisName, position, padding, plot, opts) {
         AxisLabel.prototype.constructor.call(this, axisName, position, padding,
             plot, opts);
@@ -127,7 +126,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     HtmlAxisLabel.prototype = new AxisLabel();
     HtmlAxisLabel.prototype.constructor = HtmlAxisLabel;
-    
+
     function HtmlAxisLabel(axisName, position, padding, plot, opts) {
         AxisLabel.prototype.constructor.call(this, axisName, position,
             padding, plot, opts);
@@ -220,7 +219,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     CssTransformAxisLabel.prototype = new HtmlAxisLabel();
     CssTransformAxisLabel.prototype.constructor = CssTransformAxisLabel;
-    
+
     function CssTransformAxisLabel(axisName, position, padding, plot, opts) {
         HtmlAxisLabel.prototype.constructor.call(this, axisName, position,
             padding, plot, opts);
@@ -329,7 +328,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     IeTransformAxisLabel.prototype = new CssTransformAxisLabel();
     IeTransformAxisLabel.prototype.constructor = IeTransformAxisLabel;
-  
+
     function IeTransformAxisLabel(axisName, position, padding, plot, opts) {
         CssTransformAxisLabel.prototype.constructor.call(this, axisName,
             position, padding,
