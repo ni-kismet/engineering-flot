@@ -86,17 +86,21 @@
             y.options.min = undefined;
             y.options.max = undefined;
             y.options.autoscaleMargin = null;
+            y.options.autoscale = "FitExactly";
             y.options.growOnly = false;
 
             switch (val) {
                 case '1':
                     y.options.min = -1.5;
                     y.options.max = 1.5;
+                    y.options.autoscale = "None";
                     break;
                 case '2':
                     y.options.autoscaleMargin = 0.02;
+                    y.options.autoscale = "FitLoosely";
                     break;
                 case '3':
+                    y.options.autoscale = "FitExactly";
                     break;
                 case '4':
                     y.options.growOnly = true;
@@ -121,8 +125,8 @@
         <fieldset id="myForm">
             <legend>Vertical axis autoscaling options</legend>
             <input type="radio" name="myRadio" value="1" /> None (min = -1.5, max = 1.5) <br />
-            <input type="radio" name="myRadio" value="2" checked="checked"/> fit loosely <br />
-            <input type="radio" name="myRadio" value="3" /> fit exactly <br />
+            <input type="radio" name="myRadio" value="2" /> fit loosely <br />
+            <input type="radio" name="myRadio" value="3" checked="checked" /> fit exactly <br />
             <input type="radio" name="myRadio" value="4" /> grow only <br />
         </fieldset>
 	</div>

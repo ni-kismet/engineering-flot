@@ -49,7 +49,8 @@ Licensed under the MIT license.
                     inverseTransform: null, // if transform is set, this should be the inverse function
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
-                    autoscaleMargin: null, // margin in % to add if auto-setting min/max
+                    autoscaleMargin: null, // margin in % to add if auto-scale is on FitLoosely mode
+                    autoscale: "None", //None, FitLoosely, FitExactly
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -66,7 +67,8 @@ Licensed under the MIT license.
                     minTickSize: null // number or [number, "unit"]
                 },
                 yaxis: {
-                    autoscaleMargin: 0.02,
+                    autoscaleMargin: 0.02, // margin in % to add if auto-scale is on FitLoosely mode
+                    autoscale: "None", //Available modes: None, FitLoosely, FitExactly
                     position: "left" // or "right"
                 },
                 xaxes: [],
@@ -681,13 +683,12 @@ Licensed under the MIT license.
                     });
 
                     if (s.bars.show || (s.lines.show && s.lines.fill)) {
-                        var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
                         format.push({
                             x: false,
                             y: true,
                             number: true,
                             required: false,
-                            autoscale: autoscale,
+                            autoscale: "FitExactly",
                             defaultValue: 0
                         });
 
@@ -1261,6 +1262,27 @@ Licensed under the MIT license.
                 max = +(opts.max != null ? opts.max : axis.datamax),
                 delta = max - min;
 
+            switch (opts.autoscale) {
+                case "None":
+                    break;
+                case "FitLoosely":
+                    var margin = opts.autoscaleMargin;
+                    min -= delta * margin;
+                    max += delta * margin;
+                    // make sure we don't go below zero if all values
+                    // are positive
+                    if (min < 0 && axis.datamin != null && axis.datamin >= 0)
+                        min = 0;
+                    if (max > 0 && axis.datamax != null && axis.datamax <= 0)
+                        max = 0;
+                    break;
+                case "FitExactly":
+                    min = axis.datamin;
+                    max = axis.datamax;
+                    break;
+            }
+
+            delta = max - min;
             if (delta == 0.0) {
                 // degenerate case
                 var widen = max == 0 ? 1 : 0.01;
@@ -1271,24 +1293,8 @@ Licensed under the MIT license.
                 // don't fall into min == max which doesn't work
                 if (opts.max == null || opts.min != null)
                     max += widen;
-            } else {
-                // consider autoscaling
-                var margin = opts.autoscaleMargin;
-                if (margin != null) {
-                    if (opts.min == null) {
-                        min -= delta * margin;
-                        // make sure we don't go below zero if all values
-                        // are positive
-                        if (min < 0 && axis.datamin != null && axis.datamin >= 0)
-                            min = 0;
-                    }
-                    if (opts.max == null) {
-                        max += delta * margin;
-                        if (max > 0 && axis.datamax != null && axis.datamax <= 0)
-                            max = 0;
-                    }
-                }
             }
+
             axis.min = min;
             axis.max = max;
         }
