@@ -52,6 +52,7 @@ Licensed under the MIT license.
                     autoscaleMargin: null, // margin in % to add if auto-setting min/max
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
+                    showTickLabels: "major", // "none", "endpoints", "major", "all"
                     tickFormatter: null, // fn: number -> string
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
@@ -67,7 +68,8 @@ Licensed under the MIT license.
                 },
                 yaxis: {
                     autoscaleMargin: 0.02,
-                    position: "left" // or "right"
+                    position: "left", // or "right"
+                    showTickLabels: "major" // "none", "endpoints", "major", "all"
                 },
                 xaxes: [],
                 yaxes: [],
@@ -1169,7 +1171,7 @@ Licensed under the MIT license.
             // labels but instead use the overall width/height to not
             // jump as much around with replots
             $.each(allAxes(), function(_, axis) {
-                if (axis.reserveSpace && axis.ticks && axis.ticks.length) {
+                if (axis.reserveSpace && axis.ticks && axis.ticks.length) {                  
                     if (axis.direction === "x") {
                         margins.left = Math.max(margins.left, axis.labelWidth / 2);
                         margins.right = Math.max(margins.right, axis.labelWidth / 2);
@@ -1368,12 +1370,23 @@ Licensed under the MIT license.
                         v = Number.NaN,
                         prev;
 
-                    do {
-                        prev = v;
-                        v = start + i * axis.tickSize;
-                        ticks.push(v);
-                        ++i;
-                    } while (v < axis.max && v != prev);
+                    //if (axis.options.showTickLabels === 'endpoints' || axis.options.showTickLabels === 'all') {
+                        ticks.push(axis.min);
+                    //}
+
+                    //if (axis.options.showTickLabels === 'major' || axis.options.showTickLabels === 'all') {
+                        do {
+                            prev = v;
+                            v = start + i * axis.tickSize;
+                            ticks.push(v);
+                            ++i;
+                        } while (v < axis.max && v != prev);
+                    //}
+
+                    //if (axis.options.showTickLabels === 'endpoints' || axis.options.showTickLabels === 'all') {
+                        ticks.push(axis.max);
+                    //}
+
                     return ticks;
                 };
 
@@ -1722,7 +1735,7 @@ Licensed under the MIT license.
                     yoff = 0,
                     xminor = 0,
                     yminor = 0,
-					j;
+                    j;
 
                 if (!isNaN(v) && v >= axis.min && v <= axis.max) {
                     if (axis.direction === "x") {
@@ -1922,7 +1935,8 @@ Licensed under the MIT license.
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j];
 
-                if (!axis.show || axis.ticks.length == 0)
+                //if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show)
                     continue;
 
                 drawTickBar(axis);
@@ -1959,14 +1973,19 @@ Licensed under the MIT license.
 
                 executeHooks(hooks.drawAxis, [axis, surface]);
 
-                if (!axis.show || axis.ticks.length == 0)
+                //if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show)
                     return;
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
 
                     tick = axis.ticks[i];
-                    if (!tick.label || tick.v < axis.min || tick.v > axis.max)
+                    if (!tick.label || tick.v < axis.min || tick.v > axis.max ||
+                        (axis.options.showTickLabels == 'none') ||
+                        (axis.options.showTickLabels == 'endpoints' && !(i == 0 || i == axis.ticks.length - 1)) ||
+                        (axis.options.showTickLabels == 'major' && (i == 0 || i == axis.ticks.length - 1))) {
                         continue;
+                    }
 
                     if (axis.direction == "x") {
                         halign = "center";
