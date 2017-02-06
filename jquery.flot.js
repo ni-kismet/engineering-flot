@@ -1962,7 +1962,68 @@ Licensed under the MIT license.
                     legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
-                    tick, x, y, halign, valign, previousLabelBox, lastLabelBox;
+                    tick, x, y, halign, valign, newLabelBox, previousLabelBox, lastLabelBox, info,
+                    labelWidth = axis.options.labelWidth || 0,
+                    maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks.length || 1)) : null),
+                    areRectanglesIntersecting = function(x11, y11, x12, y12, x21, y21, x22, y22) {
+                        return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
+                               ((y11 <= y21 && y21 <= y12) || (y21 <= y11 && y11 <= y22));
+                    },
+                    isIntersectingWithOtherLabelsBoxes = function(newLabelBox) {
+                        var intersecting = false;
+                        if (previousLabelBox) {
+                            intersecting |= areRectanglesIntersecting(
+                                  previousLabelBox.x, previousLabelBox.y, previousLabelBox.x + previousLabelBox.width, previousLabelBox.y + previousLabelBox.height,
+                                  newLabelBox.x, newLabelBox.y, newLabelBox.x + newLabelBox.width, newLabelBox.y + newLabelBox.height);
+                        }
+                        if (lastLabelBox) {
+                            intersecting |= areRectanglesIntersecting(
+                                  lastLabelBox.x, lastLabelBox.y, lastLabelBox.x + lastLabelBox.width, lastLabelBox.y + lastLabelBox.height,
+                                  newLabelBox.x, newLabelBox.y, newLabelBox.x + newLabelBox.width, newLabelBox.y + newLabelBox.height);
+                        }
+                        return intersecting;
+                    },
+                    drawAxisLabel = function (index) {
+                        tick = axis.ticks[index];
+                        if (!tick.label || tick.v < axis.min || tick.v > axis.max ||
+                            (axis.options.showTickLabels == 'none') ||
+                            (axis.options.showTickLabels == 'endpoints' && !(index == 0 || index == axis.ticks.length - 1)) ||
+                            (axis.options.showTickLabels == 'major' && (index == 0 || index == axis.ticks.length - 1))) {
+                            return;
+                        }
+
+                        info = surface.getTextInfo(layer, tick.label, font, null, maxWidth);
+
+                        if (axis.direction == "x") {
+                            halign = "center";
+                            x = plotOffset.left + axis.p2c(tick.v);
+                            if (axis.position == "bottom") {
+                                y = box.top + box.padding;
+                            } else {
+                                y = box.top + box.height - box.padding;
+                                valign = "bottom";
+                            }
+                            newLabelBox = {x: x - info.width / 2, y: y, width: info.width, height: info.height}
+                        } else {
+                            valign = "middle";
+                            y = plotOffset.top + axis.p2c(tick.v);
+                            if (axis.position == "left") {
+                                x = box.left + box.width - box.padding;
+                                halign = "right";
+                            } else {
+                                x = box.left + box.padding;
+                            }
+                            newLabelBox = {x: x, y: y - info.height / 2, width: info.width, height: info.height}
+                        }
+
+                        if (isIntersectingWithOtherLabelsBoxes(newLabelBox)) {
+                            return;
+                        }
+
+                        previousLabelBox = newLabelBox;
+
+                        surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+                    };
 
                 // Remove text before checking for axis.show and ticks.length;
                 // otherwise plugins, like flot-tickrotor, that draw their own
@@ -1972,40 +2033,17 @@ Licensed under the MIT license.
 
                 executeHooks(hooks.drawAxis, [axis, surface]);
 
-                if (!axis.show)
+                if (!axis.show) {
                     return;
+                }
 
-                for (var i = 0; i < axis.ticks.length; ++i) {
+                drawAxisLabel(axis.ticks.length - 1);
 
-                    tick = axis.ticks[i];
-                    if (!tick.label || tick.v < axis.min || tick.v > axis.max ||
-                        (axis.options.showTickLabels == 'none') ||
-                        (axis.options.showTickLabels == 'endpoints' && !(i == 0 || i == axis.ticks.length - 1)) ||
-                        (axis.options.showTickLabels == 'major' && (i == 0 || i == axis.ticks.length - 1))) {
-                        continue;
-                    }
+                lastLabelBox = previousLabelBox;
+                previousLabelBox = null;
 
-                    if (axis.direction == "x") {
-                        halign = "center";
-                        x = plotOffset.left + axis.p2c(tick.v);
-                        if (axis.position == "bottom") {
-                            y = box.top + box.padding;
-                        } else {
-                            y = box.top + box.height - box.padding;
-                            valign = "bottom";
-                        }
-                    } else {
-                        valign = "middle";
-                        y = plotOffset.top + axis.p2c(tick.v);
-                        if (axis.position == "left") {
-                            x = box.left + box.width - box.padding;
-                            halign = "right";
-                        } else {
-                            x = box.left + box.padding;
-                        }
-                    }
-
-                    surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+                for (var i = 0; i < axis.ticks.length - 1; ++i) {
+                    drawAxisLabel(i);
                 }
             });
         }
