@@ -688,7 +688,7 @@ Licensed under the MIT license.
                             number: true,
                             required: false,
                             autoscale: autoscale,
-                            defaultValue: 0
+                            defaultValue: s.lines.fillTowards || 0 
                         });
 
                         if (s.bars.horizontal) {
@@ -2090,6 +2090,7 @@ Licensed under the MIT license.
             var points = datapoints.points,
                 ps = datapoints.pointsize,
                 bottom = Math.min(Math.max(0, axisy.min), axisy.max),
+                //bottom = axisy.min,
                 i = 0,
                 top, areaOpen = false,
                 ypos = 1,
