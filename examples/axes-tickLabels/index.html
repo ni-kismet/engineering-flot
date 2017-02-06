@@ -81,7 +81,7 @@
         window.requestAnimationFrame(update);
 
         $('#tickLabels input').on('change', function() {
-            var val = $('input[name="myRadio"]:checked', '#myForm').val()
+            var val = $('input[name="tickLabels"]:checked', '#tickLabels').val()
             var y = plot.getAxes().yaxis;
             y.options.min = undefined;
             y.options.max = undefined;
@@ -89,6 +89,26 @@
             y.options.growOnly = false;
 						y.options.showTickLabels = val;
         });
+
+				$('#tickMarks input').on('change', function() {
+						var val = $('input[name="tickMarks"]:checked', '#tickMarks').val()
+						var y = plot.getAxes().yaxis;
+						y.options.min = undefined;
+						y.options.max = undefined;
+						switch(val) {
+								case 'none':
+										y.options.showTicks = false;
+										break;
+								case 'major':
+										y.options.showTicks = true;
+										y.options.showMinorTicks = false;
+										break;
+								case 'all':
+										y.options.showTicks = true;
+										y.options.showMinorTicks = true;
+										break;
+						}
+				});
 	});
 
 	</script>
@@ -96,7 +116,7 @@
 <body>
 
 	<div id="header">
-		<h2>Axes autoscaling options</h2>
+		<h2>Flot Examples: Axes tick labels options</h2>
 	</div>
 
 	<div id="content">
@@ -114,7 +134,6 @@
 				<fieldset id="tickMarks">
 						<legend>Vertical axis tick marks options</legend>
 						<input type="radio" name="tickMarks" value="none" /> none <br />
-						<input type="radio" name="tickMarks" value="endpoints" /> endpoints <br />
 						<input type="radio" name="tickMarks" value="major" checked="checked"/> major <br />
 						<input type="radio" name="tickMarks" value="all" /> all <br />
 				</fieldset>

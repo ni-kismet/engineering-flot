@@ -987,7 +987,9 @@ Licensed under the MIT license.
         function measureTickLabels(axis) {
 
             var opts = axis.options,
-                ticks = axis.ticks || [],
+                ticks = opts.showTickLabels != 'none' && axis.ticks ? axis.ticks : [],
+                showMajorTickLabels = opts.showTickLabels == 'major' || opts.showTickLabels == 'all',
+                showEndpointsTickLabels = opts.showTickLabels == 'endpoints' || opts.showTickLabels == 'all',
                 labelWidth = opts.labelWidth || 0,
                 labelHeight = opts.labelHeight || 0,
                 maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (ticks.length || 1)) : null),
@@ -999,8 +1001,11 @@ Licensed under the MIT license.
                 var t = ticks[i];
                 var label = t.label;
 
-                if (!t.label)
+                if (!t.label ||
+                    (showMajorTickLabels == false && i > 0 && i < ticks.length - 1) ||
+                    (showEndpointsTickLabels == false && (i == 0 || i == ticks.length - 1))) {
                     continue;
+                }
 
                 if (typeof t.label === 'object') {
                   label = t.label.name;
@@ -1171,7 +1176,7 @@ Licensed under the MIT license.
             // labels but instead use the overall width/height to not
             // jump as much around with replots
             $.each(allAxes(), function(_, axis) {
-                if (axis.reserveSpace && axis.ticks && axis.ticks.length) {                  
+                if (axis.reserveSpace && axis.ticks && axis.ticks.length) {
                     if (axis.direction === "x") {
                         margins.left = Math.max(margins.left, axis.labelWidth / 2);
                         margins.right = Math.max(margins.right, axis.labelWidth / 2);
@@ -1370,22 +1375,16 @@ Licensed under the MIT license.
                         v = Number.NaN,
                         prev;
 
-                    //if (axis.options.showTickLabels === 'endpoints' || axis.options.showTickLabels === 'all') {
-                        ticks.push(axis.min);
-                    //}
+                    ticks.push(axis.min);
 
-                    //if (axis.options.showTickLabels === 'major' || axis.options.showTickLabels === 'all') {
-                        do {
-                            prev = v;
-                            v = start + i * axis.tickSize;
-                            ticks.push(v);
-                            ++i;
-                        } while (v < axis.max && v != prev);
-                    //}
+                    do {
+                        prev = v;
+                        v = start + i * axis.tickSize;
+                        ticks.push(v);
+                        ++i;
+                    } while (v < axis.max && v != prev);
 
-                    //if (axis.options.showTickLabels === 'endpoints' || axis.options.showTickLabels === 'all') {
-                        ticks.push(axis.max);
-                    //}
+                    ticks.push(axis.max);
 
                     return ticks;
                 };
@@ -1963,7 +1962,7 @@ Licensed under the MIT license.
                     legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
-                    tick, x, y, halign, valign;
+                    tick, x, y, halign, valign, previousLabelBox, lastLabelBox;
 
                 // Remove text before checking for axis.show and ticks.length;
                 // otherwise plugins, like flot-tickrotor, that draw their own
@@ -1973,7 +1972,6 @@ Licensed under the MIT license.
 
                 executeHooks(hooks.drawAxis, [axis, surface]);
 
-                //if (!axis.show || axis.ticks.length == 0)
                 if (!axis.show)
                     return;
 
