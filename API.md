@@ -258,6 +258,7 @@ xaxis, yaxis: {
     transform: null or fn: number -> number
     inverseTransform: null or fn: number -> number
 
+    showTickLabels: "major", "none", "endpoints", or "all"
     ticks: null or number or ticks array or (fn: axis -> ticks array)
     tickSize: number or array
     minTickSize: number or array
