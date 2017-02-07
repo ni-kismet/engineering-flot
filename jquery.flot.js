@@ -1962,34 +1962,28 @@ Licensed under the MIT license.
                     legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
-                    tick, x, y, halign, valign, newLabelBox, previousLabelBox, lastLabelBox, info,
+                    tick, x, y, halign, valign, info,
+                    nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, firstLabelBox, lastLabelBox, previousLabelBox = nullBox,
                     labelWidth = axis.options.labelWidth || 0,
                     maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks.length || 1)) : null),
-                    areRectanglesIntersecting = function(x11, y11, x12, y12, x21, y21, x22, y22) {
+                    overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
                         return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
                                ((y11 <= y21 && y21 <= y12) || (y21 <= y11 && y11 <= y22));
                     },
-                    isIntersectingWithOtherLabelsBoxes = function(newLabelBox) {
-                        var intersecting = false;
-                        if (previousLabelBox) {
-                            intersecting |= areRectanglesIntersecting(
-                                  previousLabelBox.x, previousLabelBox.y, previousLabelBox.x + previousLabelBox.width, previousLabelBox.y + previousLabelBox.height,
-                                  newLabelBox.x, newLabelBox.y, newLabelBox.x + newLabelBox.width, newLabelBox.y + newLabelBox.height);
-                        }
-                        if (lastLabelBox) {
-                            intersecting |= areRectanglesIntersecting(
-                                  lastLabelBox.x, lastLabelBox.y, lastLabelBox.x + lastLabelBox.width, lastLabelBox.y + lastLabelBox.height,
-                                  newLabelBox.x, newLabelBox.y, newLabelBox.x + newLabelBox.width, newLabelBox.y + newLabelBox.height);
-                        }
-                        return intersecting;
+                    overlapsOtherLabels = function(newLabelBox, previousLabelBoxes) {
+                        return previousLabelBoxes.some(function(labelBox) {
+                            return overlapping(
+                                newLabelBox.x, newLabelBox.y, newLabelBox.x + newLabelBox.width, newLabelBox.y + newLabelBox.height,
+                                labelBox.x, labelBox.y, labelBox.x + labelBox.width, labelBox.y + labelBox.height);
+                        });
                     },
-                    drawAxisLabel = function (index) {
+                    drawAxisLabel = function (index, labelBoxes) {
                         tick = axis.ticks[index];
                         if (!tick.label || tick.v < axis.min || tick.v > axis.max ||
                             (axis.options.showTickLabels == 'none') ||
                             (axis.options.showTickLabels == 'endpoints' && !(index == 0 || index == axis.ticks.length - 1)) ||
                             (axis.options.showTickLabels == 'major' && (index == 0 || index == axis.ticks.length - 1))) {
-                            return;
+                            return nullBox;
                         }
 
                         info = surface.getTextInfo(layer, tick.label, font, null, maxWidth);
@@ -2016,13 +2010,13 @@ Licensed under the MIT license.
                             newLabelBox = {x: x, y: y - info.height / 2, width: info.width, height: info.height}
                         }
 
-                        if (isIntersectingWithOtherLabelsBoxes(newLabelBox)) {
-                            return;
+                        if (overlapsOtherLabels(newLabelBox, labelBoxes)) {
+                            return nullBox;
                         }
 
-                        previousLabelBox = newLabelBox;
-
                         surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+
+                        return newLabelBox;
                     };
 
                 // Remove text before checking for axis.show and ticks.length;
@@ -2037,13 +2031,10 @@ Licensed under the MIT license.
                     return;
                 }
 
-                drawAxisLabel(axis.ticks.length - 1);
-
-                lastLabelBox = previousLabelBox;
-                previousLabelBox = null;
-
-                for (var i = 0; i < axis.ticks.length - 1; ++i) {
-                    drawAxisLabel(i);
+                firstLabelBox = drawAxisLabel(0, []);
+                lastLabelBox = drawAxisLabel(axis.ticks.length - 1, [firstLabelBox]);
+                for (var i = 1; i < axis.ticks.length - 1; ++i) {
+                    previousLabelBox = drawAxisLabel(i, [firstLabelBox, previousLabelBox, lastLabelBox]);
                 }
             });
         }
