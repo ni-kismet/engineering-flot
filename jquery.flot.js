@@ -671,6 +671,7 @@ Licensed under the MIT license.
                         autoscale: s.xaxis.options.min == null && s.xaxis.options.max == null,
                         defaultValue: null
                     });
+
                     format.push({
                         x: false,
                         y: true,
@@ -680,20 +681,18 @@ Licensed under the MIT license.
                         defaultValue: null
                     });
 
-                    if (0) { //(s.bars.show || (s.lines.show && s.lines.fill)) {
-                        var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
-                        format.push({
-                            x: false,
-                            y: true,
-                            number: true,
-                            required: false,
-                            autoscale: autoscale,
-                            defaultValue: s.lines.fillTowards || 0
-                        });
-
-                        if (s.bars.horizontal) {
-                            format[format.length - 1].y = false;
-                            format[format.length - 1].x = true;
+                    if (s.bars.show || (s.lines.show && s.lines.fill)) {
+                        var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (s.data && s.data[0].length ? s.data[0].length : 3);
+                        if (expectedPs > 2) {
+                            var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
+                            format.push({
+                                x: false,
+                                y: true,
+                                number: true,
+                                required: false,
+                                autoscale: autoscale,
+                                defaultValue: 0
+                            });
                         }
                     }
 
@@ -859,6 +858,15 @@ Licensed under the MIT license.
                     } else {
                         xmin += delta;
                         xmax += delta + s.bars.barWidth;
+                    }
+                }
+
+                if ((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero)) {
+                    // make sure the 0 point is included in the computed y range when requested
+                    if (ps <= 2) {
+                        /*if ps > 0 the points were already taken into account for autoscale */
+                        ymin = Math.min(0, ymin);
+                        ymax = Math.max(0, ymax);
                     }
                 }
 
@@ -2092,10 +2100,10 @@ Licensed under the MIT license.
                 bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min,
                 //bottom = axisy.min,
                 i = 0,
+                ypos = 1,
                 top, areaOpen = false,
                 segmentStart = 0,
                 segmentEnd = 0;
-
 
             // we process each segment in two turns, first forward
             // direction to sketch out top, then once we hit the
@@ -2107,15 +2115,21 @@ Licensed under the MIT license.
                 i += ps; // ps is negative if going backwards
 
                 var x1 = points[i - ps],
-                    y1 = ps < 0 ? bottom : points[i - ps + 1],
+                    y1 = points[i - ps + ypos],
                     x2 = points[i],
-                    y2 = ps < 0 ? bottom : points[i + 1];
+                    y2 = points[i + ypos];
+
+                    if (ps === -2) {
+                        /* going backwards and no value for the bottom provided in the series*/
+                        y1 = y2 = bottom;
+                    }
 
                 if (areaOpen) {
                     if (ps > 0 && x1 != null && x2 == null) {
                         // at turning point
                         segmentEnd = i;
                         ps = -ps;
+                        ypos = 2;
                         continue;
                     }
 
@@ -2950,9 +2964,7 @@ Licensed under the MIT license.
     // Add the plot function to the top level of the jQuery object
 
     $.plot = function(placeholder, data, options) {
-        //var t0 = new Date();
         var plot = new Plot($(placeholder), data, options, $.plot.plugins);
-        //(window.console ? console.log : alert)("time used (msecs): " + ((new Date()).getTime() - t0.getTime()));
         return plot;
     };
 

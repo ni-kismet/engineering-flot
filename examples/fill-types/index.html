@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Flot Examples: Series Fill Types</title>
+	<title>Flot Examples: Area Fill Types</title>
 	<link href="../examples.css" rel="stylesheet" type="text/css">
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.colorhelpers.js"></script>
@@ -20,26 +20,39 @@
 
 		var d2 = [];
 
-        for (var i = 0; i < 14; i += 0.5) {
+		for (var i = 0; i < 14; i += 0.5) {
 			d2.push([i, Math.sin(i)]);
 		}
 
 		var d3 = [];
 		for (var i = 0; i < 14; i += 0.5) {
-			d3.push([i, -5 - Math.cos(i)]);
+			d3.push([i, -5 - Math.cos(i), -8 - Math.sin(i)]);
 		}
 
+		var d4 = [];
+		for (var i = 0; i < 14; i += 0.5) {
+			d4.push([i, -10 - Math.cos(i)]);
+		}
+
+
 		$.plot("#placeholder", [{
-    			data: d1,
-    			lines: { show: true, fill: true, zero: false, fillTowards: Infinity }
-    		}, {
-    			data: d2,
-    			lines: { show: true, fill: true, zero: false }
-    		}, {
-    			data: d3,
-                lines: { show: true, fill: true, zero: false, fillTowards: -Infinity }
-    		}]
-        );
+				label: "Fill towards Infinity",
+				data: d1,
+				lines: { show: true, fill: true, zero: false, fillTowards: Infinity }
+			}, {
+				label: "Fill towards zero",
+				data: d2,
+				lines: { show: true, fill: true, zero: false }
+			}, {
+				label: "Fill between",
+				data: d3,
+				lines: { show: true,  lineWidth: 0, fill: true, zero: false }
+			}, {
+				label: "Fill towards -Infinity",
+				data: d4,
+				lines: { show: true, fill: true, zero: false, fillTowards: -Infinity }
+			}]
+		);
 
 		// Add the Flot version string to the footer
 
@@ -51,7 +64,7 @@
 <body>
 
 	<div id="header">
-		<h2>Series Fill Types</h2>
+		<h2>Area Fill Types</h2>
 	</div>
 
 	<div id="content">
@@ -60,7 +73,8 @@
 			<div id="placeholder" class="demo-placeholder"></div>
 		</div>
 
-		<p>engineering-flot supports area fills towards 0, -Infinity, +Infinity or arbitrary values.</p>
+		<p>engineering-flot supports area fills towards 0, -Infinity, +Infinity or arbitrary values. An option is to fill "bands" between provided values.
+		To do that you need to provide the second y value to the plot</p>
 
 	</div>
 
