@@ -680,7 +680,7 @@ Licensed under the MIT license.
                         defaultValue: null
                     });
 
-                    if (s.bars.show || (s.lines.show && s.lines.fill)) {
+                    if (0) { //(s.bars.show || (s.lines.show && s.lines.fill)) {
                         var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
                         format.push({
                             x: false,
@@ -688,7 +688,7 @@ Licensed under the MIT license.
                             number: true,
                             required: false,
                             autoscale: autoscale,
-                            defaultValue: s.lines.fillTowards || 0 
+                            defaultValue: s.lines.fillTowards || 0
                         });
 
                         if (s.bars.horizontal) {
@@ -2086,16 +2086,16 @@ Licensed under the MIT license.
             ctx.stroke();
         }
 
-        function plotLineArea(datapoints, axisx, axisy) {
+        function plotLineArea(datapoints, axisx, axisy, fillTowards) {
             var points = datapoints.points,
                 ps = datapoints.pointsize,
-                bottom = Math.min(Math.max(0, axisy.min), axisy.max),
+                bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min,
                 //bottom = axisy.min,
                 i = 0,
                 top, areaOpen = false,
-                ypos = 1,
                 segmentStart = 0,
                 segmentEnd = 0;
+
 
             // we process each segment in two turns, first forward
             // direction to sketch out top, then once we hit the
@@ -2107,16 +2107,15 @@ Licensed under the MIT license.
                 i += ps; // ps is negative if going backwards
 
                 var x1 = points[i - ps],
-                    y1 = points[i - ps + ypos],
+                    y1 = ps < 0 ? bottom : points[i - ps + 1],
                     x2 = points[i],
-                    y2 = points[i + ypos];
+                    y2 = ps < 0 ? bottom : points[i + 1];
 
                 if (areaOpen) {
                     if (ps > 0 && x1 != null && x2 == null) {
                         // at turning point
                         segmentEnd = i;
                         ps = -ps;
-                        ypos = 2;
                         continue;
                     }
 
@@ -2125,7 +2124,6 @@ Licensed under the MIT license.
                         ctx.fill();
                         areaOpen = false;
                         ps = -ps;
-                        ypos = 1;
                         i = segmentStart = segmentEnd + ps;
                         continue;
                     }
@@ -2265,7 +2263,7 @@ Licensed under the MIT license.
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                plotLineArea(datapoints, series.xaxis, series.yaxis);
+                plotLineArea(datapoints, series.xaxis, series.yaxis, series.lines.fillTowards || 0);
             }
 
             if (lw > 0)
@@ -2450,7 +2448,7 @@ Licensed under the MIT license.
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null)
                         continue;
-                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], 0, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
 
