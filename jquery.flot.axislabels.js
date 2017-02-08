@@ -54,7 +54,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             || typeof div.style.transition != 'undefined';
     }
 
-
     function AxisLabel(axisName, position, padding, plot, opts) {
         this.axisName = axisName;
         this.position = position;
@@ -66,7 +65,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }
 
     AxisLabel.prototype.cleanup = function () {};
-
 
     CanvasAxisLabel.prototype = new AxisLabel();
     CanvasAxisLabel.prototype.constructor = CanvasAxisLabel;
@@ -136,8 +134,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }
 
     HtmlAxisLabel.prototype.calculateSize = function () {
+        var deentityify = function (string) {
+            var entityMap = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+                '/': '&#x2F;',
+                '`': '&#x60;',
+                '=': '&#x3D;'
+            };
+
+            return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap (s) {
+                return entityMap[s];
+            }); 
+        }
+
         var elem = $('<div class="axisLabels" style="position:absolute;">' +
-            this.opts.axisLabel + '</div>');
+            deentityify(this.opts.axisLabel) + '</div>');
         this.plot.getPlaceholder().append(elem);
         // store height and width of label itself, for use in draw()
         this.labelWidth = elem.outerWidth(true);
@@ -159,9 +174,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     HtmlAxisLabel.prototype.draw = function (box) {
+        var deentityify = function (string) {
+            var entityMap = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+                '/': '&#x2F;',
+                '`': '&#x60;',
+                '=': '&#x3D;'
+            };
+
+            return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap (s) {
+                return entityMap[s];
+            }); 
+        }
+
         this.plot.getPlaceholder().find('#' + this.axisName + 'Label').remove();
         this.elem = $('<div id="' + this.axisName +
-            'Label" " class="axisLabels" style="position:absolute;">' + this.opts.axisLabel + '</div>');
+            'Label" " class="axisLabels" style="position:absolute;">' + deentityify(this.opts.axisLabel) + '</div>');
         this.plot.getPlaceholder().append(this.elem);
         if (this.position == 'top') {
             this.elem.css('left', box.left + box.width / 2 - this.labelWidth / 2 +
@@ -267,12 +299,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     CssTransformAxisLabel.prototype.draw = function (box) {
+        var deentityify = function (string) {
+            var entityMap = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+                '/': '&#x2F;',
+                '`': '&#x60;',
+                '=': '&#x3D;'
+            };
+
+            return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap (s) {
+                return entityMap[s];
+            }); 
+        }
+
         this.plot.getPlaceholder().find("." + this.axisName + "Label").remove();
         var offsets = this.calculateOffsets(box);
         this.elem = $('<div class="axisLabels ' + this.axisName +
             'Label" style="position:absolute; ' +
             this.transforms(offsets.degrees, offsets.x, offsets.y) + this.transformOrigin() +
-            '">' + this.opts.axisLabel + '</div>');
+            '">' + deentityify(this.opts.axisLabel) + '</div>');
         this.plot.getPlaceholder().append(this.elem);
     };
 
