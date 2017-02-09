@@ -1508,8 +1508,7 @@ Licensed under the MIT license.
             }
             return {
                 v: v,
-                label: label,
-                type: type
+                label: label
             };
         }
 
