@@ -201,13 +201,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 return;
 
             var axisLabels = {};
-            var axisOffsetCounts = {
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0
-            };
-
             var defaultPadding = 2; // padding between axis and tick labels
 
             plot.hooks.axisReserveSpace.push(function(plot, axis) {
