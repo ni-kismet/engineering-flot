@@ -255,8 +255,8 @@ Licensed under the MIT license.
             overlay.clearCache();
         };
 		
-        plot.findNearbyPoint = function(mouseX, mouseY, seriesFilter) {
-            return findNearbyItem (mouseX, mouseY, seriesFilter);
+        plot.findNearbyItem = function(mouseX, mouseY, seriesFilter, distance) {
+            return findNearbyItem (mouseX, mouseY, seriesFilter, distance);
         };
 
         // public attributes
@@ -2691,9 +2691,9 @@ Licensed under the MIT license.
         }
 
         // returns the data item the mouse is over, or null if none is found
-        function findNearbyItem(mouseX, mouseY, seriesFilter) {
-            var maxDistance = Number.MAX_VALUE,
-                smallestDistance = Number.MAX_VALUE,
+        function findNearbyItem(mouseX, mouseY, seriesFilter, distance) {
+            var maxDistance = distance,
+                smallestDistance = maxDistance * maxDistance + 1,
                 item = null,
                 foundPoint = false,
                 i, j, ps;
@@ -2835,7 +2835,7 @@ Licensed under the MIT license.
             pos.pageX = event.pageX;
             pos.pageY = event.pageY;
 
-            var item = findNearbyItem(canvasX, canvasY, seriesFilter);
+            var item = findNearbyItem(canvasX, canvasY, seriesFilter, options.grid.mouseActiveRadius);
 
             if (item) {
                 // fill in mouse pos for any listeners out there
