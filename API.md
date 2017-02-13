@@ -1202,7 +1202,7 @@ can call:
  - findNearbyItem(mouseX, mouseY, seriesFilter, distance)
     
 	Returns the closest item to the position determined by mouseX and
-    mouseY. The series on which the search is realised can be specied
+    mouseY. The series on which the search is realised can be specified
     using seriesFilter function.
  
 
