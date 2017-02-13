@@ -54,6 +54,7 @@ Licensed under the MIT license.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
+                    showTickLabels: "major", // "none", "endpoints", "major", "all"
                     labelWidth: null, // size of tick labels in pixels
                     labelHeight: null,
                     reserveSpace: null, // whether to reserve space even if axis isn't shown
@@ -71,6 +72,8 @@ Licensed under the MIT license.
                     autoscale: "loose", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left" // or "right"
+                    showTickLabels: "major" // "none", "endpoints", "major", "all"
+
                 },
                 xaxes: [],
                 yaxes: [],
@@ -671,31 +674,31 @@ Licensed under the MIT license.
                         y: false,
                         number: true,
                         required: true,
-                        autoscale: null,
+                        autoscale: s.xaxis.options.min == null && s.xaxis.options.max == null,
                         defaultValue: null
                     });
+
                     format.push({
                         x: false,
                         y: true,
                         number: true,
                         required: true,
-                        autoscale: null,
+                        autoscale: s.yaxis.options.min == null && s.yaxis.options.max == null,
                         defaultValue: null
                     });
 
                     if (s.bars.show || (s.lines.show && s.lines.fill)) {
-                        format.push({
-                            x: false,
-                            y: true,
-                            number: true,
-                            required: false,
-                            autoscale: "loose",
-                            defaultValue: 0
-                        });
-
-                        if (s.bars.horizontal) {
-                            format[format.length - 1].y = false;
-                            format[format.length - 1].x = true;
+                        var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (s.data && s.data[0] && s.data[0].length ? s.data[0].length : 3);
+                        if (expectedPs > 2) {
+                            var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
+                            format.push({
+                                x: false,
+                                y: true,
+                                number: true,
+                                required: false,
+                                autoscale: "loose",
+                                defaultValue: 0
+                            });
                         }
                     }
 
@@ -805,6 +808,12 @@ Licensed under the MIT license.
                     xmax = bottomSentry,
                     ymax = bottomSentry;
 
+                if (format.every(function (f) {
+                    return f.autoscale === false;
+                })) {
+                    continue;
+                }
+
                 for (j = 0; j < points.length; j += ps) {
                     if (points[j] === null)
                         continue;
@@ -855,6 +864,15 @@ Licensed under the MIT license.
                     } else {
                         xmin += delta;
                         xmax += delta + s.bars.barWidth;
+                    }
+                }
+
+                if ((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero)) {
+                    // make sure the 0 point is included in the computed y range when requested
+                    if (ps <= 2) {
+                        /*if ps > 0 the points were already taken into account for autoscale */
+                        ymin = Math.min(0, ymin);
+                        ymax = Math.max(0, ymax);
                     }
                 }
 
@@ -981,7 +999,9 @@ Licensed under the MIT license.
         function measureTickLabels(axis) {
 
             var opts = axis.options,
-                ticks = axis.ticks || [],
+                ticks = opts.showTickLabels != 'none' && axis.ticks ? axis.ticks : [],
+                showMajorTickLabels = opts.showTickLabels == 'major' || opts.showTickLabels == 'all',
+                showEndpointsTickLabels = opts.showTickLabels == 'endpoints' || opts.showTickLabels == 'all',
                 labelWidth = opts.labelWidth || 0,
                 labelHeight = opts.labelHeight || 0,
                 maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (ticks.length || 1)) : null),
@@ -993,8 +1013,11 @@ Licensed under the MIT license.
                 var t = ticks[i];
                 var label = t.label;
 
-                if (!t.label)
+                if (!t.label ||
+                    (showMajorTickLabels == false && i > 0 && i < ticks.length - 1) ||
+                    (showEndpointsTickLabels == false && (i == 0 || i == ticks.length - 1))) {
                     continue;
+                }
 
                 if (typeof t.label === 'object') {
                   label = t.label.name;
@@ -1221,8 +1244,10 @@ Licensed under the MIT license.
                 $.each(allocatedAxes, function(_, axis) {
                     // make the ticks
                     setupTickGeneration(axis);
-                    setTicks(axis);
+                    setMajorTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
+                    setEndpointTicks(axis);
+
                     // find labelWidth/Height for axis
                     measureTickLabels(axis);
                 });
@@ -1381,6 +1406,7 @@ Licensed under the MIT license.
                         ticks.push(v);
                         ++i;
                     } while (v < axis.max && v != prev);
+
                     return ticks;
                 };
 
@@ -1449,7 +1475,7 @@ Licensed under the MIT license.
             }
         }
 
-        function setTicks(axis) {
+        function setMajorTicks(axis) {
             var oticks = axis.options.ticks,
                 ticks = [];
             if (oticks == null || (typeof oticks == "number" && oticks > 0))
@@ -1474,14 +1500,31 @@ Licensed under the MIT license.
                         label = t[1];
                 } else
                     v = +t;
-                if (label == null)
-                    label = axis.tickFormatter(v, axis);
                 if (!isNaN(v))
-                    axis.ticks.push({
-                        v: v,
-                        label: label
-                    });
+                    axis.ticks.push(
+                        newTick(v, label, axis, 'major'));
             }
+        }
+
+        function newTick(v, label, axis, type) {
+            if (!label) {
+                switch(type) {
+                    case 'min':
+                    case 'max':
+                        // this is a workaround to display the endpoints with a higher
+                        //precision without changing the API and all the tickFormatters
+                        //axis.tickDecimals = (axis.tickDecimals != null ? axis.tickDecimals + 1 : null);
+                        label = axis.tickFormatter(v, axis);
+                        //axis.tickDecimals = (axis.tickDecimals != null ? axis.tickDecimals - 1 : null);
+                        break;
+                    case 'major':
+                        label = axis.tickFormatter(v, axis)
+                }
+            }
+            return {
+                v: v,
+                label: label
+            };
         }
 
         function snapRangeToTicks(axis, ticks) {
@@ -1492,6 +1535,11 @@ Licensed under the MIT license.
                 if (axis.options.max == null && ticks.length > 1)
                     axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
             }
+        }
+
+        function setEndpointTicks(axis) {
+            axis.ticks.unshift(newTick(axis.min, null, axis, 'min'));
+            axis.ticks.push(newTick(axis.max, null, axis, 'max'));
         }
 
         function draw() {
@@ -1929,7 +1977,8 @@ Licensed under the MIT license.
             for (var j = 0; j < axes.length; ++j) {
                 var axis = axes[j];
 
-                if (!axis.show || axis.ticks.length == 0)
+                //if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show)
                     continue;
 
                 drawTickBar(axis);
@@ -1956,7 +2005,62 @@ Licensed under the MIT license.
                     legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
-                    tick, x, y, halign, valign;
+                    tick, x, y, halign, valign, info,
+                    nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, firstLabelBox, lastLabelBox, previousLabelBox = nullBox,
+                    labelWidth = axis.options.labelWidth || 0,
+                    maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks.length || 1)) : null),
+                    overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
+                        return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
+                               ((y11 <= y21 && y21 <= y12) || (y21 <= y11 && y11 <= y22));
+                    },
+                    overlapsOtherLabels = function(newLabelBox, previousLabelBoxes) {
+                        return previousLabelBoxes.some(function(labelBox) {
+                            return overlapping(
+                                newLabelBox.x, newLabelBox.y, newLabelBox.x + newLabelBox.width, newLabelBox.y + newLabelBox.height,
+                                labelBox.x, labelBox.y, labelBox.x + labelBox.width, labelBox.y + labelBox.height);
+                        });
+                    },
+                    drawAxisLabel = function (index, labelBoxes) {
+                        tick = axis.ticks[index];
+                        if (!tick.label || tick.v < axis.min || tick.v > axis.max ||
+                            (axis.options.showTickLabels == 'none') ||
+                            (axis.options.showTickLabels == 'endpoints' && !(index == 0 || index == axis.ticks.length - 1)) ||
+                            (axis.options.showTickLabels == 'major' && (index == 0 || index == axis.ticks.length - 1))) {
+                            return nullBox;
+                        }
+
+                        info = surface.getTextInfo(layer, tick.label, font, null, maxWidth);
+
+                        if (axis.direction == "x") {
+                            halign = "center";
+                            x = plotOffset.left + axis.p2c(tick.v);
+                            if (axis.position == "bottom") {
+                                y = box.top + box.padding;
+                            } else {
+                                y = box.top + box.height - box.padding;
+                                valign = "bottom";
+                            }
+                            newLabelBox = {x: x - info.width / 2, y: y, width: info.width, height: info.height}
+                        } else {
+                            valign = "middle";
+                            y = plotOffset.top + axis.p2c(tick.v);
+                            if (axis.position == "left") {
+                                x = box.left + box.width - box.padding;
+                                halign = "right";
+                            } else {
+                                x = box.left + box.padding;
+                            }
+                            newLabelBox = {x: x, y: y - info.height / 2, width: info.width, height: info.height}
+                        }
+
+                        if (overlapsOtherLabels(newLabelBox, labelBoxes)) {
+                            return nullBox;
+                        }
+
+                        surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+
+                        return newLabelBox;
+                    };
 
                 // Remove text before checking for axis.show and ticks.length;
                 // otherwise plugins, like flot-tickrotor, that draw their own
@@ -1966,36 +2070,14 @@ Licensed under the MIT license.
 
                 executeHooks(hooks.drawAxis, [axis, surface]);
 
-                if (!axis.show || axis.ticks.length == 0)
+                if (!axis.show) {
                     return;
+                }
 
-                for (var i = 0; i < axis.ticks.length; ++i) {
-
-                    tick = axis.ticks[i];
-                    if (!tick.label || tick.v < axis.min || tick.v > axis.max)
-                        continue;
-
-                    if (axis.direction == "x") {
-                        halign = "center";
-                        x = plotOffset.left + axis.p2c(tick.v);
-                        if (axis.position == "bottom") {
-                            y = box.top + box.padding;
-                        } else {
-                            y = box.top + box.height - box.padding;
-                            valign = "bottom";
-                        }
-                    } else {
-                        valign = "middle";
-                        y = plotOffset.top + axis.p2c(tick.v);
-                        if (axis.position == "left") {
-                            x = box.left + box.width - box.padding;
-                            halign = "right";
-                        } else {
-                            x = box.left + box.padding;
-                        }
-                    }
-
-                    surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
+                firstLabelBox = drawAxisLabel(0, []);
+                lastLabelBox = drawAxisLabel(axis.ticks.length - 1, [firstLabelBox]);
+                for (var i = 1; i < axis.ticks.length - 1; ++i) {
+                    previousLabelBox = drawAxisLabel(i, [firstLabelBox, previousLabelBox, lastLabelBox]);
                 }
             });
         }
@@ -2093,13 +2175,14 @@ Licensed under the MIT license.
             ctx.stroke();
         }
 
-        function plotLineArea(datapoints, axisx, axisy) {
+        function plotLineArea(datapoints, axisx, axisy, fillTowards) {
             var points = datapoints.points,
                 ps = datapoints.pointsize,
-                bottom = Math.min(Math.max(0, axisy.min), axisy.max),
+                bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min,
+                //bottom = axisy.min,
                 i = 0,
-                top, areaOpen = false,
                 ypos = 1,
+                top, areaOpen = false,
                 segmentStart = 0,
                 segmentEnd = 0;
 
@@ -2117,6 +2200,11 @@ Licensed under the MIT license.
                     x2 = points[i],
                     y2 = points[i + ypos];
 
+                    if (ps === -2) {
+                        /* going backwards and no value for the bottom provided in the series*/
+                        y1 = y2 = bottom;
+                    }
+
                 if (areaOpen) {
                     if (ps > 0 && x1 != null && x2 == null) {
                         // at turning point
@@ -2131,7 +2219,6 @@ Licensed under the MIT license.
                         ctx.fill();
                         areaOpen = false;
                         ps = -ps;
-                        ypos = 1;
                         i = segmentStart = segmentEnd + ps;
                         continue;
                     }
@@ -2271,7 +2358,7 @@ Licensed under the MIT license.
             var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
-                plotLineArea(datapoints, series.xaxis, series.yaxis);
+                plotLineArea(datapoints, series.xaxis, series.yaxis, series.lines.fillTowards || 0);
             }
 
             if (lw > 0)
@@ -2456,7 +2543,7 @@ Licensed under the MIT license.
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null)
                         continue;
-                    drawBar(points[i], points[i + 1], points[i + 2], barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], 0, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
 
@@ -2958,9 +3045,7 @@ Licensed under the MIT license.
     // Add the plot function to the top level of the jQuery object
 
     $.plot = function(placeholder, data, options) {
-        //var t0 = new Date();
         var plot = new Plot($(placeholder), data, options, $.plot.plugins);
-        //(window.console ? console.log : alert)("time used (msecs): " + ((new Date()).getTime() - t0.getTime()));
         return plot;
     };
 
