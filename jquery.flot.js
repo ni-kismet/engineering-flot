@@ -255,9 +255,8 @@ Licensed under the MIT license.
             overlay.clearCache();
         };
 		
-        plot.findNearbyItem = function(mouseX, mouseY, seriesFilter, distance) {
-            return findNearbyItem (mouseX, mouseY, seriesFilter, distance);
-        };
+        plot.findNearbyItem = findNearbyItem;
+    
 
         // public attributes
         plot.hooks = hooks;
