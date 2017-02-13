@@ -71,7 +71,7 @@ Licensed under the MIT license.
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
                     autoscale: "loose", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
-                    position: "left" // or "right"
+                    position: "left", // or "right"
                     showTickLabels: "major" // "none", "endpoints", "major", "all"
 
                 },
