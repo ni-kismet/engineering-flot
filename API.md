@@ -89,7 +89,9 @@ not connected.
 
 Lines and points take two coordinates. For filled lines and bars, you
 can specify a third coordinate which is the bottom of the filled
-area/bar (defaults to 0).
+area/bar (defaults to 0). If you don't specify a third coordinate you can
+specify it as a constant for the entire series using "fillTowards" (see the lines
+options).
 
 The format of a single series object is as follows:
 
@@ -264,6 +266,7 @@ xaxis, yaxis: {
     tickFormatter: (fn: number, object -> string) or string
     tickDecimals: null or number
 
+    showTickLabels: "major", "none", "endpoints", or "all"
     labelWidth: null or number
     labelHeight: null or number
     reserveSpace: null or true
@@ -472,6 +475,9 @@ function suffixFormatter(val, axis) {
         return val.toFixed(axis.tickDecimals) + " B";
 }
 ```
+
+"showTickLabels" can be used to specify which ticks labels are visible:
+"none", "endpoints", "major" or "all". The default is "major".
 
 "labelWidth" and "labelHeight" specifies a fixed size of the tick
 labels in pixels. They're useful in case you need to align several
@@ -828,7 +834,9 @@ This is because they convey information through size, and starting from a
 different value would distort their meaning. In cases where the fill is purely
 for decorative purposes, however, "zero" allows you to override this behavior.
 It defaults to true for filled lines and bars; setting it to false tells the
-series to use the same automatic scaling as an un-filled line.
+series to use the same automatic scaling as an un-filled line. If you want the
+area filled toward a different value (+Infinity and -Infinity are good examples)
+you can use the "fillTowards" option.
 
 For lines, "steps" specifies whether two adjacent data points are
 connected with a straight (possibly diagonal) line or with first a
