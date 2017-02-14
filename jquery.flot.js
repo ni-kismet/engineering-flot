@@ -50,7 +50,7 @@ Licensed under the MIT license.
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "none", // Available modes: "none", "loose", "exact",
+                    autoscale: "exact", // Available modes: "none", "loose", "exact",
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -674,7 +674,6 @@ Licensed under the MIT license.
                         y: false,
                         number: true,
                         required: true,
-                        autoscale: s.xaxis.options.min == null && s.xaxis.options.max == null,
                         defaultValue: null
                     });
 
@@ -683,20 +682,17 @@ Licensed under the MIT license.
                         y: true,
                         number: true,
                         required: true,
-                        autoscale: s.yaxis.options.min == null && s.yaxis.options.max == null,
                         defaultValue: null
                     });
 
                     if (s.bars.show || (s.lines.show && s.lines.fill)) {
                         var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (s.data && s.data[0] && s.data[0].length ? s.data[0].length : 3);
                         if (expectedPs > 2) {
-                            var autoscale = !!((s.bars.show && s.bars.zero) || (s.lines.show && s.lines.zero));
                             format.push({
                                 x: false,
                                 y: true,
                                 number: true,
                                 required: false,
-                                autoscale: "loose",
                                 defaultValue: 0
                             });
                         }
@@ -1297,10 +1293,9 @@ Licensed under the MIT license.
                     min = +(axis.datamin);
                     max = +(axis.datamax);
                     delta = max - min;
-                    var margin = opts.autoscaleMargin;
+                    var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
                     min -= delta * margin;
                     max += delta * margin;
-
                     break;
                 case "exact":
                     min = axis.datamin;
