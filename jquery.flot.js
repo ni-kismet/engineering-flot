@@ -752,7 +752,7 @@ Licensed under the MIT license.
                             if (val != null) {
                                 f = format[m];
                                 // extract min/max info
-                                if (f.autoscale !== false) {
+                                if (f.autoscale !== "none") {
                                     if (f.x) {
                                         updateAxis(s.xaxis, val, val);
                                     }
@@ -805,7 +805,7 @@ Licensed under the MIT license.
                     ymax = bottomSentry;
 
                 if (format.every(function (f) {
-                    return f.autoscale === false;
+                    return f.autoscale === "none";
                 })) {
                     continue;
                 }
