@@ -32,7 +32,7 @@
                 { position: 'bottom' }
             ],
             yaxes: [
-                { position: 'left', autoscaleMargin: 0.02 }
+                { position: 'left', autoscale: 'none', min: -3, max: 3 }
             ]
         });
 
@@ -83,24 +83,35 @@
 
             switch (val) {
                 case 'none':
-                    y.options.min = -1.5;
-                    y.options.max = 1.5;
+                    y.options.autoscale = 'none';
+                    y.options.min = -3;
+                    y.options.max = 3;
                     y.options.autoscaleMargin = null;
                     y.options.growOnly = null;
                     break;
                 case 'fitLoosely':
+                    y.options.autoscale = 'loose';
                     y.options.min = undefined;
                     y.options.max = undefined;
-                    y.options.autoscaleMargin = 0.02;
+                    y.options.autoscaleMargin = 0.1;
                     y.options.growOnly = false;
                     break;
                 case 'fitExactly':
+                    y.options.autoscale = 'exact';
                     y.options.min = undefined;
                     y.options.max = undefined;
                     y.options.autoscaleMargin = null;
                     y.options.growOnly = false;
                     break;
-                case 'growOnly':
+                case 'growLoosely':
+                    y.options.autoscale = 'loose';
+                    y.options.min = -2.0;
+                    y.options.max = 2.0;
+                    y.options.autoscaleMargin = 0.1;
+                    y.options.growOnly = true;
+                    break;
+                case 'growExactly':
+                    y.options.autoscale = 'exact';
                     y.options.min = undefined;
                     y.options.max = undefined;
                     y.options.autoscaleMargin = null;
@@ -154,10 +165,11 @@
         </fieldset>
         <fieldset id="scaling">
             <legend>Vertical axis autoscaling options</legend>
-            <input type="radio" name="scaling" value="none" /> None (min = -1.5, max = 1.5) <br />
-            <input type="radio" name="scaling" value="fitLoosely" checked="checked"/> fit loosely <br />
+            <input type="radio" name="scaling" value="none" checked="checked" /> None (min = -3, max = 3) <br />
+            <input type="radio" name="scaling" value="fitLoosely"/> fit loosely <br />
             <input type="radio" name="scaling" value="fitExactly" /> fit exactly <br />
-            <input type="radio" name="scaling" value="growOnly" /> grow only <br />
+            <input type="radio" name="scaling" value="growLoosely" /> grow loosely <br />
+            <input type="radio" name="scaling" value="growExactly" /> grow exactly <br />
         </fieldset>
         <fieldset id="verticalPosition">
             <legend>Vertical axis position options</legend>
