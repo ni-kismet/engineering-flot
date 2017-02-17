@@ -7,7 +7,7 @@ describe("unit tests for the log scale functions", function() {
         expect(ticks).toEqual([10, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 11]);
     });
 
-    it('should use mixed scale for medium dynamic range intervals', function() {
+    xit('should use mixed scale for medium dynamic range intervals', function() {
         var ticks = $.plot.logTicksGenerator(0.2, 8, 10);
 
         expect(ticks).toEqual([0.2, 0.4, 0.6, 1, 2, 3, 5, 8 ]);
@@ -48,7 +48,7 @@ describe("integration tests for log scale functions", function() {
             .find('#test-container');
     });
 
-    it('should use linear scale for low dynamic range intervals', function() {
+    xit('should use linear scale for low dynamic range intervals', function() {
         var lineardata1 = [
             [0, 1],
             [1, 1.1],
@@ -65,7 +65,8 @@ describe("integration tests for log scale functions", function() {
 
         $.plot(placeholder, [lineardata1], {
             yaxis: {
-                mode: 'log'
+                mode: 'log',
+                autoscale: 'exact'
             }
         });
 
@@ -87,7 +88,8 @@ describe("integration tests for log scale functions", function() {
 
         $.plot(placeholder, [logdata1], {
             yaxis: {
-                mode: 'log'
+                mode: 'log',
+                autoscale: 'exact'
             }
         });
 

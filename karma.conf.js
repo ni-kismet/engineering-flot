@@ -22,7 +22,7 @@ module.exports = function (config) {
             'jquery.flot.js',
             'jquery.flot.uiConstants.js',
             'jquery.flot.logaxis.js',
-            'spec/*.Test.js',
+            'tests/*.Test.js',
         ],
 
         // list of files to exclude
