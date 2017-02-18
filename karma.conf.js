@@ -7,14 +7,17 @@ var module;
 module.exports = function (config) {
     'use strict';
 
+    var coverage_sources = [
+            'jquery.canvaswrapper.js',
+            'jquery.colorhelpers.js',
+            'jquery.flot.js',
+            'jquery.flot.uiConstants.js',
+            'jquery.flot.logaxis.js'
+        ];
+
     var sources = [
-        'jquery.js',
-        'jquery.canvaswrapper.js',
-        'jquery.colorhelpers.js',
-        'jquery.flot.js',
-        'jquery.flot.uiConstants.js',
-        'jquery.flot.logaxis.js'
-    ];
+        'jquery.js'
+    ].concat(coverage_sources);
 
     var settings = {
 
@@ -76,8 +79,7 @@ module.exports = function (config) {
     };
 
     if (config.coverage) {
-        console.log('Coverage !');
-        sources.forEach(function (pattern) {
+        coverage_sources.forEach(function (pattern) {
             if (!settings.preprocessors[pattern]) {
                 settings.preprocessors[pattern] = ['coverage'];
             } else {
@@ -87,7 +89,6 @@ module.exports = function (config) {
 
         settings.reporters.push('coverage');
         settings.reporters.push('coveralls');
-        console.log(settings);
     }
 
     config.set(settings);
