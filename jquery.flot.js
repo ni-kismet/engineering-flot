@@ -84,7 +84,7 @@ Licensed under the MIT license.
                         lineWidth: 2, // in pixels
                         fill: true,
                         fillColor: "#ffffff",
-                        symbol: "circle" // or callback
+                        symbol: 'circle' // or callback
                     },
                     lines: {
                         // we don't put in show: false so we can see
@@ -2992,7 +2992,7 @@ Licensed under the MIT license.
 
             octx.beginPath();
             var symbol = series.points.symbol;
-            if (symbol === "circle")
+            if (symbol === 'circle')
                 octx.arc(x, y, radius, 0, 2 * Math.PI, false);
             else if  (typeof symbol === 'string' && plot.drawSymbol && plot.drawSymbol[symbol]) {
                 plot.drawSymbol[symbol](octx, x, y, radius, false);

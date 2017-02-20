@@ -20,7 +20,7 @@ describe("flot symbol plugin", function() {
         expect(typeof plot.drawSymbol).toBe('object');
     })
 
-    var shapes = ['ellipse', 'square', 'rectangle', 'cross', 'diamond', 'triangle', 'plus'];
+    var shapes = ['square', 'rectangle', 'diamond', 'triangle',  'cross', 'ellipse', 'plus'];
     shapes.forEach(function (shape) {
         it('should provide a way to draw ' + shape + ' shapes', function () {
             plot = $.plot(placeholder, [[]], options);
