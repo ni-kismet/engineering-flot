@@ -1293,16 +1293,21 @@ Licensed under the MIT license.
                     max = +(opts.max != null ? opts.max : axis.datamax);
                     break;
                 case "loose":
-                    min = +(axis.datamin);
-                    max = +(axis.datamax);
-                    delta = max - min;
-                    var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
-                    min -= delta * margin;
-                    max += delta * margin;
+                    if(axis.datamin != null && axis.datamax != null) {
+                        min = axis.datamin;
+                        max = axis.datamax;
+                        delta = max - min;
+                        var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
+                        min -= delta * margin;
+                        max += delta * margin;
+                    } else {
+                        min = opts.min;
+                        max = opts.max;
+                    }
                     break;
                 case "exact":
-                    min = axis.datamin;
-                    max = axis.datamax;
+                    min = (axis.datamin != null ? axis.datamin : opts.min);
+                    max = (axis.datamax != null ? axis.datamax : opts.max);
                     break;
             }
 
