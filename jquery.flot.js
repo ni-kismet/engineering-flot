@@ -84,7 +84,7 @@ Licensed under the MIT license.
                         lineWidth: 2, // in pixels
                         fill: true,
                         fillColor: "#ffffff",
-                        symbol: "circle" // or callback
+                        symbol: 'circle' // or callback
                     },
                     lines: {
                         // we don't put in show: false so we can see
@@ -258,9 +258,9 @@ Licensed under the MIT license.
             surface.clearCache();
             overlay.clearCache();
         };
-		
+
         plot.findNearbyItem = findNearbyItem;
-    
+
 
         // public attributes
         plot.hooks = hooks;
@@ -1003,7 +1003,7 @@ Licensed under the MIT license.
                 showEndpointsTickLabels = opts.showTickLabels == 'endpoints' || opts.showTickLabels == 'all',
                 labelWidth = opts.labelWidth || 0,
                 labelHeight = opts.labelHeight || 0,
-                maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (ticks.length || 1)) : null),
+                maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks ? axis.ticks.length : 1)) : null),
                 legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                 layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                 font = opts.font || "flot-tick-label tickLabel";
@@ -1528,16 +1528,16 @@ Licensed under the MIT license.
         function snapRangeToTicks(axis, ticks) {
             if (axis.options.autoscale === "loose" && ticks.length > 0) {
                 // snap to ticks
-                if (axis.options.min == null)
-                    axis.min = Math.min(axis.min, ticks[0].v);
-                if (axis.options.max == null && ticks.length > 1)
-                    axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
+                axis.min = Math.min(axis.min, ticks[0].v);
+                axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
             }
         }
 
         function setEndpointTicks(axis) {
-            axis.ticks.unshift(newTick(axis.min, null, axis, 'min'));
-            axis.ticks.push(newTick(axis.max, null, axis, 'max'));
+            if (axis.options.showTickLabels == 'all' || axis.options.showTickLabels == 'endpoints') {
+                axis.ticks.unshift(newTick(axis.min, null, axis, 'min'));
+                axis.ticks.push(newTick(axis.max, null, axis, 'max'));
+            }
         }
 
         function draw() {
@@ -2006,7 +2006,7 @@ Licensed under the MIT license.
                     tick, x, y, halign, valign, info,
                     nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, firstLabelBox, lastLabelBox, previousLabelBox = nullBox,
                     labelWidth = axis.options.labelWidth || 0,
-                    maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks.length || 1)) : null),
+                    maxWidth = labelWidth || (axis.direction == "x" ? Math.floor(surface.width / (axis.ticks ? axis.ticks.length : 1)) : null),
                     overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
                         return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
                                ((y11 <= y21 && y21 <= y12) || (y21 <= y11 && y11 <= y22));
@@ -2018,12 +2018,8 @@ Licensed under the MIT license.
                                 labelBox.x, labelBox.y, labelBox.x + labelBox.width, labelBox.y + labelBox.height);
                         });
                     },
-                    drawAxisLabel = function (index, labelBoxes) {
-                        tick = axis.ticks[index];
-                        if (!tick.label || tick.v < axis.min || tick.v > axis.max ||
-                            (axis.options.showTickLabels == 'none') ||
-                            (axis.options.showTickLabels == 'endpoints' && !(index == 0 || index == axis.ticks.length - 1)) ||
-                            (axis.options.showTickLabels == 'major' && (index == 0 || index == axis.ticks.length - 1))) {
+                    drawAxisLabel = function (tick, labelBoxes) {
+                        if (!tick.label || tick.v < axis.min || tick.v > axis.max) {
                             return nullBox;
                         }
 
@@ -2072,10 +2068,23 @@ Licensed under the MIT license.
                     return;
                 }
 
-                firstLabelBox = drawAxisLabel(0, []);
-                lastLabelBox = drawAxisLabel(axis.ticks.length - 1, [firstLabelBox]);
-                for (var i = 1; i < axis.ticks.length - 1; ++i) {
-                    previousLabelBox = drawAxisLabel(i, [firstLabelBox, previousLabelBox, lastLabelBox]);
+                switch(axis.options.showTickLabels) {
+                    case 'none':
+                        break;
+                    case 'endpoints':
+                        firstLabelBox = drawAxisLabel(axis.ticks[0], []);
+                        lastLabelBox = drawAxisLabel(axis.ticks[axis.ticks.length - 1], [firstLabelBox]);
+                        break;
+                    case 'major':
+                        // no endpoint tick is being generated when showTickLabels=
+                        //'major' so it's safe to merge these two cases here
+                    case 'all':
+                        firstLabelBox = drawAxisLabel(axis.ticks[0], []);
+                        lastLabelBox = drawAxisLabel(axis.ticks[axis.ticks.length - 1], [firstLabelBox]);
+                        for (var i = 1; i < axis.ticks.length - 1; ++i) {
+                            previousLabelBox = drawAxisLabel(axis.ticks[i], [firstLabelBox, previousLabelBox, lastLabelBox]);
+                        }
+                        break;
                 }
             });
         }
@@ -2378,10 +2387,12 @@ Licensed under the MIT license.
                     ctx.beginPath();
                     x = axisx.p2c(x);
                     y = axisy.p2c(y) + offset;
-                    if (symbol == "circle")
+
+                    if (symbol === 'circle') {
                         ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
-                    else
-                        symbol(ctx, x, y, radius, shadow);
+                    } else if  (typeof symbol === 'string' && plot.drawSymbol && plot.drawSymbol[symbol]) {
+                        plot.drawSymbol[symbol](ctx, x, y, radius, shadow);
+                    }
                     ctx.closePath();
 
                     if (fillStyle) {
@@ -2980,10 +2991,13 @@ Licensed under the MIT license.
             y = axisy.p2c(y);
 
             octx.beginPath();
-            if (series.points.symbol == "circle")
+            var symbol = series.points.symbol;
+            if (symbol === 'circle')
                 octx.arc(x, y, radius, 0, 2 * Math.PI, false);
-            else
-                series.points.symbol(octx, x, y, radius, false);
+            else if  (typeof symbol === 'string' && plot.drawSymbol && plot.drawSymbol[symbol]) {
+                plot.drawSymbol[symbol](octx, x, y, radius, false);
+            }
+
             octx.closePath();
             octx.stroke();
         }
