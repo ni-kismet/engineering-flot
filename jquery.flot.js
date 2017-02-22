@@ -2651,7 +2651,7 @@ Licensed under the MIT license.
             }
         }
 
-        function computeRangeForDataSeries(series) {
+        function computeRangeForDataSeries(series, force) {
             var points = series.datapoints.points,
                 ps = series.datapoints.pointsize,
                 format = series.datapoints.format,
@@ -2675,7 +2675,7 @@ Licensed under the MIT license.
                     if (f === null || f === undefined)
                         continue
 
-                    if (!f.computeRange || val === fakeInfinity || val === -fakeInfinity)
+                    if ((!force && !f.computeRange) || val === fakeInfinity || val === -fakeInfinity)
                         continue;
 
                     if (f.x === true) {

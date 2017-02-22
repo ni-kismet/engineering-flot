@@ -55,6 +55,34 @@ describe('flot', function() {
             expect(limits.ymax).toBe(3);
         });
 
+        it('should not compute the minimum and the maximum when autoscale="none"', function () {
+            options.xaxis = {autoscale: 'none'};
+            options.yaxis = {autoscale: 'none'};
+            plot = $.plot(placeholder, [[[0, 1], [1, 2], [2, 3]]], options);
+
+            var series = plot.getData();
+            var limits = plot.computeRangeForDataSeries(series[0]);
+
+            expect(limits.xmin).toBe(Infinity);
+            expect(limits.xmax).toBe(-Infinity);
+            expect(limits.ymin).toBe(Infinity);
+            expect(limits.ymax).toBe(-Infinity);
+        });
+
+        it('should compute the minimum and the maximum when autoscale="none" and force=true', function () {
+            options.xaxis = {autoscale: 'none'};
+            options.yaxis = {autoscale: 'none'};
+            plot = $.plot(placeholder, [[[0, 1], [1, 2], [2, 3]]], options);
+
+            var series = plot.getData();
+            var limits = plot.computeRangeForDataSeries(series[0], true);
+
+            expect(limits.xmin).toBe(0);
+            expect(limits.xmax).toBe(2);
+            expect(limits.ymin).toBe(1);
+            expect(limits.ymax).toBe(3);
+        });
+
     });
 
 
