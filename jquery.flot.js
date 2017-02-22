@@ -1413,7 +1413,13 @@ Licensed under the MIT license.
                     return ticks;
                 };
 
-                axis.tickFormatter = function(value, axis) {
+                axis.tickFormatter = function(value, axis, precision) {
+                    
+                    var oldTickDecimals = axis.tickDecimals;
+
+                    if (precision) {
+                        axis.tickDecimals = precision;
+                    }
 
                     var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
                     var formatted = "" + Math.round(value * factor) / factor;
@@ -1423,19 +1429,20 @@ Licensed under the MIT license.
 
                     if (axis.tickDecimals != null) {
                         var decimal = formatted.indexOf(".");
-                        var precision = decimal == -1 ? 0 : formatted.length - decimal - 1;
-                        if (precision < axis.tickDecimals) {
-                            return (precision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - precision);
+                        var decimalPrecision = decimal == -1 ? 0 : formatted.length - decimal - 1;
+                        if (decimalPrecision < axis.tickDecimals) {
+                            formatted = (decimalPrecision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
                         }
                     }
 
+                    axis.tickDecimals = oldTickDecimals;
                     return formatted;
                 };
             }
 
             if ($.isFunction(opts.tickFormatter))
-                axis.tickFormatter = function(v, axis) {
-                    return "" + opts.tickFormatter(v, axis);
+                axis.tickFormatter = function(v, axis, precision) {
+                    return "" + opts.tickFormatter(v, axis, precision);
                 };
 
             if (opts.alignTicksWithAxis != null) {
