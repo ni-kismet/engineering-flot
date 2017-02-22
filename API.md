@@ -1208,11 +1208,18 @@ can call:
 	
  - findNearbyItem(mouseX, mouseY, seriesFilter, distance)
     
-	Returns the closest item to the position determined by mouseX and
+    Returns the closest item to the position determined by mouseX and
     mouseY. The series on which the search is realised can be specified
     using seriesFilter function.
  
+ - enhanceValuePrecision(min, max, direction, options, tickDecimals)
 
+    Used for determining the tick size and the precision for a certain 
+    axis. If the tickDecimals is specified, the maximum precision 
+    would be at most tickDecimals. Otherwise, it would be computed 
+    based on the axis minimum and maximum and the number of ticks.
+    It returns the computed precision and tickSize.
+ 
 There are also some members that let you peek inside the internal
 workings of Flot which is useful in some cases. Note that if you change
 something in the objects returned, you're changing the objects used by
