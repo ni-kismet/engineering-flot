@@ -2,7 +2,7 @@
 
 describe('flot', function() {
 
-    describe('seriesDataLimits', function() {
+    describe('computeRangeForDataSeries', function() {
 
         var placeholder, plot;
 
@@ -23,7 +23,7 @@ describe('flot', function() {
             plot = $.plot(placeholder, [[]], options);
 
             var series = plot.getData();
-            var limits = plot.seriesDataLimits(series[0]);
+            var limits = plot.computeRangeForDataSeries(series[0]);
 
             expect(limits.xmin).toBe(Infinity);
             expect(limits.xmax).toBe(-Infinity);
@@ -35,7 +35,7 @@ describe('flot', function() {
             plot = $.plot(placeholder, [[[0, 1], [1, 2], [2, 3]]], options);
 
             var series = plot.getData();
-            var limits = plot.seriesDataLimits(series[0]);
+            var limits = plot.computeRangeForDataSeries(series[0]);
 
             expect(limits.xmin).toBe(0);
             expect(limits.xmax).toBe(2);
@@ -47,7 +47,7 @@ describe('flot', function() {
             plot = $.plot(placeholder, [[[10, 1], [11, 2], [12, 3]]], options);
 
             var series = plot.getData();
-            var limits = plot.seriesDataLimits(series[0]);
+            var limits = plot.computeRangeForDataSeries(series[0]);
 
             expect(limits.xmin).toBe(10);
             expect(limits.xmax).toBe(12);
@@ -58,7 +58,7 @@ describe('flot', function() {
     });
 
 
-    describe('adjustSeriesDataLimits', function() {
+    describe('adjustSeriesDataRange', function() {
 
         var placeholder, plot;
 
@@ -77,7 +77,7 @@ describe('flot', function() {
                     },
                     limits = {xmin: 10, ymin: 11, xmax: 12, ymax: 13};
 
-                var limits = plot.adjustSeriesDataLimits(series, limits);
+                var limits = plot.adjustSeriesDataRange(series, limits);
 
                 expect(limits.ymin).toBe(0);
                 expect(limits.ymax).toBe(13);
@@ -93,7 +93,7 @@ describe('flot', function() {
                     },
                     limits = {xmin: 10, ymin: -11, xmax: 12, ymax: -9};
 
-                var limits = plot.adjustSeriesDataLimits(series, limits);
+                var limits = plot.adjustSeriesDataRange(series, limits);
 
                 expect(limits.ymin).toBe(-11);
                 expect(limits.ymax).toBe(0);
@@ -109,7 +109,7 @@ describe('flot', function() {
                     },
                     limits = {xmin: 10, ymin: -11, xmax: 12, ymax: -9};
 
-                var limits = plot.adjustSeriesDataLimits(series, limits);
+                var limits = plot.adjustSeriesDataRange(series, limits);
 
                 expect(limits.ymin).toBe(-11);
                 expect(limits.ymax).toBe(-9);
@@ -123,7 +123,7 @@ describe('flot', function() {
                 },
                 limits = {xmin: 10, ymin: 11, xmax: 12, ymax: 13};
 
-            var limits = plot.adjustSeriesDataLimits(series, limits);
+            var limits = plot.adjustSeriesDataRange(series, limits);
 
             expect(limits.xmin).toBe(10 - 6/2);
             expect(limits.xmax).toBe(12 + 6/2);

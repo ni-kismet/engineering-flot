@@ -259,9 +259,9 @@ Licensed under the MIT license.
             overlay.clearCache();
         };
 
-        plot.seriesDataLimits = seriesDataLimits;
+        plot.computeRangeForDataSeries = computeRangeForDataSeries;
 
-        plot.adjustSeriesDataLimits = adjustSeriesDataLimits;
+        plot.adjustSeriesDataRange = adjustSeriesDataRange;
 
         plot.findNearbyItem = findNearbyItem;
 
@@ -680,6 +680,7 @@ Licensed under the MIT license.
                         y: false,
                         number: true,
                         required: true,
+                        computeRange: s.xaxis.options.autoscale !== 'none',
                         defaultValue: null
                     });
 
@@ -688,6 +689,7 @@ Licensed under the MIT license.
                         y: true,
                         number: true,
                         required: true,
+                        computeRange: s.yaxis.options.autoscale !== 'none',
                         defaultValue: null
                     });
 
@@ -699,6 +701,7 @@ Licensed under the MIT license.
                                 y: true,
                                 number: true,
                                 required: false,
+                                computeRange: s.yaxis.options.autoscale !== 'none',
                                 defaultValue: 0
                             });
                         }
@@ -758,7 +761,7 @@ Licensed under the MIT license.
                             if (val != null) {
                                 f = format[m];
                                 // extract min/max info
-                                if (f.autoscale !== "none") {
+                                if (f.computeRange) {
                                     if (f.x) {
                                         updateAxis(s.xaxis, val, val);
                                     }
@@ -803,15 +806,15 @@ Licensed under the MIT license.
                 s = series[i];
                 format = s.datapoints.format;
 
-                if (format.every(function (f) { return f.autoscale === "none"; })) {
+                if (format.every(function (f) { return !f.computeRange; })) {
                     continue;
                 }
 
-                var limits = plot.adjustSeriesDataLimits(s,
-                    plot.seriesDataLimits(s));
+                var range = plot.adjustSeriesDataRange(s,
+                    plot.computeRangeForDataSeries(s));
 
-                updateAxis(s.xaxis, limits.xmin, limits.xmax);
-                updateAxis(s.yaxis, limits.ymin, limits.ymax);
+                updateAxis(s.xaxis, range.xmin, range.xmax);
+                updateAxis(s.yaxis, range.ymin, range.ymax);
             }
 
             $.each(allAxes(), function(_, axis) {
@@ -2645,14 +2648,14 @@ Licensed under the MIT license.
             }
         }
 
-        function seriesDataLimits(series) {
+        function computeRangeForDataSeries(series) {
             var points = series.datapoints.points,
                 ps = series.datapoints.pointsize,
                 format = series.datapoints.format,
                 topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
                 fakeInfinity = Number.MAX_VALUE,
-                limits = {
+                range = {
                     xmin: topSentry,
                     ymin: topSentry,
                     xmax: bottomSentry,
@@ -2669,29 +2672,29 @@ Licensed under the MIT license.
                     if (f === null || f === undefined)
                         continue
 
-                    if ( f.autoscale === "none" || val === fakeInfinity || val === -fakeInfinity)
+                    if (!f.computeRange || val === fakeInfinity || val === -fakeInfinity)
                         continue;
 
                     if (f.x === true) {
-                        if (val < limits.xmin)
-                            limits.xmin = val;
-                        if (val > limits.xmax)
-                            limits.xmax = val;
+                        if (val < range.xmin)
+                            range.xmin = val;
+                        if (val > range.xmax)
+                            range.xmax = val;
                     }
 
                     if (f.y === true) {
-                        if (val < limits.ymin)
-                            limits.ymin = val;
-                        if (val > limits.ymax)
-                            limits.ymax = val;
+                        if (val < range.ymin)
+                            range.ymin = val;
+                        if (val > range.ymax)
+                            range.ymax = val;
                     }
                 }
             }
 
-            return limits;
+            return range;
         };
 
-        function adjustSeriesDataLimits(series, limits) {
+        function adjustSeriesDataRange(series, range) {
             if (series.bars.show) {
                 // make sure we got room for the bar on the dancing floor
                 var delta;
@@ -2708,11 +2711,11 @@ Licensed under the MIT license.
                 }
 
                 if (series.bars.horizontal) {
-                    limits.ymin += delta;
-                    limits.ymax += delta + series.bars.barWidth;
+                    range.ymin += delta;
+                    range.ymax += delta + series.bars.barWidth;
                 } else {
-                    limits.xmin += delta;
-                    limits.xmax += delta + series.bars.barWidth;
+                    range.xmin += delta;
+                    range.xmax += delta + series.bars.barWidth;
                 }
             }
 
@@ -2722,12 +2725,12 @@ Licensed under the MIT license.
                 // make sure the 0 point is included in the computed y range when requested
                 if (ps <= 2) {
                     /*if ps > 0 the points were already taken into account for autoscale */
-                    limits.ymin = Math.min(0, limits.ymin);
-                    limits.ymax = Math.max(0, limits.ymax);
+                    range.ymin = Math.min(0, range.ymin);
+                    range.ymax = Math.max(0, range.ymax);
                 }
             }
 
-            return limits;
+            return range;
         };
 
 
