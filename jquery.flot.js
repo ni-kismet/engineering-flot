@@ -1381,6 +1381,8 @@ Licensed under the MIT license.
 
             axis.delta = (axis.max - axis.min) / opts.ticks;
 			var axisPrecision = plot.enhanceValuePrecision(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
+			
+			axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : axisPrecision.precision);
 			axis.tickSize = axisPrecision.tickSize;
 
             // Time mode was moved to a plug-in in 0.8, and since so many people use it
@@ -1526,7 +1528,7 @@ Licensed under the MIT license.
                         label = axis.tickFormatter(v, axis, axisPrecision.precision);
                         break;
                     case 'major':
-                        label = axis.tickFormatter(v, axis)
+                        label = axis.tickFormatter(v, axis);
                 }
             }
             return {
