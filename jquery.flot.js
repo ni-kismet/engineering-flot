@@ -155,6 +155,7 @@ Licensed under the MIT license.
                 processRawData: [],
                 processDatapoints: [],
                 processOffset: [],
+                adjustSeriesDataRange: [],
                 drawBackground: [],
                 drawSeries: [],
                 drawAxis: [],
@@ -812,6 +813,8 @@ Licensed under the MIT license.
 
                 var range = plot.adjustSeriesDataRange(s,
                     plot.computeRangeForDataSeries(s));
+
+                executeHooks(hooks.adjustSeriesDataRange, [s, range]);
 
                 updateAxis(s.xaxis, range.xmin, range.xmax);
                 updateAxis(s.yaxis, range.ymin, range.ymax);
