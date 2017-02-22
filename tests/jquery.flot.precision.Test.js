@@ -50,7 +50,9 @@ describe("unit tests for the tickLables precision of axis", function() {
         var testVector = [
             [1, 10, 10, 2, 3, 1],
             [1, 1.01, 10, null, 2, 2],
-            [1, 1.1, 5, null, 1, 1]
+			[0.99963, 0.99964, null, null, 3, 3],
+            [1, 1.1, 5, null, 1, 1],
+			[1, 1.00000000000001, 10, null, 5, 5]
             ];
         
         testVector.forEach(function (t) {
@@ -75,7 +77,9 @@ describe("unit tests for the tickLables precision of axis", function() {
         var testVector = [
             [1, 10, 10, 2, 1],
             [1, 1.01, 10, null, 3],
-            [1, 1.1, 5, null, 2]
+            [1, 1.1, 5, null, 2],
+            [0.99963, 0.99964, null, null, 6],
+            [1, 1.00000000000001, 10, null, 16]
             ];
         
         testVector.forEach(function (t) {
