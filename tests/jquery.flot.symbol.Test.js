@@ -7,6 +7,14 @@ describe("flot symbol plugin", function() {
             shadowSize: 0, // don't draw shadows
             lines: { show: false},
             points: { show: true, fill: false, symbol: 'circle' }
+        },
+        xaxis: {
+            min: -1,
+            max: 1
+        },
+        yaxis: {
+            min: -1,
+            max: 1
         }
     };
 
