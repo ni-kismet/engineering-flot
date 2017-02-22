@@ -261,7 +261,54 @@ Licensed under the MIT license.
 
         plot.findNearbyItem = findNearbyItem;
 
+        plot.enhanceValuePrecision = function (min, max, direction, options, tickDecimals){
+            var noTicks;
+            if (typeof options.ticks == "number" && options.ticks > 0)
+                noTicks = options.ticks;
+            else
+            // heuristic based on the model a*sqrt(x) fitted to
+            // some data points that seemed reasonable
+                noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
 
+            var delta = (max - min) / noTicks,
+                dec = -Math.floor(Math.log(delta) / Math.LN10);
+
+            //if it is called with tickDecimals, then the precision should not be greather then that
+            if (tickDecimals != null && dec > tickDecimals) {
+                dec = tickDecimals;
+            }
+
+            var magn = Math.pow(10, -dec),
+                norm = delta / magn, // norm is between 1.0 and 10.0
+                size;
+
+            if (norm < 1.5) {
+                size = 1;
+            } else if (norm < 3) {
+                size = 2;
+                // special case for 2.5, requires an extra decimal
+                if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+                    size = 2.5;
+                    ++dec;
+                }
+            } else if (norm < 7.5) {
+                size = 5;
+            } else {
+                size = 10;
+            }
+
+            size *= magn;
+
+            if (options.minTickSize != null && size < options.minTickSize) {
+                size = options.minTickSize;
+            }
+            
+            return { 
+			    precision: dec, 
+				tickSize: options.tickSize || size
+			};
+        };
+		
         // public attributes
         plot.hooks = hooks;
 
@@ -1332,51 +1379,9 @@ Licensed under the MIT license.
         function setupTickGeneration(axis) {
             var opts = axis.options;
 
-            // estimate number of ticks
-            var noTicks;
-            if (typeof opts.ticks == "number" && opts.ticks > 0)
-                noTicks = opts.ticks;
-            else
-            // heuristic based on the model a*sqrt(x) fitted to
-            // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(axis.direction == "x" ? surface.width : surface.height);
-
-            var delta = (axis.max - axis.min) / noTicks,
-                dec = -Math.floor(Math.log(delta) / Math.LN10),
-                maxDec = opts.tickDecimals;
-
-            if (maxDec != null && dec > maxDec) {
-                dec = maxDec;
-            }
-
-            var magn = Math.pow(10, -dec),
-                norm = delta / magn, // norm is between 1.0 and 10.0
-                size;
-
-            if (norm < 1.5) {
-                size = 1;
-            } else if (norm < 3) {
-                size = 2;
-                // special case for 2.5, requires an extra decimal
-                if (norm > 2.25 && (maxDec == null || dec + 1 <= maxDec)) {
-                    size = 2.5;
-                    ++dec;
-                }
-            } else if (norm < 7.5) {
-                size = 5;
-            } else {
-                size = 10;
-            }
-
-            size *= magn;
-
-            if (opts.minTickSize != null && size < opts.minTickSize) {
-                size = opts.minTickSize;
-            }
-
-            axis.delta = delta;
-            axis.tickDecimals = Math.max(0, maxDec != null ? maxDec : dec);
-            axis.tickSize = opts.tickSize || size;
+            axis.delta = (axis.max - axis.min) / opts.ticks;
+			var axisPrecision = plot.enhanceValuePrecision(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
+			axis.tickSize = axisPrecision.tickSize;
 
             // Time mode was moved to a plug-in in 0.8, and since so many people use it
             // we'll add an especially friendly reminder to make sure they included it.
@@ -1509,11 +1514,9 @@ Licensed under the MIT license.
                 switch(type) {
                     case 'min':
                     case 'max':
-                        // this is a workaround to display the endpoints with a higher
-                        //precision without changing the API and all the tickFormatters
-                        //axis.tickDecimals = (axis.tickDecimals != null ? axis.tickDecimals + 1 : null);
-                        label = axis.tickFormatter(v, axis);
-                        //axis.tickDecimals = (axis.tickDecimals != null ? axis.tickDecimals - 1 : null);
+                        // display endpoints with higer precision
+                        var axisPrecision = plot.enhanceValuePrecision(axis.min, axis.max, axis.direction, axis.options);
+                        label = axis.tickFormatter(v, axis, axisPrecision.precision);
                         break;
                     case 'major':
                         label = axis.tickFormatter(v, axis)
