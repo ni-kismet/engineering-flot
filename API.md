@@ -1294,7 +1294,7 @@ Flot to keep track of its state, so be careful.
   - adjustSeriesDataRange(series, range)
 
     Adjusts the minimum and the maximum values based on the options of
-    of the series. For example if bars are being drawn then this function
+    the series. For example if bars are being drawn then this function
     will decrease the minimum and increase the maximum to make sure the
     first and the last bar will have enough space.
 
