@@ -36,9 +36,9 @@ describe("unit tests for the tickLables precision of axis", function() {
                 
             options.ticks = t[2];
             options.minTickSize = t[3];
-            var axisPrecision = plot.enhanceValuePrecision(min, max, "x", options, tickDecimals);
+            var tickSize = plot.computeTickSize(min, max, "x", options, tickDecimals);
                 
-            expect(axisPrecision.tickSize).toEqual(expectedValue);
+            expect(tickSize).toEqual(expectedValue);
         });
     });
     
@@ -48,7 +48,7 @@ describe("unit tests for the tickLables precision of axis", function() {
         plot = $.plot("#placeholder", [sampledata], {});
 
         var testVector = [
-            [1, 10, 10, 2, 3, 1],
+            [1, 10, 10, 2, 3, 2],
             [1, 1.01, 10, null, 2, 2],
 			[0.99963, 0.99964, null, null, 3, 3],
             [1, 1.1, 5, null, 1, 1],
@@ -63,9 +63,9 @@ describe("unit tests for the tickLables precision of axis", function() {
                 
             options.ticks = t[2];
             options.minTickSize = t[3];
-            var axisPrecision = plot.enhanceValuePrecision(min, max, "x", options, tickDecimals);
+            var precision = plot.computeValuePrecision(min, max, "x", options, tickDecimals);
                 
-            expect(axisPrecision.precision).toEqual(expectedValue);
+            expect(precision).toEqual(expectedValue);
         });
     });
     
@@ -75,11 +75,11 @@ describe("unit tests for the tickLables precision of axis", function() {
         plot = $.plot("#placeholder", [sampledata], {});
 
         var testVector = [
-            [1, 10, 10, 2, 1],
+            [1, 10, 10, 2, 2],
             [1, 1.01, 10, null, 3],
             [1, 1.1, 5, null, 2],
             [0.99963, 0.99964, null, null, 6],
-            [1, 1.00000000000001, 10, null, 16]
+            [1, 1.00000000000001, 10, null, 17]
             ];
         
         testVector.forEach(function (t) {
@@ -89,9 +89,9 @@ describe("unit tests for the tickLables precision of axis", function() {
                 
             options.ticks = t[2];
             options.minTickSize = t[3];
-            var axisPrecision = plot.enhanceValuePrecision(min, max, "x", options);
+            var precision = plot.computeValuePrecision(min, max, "x", options);
                 
-            expect(axisPrecision.precision).toEqual(expectedValue);
+            expect(precision).toEqual(expectedValue);
         });
     });
 });

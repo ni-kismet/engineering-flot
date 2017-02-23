@@ -261,7 +261,7 @@ Licensed under the MIT license.
 
         plot.findNearbyItem = findNearbyItem;
 
-        plot.enhanceValuePrecision = function (min, max, direction, options, tickDecimals){
+        plot.computeValuePrecision = function (min, max, direction, options, tickDecimals){
             var noTicks;
             if (typeof options.ticks == "number" && options.ticks > 0)
                 noTicks = options.ticks;
@@ -274,10 +274,36 @@ Licensed under the MIT license.
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
-            if (tickDecimals != null && dec >= tickDecimals) {
+            if (tickDecimals != null && dec > tickDecimals) {
                 dec = tickDecimals;
             }
 			
+			var magn = Math.pow(10, -dec),
+                norm = delta / magn;
+
+            if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+                ++dec;
+            }
+			
+            return dec;
+        };
+		
+		plot.computeTickSize = function (min, max, direction, options, tickDecimals){
+            var noTicks;
+            if (typeof options.ticks == "number" && options.ticks > 0)
+                noTicks = options.ticks;
+            else
+            // heuristic based on the model a*sqrt(x) fitted to
+            // some data points that seemed reasonable
+                noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
+
+            var delta = (max - min) / noTicks,
+                dec = -Math.floor(Math.log(delta) / Math.LN10);
+
+            //if it is called with tickDecimals, then the precision should not be greather then that
+            if (tickDecimals != null && dec > tickDecimals) {
+                dec = tickDecimals;
+            }
 
             var magn = Math.pow(10, -dec),
                 norm = delta / magn, // norm is between 1.0 and 10.0
@@ -290,7 +316,6 @@ Licensed under the MIT license.
                 // special case for 2.5, requires an extra decimal
                 if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
                     size = 2.5;
-                    ++dec;
                 }
             } else if (norm < 7.5) {
                 size = 5;
@@ -304,10 +329,7 @@ Licensed under the MIT license.
                 size = options.minTickSize;
             }
             
-            return { 
-			    precision: dec, 
-				tickSize: options.tickSize || size
-			};
+            return options.tickSize || size;
         };
 		
         // public attributes
@@ -1381,10 +1403,10 @@ Licensed under the MIT license.
             var opts = axis.options;
 
             axis.delta = (axis.max - axis.min) / opts.ticks;
-            var axisPrecision = plot.enhanceValuePrecision(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
+            var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
             
-            axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : axisPrecision.precision);
-            axis.tickSize = axisPrecision.tickSize;
+            axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
+            axis.tickSize = precision = plot.computeTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
 
             // Time mode was moved to a plug-in in 0.8, and since so many people use it
             // we'll add an especially friendly reminder to make sure they included it.
@@ -1525,8 +1547,8 @@ Licensed under the MIT license.
                     case 'min':
                     case 'max':
                         // display endpoints with higer precision
-                        var axisPrecision = plot.enhanceValuePrecision(axis.min, axis.max, axis.direction, axis.options);
-                        label = axis.tickFormatter(v, axis, axisPrecision.precision);
+                        var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, axis.options);
+                        label = axis.tickFormatter(v, axis, precision);
                         break;
                     case 'major':
                         label = axis.tickFormatter(v, axis);
