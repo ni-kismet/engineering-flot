@@ -1252,17 +1252,21 @@ Licensed under the MIT license.
                     break;
             }
 
+            min = (min == undefined ? null : min);
+            max = (max == undefined ? null : max);
             delta = max - min;
             if (delta == 0.0) {
                 // degenerate case
                 var widen = max == 0 ? 1 : 0.01;
-
-                if (opts.min == null)
-                    min -= widen;
+                var wmin = null;
+                if (min == null)
+                    wmin -= widen;
                 // always widen max if we couldn't widen min to ensure we
                 // don't fall into min == max which doesn't work
-                if (opts.max == null || opts.min != null)
+                if (max == null || min != null)
                     max += widen;
+                if(wmin != null)
+                    min = wmin;
             }
 
             // grow loose or grow exact
@@ -1271,8 +1275,8 @@ Licensed under the MIT license.
                 max = (max > axis.datamax) ? max : axis.datamax;
             }
 
-            axis.min = (min == null ? -1 : min);
-            axis.max = (max == null ? 1 : max);
+            axis.min = min != null ? min : -1;
+            axis.max = max != null ? max : 1;
         }
 
         function setupTickGeneration(axis) {
