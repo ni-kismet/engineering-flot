@@ -283,7 +283,7 @@ Licensed under the MIT license.
                 dec = tickDecimals;
             }
 			
-			      var magn = Math.pow(10, -dec),
+			var magn = Math.pow(10, -dec),
                 norm = delta / magn;
 
             if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
@@ -293,7 +293,7 @@ Licensed under the MIT license.
             return dec;
         };
 		
-		    plot.computeTickSize = function (min, max, direction, options, tickDecimals){
+		plot.computeTickSize = function (min, max, direction, options, tickDecimals){
             var noTicks;
             if (typeof options.ticks == "number" && options.ticks > 0)
                 noTicks = options.ticks;
@@ -1357,7 +1357,7 @@ Licensed under the MIT license.
             var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
             
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
-            axis.tickSize = precision = plot.computeTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
+            axis.tickSize = plot.computeTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
 
             // Time mode was moved to a plug-in in 0.8, and since so many people use it
             // we'll add an especially friendly reminder to make sure they included it.

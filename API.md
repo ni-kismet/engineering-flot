@@ -1205,7 +1205,6 @@ can call:
     Cleans up any event handlers Flot has currently registered. This
     is used internally.
 
-
  - findNearbyItem(mouseX, mouseY, seriesFilter, distance)
     
     Returns the closest item to the position determined by mouseX and
@@ -1214,7 +1213,7 @@ can call:
  
  - computeValuePrecision(min, max, direction, options, tickDecimals)
 
-	  Used for determining the the precision for a certain axis. 
+    Used for determining the the precision for a certain axis. 
     If the tickDecimals is specified, the maximum precision 
     would be at most tickDecimals. Otherwise, it would be computed 
     based on the axis minimum and maximum and the number of ticks.
