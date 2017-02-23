@@ -57,7 +57,7 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(100);
         });
 
-        it('should wideen the axis max if axis min is the same as axis max', function () {
+        it('should widen the axis max if axis min is the same as axis max', function () {
             options.xaxis = {min: 0, max: 0};
             options.yaxis = {min: 2, max: 2};
             plot = $.plot(placeholder, [[]], options);
@@ -70,7 +70,7 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(2.01);
         });
 
-        it('should wideen the axis min and max if both are null', function () {
+        it('should widen the axis min and max if both are null', function () {
             options.xaxis = {};
             options.yaxis = {};
             plot = $.plot(placeholder, [[]], options);
@@ -83,7 +83,7 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(0.01);
         });
 
-        it('should wideen the axis min if is null', function () {
+        it('should widen the axis min if is null', function () {
             options.xaxis = {max: 1};
             options.yaxis = {max: 0};
             plot = $.plot(placeholder, [[]], options);
@@ -96,6 +96,53 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(0);
         });
 
+        it('should not change the axis min and max for none autoscaling if data is set', function () {
+            options.xaxis = {autoscale: 'none', min: 0, max: 50};
+            options.yaxis = {autoscale: 'none', min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+            plot.setData([[[0, 1], [1, 2]]]);
+            plot.setupGrid();
+            plot.draw();
+            
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
+        it('should change the axis min and max for exact autoscaling if data is set', function () {
+            options.xaxis = {autoscale: 'exact', min: 0, max: 50};
+            options.yaxis = {autoscale: 'exact', min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+            plot.setData([[[0, 1], [1, 2]]]);
+            plot.setupGrid();
+            plot.draw();
+            
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(1);
+            expect(axes.yaxis.min).toBe(1);
+            expect(axes.yaxis.max).toBe(2);
+        });
+
+        it('should change the axis min and max for loose autoscaling if data is set', function () {
+            options.xaxis = {autoscale: 'loose', min: 0, max: 50};
+            options.yaxis = {autoscale: 'loose', min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+            plot.setData([[[0, 0], [10, 100]]]);
+            plot.setupGrid();
+            plot.draw();
+            
+            expect(axes.xaxis.min).toBe(-1);
+            expect(axes.xaxis.max).toBe(11);
+            expect(axes.yaxis.min).toBe(-20);
+            expect(axes.yaxis.max).toBe(120);
+        });
     });
 
     describe('computeRangeForDataSeries', function() {
