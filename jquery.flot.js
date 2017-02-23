@@ -1041,7 +1041,7 @@ Licensed under the MIT license.
                     gridLines = false;
                 }
             }
-
+            
             if (!isNaN(+tickLength))
                 padding += showTicks ? +tickLength : 0;
 
@@ -1271,8 +1271,8 @@ Licensed under the MIT license.
                 max = (max > axis.datamax) ? max : axis.datamax;
             }
 
-            axis.min = min;
-            axis.max = max;
+            axis.min = (min == null ? -1 : min);
+            axis.max = (max == null ? 1 : max);
         }
 
         function setupTickGeneration(axis) {
