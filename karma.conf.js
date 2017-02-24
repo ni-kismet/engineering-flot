@@ -18,7 +18,8 @@ module.exports = function (config) {
         ];
 
     var sources = [
-        'jquery.js'
+        'jquery.js',
+        './node_modules/phantomjs-polyfill-find/find-polyfill.js'
     ].concat(coverage_sources);
 
     var settings = {
