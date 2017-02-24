@@ -2041,9 +2041,9 @@ Licensed under the MIT license.
 
         function drawSeries(series) {
             if (series.lines.show)
-                $.plot.drawSeries.drawSeriesLines(series, ctx, plotOffset, plotHeight);
+                $.plot.drawSeries.drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradient);
             if (series.bars.show)
-                $.plot.drawSeries.drawSeriesBars(series, ctx, plotOffset);
+                $.plot.drawSeries.drawSeriesBars(series, ctx, plotOffset, getColorOrGradient);
             if (series.points.show)
                 $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plot.drawSymbol, getColorOrGradient);
         }

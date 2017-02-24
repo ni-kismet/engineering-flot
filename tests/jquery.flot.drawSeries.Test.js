@@ -41,7 +41,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotHeight);
+            drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradientMock);
 
             expect(ctx.moveTo).not.toHaveBeenCalled();
             expect(ctx.lineTo).not.toHaveBeenCalled();
@@ -52,12 +52,12 @@ describe('drawSeries', function() {
 
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotHeight);
+            drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradientMock);
 
             expect(ctx.lineTo).toHaveBeenCalled();
         });
 
-        it('should clip when the points are past the margins of the axes', function () {
+        it('should clip the lines when the points are outside the range of the axes', function () {
             series.datapoints.points = [
                 minx - 8, 50,
                 maxx + 8, 50,
@@ -68,16 +68,48 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotHeight);
+            drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradientMock);
 
-            var points = ctx.moveTo.calls.allArgs()
-                .concat(ctx.lineTo.calls.allArgs());
+            validatePointsAreInsideTheAxisRanges(
+                ctx.moveTo.calls.allArgs().concat(
+                    ctx.lineTo.calls.allArgs()));
+        });
+
+        it('should clip the lines and the fill area when the points are outside the range of the axes', function () {
+            series.datapoints.points = [
+                minx - 8, 50,
+                maxx + 8, 50,
+                100, miny - 8,
+                100, maxy + 8,
+                minx - 8, 50];
+            series.lines.fill = true;
+            series.lines.fillColor = 'rgb(200, 200, 200)';
+
+            spyOn(ctx, 'moveTo').and.callThrough();
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradientMock);
+
+            validatePointsAreInsideTheAxisRanges(
+                ctx.moveTo.calls.allArgs().concat(
+                    ctx.lineTo.calls.allArgs()));
+        });
+
+
+        function validatePointsAreInsideTheAxisRanges(points) {
             points.forEach(function(point) {
                 var x = point[0], y = point[1];
                 expect(minx <= x && x <= maxx).toBe(true);
                 expect(miny <= y && y <= maxy).toBe(true);
             });
-        });
+        }
+        function getColorOrGradientMock(spec, bottom, top, defaultColor) {
+            if (typeof spec === 'string') {
+                return spec;
+            } else {
+                throw 'test case not supported by the getColorOrGradientMock';
+            }
+        }
 
     });
 

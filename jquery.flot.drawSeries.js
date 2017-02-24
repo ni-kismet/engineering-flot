@@ -234,7 +234,7 @@
             }
         }
 
-        function drawSeriesLines(series, ctx, plotOffset, plotHeight) {
+        function drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradient) {
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
@@ -267,7 +267,7 @@
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
-            var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight);
+            var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight, getColorOrGradient);
             if (fillStyle) {
                 ctx.fillStyle = fillStyle;
                 plotLineArea(datapoints, series.xaxis, series.yaxis, series.lines.fillTowards || 0, ctx);
@@ -449,7 +449,7 @@
             }
         }
 
-        function drawSeriesBars(series, ctx, plotOffset) {
+        function drawSeriesBars(series, ctx, plotOffset, getColorOrGradient) {
             function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize;
@@ -482,7 +482,7 @@
             }
 
             var fillStyleCallback = series.bars.fill ? function(bottom, top) {
-                return getFillStyle(series.bars, series.color, bottom, top);
+                return getFillStyle(series.bars, series.color, bottom, top, getColorOrGradient);
             } : null;
             plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
