@@ -265,78 +265,9 @@ Licensed under the MIT license.
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
 
         plot.findNearbyItem = findNearbyItem;
-      
-        plot.computeValuePrecision = function (min, max, direction, options, tickDecimals){
-            var noTicks;
-            if (typeof options.ticks == "number" && options.ticks > 0)
-                noTicks = options.ticks;
-            else
-            // heuristic based on the model a*sqrt(x) fitted to
-            // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
 
-            var delta = (max - min) / noTicks,
-                dec = -Math.floor(Math.log(delta) / Math.LN10);
+        plot.computeValuePrecision = computeValuePrecision;
 
-            //if it is called with tickDecimals, then the precision should not be greather then that
-            if (tickDecimals != null && dec > tickDecimals) {
-                dec = tickDecimals;
-            }
-			
-			var magn = Math.pow(10, -dec),
-                norm = delta / magn;
-
-            if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
-                ++dec;
-            }
-			
-            return dec;
-        };
-		
-		plot.computeTickSize = function (min, max, direction, options, tickDecimals){
-            var noTicks;
-            if (typeof options.ticks == "number" && options.ticks > 0)
-                noTicks = options.ticks;
-            else
-            // heuristic based on the model a*sqrt(x) fitted to
-            // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
-
-            var delta = (max - min) / noTicks,
-                dec = -Math.floor(Math.log(delta) / Math.LN10);
-
-            //if it is called with tickDecimals, then the precision should not be greather then that
-            if (tickDecimals != null && dec > tickDecimals) {
-                dec = tickDecimals;
-            }
-
-            var magn = Math.pow(10, -dec),
-                norm = delta / magn, // norm is between 1.0 and 10.0
-                size;
-
-            if (norm < 1.5) {
-                size = 1;
-            } else if (norm < 3) {
-                size = 2;
-                // special case for 2.5, requires an extra decimal
-                if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
-                    size = 2.5;
-                }
-            } else if (norm < 7.5) {
-                size = 5;
-            } else {
-                size = 10;
-            }
-
-            size *= magn;
-
-            if (options.minTickSize != null && size < options.minTickSize) {
-                size = options.minTickSize;
-            }
-            
-            return options.tickSize || size;
-        };
-		
         // public attributes
         plot.hooks = hooks;
 
@@ -1043,7 +974,7 @@ Licensed under the MIT license.
             axis.labelWidth = opts.labelWidth || labelWidth;
             axis.labelHeight = opts.labelHeight || labelHeight;
         }
-
+    
         function allocateAxisBoxFirstPhase(axis) {
             // find the bounding box of the axis by looking at label
             // widths/heights and ticks, make room by diminishing the
@@ -1112,7 +1043,7 @@ Licensed under the MIT license.
                     gridLines = false;
                 }
             }
-            
+
             if (!isNaN(+tickLength))
                 padding += showTicks ? +tickLength : 0;
 
@@ -1247,6 +1178,8 @@ Licensed under the MIT license.
             });
 
             if (showGrid) {
+                plotWidth = surface.width - plotOffset.left - plotOffset.right;
+                plotHeight = surface.height - plotOffset.bottom - plotOffset.top;
 
                 var allocatedAxes = $.grep(axes, function(axis) {
                     return axis.show || axis.reserveSpace;
@@ -1257,6 +1190,9 @@ Licensed under the MIT license.
                     setupTickGeneration(axis);
                     setMajorTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
+
+                    setTransformationHelpers(axis);
+
                     setEndpointTicks(axis);
 
                     // find labelWidth/Height for axis
@@ -1350,14 +1286,85 @@ Licensed under the MIT license.
             axis.max = max != null ? max : 1;
         }
 
+        function computeValuePrecision (min, max, direction, ticks, tickDecimals){
+            var noTicks;
+            if (typeof ticks == "number" && ticks > 0)
+                noTicks = ticks;
+            else
+            // heuristic based on the model a*sqrt(x) fitted to
+            // some data points that seemed reasonable
+                noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
+
+            var delta = (max - min) / noTicks,
+                dec = -Math.floor(Math.log(delta) / Math.LN10);
+
+            //if it is called with tickDecimals, then the precision should not be greather then that
+            if (tickDecimals != null && dec > tickDecimals) {
+                dec = tickDecimals;
+            }
+
+            var magn = Math.pow(10, -dec),
+                norm = delta / magn;
+
+            if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+                ++dec;
+            }
+
+            return dec;
+        };
+        
+        function computeTickSize (min, max, direction, options, tickDecimals){
+            var noTicks;
+            if (typeof options.ticks == "number" && options.ticks > 0)
+                noTicks = options.ticks;
+            else
+            // heuristic based on the model a*sqrt(x) fitted to
+            // some data points that seemed reasonable
+                noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
+
+            var delta = (max - min) / noTicks,
+                dec = -Math.floor(Math.log(delta) / Math.LN10);
+
+            //if it is called with tickDecimals, then the precision should not be greather then that
+            if (tickDecimals != null && dec > tickDecimals) {
+                dec = tickDecimals;
+            }
+
+            var magn = Math.pow(10, -dec),
+                norm = delta / magn, // norm is between 1.0 and 10.0
+                size;
+
+            if (norm < 1.5) {
+                size = 1;
+            } else if (norm < 3) {
+                size = 2;
+                // special case for 2.5, requires an extra decimal
+                if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+                    size = 2.5;
+                }
+            } else if (norm < 7.5) {
+                size = 5;
+            } else {
+                size = 10;
+            }
+
+            size *= magn;
+
+            if (options.minTickSize != null && size < options.minTickSize) {
+                size = options.minTickSize;
+            }
+
+            return options.tickSize || size;
+        };
+
         function setupTickGeneration(axis) {
             var opts = axis.options;
 
             axis.delta = (axis.max - axis.min) / opts.ticks;
-            var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
-            
+            var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, opts.ticks, opts.tickDecimals);
+
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
-            axis.tickSize = plot.computeTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
+            axis.tickSize = computeTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
 
             // Time mode was moved to a plug-in in 0.8, and since so many people use it
             // we'll add an especially friendly reminder to make sure they included it.
@@ -1389,8 +1396,9 @@ Licensed under the MIT license.
                     return ticks;
                 };
 
+
                 axis.tickFormatter = function(value, axis, precision) {
-                    
+
                     var oldTickDecimals = axis.tickDecimals;
 
                     if (precision) {
@@ -1413,13 +1421,13 @@ Licensed under the MIT license.
 
                     axis.tickDecimals = oldTickDecimals;
                     return formatted;
-                };
-            }
+                    };
+                }
 
-            if ($.isFunction(opts.tickFormatter))
-                axis.tickFormatter = function(v, axis, precision) {
-                    return "" + opts.tickFormatter(v, axis, precision);
-                };
+                if ($.isFunction(opts.tickFormatter))
+                    axis.tickFormatter = function(v, axis, precision) {
+                        return "" + opts.tickFormatter(v, axis, precision);
+            };
 
             if (opts.alignTicksWithAxis != null) {
                 var otherAxis = (axis.direction == "x" ? xaxes : yaxes)[opts.alignTicksWithAxis - 1];
@@ -1497,12 +1505,11 @@ Licensed under the MIT license.
                 switch(type) {
                     case 'min':
                     case 'max':
-                        // display endpoints with higer precision
-                        var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, axis.options);
+                        var precision = getEndpointPrecision(v, axis);
                         label = axis.tickFormatter(v, axis, precision);
                         break;
                     case 'major':
-                        label = axis.tickFormatter(v, axis);
+                        label = axis.tickFormatter(v, axis)
                 }
             }
             return {
@@ -1517,6 +1524,15 @@ Licensed under the MIT license.
                 axis.min = Math.min(axis.min, ticks[0].v);
                 axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
             }
+        }
+
+        function getEndpointPrecision(value, axis){
+            var canvas1 = Math.floor(axis.p2c(value)),
+                canvas2 = axis.direction === "x" ? canvas1 + 1: canvas1 - 1,
+                point1 = axis.c2p(canvas1),
+                point2 = axis.c2p(canvas2);
+
+            return computeValuePrecision(point1, point2, axis.direction, 1);
         }
 
         function setEndpointTicks(axis) {

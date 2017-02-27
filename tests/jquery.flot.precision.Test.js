@@ -16,31 +16,6 @@ describe("unit tests for the tickLables precision of axis", function() {
         }
         $('#placeholder').empty();
     });
-
-    it('should use the default tickSize when specified', function() {
-        var options = [];
-        
-        plot = $.plot("#placeholder", [sampledata], {});
-
-        var testVector = [
-            [1, 10, 10, 2, 3, 2],
-            [1, 5, 10, null, 3, 0.5],
-            [1, 1.2, 5, null, 3, 0.05]
-            ];
-        
-        testVector.forEach(function (t) {
-            var min = t[0],
-                max = t[1],
-                tickDecimals = t[4],
-                expectedValue = t[5];
-                
-            options.ticks = t[2];
-            options.minTickSize = t[3];
-            var tickSize = plot.computeTickSize(min, max, "x", options, tickDecimals);
-                
-            expect(tickSize).toEqual(expectedValue);
-        });
-    });
     
     it('should use the precision given by tickDecimals when specified', function() {
         var options = [];
@@ -48,50 +23,79 @@ describe("unit tests for the tickLables precision of axis", function() {
         plot = $.plot("#placeholder", [sampledata], {});
 
         var testVector = [
-            [1, 10, 10, 2, 3, 2],
-            [1, 1.01, 10, null, 2, 2],
-			[0.99963, 0.99964, null, null, 3, 3],
-            [1, 1.1, 5, null, 1, 1],
-			[1, 1.00000000000001, 10, null, 5, 5]
+            [1, 10, 10, 3, 2],
+            [1, 1.01, 10, 2, 2],
+            [0.99963, 0.99964, null, 3, 3],
+            [1, 1.1, 5, 1, 1],
+            [1, 1.00000000000001, 10, 5, 5]
             ];
         
         testVector.forEach(function (t) {
             var min = t[0],
                 max = t[1],
-                tickDecimals = t[4],
-                expectedValue = t[5];
-                
-            options.ticks = t[2];
-            options.minTickSize = t[3];
-            var precision = plot.computeValuePrecision(min, max, "x", options, tickDecimals);
+                ticks = t[2],
+                tickDecimals = t[3],
+                expectedValue = t[4];
+
+            var precision = plot.computeValuePrecision(min, max, "x", ticks, tickDecimals);
                 
             expect(precision).toEqual(expectedValue);
         });
     });
     
     it('should use the maximum precision when tickDecimals not specified', function() {
-        var options = [];
         
         plot = $.plot("#placeholder", [sampledata], {});
 
         var testVector = [
-            [1, 10, 10, 2, 2],
-            [1, 1.01, 10, null, 3],
-            [1, 1.1, 5, null, 2],
-            [0.99963, 0.99964, null, null, 6],
-            [1, 1.00000000000001, 10, null, 17]
+            [1, 10, 10, 2],
+            [1, 1.01, 10, 3],
+            [1, 1.1, 5, 2],
+            [0.99963, 0.99964, null, 6],
+            [1, 1.00000000000001, 10, 17]
             ];
         
         testVector.forEach(function (t) {
             var min = t[0],
                 max = t[1],
-                expectedValue = t[4];
-                
-            options.ticks = t[2];
-            options.minTickSize = t[3];
-            var precision = plot.computeValuePrecision(min, max, "x", options);
+                ticks = t[2],
+                expectedValue = t[3];
+              
+            var precision = plot.computeValuePrecision(min, max, "x", ticks);
                 
             expect(precision).toEqual(expectedValue);
+        });
+    });
+    
+    it('should increase precision for endpoints', function() {
+        var testVector = [
+            [1, 10, 10, '1.00', '10.00'],
+            [-1, 1, 20, '-1.0000', '1.0000'],
+            [1, 1.01, 10, '1.00000', '1.01000'],
+            [99, 99.02, 10, '99.000000', '99.020000'],
+            [0.99963, 0.99964, null, '0.99963000', '0.99964000'],
+            [1, 1.00000000001, 100, '1.00000000000000', '1.00000000001000']
+            ];
+        
+        testVector.forEach(function (t) {
+            
+            plot = $.plot("#placeholder", [sampledata], {
+                xaxes: [{
+                    min: t[0],
+                    max: t[1],
+                    ticks: t[2],
+                    showTickLabels : 'endpoints',
+                    autoscale: "none"  
+                }]
+            });
+            
+            var minExpectedValue = t[3],
+                maxExpectedValue = t[4],
+                xaxis = plot.getAxes().xaxis;
+            
+            expect(xaxis.ticks[0].label).toEqual(minExpectedValue);
+            expect(xaxis.ticks[xaxis.ticks.length-1].label).toEqual(maxExpectedValue);
+
         });
     });
 });
