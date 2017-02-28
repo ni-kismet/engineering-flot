@@ -5,7 +5,7 @@ describe('drawSeries', function() {
     describe('drawSeriesLines', function() {
         var minx = 0, maxx = 200, miny = 0, maxy = 100,
             series, ctx, plotHeight, plotOffset,
-            drawSeriesLines = window.drawSeries.drawSeriesLines;
+            drawSeriesLines = jQuery.plot.drawSeries.drawSeriesLines;
 
         beforeEach(function() {
             series = {

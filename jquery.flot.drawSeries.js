@@ -1,5 +1,5 @@
 (function($) {
-
+    "use strict";
 
     function drawSeries() {
 
@@ -510,8 +510,6 @@
     };
 
 
-    // this is a temporary way for making the drawSeries accesible to flot and tests
     $.plot.drawSeries = new drawSeries();
-    window.drawSeries = $.plot.drawSeries;
 
 })(jQuery);
