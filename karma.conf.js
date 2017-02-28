@@ -19,8 +19,7 @@ module.exports = function (config) {
         ];
 
     var sources = [
-        'jquery.js',
-        './node_modules/phantomjs-polyfill-find/find-polyfill.js'
+        'jquery.js'
     ].concat(coverage_sources);
 
     var settings = {
@@ -34,6 +33,7 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
+            './node_modules/phantomjs-polyfill-find/find-polyfill.js',
             'tests/*.Test.js',
         ]),
 
