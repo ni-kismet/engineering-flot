@@ -1,4 +1,4 @@
-describe("unit tests for the tickLables precision of axis", function() {
+describe("unit tests for the precision of axis", function() {
     var plot;
     var placeholder;
     var sampledata = [[0, 1], [1, 1.1], [2, 1.2]];
@@ -23,7 +23,7 @@ describe("unit tests for the tickLables precision of axis", function() {
         plot = $.plot("#placeholder", [sampledata], {});
 
         var testVector = [
-            [1, 10, 10, 3, 2],
+            [1, 10, 10, 3, 1],
             [1, 1.01, 10, 2, 2],
             [0.99963, 0.99964, null, 3, 3],
             [1, 1.1, 5, 1, 1],
@@ -48,11 +48,11 @@ describe("unit tests for the tickLables precision of axis", function() {
         plot = $.plot("#placeholder", [sampledata], {});
 
         var testVector = [
-            [1, 10, 10, 2],
+            [1, 10, 10, 1],
             [1, 1.01, 10, 3],
             [1, 1.1, 5, 2],
             [0.99963, 0.99964, null, 6],
-            [1, 1.00000000000001, 10, 17]
+            [1, 1.00000000000001, 10, 16]
             ];
         
         testVector.forEach(function (t) {
@@ -69,12 +69,16 @@ describe("unit tests for the tickLables precision of axis", function() {
     
     it('should increase precision for endpoints', function() {
         var testVector = [
-            [1, 10, 10, '1.00', '10.00'],
-            [-1, 1, 20, '-1.0000', '1.0000'],
-            [1, 1.01, 10, '1.00000', '1.01000'],
-            [99, 99.02, 10, '99.000000', '99.020000'],
-            [0.99963, 0.99964, null, '0.99963000', '0.99964000'],
-            [1, 1.00000000001, 100, '1.00000000000000', '1.00000000001000']
+            [1, 10, 10, 'linear', '1.00', '10.00'],
+		    [0, 100, 11, 'linear', '0.0', '100.0'],
+            [-1, 1, 20, 'linear', '-1.0000', '1.0000'],
+            [1, 1.01, 10, 'linear', '1.00000', '1.01000'],
+            [99, 99.02, 10, 'linear', '99.000000', '99.020000'],
+            [0.99963, 0.99964, null, 'linear', '0.99963000', '0.99964000'],
+            [1, 1.00000000001, 100, 'linear', '1.00000000000000', '1.00000000001000'],
+			[1, 10, 10, 'log', '1.0000', '10.000'],
+		    [0.1, 100, 11, 'log', '0.1000', '100.0'],
+		    [0.99963, 0.99964, null, 'log', '0.99963000', '0.99964000']
             ];
         
         testVector.forEach(function (t) {
@@ -85,12 +89,13 @@ describe("unit tests for the tickLables precision of axis", function() {
                     max: t[1],
                     ticks: t[2],
                     showTickLabels : 'endpoints',
-                    autoscale: "none"  
+                    autoscale: "none",
+                    mode: t[3]
                 }]
             });
             
-            var minExpectedValue = t[3],
-                maxExpectedValue = t[4],
+            var minExpectedValue = t[4],
+                maxExpectedValue = t[5],
                 xaxis = plot.getAxes().xaxis;
             
             expect(xaxis.ticks[0].label).toEqual(minExpectedValue);

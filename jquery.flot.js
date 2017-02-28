@@ -1288,12 +1288,12 @@ Licensed under the MIT license.
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals){
             var noTicks;
-            if (typeof ticks == "number" && ticks > 0)
+			
+            if (typeof ticks == "number" && ticks > 0) {
                 noTicks = ticks;
-            else
-            // heuristic based on the model a*sqrt(x) fitted to
-            // some data points that seemed reasonable
+			} else {
                 noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
+			}
 
             var delta = (max - min) / noTicks,
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
@@ -1306,7 +1306,7 @@ Licensed under the MIT license.
             var magn = Math.pow(10, -dec),
                 norm = delta / magn;
 
-            if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+            if (norm > 2.25 && norm < 3 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
                 ++dec;
             }
 
@@ -1315,13 +1315,15 @@ Licensed under the MIT license.
         
         function computeTickSize (min, max, direction, options, tickDecimals){
             var noTicks;
-            if (typeof options.ticks == "number" && options.ticks > 0)
+			
+            if (typeof options.ticks == "number" && options.ticks > 0) {
                 noTicks = options.ticks;
-            else
+            } else {
             // heuristic based on the model a*sqrt(x) fitted to
             // some data points that seemed reasonable
                 noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
-
+            }
+                
             var delta = (max - min) / noTicks,
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
@@ -1395,7 +1397,6 @@ Licensed under the MIT license.
 
                     return ticks;
                 };
-
 
                 axis.tickFormatter = function(value, axis, precision) {
 
@@ -1505,6 +1506,7 @@ Licensed under the MIT license.
                 switch(type) {
                     case 'min':
                     case 'max':
+                        //improving the precision of endpoints
                         var precision = getEndpointPrecision(v, axis);
                         label = axis.tickFormatter(v, axis, precision);
                         break;
@@ -1530,9 +1532,13 @@ Licensed under the MIT license.
             var canvas1 = Math.floor(axis.p2c(value)),
                 canvas2 = axis.direction === "x" ? canvas1 + 1: canvas1 - 1,
                 point1 = axis.c2p(canvas1),
-                point2 = axis.c2p(canvas2);
-
-            return computeValuePrecision(point1, point2, axis.direction, 1);
+                point2 = axis.c2p(canvas2),
+                precision = computeValuePrecision(point1, point2, axis.direction, 1);
+                
+            if(precision < 20){
+                return precision;
+            }
+            return 20;
         }
 
         function setEndpointTicks(axis) {

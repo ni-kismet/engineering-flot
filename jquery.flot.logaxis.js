@@ -210,7 +210,7 @@ Set axis.mode to "log" to enable.
                         return logTickGenerator(axis.min, axis.max, noTicks);
                     };
 
-                    axis.tickFormatter = logTickFormatter;
+                    axis.options.tickFormatter = logTickFormatter;
                     axis.options.transform = logTransform;
                     axis.options.inverseTransform = logInverseTransform;
                     axis.options.autoscaleMargin = 0;
