@@ -1211,7 +1211,7 @@ can call:
     mouseY. The series on which the search is realised can be specified
     using seriesFilter function.
  
- - computeValuePrecision(min, max, direction, options, tickDecimals)
+ - computeValuePrecision(min, max, direction, ticks, tickDecimals)
 
     Used for determining the the precision for a certain axis. 
     If the tickDecimals is specified, the maximum precision 

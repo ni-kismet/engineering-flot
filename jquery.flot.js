@@ -1190,9 +1190,9 @@ Licensed under the MIT license.
                     setupTickGeneration(axis);
                     setMajorTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
-
+					
+					//for computing the endpoints precision, transformationHelpers are needed
                     setTransformationHelpers(axis);
-
                     setEndpointTicks(axis);
 
                     // find labelWidth/Height for axis
@@ -1214,6 +1214,7 @@ Licensed under the MIT license.
                 });
             }
 
+	        //after adjusting the axis, plot width and height will be modified
             plotWidth = surface.width - plotOffset.left - plotOffset.right;
             plotHeight = surface.height - plotOffset.bottom - plotOffset.top;
 
@@ -1288,12 +1289,12 @@ Licensed under the MIT license.
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals){
             var noTicks;
-			
+            
             if (typeof ticks == "number" && ticks > 0) {
                 noTicks = ticks;
-			} else {
+            } else {
                 noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
-			}
+            }
 
             var delta = (max - min) / noTicks,
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
@@ -1315,7 +1316,7 @@ Licensed under the MIT license.
         
         function computeTickSize (min, max, direction, options, tickDecimals){
             var noTicks;
-			
+            
             if (typeof options.ticks == "number" && options.ticks > 0) {
                 noTicks = options.ticks;
             } else {
