@@ -3,8 +3,8 @@
   "version": "0.3.1",
   "main": "jquery.flot.js",
   "scripts": {
-    "test": "node node_modules/karma/bin/karma start --single-run",
-    "coverage": "node node_modules/karma/bin/karma start --single-run --coverage",
+    "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurency=1",
+    "coverage": "node node_modules/karma/bin/karma start --single-run --coverage --no-auto-watch --concurency=1",
     "build": "node build"
   },
   "devDependencies": {

@@ -15,7 +15,8 @@ module.exports = function (config) {
             'jquery.flot.logaxis.js',
             'jquery.flot.symbol.js',
             'jquery.flot.flatdata.js',
-            'jquery.flot.drawSeries.js'
+            'jquery.flot.drawSeries.js',
+            'jquery.flot.navigate.js'
         ];
 
     var sources = [
@@ -67,7 +68,7 @@ module.exports = function (config) {
         logLevel: config.LOG_INFO,
 
         // enable / disable watching file and executing tests whenever any file changes
-        autoWatch: true,
+        autoWatch: false,
 
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
@@ -78,7 +79,7 @@ module.exports = function (config) {
         singleRun: false,
 
         // Concurrency level
-        // how many browser should be started simultaneous
+        // how many browsers should be started simultaneous
         concurrency: Infinity
     };
 

@@ -268,11 +268,21 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
         function onDrag(e) {
             var frameRate = plot.getOptions().pan.frameRate;
+
+            if (frameRate === -1) {
+                plot.smartPan({
+                    left: startPageX - e.pageX,
+                    top: startPageY - e.pageY
+                });
+
+                return;
+            }
+
             if (panTimeout || !frameRate)
                 return;
 
             panTimeout = setTimeout(function() {
-                plot.absPan({
+                plot.smartPan({
                     left: startPageX - e.pageX,
                     top: startPageY - e.pageY
                 });
@@ -288,7 +298,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
 
             plot.getPlaceholder().css('cursor', prevCursor);
-            plot.absPan({
+            plot.smartPan({
                 left: startPageX - e.pageX,
                 top: startPageY - e.pageY
             });
@@ -363,8 +373,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     return;
                 }
 
-                min = axis.c2p(min);
-                max = axis.c2p(max);
+                min = $.plot.saturated.saturate(axis.c2p(min));
+                max = $.plot.saturated.saturate(axis.c2p(max));
                 if (min > max) {
                     // make sure min < max
                     var tmp = min;
@@ -379,6 +389,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     range = opts.transform(max) - opts.transform(min);
                 }
 
+                opts.autoscale = 'none';
                 opts.min = min;
                 opts.max = max;
             });
@@ -440,7 +451,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             return snap;
         }
 
-        plot.absPan = function(args) {
+        plot.smartPan = function(args) {
             var delta = {
                     x: +args.left,
                     y: +args.top
@@ -484,6 +495,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 if (d !== 0) {
                     min = axis.c2p(axis.p2c(axis.savedMin) + d);
                     max = axis.c2p(axis.p2c(axis.savedMax) + d);
+                    opts.autoscale = 'none';
                     opts.min = min;
                     opts.max = max;
                 } else {
