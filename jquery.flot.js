@@ -1190,8 +1190,8 @@ Licensed under the MIT license.
                     setupTickGeneration(axis);
                     setMajorTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
-					
-					//for computing the endpoints precision, transformationHelpers are needed
+                    
+                    //for computing the endpoints precision, transformationHelpers are needed
                     setTransformationHelpers(axis);
                     setEndpointTicks(axis);
 
@@ -1214,7 +1214,7 @@ Licensed under the MIT license.
                 });
             }
 
-	        //after adjusting the axis, plot width and height will be modified
+            //after adjusting the axis, plot width and height will be modified
             plotWidth = surface.width - plotOffset.left - plotOffset.right;
             plotHeight = surface.height - plotOffset.bottom - plotOffset.top;
 
