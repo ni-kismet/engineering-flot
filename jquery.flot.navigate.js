@@ -379,8 +379,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     range = opts.transform(max) - opts.transform(min);
                 }
 
-                opts.min = min;
-                opts.max = max;
+                opts.minShifted = (opts.minShifted || 0) + (axis.min - min);
+                opts.maxShifted = (opts.maxShifted || 0) + (axis.max - max);
             });
 
             plot.setupGrid();
@@ -412,8 +412,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 if (d !== 0) {
                     min = axis.c2p(axis.p2c(axis.min) + d);
                     max = axis.c2p(axis.p2c(axis.max) + d);
-                    opts.min = min;
-                    opts.max = max;
+                    opts.minShifted = (opts.minShifted || 0) + (axis.min - min);
+                    opts.maxShifted = (opts.maxShifted || 0) + (axis.max - max);
                 }
             });
 
@@ -484,11 +484,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 if (d !== 0) {
                     min = axis.c2p(axis.p2c(axis.savedMin) + d);
                     max = axis.c2p(axis.p2c(axis.savedMax) + d);
-                    opts.min = min;
-                    opts.max = max;
-                } else {
-                    opts.min = opts.savedMin;
-                    opts.max = opts.savedMax;
+                    opts.minShifted = (opts.minShifted || 0) + (axis.min - min);
+                    opts.maxShifted = (opts.maxShifted || 0) + (axis.max - max);
                 }
             });
 
