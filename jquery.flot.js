@@ -50,7 +50,7 @@ Licensed under the MIT license.
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "exact", // Available modes: "none", "loose", "exact",
+                    autoscale: "exact", // Available modes: "none", "loose", "exact", "window"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -69,7 +69,7 @@ Licensed under the MIT license.
                 },
                 yaxis: {
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "loose", // Available modes: "none", "loose", "exact"
+                    autoscale: "loose", // Available modes: "none", "loose", "exact", "window"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
                     showTickLabels: "major" // "none", "endpoints", "major", "all"
@@ -1232,8 +1232,9 @@ Licensed under the MIT license.
 
         function setRange(axis) {
             var opts = axis.options,
-                min,
-                max,
+                windowWidth = opts.windowSize,
+                min = axis.min || opts.min,
+                max = axis.max || opts.max,
                 delta;
 
             switch (opts.autoscale) {
@@ -1241,17 +1242,23 @@ Licensed under the MIT license.
                     min = +(opts.min != null ? opts.min : axis.datamin);
                     max = +(opts.max != null ? opts.max : axis.datamax);
                     break;
-                case "loose":
-                    if(axis.datamin != null && axis.datamax != null) {
-                        min = axis.datamin;
+                case "window":
+                    if(axis.datamax > max) {
+                        // move the window to fit the new data inside, but keep the width constant
                         max = axis.datamax;
+                        min = Math.max(axis.datamax - (opts.windowSize || 100), min);
+                    }
+                    break;
+                case "loose":
+                    if(axis.datamin != null || axis.datamax != null) {
+                        min = axis.datamin || opts.min;
+                        max = axis.datamax || opts.max;
+
                         delta = max - min;
                         var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
+
                         min -= delta * margin;
                         max += delta * margin;
-                    } else {
-                        min = opts.min;
-                        max = opts.max;
                     }
                     break;
                 case "exact":
@@ -1260,8 +1267,8 @@ Licensed under the MIT license.
                     break;
             }
 
-            min = (min == undefined ? null : min);
-            max = (max == undefined ? null : max);
+            min = (isNaN(min) ? null : min);
+            max = (isNaN(max) ? null : max);
             delta = max - min;
             if (delta == 0.0) {
                 // degenerate case
@@ -1278,7 +1285,7 @@ Licensed under the MIT license.
             }
 
             // grow loose or grow exact
-            if(opts.autoscale !== "none" && opts.growOnly === true) {
+            if(opts.autoscale !== "none" && opts.autoscale !== "window" && opts.growOnly === true) {
                 min = (min < axis.datamin) ? min : axis.datamin;
                 max = (max > axis.datamax) ? max : axis.datamax;
             }
