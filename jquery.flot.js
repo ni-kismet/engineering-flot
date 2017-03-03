@@ -1243,8 +1243,8 @@ Licensed under the MIT license.
                     break;
                 case "loose":
                     if(axis.datamin != null || axis.datamax != null) {
-                        min = axis.datamin || opts.min;
-                        max = axis.datamax || opts.max;
+                        min = isNaN(axis.datamin) ? opts.min : axis.datamin;
+                        max = isNaN(axis.datamin) ? opts.max : axis.datamax;
 
                         
                         delta = max - min;
