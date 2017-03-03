@@ -489,9 +489,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     opts.min = min;
                     opts.max = max;
                     opts.autoscale = "none";
-                }else {
-                    opts.min = opts.savedMin;
-                    opts.max = opts.savedMax;
                 }
             });
 
