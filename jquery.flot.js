@@ -50,7 +50,7 @@ Licensed under the MIT license.
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "exact", // Available modes: "none", "loose", "exact",
+                    autoscale: "exact", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -1232,8 +1232,8 @@ Licensed under the MIT license.
 
         function setRange(axis) {
             var opts = axis.options,
-                min,
-                max,
+                min = axis.min || opts.min,
+                max = axis.max || opts.max,
                 delta;
 
             switch (opts.autoscale) {
@@ -1245,13 +1245,12 @@ Licensed under the MIT license.
                     if(axis.datamin != null && axis.datamax != null) {
                         min = axis.datamin;
                         max = axis.datamax;
+
                         delta = max - min;
                         var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
+
                         min -= delta * margin;
                         max += delta * margin;
-                    } else {
-                        min = opts.min;
-                        max = opts.max;
                     }
                     break;
                 case "exact":
@@ -1260,8 +1259,8 @@ Licensed under the MIT license.
                     break;
             }
 
-            min = (min == undefined ? null : min);
-            max = (max == undefined ? null : max);
+            min = (isNaN(min) ? null : min);
+            max = (isNaN(max) ? null : max);
             delta = max - min;
             if (delta == 0.0) {
                 // degenerate case

@@ -381,6 +381,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
                 opts.min = min;
                 opts.max = max;
+                opts.autoscale = "none";
             });
 
             plot.setupGrid();
@@ -414,6 +415,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     max = axis.c2p(axis.p2c(axis.max) + d);
                     opts.min = min;
                     opts.max = max;
+                    opts.autoscale = "none";
                 }
             });
 
@@ -486,9 +488,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     max = axis.c2p(axis.p2c(axis.savedMax) + d);
                     opts.min = min;
                     opts.max = max;
-                } else {
-                    opts.min = opts.savedMin;
-                    opts.max = opts.savedMax;
+                    opts.autoscale = "none";
                 }
             });
 
