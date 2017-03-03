@@ -1242,11 +1242,10 @@ Licensed under the MIT license.
                     max = +(opts.max != null ? opts.max : axis.datamax);
                     break;
                 case "loose":
-                    if(axis.datamin != null || axis.datamax != null) {
-                        min = isNaN(axis.datamin) ? opts.min : axis.datamin;
-                        max = isNaN(axis.datamin) ? opts.max : axis.datamax;
+                    if(axis.datamin != null && axis.datamax != null) {
+                        min = axis.datamin;
+                        max = axis.datamax;
 
-                        
                         delta = max - min;
                         var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
 
