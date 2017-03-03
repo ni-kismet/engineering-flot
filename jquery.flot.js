@@ -50,7 +50,7 @@ Licensed under the MIT license.
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "exact", // Available modes: "none", "loose", "exact", "window"
+                    autoscale: "exact", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -69,7 +69,7 @@ Licensed under the MIT license.
                 },
                 yaxis: {
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "loose", // Available modes: "none", "loose", "exact", "window"
+                    autoscale: "loose", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
                     showTickLabels: "major" // "none", "endpoints", "major", "all"
@@ -1224,7 +1224,6 @@ Licensed under the MIT license.
 
         function setRange(axis) {
             var opts = axis.options,
-                windowWidth = opts.windowSize,
                 min = axis.min || opts.min,
                 max = axis.max || opts.max,
                 delta;
@@ -1233,13 +1232,6 @@ Licensed under the MIT license.
                 case "none":
                     min = +(opts.min != null ? opts.min : axis.datamin);
                     max = +(opts.max != null ? opts.max : axis.datamax);
-                    break;
-                case "window":
-                    if(axis.datamax > max) {
-                        // move the window to fit the new data inside, but keep the width constant
-                        max = axis.datamax;
-                        min = Math.max(axis.datamax - (opts.windowSize || 100), min);
-                    }
                     break;
                 case "loose":
                     if(axis.datamin != null || axis.datamax != null) {
