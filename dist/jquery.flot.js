@@ -1,3 +1,717 @@
+/* Plugin for jQuery for working with colors.
+ * 
+ * Version 1.1.
+ * 
+ * Inspiration from jQuery color animation plugin by John Resig.
+ *
+ * Released under the MIT license by Ole Laursen, October 2009.
+ *
+ * Examples:
+ *
+ *   $.color.parse("#fff").scale('rgb', 0.25).add('a', -0.5).toString()
+ *   var c = $.color.extract($("#mydiv"), 'background-color');
+ *   console.log(c.r, c.g, c.b, c.a);
+ *   $.color.make(100, 50, 25, 0.4).toString() // returns "rgba(100,50,25,0.4)"
+ *
+ * Note that .scale() and .add() return the same modified object
+ * instead of making a new one.
+ *
+ * V. 1.1: Fix error handling so e.g. parsing an empty string does
+ * produce a color rather than just crashing.
+ */ 
+
+(function($) {
+    $.color = {};
+
+    // construct color object with some convenient chainable helpers
+    $.color.make = function (r, g, b, a) {
+        var o = {};
+        o.r = r || 0;
+        o.g = g || 0;
+        o.b = b || 0;
+        o.a = a != null ? a : 1;
+
+        o.add = function (c, d) {
+            for (var i = 0; i < c.length; ++i)
+                o[c.charAt(i)] += d;
+            return o.normalize();
+        };
+        
+        o.scale = function (c, f) {
+            for (var i = 0; i < c.length; ++i)
+                o[c.charAt(i)] *= f;
+            return o.normalize();
+        };
+        
+        o.toString = function () {
+            if (o.a >= 1.0) {
+                return "rgb("+[o.r, o.g, o.b].join(",")+")";
+            } else {
+                return "rgba("+[o.r, o.g, o.b, o.a].join(",")+")";
+            }
+        };
+
+        o.normalize = function () {
+            function clamp(min, value, max) {
+                return value < min ? min: (value > max ? max: value);
+            }
+            
+            o.r = clamp(0, parseInt(o.r), 255);
+            o.g = clamp(0, parseInt(o.g), 255);
+            o.b = clamp(0, parseInt(o.b), 255);
+            o.a = clamp(0, o.a, 1);
+            return o;
+        };
+
+        o.clone = function () {
+            return $.color.make(o.r, o.b, o.g, o.a);
+        };
+
+        return o.normalize();
+    }
+
+    // extract CSS color property from element, going up in the DOM
+    // if it's "transparent"
+    $.color.extract = function (elem, css) {
+        var c;
+
+        do {
+            c = elem.css(css).toLowerCase();
+            // keep going until we find an element that has color, or
+            // we hit the body or root (have no parent)
+            if (c != '' && c != 'transparent')
+                break;
+            elem = elem.parent();
+        } while (elem.length && !$.nodeName(elem.get(0), "body"));
+
+        // catch Safari's way of signalling transparent
+        if (c == "rgba(0, 0, 0, 0)")
+            c = "transparent";
+        
+        return $.color.parse(c);
+    }
+    
+    // parse CSS color string (like "rgb(10, 32, 43)" or "#fff"),
+    // returns color object, if parsing failed, you get black (0, 0,
+    // 0) out
+    $.color.parse = function (str) {
+        var res, m = $.color.make;
+
+        // Look for rgb(num,num,num)
+        if (res = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(str))
+            return m(parseInt(res[1], 10), parseInt(res[2], 10), parseInt(res[3], 10));
+        
+        // Look for rgba(num,num,num,num)
+        if (res = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
+            return m(parseInt(res[1], 10), parseInt(res[2], 10), parseInt(res[3], 10), parseFloat(res[4]));
+            
+        // Look for rgb(num%,num%,num%)
+        if (res = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(str))
+            return m(parseFloat(res[1])*2.55, parseFloat(res[2])*2.55, parseFloat(res[3])*2.55);
+
+        // Look for rgba(num%,num%,num%,num)
+        if (res = /rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(str))
+            return m(parseFloat(res[1])*2.55, parseFloat(res[2])*2.55, parseFloat(res[3])*2.55, parseFloat(res[4]));
+        
+        // Look for #a0b1c2
+        if (res = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(str))
+            return m(parseInt(res[1], 16), parseInt(res[2], 16), parseInt(res[3], 16));
+
+        // Look for #fff
+        if (res = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(str))
+            return m(parseInt(res[1]+res[1], 16), parseInt(res[2]+res[2], 16), parseInt(res[3]+res[3], 16));
+
+        // Otherwise, we're most likely dealing with a named color
+        var name = $.trim(str).toLowerCase();
+        if (name == "transparent")
+            return m(255, 255, 255, 0);
+        else {
+            // default to black
+            res = lookupColors[name] || [0, 0, 0];
+            return m(res[0], res[1], res[2]);
+        }
+    }
+    
+    var lookupColors = {
+        aqua:[0,255,255],
+        azure:[240,255,255],
+        beige:[245,245,220],
+        black:[0,0,0],
+        blue:[0,0,255],
+        brown:[165,42,42],
+        cyan:[0,255,255],
+        darkblue:[0,0,139],
+        darkcyan:[0,139,139],
+        darkgrey:[169,169,169],
+        darkgreen:[0,100,0],
+        darkkhaki:[189,183,107],
+        darkmagenta:[139,0,139],
+        darkolivegreen:[85,107,47],
+        darkorange:[255,140,0],
+        darkorchid:[153,50,204],
+        darkred:[139,0,0],
+        darksalmon:[233,150,122],
+        darkviolet:[148,0,211],
+        fuchsia:[255,0,255],
+        gold:[255,215,0],
+        green:[0,128,0],
+        indigo:[75,0,130],
+        khaki:[240,230,140],
+        lightblue:[173,216,230],
+        lightcyan:[224,255,255],
+        lightgreen:[144,238,144],
+        lightgrey:[211,211,211],
+        lightpink:[255,182,193],
+        lightyellow:[255,255,224],
+        lime:[0,255,0],
+        magenta:[255,0,255],
+        maroon:[128,0,0],
+        navy:[0,0,128],
+        olive:[128,128,0],
+        orange:[255,165,0],
+        pink:[255,192,203],
+        purple:[128,0,128],
+        violet:[128,0,128],
+        red:[255,0,0],
+        silver:[192,192,192],
+        white:[255,255,255],
+        yellow:[255,255,0]
+    };
+})(jQuery);
+///////////////////////////////////////////////////////////////////////////
+// The Canvas object is a wrapper around an HTML5 <canvas> tag.
+//
+// @constructor
+// @param {string} cls List of classes to apply to the canvas.
+// @param {element} container Element onto which to append the canvas.
+//
+// Requiring a container is a little iffy, but unfortunately canvas
+// operations don't work unless the canvas is attached to the DOM.
+
+(function($) {
+    var Canvas = function(cls, container) {
+
+        var element = container.children("." + cls)[0];
+
+        if (element == null) {
+
+            element = document.createElement("canvas");
+            element.className = cls;
+
+            $(element).css({
+                    direction: "ltr",
+                    position: "absolute",
+                    left: 0,
+                    top: 0
+                })
+                .appendTo(container);
+
+            // If HTML5 Canvas isn't available, throw
+
+            if (!element.getContext) {
+                throw new Error("Canvas is not available.");
+            }
+        }
+
+        this.element = element;
+
+        var context = this.context = element.getContext("2d");
+
+        // Determine the screen's ratio of physical to device-independent
+        // pixels.  This is the ratio between the canvas width that the browser
+        // advertises and the number of pixels actually present in that space.
+
+        // The iPhone 4, for example, has a device-independent width of 320px,
+        // but its screen is actually 640px wide.  It therefore has a pixel
+        // ratio of 2, while most normal devices have a ratio of 1.
+
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio =
+            context.webkitBackingStorePixelRatio ||
+            context.mozBackingStorePixelRatio ||
+            context.msBackingStorePixelRatio ||
+            context.oBackingStorePixelRatio ||
+            context.backingStorePixelRatio || 1;
+
+        this.pixelRatio = devicePixelRatio / backingStoreRatio;
+
+        // Size the canvas to match the internal dimensions of its container
+
+        this.resize(container.width(), container.height());
+
+        // Collection of HTML div layers for text overlaid onto the canvas
+
+        this.textContainer = null;
+        this.SVGContainer = null;
+        this.text = {};
+        this.SVG = {};
+
+        // Cache of text fragments and metrics, so we can avoid expensively
+        // re-calculating them when the plot is re-rendered in a loop.
+
+        this._textCache = {};
+    }
+
+    // Resizes the canvas to the given dimensions.
+    //
+    // @param {number} width New width of the canvas, in pixels.
+    // @param {number} width New height of the canvas, in pixels.
+
+    Canvas.prototype.resize = function(width, height) {
+
+        if (width <= 0 || height <= 0) {
+            throw new Error("Invalid dimensions for plot, width = " + width + ", height = " + height);
+        }
+
+        var element = this.element,
+            context = this.context,
+            pixelRatio = this.pixelRatio;
+
+        // Resize the canvas, increasing its density based on the display's
+        // pixel ratio; basically giving it more pixels without increasing the
+        // size of its element, to take advantage of the fact that retina
+        // displays have that many more pixels in the same advertised space.
+
+        // Resizing should reset the state (excanvas seems to be buggy though)
+
+        if (this.width != width) {
+            element.width = width * pixelRatio;
+            element.style.width = width + "px";
+            this.width = width;
+        }
+
+        if (this.height != height) {
+            element.height = height * pixelRatio;
+            element.style.height = height + "px";
+            this.height = height;
+        }
+
+        // Save the context, so we can reset in case we get replotted.  The
+        // restore ensure that we're really back at the initial state, and
+        // should be safe even if we haven't saved the initial state yet.
+
+        context.restore();
+        context.save();
+
+        // Scale the coordinate space to match the display density; so even though we
+        // may have twice as many pixels, we still want lines and other drawing to
+        // appear at the same size; the extra pixels will just make them crisper.
+
+        context.scale(pixelRatio, pixelRatio);
+    };
+
+    // Clears the entire canvas area, not including any overlaid HTML text
+
+    Canvas.prototype.clear = function() {
+        this.context.clearRect(0, 0, this.width, this.height);
+    };
+
+    // Finishes rendering the canvas, including managing the text overlay.
+
+    Canvas.prototype.render = function() {
+
+        var cache = this._textCache;
+
+        // For each text layer, add elements marked as active that haven't
+        // already been rendered, and remove those that are no longer active.
+
+        for (var layerKey in cache) {
+            if (hasOwnProperty.call(cache, layerKey)) {
+
+                var layer = this.getTextLayer(layerKey),
+                    layerCache = cache[layerKey];
+
+                layer.hide();
+
+                for (var styleKey in layerCache) {
+                    if (hasOwnProperty.call(layerCache, styleKey)) {
+                        var styleCache = layerCache[styleKey];
+                        for (var key in styleCache) {
+                            if (hasOwnProperty.call(styleCache, key)) {
+
+                                var positions = styleCache[key].positions;
+
+                                for (var i = 0, position; position = positions[i]; i++) {
+                                    if (position.active) {
+                                        if (!position.rendered) {
+                                            layer.append(position.element);
+                                            position.rendered = true;
+                                        }
+                                    } else {
+                                        positions.splice(i--, 1);
+                                        if (position.rendered) {
+                                            position.element.detach();
+                                        }
+                                    }
+                                }
+
+                                if (positions.length == 0) {
+                                    if (styleCache[key].measured) {
+                                        styleCache[key].measured = false;
+                                    } else {
+                                        delete styleCache[key];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                layer.show();
+            }
+        }
+    };
+
+    // Creates (if necessary) and returns the text overlay container.
+    //
+    // @param {string} classes String of space-separated CSS classes used to
+    //     uniquely identify the text layer.
+    // @return {object} The jQuery-wrapped text-layer div.
+
+    Canvas.prototype.getTextLayer = function(classes) {
+
+        var layer = this.text[classes];
+
+        // Create the text layer if it doesn't exist
+
+        if (layer == null) {
+
+            // Create the text layer container, if it doesn't exist
+
+            if (this.textContainer == null) {
+                this.textContainer = $("<div class='flot-text'></div>")
+                    .css({
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        color: "inherit"
+                    })
+                    .insertAfter(this.element);
+            }
+
+            layer = this.text[classes] = $("<div></div>")
+                .addClass(classes)
+                .css({
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0
+                })
+                .appendTo(this.textContainer);
+        }
+
+        return layer;
+    };
+
+    // Creates (if necessary) and returns the SVG overlay container.
+    //
+    // @param {string} classes String of space-separated CSS classes used to
+    //     uniquely identify the text layer.
+    // @return {object} The jQuery-wrapped text-layer div.
+
+    Canvas.prototype.getSVGLayer = function(classes) {
+
+        var layer = this.SVG[classes];
+
+        // Create the SVG layer if it doesn't exist
+
+        if (layer == null) {
+
+            // Create the text layer container, if it doesn't exist
+
+            var svgElement;
+
+            if (this.SVGContainer == null) {
+                this.SVGContainer = $("<div class='flot-svg'></div>")
+                    .css({
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        'pointer-events': 'none'
+                    })
+                    .insertAfter(this.element);
+                svgElement = $(document.createElementNS("http://www.w3.org/2000/svg", "svg")).css({
+                  width: '100%',
+                  height: '100%'
+                });
+                svgElement.appendTo(this.SVGContainer);
+            }
+
+            layer = this.SVG[classes] = $(document.createElementNS("http://www.w3.org/2000/svg", "g"))
+                .addClass(classes)
+                .css({
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    'fill': '#aaaaaa'
+                })
+                .appendTo(svgElement);
+        }
+
+        return layer;
+    };
+
+
+    // Creates (if necessary) and returns a text info object.
+    //
+    // The object looks like this:
+    //
+    // {
+    //     width: Width of the text's wrapper div.
+    //     height: Height of the text's wrapper div.
+    //     element: The jQuery-wrapped HTML div containing the text.
+    //     positions: Array of positions at which this text is drawn.
+    // }
+    //
+    // The positions array contains objects that look like this:
+    //
+    // {
+    //     active: Flag indicating whether the text should be visible.
+    //     rendered: Flag indicating whether the text is currently visible.
+    //     element: The jQuery-wrapped HTML div containing the text.
+    //     x: X coordinate at which to draw the text.
+    //     y: Y coordinate at which to draw the text.
+    // }
+    //
+    // Each position after the first receives a clone of the original element.
+    //
+    // The idea is that that the width, height, and general 'identity' of the
+    // text is constant no matter where it is placed; the placements are a
+    // secondary property.
+    //
+    // Canvas maintains a cache of recently-used text info objects; getTextInfo
+    // either returns the cached element or creates a new entry.
+    //
+    // @param {string} layer A string of space-separated CSS classes uniquely
+    //     identifying the layer containing this text.
+    // @param {string} text Text string to retrieve info for.
+    // @param {(string|object)=} font Either a string of space-separated CSS
+    //     classes or a font-spec object, defining the text's font and style.
+    // @param {number=} angle Angle at which to rotate the text, in degrees.
+    //     Angle is currently unused, it will be implemented in the future.
+    // @param {number=} width Maximum width of the text before it wraps.
+    // @return {object} a text info object.
+
+    Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
+
+        var textStyle, layerCache, styleCache, info;
+
+        // Cast the value to a string, in case we were given a number or such
+
+        text = "" + text;
+
+        // If the font is a font-spec object, generate a CSS font definition
+
+        if (typeof font === "object") {
+            textStyle = font.style + " " + font.variant + " " + font.weight + " " + font.size + "px/" + font.lineHeight + "px " + font.family;
+        } else {
+            textStyle = font;
+        }
+
+        // Retrieve (or create) the cache for the text's layer and styles
+
+        layerCache = this._textCache[layer];
+
+        if (layerCache == null) {
+            layerCache = this._textCache[layer] = {};
+        }
+
+        styleCache = layerCache[textStyle];
+
+        if (styleCache == null) {
+            styleCache = layerCache[textStyle] = {};
+        }
+
+        info = styleCache[text];
+
+        // If we can't find a matching element in our cache, create a new one
+
+        if (info == null) {
+
+            var element = $("<div></div>").html(text)
+                .css({
+                    position: "absolute",
+                    'max-width': width,
+                    top: -9999
+                })
+                .appendTo(this.getTextLayer(layer));
+
+            if (typeof font === "object") {
+                element.css({
+                    font: textStyle,
+                    color: font.color
+                });
+            } else if (typeof font === "string") {
+                element.addClass(font);
+            }
+
+            info = styleCache[text] = {
+                width: element.outerWidth(true),
+                height: element.outerHeight(true),
+                measured: true,
+                element: element,
+                positions: []
+            };
+
+            element.detach();
+        }
+
+        info.measured = true;
+        return info;
+    };
+
+    // Adds a text string to the canvas text overlay.
+    //
+    // The text isn't drawn immediately; it is marked as rendering, which will
+    // result in its addition to the canvas on the next render pass.
+    //
+    // @param {string} layer A string of space-separated CSS classes uniquely
+    //     identifying the layer containing this text.
+    // @param {number} x X coordinate at which to draw the text.
+    // @param {number} y Y coordinate at which to draw the text.
+    // @param {string} text Text string to draw.
+    // @param {(string|object)=} font Either a string of space-separated CSS
+    //     classes or a font-spec object, defining the text's font and style.
+    // @param {number=} angle Angle at which to rotate the text, in degrees.
+    //     Angle is currently unused, it will be implemented in the future.
+    // @param {number=} width Maximum width of the text before it wraps.
+    // @param {string=} halign Horizontal alignment of the text; either "left",
+    //     "center" or "right".
+    // @param {string=} valign Vertical alignment of the text; either "top",
+    //     "middle" or "bottom".
+
+    Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
+
+        var info = this.getTextInfo(layer, text, font, angle, width),
+            positions = info.positions;
+
+        // Tweak the div's position to match the text's alignment
+
+        if (halign == "center") {
+            x -= info.width / 2;
+        } else if (halign == "right") {
+            x -= info.width;
+        }
+
+        if (valign == "middle") {
+            y -= info.height / 2;
+        } else if (valign == "bottom") {
+            y -= info.height;
+        }
+
+        // Determine whether this text already exists at this position.
+        // If so, mark it for inclusion in the next render pass.
+
+        for (var i = 0, position; position = positions[i]; i++) {
+            if (position.x == x && position.y == y) {
+                position.active = true;
+                return;
+            }
+        }
+
+        // If the text doesn't exist at this position, create a new entry
+
+        // For the very first position we'll re-use the original element,
+        // while for subsequent ones we'll clone it.
+
+        position = {
+            active: true,
+            rendered: false,
+            element: positions.length ? info.element.clone() : info.element,
+            x: x,
+            y: y
+        };
+
+        positions.push(position);
+
+        // Move the element to its final position within the container
+
+        position.element.css({
+            top: Math.round(y),
+            left: Math.round(x),
+            'text-align': halign // In case the text wraps
+        });
+    };
+
+    // Removes one or more text strings from the canvas text overlay.
+    //
+    // If no parameters are given, all text within the layer is removed.
+    //
+    // Note that the text is not immediately removed; it is simply marked as
+    // inactive, which will result in its removal on the next render pass.
+    // This avoids the performance penalty for 'clear and redraw' behavior,
+    // where we potentially get rid of all text on a layer, but will likely
+    // add back most or all of it later, as when redrawing axes, for example.
+    //
+    // @param {string} layer A string of space-separated CSS classes uniquely
+    //     identifying the layer containing this text.
+    // @param {number=} x X coordinate of the text.
+    // @param {number=} y Y coordinate of the text.
+    // @param {string=} text Text string to remove.
+    // @param {(string|object)=} font Either a string of space-separated CSS
+    //     classes or a font-spec object, defining the text's font and style.
+    // @param {number=} angle Angle at which the text is rotated, in degrees.
+    //     Angle is currently unused, it will be implemented in the future.
+
+    Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
+        if (text == null) {
+            var layerCache = this._textCache[layer];
+            if (layerCache != null) {
+                for (var styleKey in layerCache) {
+                    if (hasOwnProperty.call(layerCache, styleKey)) {
+                        var styleCache = layerCache[styleKey];
+                        for (var key in styleCache) {
+                            if (hasOwnProperty.call(styleCache, key)) {
+                                var positions = styleCache[key].positions;
+                                for (var i = 0, position; position = positions[i]; i++) {
+                                    position.active = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            var positions = this.getTextInfo(layer, text, font, angle).positions;
+            for (var i = 0, position; position = positions[i]; i++) {
+                if (position.x == x && position.y == y) {
+                    position.active = false;
+                }
+            }
+        }
+    };
+
+    // Clears the the cache used to speed up the text size measurements.
+    // As an (unfortunate) side effect all text within the text Layer is removed.
+    // Use this function before plot.setupGrid() and plot.draw() in one of these
+    // cases:
+    // 1. The plot just became visible.
+    // 2. The styles changed.
+    Canvas.prototype.clearCache = function() {
+      var cache = this._textCache;
+      for (var layerKey in cache) {
+        if (hasOwnProperty.call(cache, layerKey)) {
+          var layer = this.getTextLayer(layerKey);
+          layer.empty();
+        }
+      };
+
+      this._textCache = {};
+    };
+
+    if (!window.Flot) {
+        window.Flot = {};
+    }
+
+    window.Flot.Canvas = Canvas;
+})(jQuery);
 /* Javascript plotting library for jQuery, version 0.8.3.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
@@ -50,7 +764,7 @@ Licensed under the MIT license.
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "exact", // Available modes: "none", "loose", "exact"
+                    autoscale: "exact", // Available modes: "none", "loose", "exact",
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -1232,8 +1946,8 @@ Licensed under the MIT license.
 
         function setRange(axis) {
             var opts = axis.options,
-                min = axis.min || opts.min,
-                max = axis.max || opts.max,
+                min,
+                max,
                 delta;
 
             switch (opts.autoscale) {
@@ -1242,16 +1956,16 @@ Licensed under the MIT license.
                     max = +(opts.max != null ? opts.max : axis.datamax);
                     break;
                 case "loose":
-                    if(axis.datamin != null || axis.datamax != null) {
-                        min = isNaN(axis.datamin) ? opts.min : axis.datamin;
-                        max = isNaN(axis.datamin) ? opts.max : axis.datamax;
-
-                        
+                    if(axis.datamin != null && axis.datamax != null) {
+                        min = axis.datamin;
+                        max = axis.datamax;
                         delta = max - min;
                         var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
-
                         min -= delta * margin;
                         max += delta * margin;
+                    } else {
+                        min = opts.min;
+                        max = opts.max;
                     }
                     break;
                 case "exact":
@@ -1260,8 +1974,8 @@ Licensed under the MIT license.
                     break;
             }
 
-            min = (isNaN(min) ? null : min);
-            max = (isNaN(max) ? null : max);
+            min = (min == undefined ? null : min);
+            max = (max == undefined ? null : max);
             delta = max - min;
             if (delta == 0.0) {
                 // degenerate case
@@ -1278,7 +1992,7 @@ Licensed under the MIT license.
             }
 
             // grow loose or grow exact
-            if(opts.autoscale !== "none" && opts.autoscale !== "window" && opts.growOnly === true) {
+            if(opts.autoscale !== "none" && opts.growOnly === true) {
                 min = (min < axis.datamin) ? min : axis.datamin;
                 max = (max > axis.datamax) ? max : axis.datamax;
             }
@@ -2674,4 +3388,528 @@ Licensed under the MIT license.
         return base * Math.floor(n / base);
     }
 
+})(jQuery);
+(function($) {
+    "use strict";
+
+    function drawSeries() {
+
+        function plotLine(datapoints, xoffset, yoffset, axisx, axisy, ctx) {
+            var points = datapoints.points,
+                ps = datapoints.pointsize,
+                prevx = null,
+                prevy = null;
+            var x1=0.0,
+                y1=0.0,
+                x2=0.0,
+                y2=0.0,
+                i=0;
+
+            ctx.beginPath();
+            for (i = ps; i < points.length; i += ps) {
+                x1 = points[i - ps];
+                y1 = points[i - ps + 1];
+                x2 = points[i];
+                y2 = points[i + 1];
+
+                if (x1 === null || x2 === null)
+                    continue;
+
+                // clip with ymin
+                if (y1 <= y2 && y1 < axisy.min) {
+                    if (y2 < axisy.min)
+                        continue; // line segment is outside
+                    // compute new intersection point
+                    x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y1 = axisy.min;
+                } else if (y2 <= y1 && y2 < axisy.min) {
+                    if (y1 < axisy.min)
+                        continue;
+                    x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y2 = axisy.min;
+                }
+
+                // clip with ymax
+                if (y1 >= y2 && y1 > axisy.max) {
+                    if (y2 > axisy.max)
+                        continue;
+                    x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y1 = axisy.max;
+                } else if (y2 >= y1 && y2 > axisy.max) {
+                    if (y1 > axisy.max)
+                        continue;
+                    x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y2 = axisy.max;
+                }
+
+                // clip with xmin
+                if (x1 <= x2 && x1 < axisx.min) {
+                    if (x2 < axisx.min)
+                        continue;
+                    y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x1 = axisx.min;
+                } else if (x2 <= x1 && x2 < axisx.min) {
+                    if (x1 < axisx.min)
+                        continue;
+                    y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x2 = axisx.min;
+                }
+
+                // clip with xmax
+                if (x1 >= x2 && x1 > axisx.max) {
+                    if (x2 > axisx.max)
+                        continue;
+                    y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x1 = axisx.max;
+                } else if (x2 >= x1 && x2 > axisx.max) {
+                    if (x1 > axisx.max)
+                        continue;
+                    y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x2 = axisx.max;
+                }
+
+                if (x1 != prevx || y1 != prevy)
+                    ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
+
+                prevx = x2;
+                prevy = y2;
+                ctx.lineTo(axisx.p2c(x2) + xoffset, axisy.p2c(y2) + yoffset);
+            }
+            ctx.stroke();
+        }
+
+        function plotLineArea(datapoints, axisx, axisy, fillTowards, ctx) {
+            var points = datapoints.points,
+                ps = datapoints.pointsize,
+                bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min,
+                //bottom = axisy.min,
+                i = 0,
+                ypos = 1,
+                top, areaOpen = false,
+                segmentStart = 0,
+                segmentEnd = 0;
+
+            // we process each segment in two turns, first forward
+            // direction to sketch out top, then once we hit the
+            // end we go backwards to sketch the bottom
+            while (true) {
+                if (ps > 0 && i > points.length + ps)
+                    break;
+
+                i += ps; // ps is negative if going backwards
+
+                var x1 = points[i - ps],
+                    y1 = points[i - ps + ypos],
+                    x2 = points[i],
+                    y2 = points[i + ypos];
+
+                    if (ps === -2) {
+                        /* going backwards and no value for the bottom provided in the series*/
+                        y1 = y2 = bottom;
+                    }
+
+                if (areaOpen) {
+                    if (ps > 0 && x1 != null && x2 == null) {
+                        // at turning point
+                        segmentEnd = i;
+                        ps = -ps;
+                        ypos = 2;
+                        continue;
+                    }
+
+                    if (ps < 0 && i == segmentStart + ps) {
+                        // done with the reverse sweep
+                        ctx.fill();
+                        areaOpen = false;
+                        ps = -ps;
+                        i = segmentStart = segmentEnd + ps;
+                        continue;
+                    }
+                }
+
+                if (x1 == null || x2 == null)
+                    continue;
+
+                // clip x values
+
+                // clip with xmin
+                if (x1 <= x2 && x1 < axisx.min) {
+                    if (x2 < axisx.min)
+                        continue;
+                    y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x1 = axisx.min;
+                } else if (x2 <= x1 && x2 < axisx.min) {
+                    if (x1 < axisx.min)
+                        continue;
+                    y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x2 = axisx.min;
+                }
+
+                // clip with xmax
+                if (x1 >= x2 && x1 > axisx.max) {
+                    if (x2 > axisx.max)
+                        continue;
+                    y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x1 = axisx.max;
+                } else if (x2 >= x1 && x2 > axisx.max) {
+                    if (x1 > axisx.max)
+                        continue;
+                    y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
+                    x2 = axisx.max;
+                }
+
+                if (!areaOpen) {
+                    // open area
+                    ctx.beginPath();
+                    ctx.moveTo(axisx.p2c(x1), axisy.p2c(bottom));
+                    areaOpen = true;
+                }
+
+                // now first check the case where both is outside
+                if (y1 >= axisy.max && y2 >= axisy.max) {
+                    ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.max));
+                    ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.max));
+                    continue;
+                } else if (y1 <= axisy.min && y2 <= axisy.min) {
+                    ctx.lineTo(axisx.p2c(x1), axisy.p2c(axisy.min));
+                    ctx.lineTo(axisx.p2c(x2), axisy.p2c(axisy.min));
+                    continue;
+                }
+
+                // else it's a bit more complicated, there might
+                // be a flat maxed out rectangle first, then a
+                // triangular cutout or reverse; to find these
+                // keep track of the current x values
+                var x1old = x1,
+                    x2old = x2;
+
+                // clip the y values, without shortcutting, we
+                // go through all cases in turn
+
+                // clip with ymin
+                if (y1 <= y2 && y1 < axisy.min && y2 >= axisy.min) {
+                    x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y1 = axisy.min;
+                } else if (y2 <= y1 && y2 < axisy.min && y1 >= axisy.min) {
+                    x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y2 = axisy.min;
+                }
+
+                // clip with ymax
+                if (y1 >= y2 && y1 > axisy.max && y2 <= axisy.max) {
+                    x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y1 = axisy.max;
+                } else if (y2 >= y1 && y2 > axisy.max && y1 <= axisy.max) {
+                    x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
+                    y2 = axisy.max;
+                }
+
+                // if the x value was changed we got a rectangle
+                // to fill
+                if (x1 != x1old) {
+                    ctx.lineTo(axisx.p2c(x1old), axisy.p2c(y1));
+                    // it goes to (x1, y1), but we fill that below
+                }
+
+                // fill triangular section, this sometimes result
+                // in redundant points if (x1, y1) hasn't changed
+                // from previous line to, but we just ignore that
+                ctx.lineTo(axisx.p2c(x1), axisy.p2c(y1));
+                ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
+
+                // fill the other rectangle if it's there
+                if (x2 != x2old) {
+                    ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
+                    ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
+                }
+            }
+        }
+
+        function drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradient) {
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
+            ctx.lineJoin = "round";
+
+            if (series.lines.dashes && ctx.setLineDash) {
+                ctx.setLineDash(series.lines.dashes);
+            }
+
+            var datapoints = {format: series.datapoints.format,
+                             points: series.datapoints.points,
+                             pointsize: series.datapoints.pointsize};
+
+           if (series.decimate) {
+               datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
+           }
+
+            var lw = series.lines.lineWidth,
+                sw = series.shadowSize;
+            // FIXME: consider another form of shadow when filling is turned on
+            if (lw > 0 && sw > 0) {
+                // draw shadow as a thick and thin line with transparency
+                ctx.lineWidth = sw;
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                // position shadow at angle from the mid of line
+                var angle = Math.PI / 18;
+                plotLine(datapoints, Math.sin(angle) * (lw / 2 + sw / 2), Math.cos(angle) * (lw / 2 + sw / 2), series.xaxis, series.yaxis, ctx);
+                ctx.lineWidth = sw / 2;
+                plotLine(datapoints, Math.sin(angle) * (lw / 2 + sw / 4), Math.cos(angle) * (lw / 2 + sw / 4), series.xaxis, series.yaxis, ctx);
+            }
+
+            ctx.lineWidth = lw;
+            ctx.strokeStyle = series.color;
+            var fillStyle = getFillStyle(series.lines, series.color, 0, plotHeight, getColorOrGradient);
+            if (fillStyle) {
+                ctx.fillStyle = fillStyle;
+                plotLineArea(datapoints, series.xaxis, series.yaxis, series.lines.fillTowards || 0, ctx);
+            }
+
+            if (lw > 0)
+                plotLine(datapoints, 0, 0, series.xaxis, series.yaxis, ctx);
+            ctx.restore();
+        }
+
+        function drawSeriesPoints(series, ctx, plotOffset, drawSymbol, getColorOrGradient) {
+            function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
+                var points = datapoints.points,
+                    ps = datapoints.pointsize;
+
+                for (var i = 0; i < points.length; i += ps) {
+                    var x = points[i],
+                        y = points[i + 1];
+                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+                        continue;
+
+                    ctx.beginPath();
+                    x = axisx.p2c(x);
+                    y = axisy.p2c(y) + offset;
+
+                    if (symbol === 'circle') {
+                        ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
+                    } else if  (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
+                        drawSymbol[symbol](ctx, x, y, radius, shadow);
+                    }
+                    ctx.closePath();
+
+                    if (fillStyle) {
+                        ctx.fillStyle = fillStyle;
+                        ctx.fill();
+                    }
+                    ctx.stroke();
+                }
+            }
+
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
+
+            var lw = series.points.lineWidth,
+                sw = series.shadowSize,
+                radius = series.points.radius,
+                symbol = series.points.symbol;
+
+            // If the user sets the line width to 0, we change it to a very
+            // small value. A line width of 0 seems to force the default of 1.
+            // Doing the conditional here allows the shadow setting to still be
+            // optional even with a lineWidth of 0.
+
+            if (lw == 0)
+                lw = 0.0001;
+
+            if (lw > 0 && sw > 0) {
+                // draw shadow in two steps
+                var w = sw / 2;
+                ctx.lineWidth = w;
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                plotPoints(series.datapoints, radius, null, w + w / 2, true,
+                    series.xaxis, series.yaxis, symbol);
+
+                ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                plotPoints(series.datapoints, radius, null, w / 2, true,
+                    series.xaxis, series.yaxis, symbol);
+            }
+
+            ctx.lineWidth = lw;
+            ctx.strokeStyle = series.color;
+            plotPoints(series.datapoints, radius,
+                getFillStyle(series.points, series.color, null, null, getColorOrGradient), 0, false,
+                series.xaxis, series.yaxis, symbol);
+            ctx.restore();
+        }
+
+        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
+            var left, right, bottom, top,
+                drawLeft, drawRight, drawTop, drawBottom,
+                tmp;
+
+            // in horizontal mode, we start the bar from the left
+            // instead of from the bottom so it appears to be
+            // horizontal rather than vertical
+            if (horizontal) {
+                drawBottom = drawRight = drawTop = true;
+                drawLeft = false;
+                left = b;
+                right = x;
+                top = y + barLeft;
+                bottom = y + barRight;
+
+                // account for negative bars
+                if (right < left) {
+                    tmp = right;
+                    right = left;
+                    left = tmp;
+                    drawLeft = true;
+                    drawRight = false;
+                }
+            } else {
+                drawLeft = drawRight = drawTop = true;
+                drawBottom = false;
+                left = x + barLeft;
+                right = x + barRight;
+                bottom = b;
+                top = y;
+
+                // account for negative bars
+                if (top < bottom) {
+                    tmp = top;
+                    top = bottom;
+                    bottom = tmp;
+                    drawBottom = true;
+                    drawTop = false;
+                }
+            }
+
+            // clip
+            if (right < axisx.min || left > axisx.max ||
+                top < axisy.min || bottom > axisy.max)
+                return;
+
+            if (left < axisx.min) {
+                left = axisx.min;
+                drawLeft = false;
+            }
+
+            if (right > axisx.max) {
+                right = axisx.max;
+                drawRight = false;
+            }
+
+            if (bottom < axisy.min) {
+                bottom = axisy.min;
+                drawBottom = false;
+            }
+
+            if (top > axisy.max) {
+                top = axisy.max;
+                drawTop = false;
+            }
+
+            left = axisx.p2c(left);
+            bottom = axisy.p2c(bottom);
+            right = axisx.p2c(right);
+            top = axisy.p2c(top);
+
+            // fill the bar
+            if (fillStyleCallback) {
+                c.fillStyle = fillStyleCallback(bottom, top);
+                c.fillRect(left, top, right - left, bottom - top)
+            }
+
+            // draw outline
+            if (lineWidth > 0 && (drawLeft || drawRight || drawTop || drawBottom)) {
+                c.beginPath();
+
+                // FIXME: inline moveTo is buggy with excanvas
+                c.moveTo(left, bottom);
+                if (drawLeft)
+                    c.lineTo(left, top);
+                else
+                    c.moveTo(left, top);
+                if (drawTop)
+                    c.lineTo(right, top);
+                else
+                    c.moveTo(right, top);
+                if (drawRight)
+                    c.lineTo(right, bottom);
+                else
+                    c.moveTo(right, bottom);
+                if (drawBottom)
+                    c.lineTo(left, bottom);
+                else
+                    c.moveTo(left, bottom);
+                c.stroke();
+            }
+        }
+
+        function drawSeriesBars(series, ctx, plotOffset, getColorOrGradient) {
+            function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
+                var points = datapoints.points,
+                    ps = datapoints.pointsize;
+
+                for (var i = 0; i < points.length; i += ps) {
+                    if (points[i] == null)
+                        continue;
+                    drawBar(points[i], points[i + 1], 0, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                }
+            }
+
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
+
+            // FIXME: figure out a way to add shadows (for instance along the right edge)
+            ctx.lineWidth = series.bars.lineWidth;
+            ctx.strokeStyle = series.color;
+
+            var barLeft;
+
+            switch (series.bars.align) {
+                case "left":
+                    barLeft = 0;
+                    break;
+                case "right":
+                    barLeft = -series.bars.barWidth;
+                    break;
+                default:
+                    barLeft = -series.bars.barWidth / 2;
+            }
+
+            var fillStyleCallback = series.bars.fill ? function(bottom, top) {
+                return getFillStyle(series.bars, series.color, bottom, top, getColorOrGradient);
+            } : null;
+            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
+            ctx.restore();
+        }
+
+        function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
+            var fill = filloptions.fill;
+            if (!fill)
+                return null;
+
+            if (filloptions.fillColor)
+                return getColorOrGradient(filloptions.fillColor, bottom, top, seriesColor);
+
+            var c = $.color.parse(seriesColor);
+            c.a = typeof fill == "number" ? fill : 0.4;
+            c.normalize();
+            return c.toString();
+        }
+
+
+        this.drawSeriesLines = drawSeriesLines;
+        this.drawSeriesPoints = drawSeriesPoints;
+        this.drawSeriesBars = drawSeriesBars;
+
+    };
+
+
+    $.plot.drawSeries = new drawSeries();
+
+})(jQuery);
+(function ($) {
+    'use strict';
+    $.plot.uiConstants = {
+        SNAPPING_CONSTANT : 20,
+        PANHINT_LENGTH_CONSTANT : 10,
+        MINOR_TICKS_COUNT_CONSTANT : 4,
+        TICK_LENGTH_CONSTANT : 10
+    };
 })(jQuery);
