@@ -1239,8 +1239,6 @@ Licensed under the MIT license.
                         // move the window to fit the new data inside, but keep the width constant
                         max = axis.datamax;
                         min = Math.max(axis.datamax - (opts.windowSize || 100), min);
-                        min -= opts.minOffset || 0;
-                        max -= opts.maxOffset || 0;
                     }
                     break;
                 case "loose":
@@ -1254,18 +1252,11 @@ Licensed under the MIT license.
 
                         min -= delta * margin;
                         max += delta * margin;
-
-                        // add the zoom offset
-                        min -= opts.minShifted || 0;
-                        max -= opts.maxShifted || 0;
                     }
                     break;
                 case "exact":
                     min = (axis.datamin != null ? axis.datamin : opts.min);
                     max = (axis.datamax != null ? axis.datamax : opts.max);
-                                            // add the zoom offset
-                        min -= opts.minShifted || 0;
-                        max -= opts.maxShifted || 0;
                     break;
             }
 
