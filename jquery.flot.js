@@ -1278,7 +1278,7 @@ Licensed under the MIT license.
             }
 
             // grow loose or grow exact
-            if(opts.autoscale !== "none" && opts.autoscale !== "window" && opts.growOnly === true) {
+            if(opts.autoscale !== "none" && opts.growOnly === true) {
                 min = (min < axis.datamin) ? min : axis.datamin;
                 max = (max > axis.datamax) ? max : axis.datamax;
             }
