@@ -185,12 +185,12 @@ describe("flot navigate plugin", function () {
             ], options);
 
             xaxis = plot.getXAxes()[0];
-            yaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
 
             plot.smartPan({
-                left: plot.width(),
-                top: 0
-            });
+                x: -plot.width(),
+                y: 0
+            }, plot.navigationState());
 
             expect(xaxis.min).toBe(-10);
             expect(xaxis.max).toBe(0);
