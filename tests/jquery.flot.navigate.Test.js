@@ -8,7 +8,15 @@ describe("flot navigate plugin", function () {
         }],
         yaxes: [{
             autoscale: 'exact'
-        }]
+        }],
+        zoom: {
+            interactive: true,
+            amount: 10
+        },
+        pan: {
+            interactive: true
+        }
+
     };
 
     beforeEach(function () {
@@ -49,6 +57,27 @@ describe("flot navigate plugin", function () {
             expect(xaxis.max).toBe(7.5);
             expect(yaxis.min).toBe(2.5);
             expect(yaxis.max).toBe(7.5);
+        });
+
+        it('uses the amount configured in the plot if none is provided', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getXAxes()[0];
+
+            plot.zoom();
+
+            expect(xaxis.min).toBe(4.5);
+            expect(xaxis.max).toBe(5.5);
+            expect(yaxis.min).toBe(4.5);
+            expect(yaxis.max).toBe(5.5);
         });
 
         it('uses the provided center', function () {
@@ -124,6 +153,28 @@ describe("flot navigate plugin", function () {
             expect(yaxis.max).toBe(7.5);
         });
 
+        it('uses the amount configured in the plot if none is provided', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getXAxes()[0];
+
+            plot.zoom();
+
+            expect(xaxis.min).toBe(4.5);
+            expect(xaxis.max).toBe(5.5);
+            expect(yaxis.min).toBe(4.5);
+            expect(yaxis.max).toBe(5.5);
+        });
+
+
         it('uses the provided center', function () {
             var xaxis, yaxis;
 
@@ -197,6 +248,79 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(10);
         });
+
+        it('uses the provided y delta', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            plot.smartPan({
+                x: 0,
+                y: plot.height(),
+            }, plot.navigationState());
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).toBe(-10);
+            expect(yaxis.max).toBe(0);
+        });
+
+        it('snaps to the x direction when delta y is small', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            plot.smartPan({
+                x: -plot.width(),
+                y: 1
+            }, plot.navigationState());
+
+            expect(xaxis.min).toBe(-10);
+            expect(xaxis.max).toBe(0);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
+        });
+
+        it('snaps to the y direction when delta x is small', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            plot.smartPan({
+                x: 1,
+                y: plot.height(),
+            }, plot.navigationState());
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).toBe(-10);
+            expect(yaxis.max).toBe(0);
+        });
+
     });
 
 });
