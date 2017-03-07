@@ -35,7 +35,8 @@ module.exports = function (config) {
         // list of files / patterns to load in the browser
         files: sources.concat([
             './node_modules/phantomjs-polyfill-find/find-polyfill.js',
-            'tests/*.Test.js',
+            'tests/utils/*.js',
+            'tests/*.Test.js'
         ]),
 
         // list of files to exclude
@@ -94,6 +95,7 @@ module.exports = function (config) {
 
         settings.reporters.push('coverage');
         settings.reporters.push('coveralls');
+        settings.browsers = ['PhantomJS'];
     }
 
     config.set(settings);
