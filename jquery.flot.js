@@ -1343,8 +1343,9 @@ Licensed under the MIT license.
             // heuristic based on the model a*sqrt(x) fitted to
             // some data points that seemed reasonable
                 noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
+            }
 
-            var delta = saturated.delta(axis.min, axis.max, noTicks),
+            var delta = saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
