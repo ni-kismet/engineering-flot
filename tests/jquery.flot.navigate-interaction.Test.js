@@ -1,6 +1,8 @@
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe("flot navigate plugin interactions", function () {
+    'use strict';
+
     var placeholder, plot, eventHolder;
     var options = {
         xaxes: [{
@@ -36,8 +38,8 @@ describe("flot navigate plugin interactions", function () {
         simulate.mouseMove(eventHolder[0], 10 + plot.width(), 20);
         simulate.mouseUp(eventHolder[0], 10 + plot.width(), 20);
 
-        xaxis = plot.getXAxes()[0];
-        yaxis = plot.getYAxes()[0];
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
 
         expect(xaxis.min).toBe(-10);
         expect(xaxis.max).toBe(0);
@@ -45,15 +47,48 @@ describe("flot navigate plugin interactions", function () {
         expect(yaxis.max).toBe(10);
     });
 
-
-    it('zooms on mouse scroll', function () {
+    it('zooms out on mouse scroll down', function () {
         plot = $.plot(placeholder, [
-            []
+            [[0, 0],
+            [10, 10]]
         ], options);
 
-        eventHolder = placeholder.find('.flot-overlay');
-        eventHolder.trigger("mousewheel", {intDelta:0, deltaX:1, deltaY:0});
+        var bbox = placeholder[0].getBoundingClientRect();
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
 
-        expect(true).toBe(false);
+        var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
+        var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
+
+        eventHolder = placeholder.find('.flot-overlay');
+        simulate.mouseWheel(eventHolder[0], clientX, clientY, 3);
+
+        expect(xaxis.min).toBe(0);
+        expect(xaxis.max).toBe(100);
+        expect(yaxis.min).toBe(0);
+        expect(yaxis.max).toBeCloseTo(100, 7);
     });
+
+    it('zooms in on mouse scroll up', function () {
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], options);
+
+        var bbox = placeholder[0].getBoundingClientRect();
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
+
+        var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
+        var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
+
+        eventHolder = placeholder.find('.flot-overlay');
+        simulate.mouseWheel(eventHolder[0], clientX, clientY, -3);
+
+        expect(xaxis.min).toBe(0);
+        expect(xaxis.max).toBe(1);
+        expect(yaxis.min).toBe(0);
+        expect(yaxis.max).toBe(1);
+    });
+
 });

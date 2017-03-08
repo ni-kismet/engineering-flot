@@ -5,13 +5,13 @@
 
     var simulate = window.simulate;
 
-    function mouseEvent(type, sx, sy, cx, cy, button) {
+    function mouseEvent(type, sx, sy, cx, cy, button, detail) {
         var evt;
         var e = {
             bubbles: true,
             cancelable: (type !== "mousemove"),
             view: window,
-            detail: 0,
+            detail: detail,
             screenX: sx,
             screenY: sy,
             clientX: cx,
@@ -85,7 +85,19 @@
         dispatchEvent(el, evt);
     }
 
+    function simulateMouseWheel(el, x, y, deltaX) {
+        var bBox = el.getBoundingClientRect()
+
+        var clickX = bBox.left + x;
+        var clickY = bBox.top + y;
+
+        var evt = mouseEvent("DOMMouseScroll", clickX, clickY, clickX, clickY, 0, deltaX);
+        dispatchEvent(el, evt);
+    }
+
+
     simulate.mouseDown = simulateMouseDown;
     simulate.mouseMove = simulateMouseMove;
     simulate.mouseUp = simulateMouseUp;
+    simulate.mouseWheel =simulateMouseWheel;
 })();
