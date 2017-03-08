@@ -47,7 +47,7 @@ describe("flot navigate plugin", function () {
             ], options);
 
             xaxis = plot.getXAxes()[0];
-            yaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
 
             plot.zoom({
                 amount: 2
@@ -55,8 +55,8 @@ describe("flot navigate plugin", function () {
 
             expect(xaxis.min).toBe(2.5);
             expect(xaxis.max).toBe(7.5);
-            expect(yaxis.min).toBe(2.5);
-            expect(yaxis.max).toBe(7.5);
+            expect(yaxis.min).toBeCloseTo(2.5, 7);
+            expect(yaxis.max).toBeCloseTo(7.5, 7);
         });
 
         it('uses the amount configured in the plot if none is provided', function () {
@@ -70,14 +70,14 @@ describe("flot navigate plugin", function () {
             ], options);
 
             xaxis = plot.getXAxes()[0];
-            yaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
 
             plot.zoom();
 
             expect(xaxis.min).toBe(4.5);
             expect(xaxis.max).toBe(5.5);
-            expect(yaxis.min).toBe(4.5);
-            expect(yaxis.max).toBe(5.5);
+            expect(yaxis.min).toBeCloseTo(4.5, 7);
+            expect(yaxis.max).toBeCloseTo(5.5, 7);
         });
 
         it('uses the provided center', function () {
@@ -100,7 +100,7 @@ describe("flot navigate plugin", function () {
             });
 
             xaxis = plot.getXAxes()[0];
-            yaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(5);
@@ -141,7 +141,7 @@ describe("flot navigate plugin", function () {
             ], options);
 
             xaxis = plot.getXAxes()[0];
-            yaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
 
             plot.zoomOut({
                 amount: 0.5
@@ -149,8 +149,8 @@ describe("flot navigate plugin", function () {
 
             expect(xaxis.min).toBe(2.5);
             expect(xaxis.max).toBe(7.5);
-            expect(yaxis.min).toBe(2.5);
-            expect(yaxis.max).toBe(7.5);
+            expect(yaxis.min).toBeCloseTo(2.5, 7);
+            expect(yaxis.max).toBeCloseTo(7.5, 7);
         });
 
         it('uses the amount configured in the plot if none is provided', function () {
@@ -164,16 +164,15 @@ describe("flot navigate plugin", function () {
             ], options);
 
             xaxis = plot.getXAxes()[0];
-            yaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
 
             plot.zoom();
 
             expect(xaxis.min).toBe(4.5);
             expect(xaxis.max).toBe(5.5);
-            expect(yaxis.min).toBe(4.5);
-            expect(yaxis.max).toBe(5.5);
+            expect(yaxis.min).toBeCloseTo(4.5, 7);
+            expect(yaxis.max).toBeCloseTo(5.5, 7);
         });
-
 
         it('uses the provided center', function () {
             var xaxis, yaxis;
@@ -195,7 +194,7 @@ describe("flot navigate plugin", function () {
             });
 
             xaxis = plot.getXAxes()[0];
-            yaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(5);
@@ -221,6 +220,31 @@ describe("flot navigate plugin", function () {
 
             expect(yaxis.min).not.toBe(-Infinity);
             expect(yaxis.max).not.toBe(Infinity);
+        });
+
+        it ('can be disabled per axis', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            xaxis.options.disableZoom = true;
+
+            plot.zoomOut({
+                amount: 0.5
+            });
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).toBeCloseTo(2.5, 7);
+            expect(yaxis.max).toBeCloseTo(7.5, 7);
         });
     });
 
@@ -312,6 +336,32 @@ describe("flot navigate plugin", function () {
 
             plot.smartPan({
                 x: 1,
+                y: plot.height(),
+            }, plot.navigationState());
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).toBe(-10);
+            expect(yaxis.max).toBe(0);
+        });
+
+        it ('can be disabled per axis', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            xaxis.options.disablePan = true;
+
+            plot.smartPan({
+                x: plot.width(),
                 y: plot.height(),
             }, plot.navigationState());
 
