@@ -88,7 +88,7 @@ describe("flot navigate plugin interactions", function () {
         expect(xaxis.min).toBe(0);
         expect(xaxis.max).toBe(1);
         expect(yaxis.min).toBe(0);
-        expect(yaxis.max).toBe(1);
+        expect(yaxis.max).toBeCloseTo(1, 7);
     });
 
 });
