@@ -4,7 +4,7 @@ describe('drawSeries', function() {
 
     describe('drawSeriesLines', function() {
         var minx = 0, maxx = 200, miny = 0, maxy = 100,
-            series, ctx, plotHeight, plotOffset,
+            series, ctx, plotWidth, plotHeight, plotOffset,
             drawSeriesLines = jQuery.plot.drawSeries.drawSeriesLines;
 
         beforeEach(function() {
@@ -31,6 +31,7 @@ describe('drawSeries', function() {
             ctx = setFixtures('<div id="test-container" style="width: 200px;height: 100px;border-style: solid;border-width: 1px"><canvas id="theCanvas" style="width: 100%; height: 100%" /></div>')
                 .find('#theCanvas')[0]
                 .getContext('2d');
+            plotWidth = 200;
             plotHeight = 100;
             plotOffset = { top: 0, left: 0 };
         });
@@ -41,7 +42,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             expect(ctx.moveTo).not.toHaveBeenCalled();
             expect(ctx.lineTo).not.toHaveBeenCalled();
@@ -52,9 +53,24 @@ describe('drawSeries', function() {
 
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             expect(ctx.lineTo).toHaveBeenCalled();
+        });
+
+        it('should decimate when a decimate function is provided', function () {
+            series.datapoints.points = [-1, -1, 0, 0, 1, 1, 2, 2, 3, 3];
+            series.decimate = function() {
+                return [0, 0, 1, 1];
+            };
+
+            spyOn(ctx, 'moveTo').and.callThrough();
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
+
+            expect(ctx.moveTo).toHaveBeenCalledWith(0, 0);
+            expect(ctx.lineTo).toHaveBeenCalledWith(1, 1);
         });
 
         it('should clip the lines when the points are outside the range of the axes', function () {
@@ -68,7 +84,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             validatePointsAreInsideTheAxisRanges(
                 ctx.moveTo.calls.allArgs().concat(
@@ -88,7 +104,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             validatePointsAreInsideTheAxisRanges(
                 ctx.moveTo.calls.allArgs().concat(
