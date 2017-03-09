@@ -2120,11 +2120,11 @@ Licensed under the MIT license.
 
         function drawSeries(series) {
             if (series.lines.show)
-                $.plot.drawSeries.drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradient);
+                $.plot.drawSeries.drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
             if (series.bars.show)
-                $.plot.drawSeries.drawSeriesBars(series, ctx, plotOffset, getColorOrGradient);
+                $.plot.drawSeries.drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
             if (series.points.show)
-                $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plot.drawSymbol, getColorOrGradient);
+                $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
         }
 
         function insertLegend() {

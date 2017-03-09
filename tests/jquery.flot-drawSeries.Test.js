@@ -42,7 +42,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             expect(ctx.moveTo).not.toHaveBeenCalled();
             expect(ctx.lineTo).not.toHaveBeenCalled();
@@ -53,7 +53,7 @@ describe('drawSeries', function() {
 
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             expect(ctx.lineTo).toHaveBeenCalled();
         });
@@ -67,7 +67,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             expect(ctx.moveTo).toHaveBeenCalledWith(0, 0);
             expect(ctx.lineTo).toHaveBeenCalledWith(1, 1);
@@ -84,7 +84,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             validatePointsAreInsideTheAxisRanges(
                 ctx.moveTo.calls.allArgs().concat(
@@ -104,7 +104,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
 
             validatePointsAreInsideTheAxisRanges(
                 ctx.moveTo.calls.allArgs().concat(

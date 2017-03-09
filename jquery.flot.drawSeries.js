@@ -234,7 +234,7 @@
             }
         }
 
-        function drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradient) {
+        function drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";
@@ -278,7 +278,7 @@
             ctx.restore();
         }
 
-        function drawSeriesPoints(series, ctx, plotOffset, drawSymbol, getColorOrGradient) {
+        function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize;
@@ -449,7 +449,7 @@
             }
         }
 
-        function drawSeriesBars(series, ctx, plotOffset, getColorOrGradient) {
+        function drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize;
