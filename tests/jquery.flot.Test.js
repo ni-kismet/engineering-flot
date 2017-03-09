@@ -105,7 +105,7 @@ describe('flot', function() {
             plot.setData([[[0, 1], [1, 2]]]);
             plot.setupGrid();
             plot.draw();
-            
+
             expect(axes.xaxis.min).toBe(0);
             expect(axes.xaxis.max).toBe(50);
             expect(axes.yaxis.min).toBe(0);
@@ -121,7 +121,7 @@ describe('flot', function() {
             plot.setData([[[0, 1], [1, 2]]]);
             plot.setupGrid();
             plot.draw();
-            
+
             expect(axes.xaxis.min).toBe(0);
             expect(axes.xaxis.max).toBe(1);
             expect(axes.yaxis.min).toBe(1);
@@ -137,7 +137,7 @@ describe('flot', function() {
             plot.setData([[[0, 0], [10, 100]]]);
             plot.setupGrid();
             plot.draw();
-            
+
             expect(axes.xaxis.min).toBe(-1);
             expect(axes.xaxis.max).toBe(11);
             expect(axes.yaxis.min).toBe(-20);
@@ -302,4 +302,20 @@ describe('flot', function() {
 
     });
 
+    describe('tick generation', function() {
+        var placeholder;
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('works for the maximum axis interval', function () {
+            var plot = $.plot(placeholder, [[[0, -Number.MAX_VALUE], [1, Number.MAX_VALUE]]], {});
+
+            var yaxis = plot.getYAxes()[0];
+
+            expect(yaxis.ticks).not.toEqual([]);
+        });
+    });
 });

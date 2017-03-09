@@ -13,6 +13,26 @@ Licensed under the MIT license.
     var hasOwnProperty = Object.prototype.hasOwnProperty;
     var Canvas = window.Flot.Canvas;
 
+    var saturated = {
+        saturate: function (a) {
+            if (a === Infinity) {
+                return Number.MAX_VALUE;
+            }
+
+            if (a === -Infinity) {
+                return -Number.MAX_VALUE;
+            }
+
+            return a;
+        },
+        delta: function(min, max, noTicks) {
+            return ((max - min) / noTicks) === Infinity ? (max/noTicks - min/noTicks) :  (max - min) / noTicks
+        },
+        multiply: function (a, b) {
+            return saturated.saturate( a * b);
+        }
+    };
+
     ///////////////////////////////////////////////////////////////////////////
     // The top-level container for the entire plot.
 
@@ -974,7 +994,7 @@ Licensed under the MIT license.
             axis.labelWidth = opts.labelWidth || labelWidth;
             axis.labelHeight = opts.labelHeight || labelHeight;
         }
-    
+
         function allocateAxisBoxFirstPhase(axis) {
             // find the bounding box of the axis by looking at label
             // widths/heights and ticks, make room by diminishing the
@@ -1190,7 +1210,7 @@ Licensed under the MIT license.
                     setupTickGeneration(axis);
                     setMajorTicks(axis);
                     snapRangeToTicks(axis, axis.ticks);
-                    
+
                     //for computing the endpoints precision, transformationHelpers are needed
                     setTransformationHelpers(axis);
                     setEndpointTicks(axis);
@@ -1245,7 +1265,7 @@ Licensed under the MIT license.
                     if(axis.datamin != null && axis.datamax != null) {
                         min = axis.datamin;
                         max = axis.datamax;
-                        delta = max - min;
+                        delta = saturated.saturate(max - min);
                         var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
                         min -= delta * margin;
                         max += delta * margin;
@@ -1289,7 +1309,7 @@ Licensed under the MIT license.
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals){
             var noTicks;
-            
+
             if (typeof ticks == "number" && ticks > 0) {
                 noTicks = ticks;
             } else {
@@ -1313,10 +1333,10 @@ Licensed under the MIT license.
 
             return dec;
         };
-        
+
         function computeTickSize (min, max, direction, options, tickDecimals){
             var noTicks;
-            
+
             if (typeof options.ticks == "number" && options.ticks > 0) {
                 noTicks = options.ticks;
             } else {
@@ -1324,8 +1344,8 @@ Licensed under the MIT license.
             // some data points that seemed reasonable
                 noTicks = 0.3 * Math.sqrt(direction == "x" ? surface.width : surface.height);
             }
-                
-            var delta = (max - min) / noTicks,
+
+            var delta = saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
@@ -1535,7 +1555,7 @@ Licensed under the MIT license.
                 point1 = axis.c2p(canvas1),
                 point2 = axis.c2p(canvas2),
                 precision = computeValuePrecision(point1, point2, axis.direction, 1);
-                
+
             if(precision < 20){
                 return precision;
             }
@@ -2668,6 +2688,8 @@ Licensed under the MIT license.
             $.plot(this, data, options);
         });
     };
+
+    $.plot.saturated = saturated;
 
     // round to nearby lower multiple of base
     function floorInBase(n, base) {

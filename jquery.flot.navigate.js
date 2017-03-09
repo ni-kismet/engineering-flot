@@ -201,6 +201,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 })(jQuery);
 
 (function($) {
+    'use strict';
+
     var options = {
         zoom: {
             interactive: false,
@@ -238,12 +240,26 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
 
         var prevCursor = 'default',
-            prevPageX = 0,
-            prevPageY = 0,
             startPageX = 0,
             startPageY = 0,
             panHint = null,
-            panTimeout = null;
+            panTimeout = null,
+            plotState;
+
+        plot.navigationState = function() {
+            var axes = this.getAxes();
+            var result = {};
+            Object.keys(axes).forEach(function(axisName) {
+                var axis = axes[axisName];
+                result[axisName] = {
+                    min: axis.min, // axis.options.min,
+                    max: axis.max, // axis.options.max,
+                    autoscale: axis.options.autoscale
+                }
+            });
+
+            return result;
+        }
 
         function onDragStart(e) {
             if (e.which != 1) // only accept left-click
@@ -252,30 +268,32 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (c)
                 prevCursor = c;
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            prevPageX = e.pageX;
-            prevPageY = e.pageY;
             startPageX = e.pageX;
             startPageY = e.pageY;
-            $.each(plot.getAxes(), function(_, axis) {
-                var opts = axis.options;
 
-                opts.savedMin = opts.min;
-                opts.savedMax = opts.max;
-                axis.savedMin = axis.min;
-                axis.savedMax = axis.max;
-            });
+            plotState = plot.navigationState();
         }
 
         function onDrag(e) {
             var frameRate = plot.getOptions().pan.frameRate;
+
+            if (frameRate === -1) {
+                plot.smartPan({
+                    x: startPageX - e.pageX,
+                    y: startPageY - e.pageY
+                }, plotState);
+
+                return;
+            }
+
             if (panTimeout || !frameRate)
                 return;
 
             panTimeout = setTimeout(function() {
-                plot.absPan({
-                    left: startPageX - e.pageX,
-                    top: startPageY - e.pageY
-                });
+                plot.smartPan({
+                    x: startPageX - e.pageX,
+                    y: startPageY - e.pageY
+                }, plotState);
 
                 panTimeout = null;
             }, 1 / frameRate * 1000);
@@ -288,10 +306,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
 
             plot.getPlaceholder().css('cursor', prevCursor);
-            plot.absPan({
-                left: startPageX - e.pageX,
-                top: startPageY - e.pageY
-            });
+            plot.smartPan({
+                x: startPageX - e.pageX,
+                y: startPageY - e.pageY
+            }, plotState);
             panHint = null;
         }
 
@@ -363,8 +381,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     return;
                 }
 
-                min = axis.c2p(min);
-                max = axis.c2p(max);
+                min = $.plot.saturated.saturate(axis.c2p(min));
+                max = $.plot.saturated.saturate(axis.c2p(max));
                 if (min > max) {
                     // make sure min < max
                     var tmp = min;
@@ -379,6 +397,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     range = opts.transform(max) - opts.transform(min);
                 }
 
+                opts.autoscale = 'none';
                 opts.min = min;
                 opts.max = max;
             });
@@ -424,28 +443,29 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 plot.getPlaceholder().trigger("plotpan", [plot, args]);
         };
 
-        var getSnap = function(delta) {
-            var snap;
-
-            if (Math.abs(delta.y) < SNAPPING_CONSTANT && Math.abs(delta.x) < SNAPPING_CONSTANT) {
-                snap = false;
-            } else if (Math.abs(delta.x) < SNAPPING_CONSTANT) {
-                delta.x = 0;
-                snap = true;
-            } else if (Math.abs(delta.y) < SNAPPING_CONSTANT) {
-                delta.y = 0;
-                snap = true;
-            }
-
-            return snap;
+        var shouldSnap = function(delta) {
+            return (Math.abs(delta.y) < SNAPPING_CONSTANT && Math.abs(delta.x) >= SNAPPING_CONSTANT) ||
+                (Math.abs(delta.x) < SNAPPING_CONSTANT && Math.abs(delta.y) >= SNAPPING_CONSTANT);
         }
 
-        plot.absPan = function(args) {
-            var delta = {
-                    x: +args.left,
-                    y: +args.top
-                },
-                snap = getSnap(delta);
+
+        // adjust delta so the pan action is constrained on the vertical or horizontal direction
+        // it the movements in the other direction are small
+        var adjustDeltaToSnap = function(delta) {
+            if (Math.abs(delta.x) < SNAPPING_CONSTANT && Math.abs(delta.y) >= SNAPPING_CONSTANT) {
+                return {x: 0, y: delta.y};
+            }
+
+            if (Math.abs(delta.y) < SNAPPING_CONSTANT && Math.abs(delta.x) >= SNAPPING_CONSTANT) {
+                return {x: delta.x, y: 0};
+            }
+
+            return delta;
+        }
+
+        plot.smartPan = function(delta, initialState, preventEvent) {
+            var snap = shouldSnap(delta);
+            delta = adjustDeltaToSnap(delta);
 
             if (snap) {
                 panHint = {
@@ -473,7 +493,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (isNaN(delta.y))
                 delta.y = 0;
 
-            $.each(plot.getAxes(), function(_, axis) {
+            var axes = plot.getAxes();
+            Object.keys(axes).forEach(function(axisName) {
+                var axis = axes[axisName];
+                var intialAxisState = initialState[axisName];
                 var opts = axis.options,
                     min, max, d = delta[axis.direction];
 
@@ -482,21 +505,24 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 if (d !== 0) {
-                    min = axis.c2p(axis.p2c(axis.savedMin) + d);
-                    max = axis.c2p(axis.p2c(axis.savedMax) + d);
+                    min = axis.c2p(axis.p2c(intialAxisState.min) + d);
+                    max = axis.c2p(axis.p2c(intialAxisState.max) + d);
+                    opts.autoscale = 'none';
                     opts.min = min;
                     opts.max = max;
                 } else {
-                    opts.min = opts.savedMin;
-                    opts.max = opts.savedMax;
+                    opts.min = intialAxisState.min;
+                    opts.max = intialAxisState.max;
+                    opts.autoscale = intialAxisState.autoscale;
                 }
             });
 
             plot.setupGrid();
             plot.draw();
 
-            if (!args.preventEvent)
-                plot.getPlaceholder().trigger("plotpan", [plot, args]);
+            if (!preventEvent) {
+                plot.getPlaceholder().trigger("plotpan", [plot, delta]);
+            }
         };
 
         function shutdown(plot, eventHolder) {

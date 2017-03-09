@@ -2,15 +2,17 @@
 
 describe("flot symbol plugin", function() {
     var placeholder, plot;
-    var options = {
-        series: {
-            shadowSize: 0, // don't draw shadows
-            lines: { show: false},
-            points: { show: true, fill: false, symbol: 'circle' }
-        }
-    };
+    var options;
 
     beforeEach(function() {
+        options = {
+            series: {
+                shadowSize: 0, // don't draw shadows
+                lines: { show: false},
+                points: { show: true, fill: false, symbol: 'circle' }
+            }
+        };
+
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
     });
