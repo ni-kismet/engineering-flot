@@ -234,7 +234,7 @@
             }
         }
 
-        function drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradient) {
+        function drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradient) {
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
             ctx.lineJoin = "round";

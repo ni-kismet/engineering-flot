@@ -2120,7 +2120,7 @@ Licensed under the MIT license.
 
         function drawSeries(series) {
             if (series.lines.show)
-                $.plot.drawSeries.drawSeriesLines(series, ctx, plotOffset, plotHeight, getColorOrGradient);
+                $.plot.drawSeries.drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, getColorOrGradient);
             if (series.bars.show)
                 $.plot.drawSeries.drawSeriesBars(series, ctx, plotOffset, getColorOrGradient);
             if (series.points.show)
