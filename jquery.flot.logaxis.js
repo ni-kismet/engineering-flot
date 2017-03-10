@@ -16,6 +16,8 @@ Set axis.mode to "log" to enable.
         xaxis: {}
     };
 
+    var defaultTickFormatter;
+
     var PREFERRED_LOG_TICK_VALUES = function () {
         var vals = [];
         for (var power = -39; power <= 39; power++) {
@@ -167,7 +169,7 @@ Set axis.mode to "log" to enable.
 
         if (precision){
             if ((tenExponent >= -4) && (tenExponent <= 4)) {
-                return value.toFixed(precision);
+                return defaultTickFormatter(value, axis, precision);
             }
             else {
                 return (value / round_with).toFixed(precision) + 'e' + tenExponent;
@@ -202,6 +204,7 @@ Set axis.mode to "log" to enable.
 
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
+            defaultTickFormatter = plot.defaultTickFormatter;
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;
                 if (opts.mode === 'log') {
