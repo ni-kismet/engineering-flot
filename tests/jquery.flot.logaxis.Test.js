@@ -31,32 +31,48 @@ describe("unit tests for the log scale functions", function() {
             [0.00004, '4e-5'],
             [3.1623E-21, '3e-21']
             ];
-        
+
         testVector.forEach(function (t) {
             var inputValue = t[0],
                 expectedValue = t[1];
-                
+
             expect(logFormatter(inputValue)).toBe(expectedValue);
         });
     });
-	
+
     it('should use a desired precision when specified', function(){
         var logFormatter = $.plot.logTickFormatter,
-            axis = [],
-            precision = 3,
-            testVector = [
+        axis = [],
+        precision = 3,
+        testVector = [
             [1.7000000000000002, '1.700'],
             [17.000000000000002, '17.000'],
             [172, '172.000'],
             [1.000, '1.000'],
             [0.00004, '4.000e-5'],
             [3.1623E-21, '3.162e-21']
-            ];		
+        ];
+
+        testVector.forEach(function (t) {
+            var inputValue = t[0],
+            expectedValue = t[1];
+
+            expect(logFormatter(inputValue, axis, precision)).toBe(expectedValue);
+        });
+    });
+
+    it('should handle a negative precision when specified', function(){
+        var logFormatter = $.plot.logTickFormatter,
+            axis = [],
+            precision = -2,
+            testVector = [
+            [801, '800'],
+            ];
 
         testVector.forEach(function (t) {
             var inputValue = t[0],
                 expectedValue = t[1];
-                
+
             expect(logFormatter(inputValue, axis, precision)).toBe(expectedValue);
         });
     });
