@@ -19,5 +19,3 @@ script:
     - ./node_modules/travis-github-lint-status/index.js
     - npm test
     - npm run coverage
-after_success:
-    - ./node_modules/.bin/codecov
