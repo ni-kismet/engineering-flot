@@ -995,12 +995,10 @@ Licensed under the MIT license.
         };
 
         plot.computeRangeForDataSeries = computeRangeForDataSeries;
-
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
-
         plot.findNearbyItem = findNearbyItem;
-
         plot.computeValuePrecision = computeValuePrecision;
+        plot.defaultTickFormatter = defaultTickFormatter;
 
         // public attributes
         plot.hooks = hooks;
@@ -2094,6 +2092,32 @@ Licensed under the MIT license.
             return options.tickSize || size;
         };
 
+        function defaultTickFormatter(value, axis, precision) {
+
+            var oldTickDecimals = axis.tickDecimals;
+
+            if (precision) {
+                axis.tickDecimals = precision;
+            }
+
+            var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
+            var formatted = "" + Math.round(value * factor) / factor;
+
+            // If tickDecimals was specified, ensure that we have exactly that
+            // much precision; otherwise default to the value's own precision.
+
+            if (axis.tickDecimals != null) {
+                var decimal = formatted.indexOf(".");
+                var decimalPrecision = decimal == -1 ? 0 : formatted.length - decimal - 1;
+                if (decimalPrecision < axis.tickDecimals) {
+                    formatted = (decimalPrecision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
+                }
+            }
+
+            axis.tickDecimals = oldTickDecimals;
+            return formatted;
+        };
+
         function setupTickGeneration(axis) {
             var opts = axis.options;
 
@@ -2133,37 +2157,14 @@ Licensed under the MIT license.
                     return ticks;
                 };
 
-                axis.tickFormatter = function(value, axis, precision) {
+                axis.tickFormatter = defaultTickFormatter;
+            }
 
-                    var oldTickDecimals = axis.tickDecimals;
-
-                    if (precision) {
-                        axis.tickDecimals = precision;
-                    }
-
-                    var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
-                    var formatted = "" + Math.round(value * factor) / factor;
-
-                    // If tickDecimals was specified, ensure that we have exactly that
-                    // much precision; otherwise default to the value's own precision.
-
-                    if (axis.tickDecimals != null) {
-                        var decimal = formatted.indexOf(".");
-                        var decimalPrecision = decimal == -1 ? 0 : formatted.length - decimal - 1;
-                        if (decimalPrecision < axis.tickDecimals) {
-                            formatted = (decimalPrecision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
-                        }
-                    }
-
-                    axis.tickDecimals = oldTickDecimals;
-                    return formatted;
-                    };
-                }
-
-                if ($.isFunction(opts.tickFormatter))
-                    axis.tickFormatter = function(v, axis, precision) {
-                        return "" + opts.tickFormatter(v, axis, precision);
-            };
+            if ($.isFunction(opts.tickFormatter)) {
+                axis.tickFormatter = function(v, axis, precision) {
+                    return "" + opts.tickFormatter(v, axis, precision);
+                };
+            }
 
             if (opts.alignTicksWithAxis != null) {
                 var otherAxis = (axis.direction == "x" ? xaxes : yaxes)[opts.alignTicksWithAxis - 1];
