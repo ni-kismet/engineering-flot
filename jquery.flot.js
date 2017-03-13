@@ -1426,7 +1426,6 @@ Licensed under the MIT license.
         };
 
         function defaultTickFormatter(value, axis, precision) {
-
             var oldTickDecimals = axis.tickDecimals;
 
             if (precision) {
@@ -1441,7 +1440,7 @@ Licensed under the MIT license.
 
             if (axis.tickDecimals != null) {
                 var decimal = formatted.indexOf(".");
-                var decimalPrecision = decimal == -1 ? 0 : formatted.length - decimal - 1;
+                var decimalPrecision = decimal === -1 ? 0 : formatted.length - decimal - 1;
                 if (decimalPrecision < axis.tickDecimals) {
                     formatted = (decimalPrecision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
                 }
