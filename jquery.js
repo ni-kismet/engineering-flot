@@ -11,6 +11,7 @@
  *
  * Date: Tue Nov 13 2012 08:20:33 GMT-0500 (Eastern Standard Time)
  */
+/* eslint-disable */
 (function( window, undefined ) {
 var
 	// A central reference to the root jQuery(document)

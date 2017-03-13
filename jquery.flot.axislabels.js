@@ -31,7 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (function($) {
     "use strict";
-    
+
     var options = {
         axisLabels: {
             show: true
@@ -84,20 +84,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.elem = $('<div id="' + this.axisName +
             'Label" " class="axisLabels" style="position:absolute;">' + this.opts.axisLabel + '</div>');
         this.plot.getPlaceholder().append(this.elem);
-        if (this.position == 'top') {
+        if (this.position === 'top') {
             this.elem.css('left', box.left + box.width / 2 - this.labelWidth / 2 +
                 'px');
             this.elem.css('top', box.top + 'px');
-        } else if (this.position == 'bottom') {
+        } else if (this.position === 'bottom') {
             this.elem.css('left', box.left + box.width / 2 - this.labelWidth / 2 +
                 'px');
             this.elem.css('top', box.top + box.height - this.labelHeight +
                 'px');
-        } else if (this.position == 'left') {
+        } else if (this.position === 'left') {
             this.elem.css('top', box.top + box.height / 2 - this.labelHeight / 2 +
                 'px');
             this.elem.css('left', box.left + 'px');
-        } else if (this.position == 'right') {
+        } else if (this.position === 'right') {
             this.elem.css('top', box.top + box.height / 2 - this.labelHeight / 2 +
                 'px');
             this.elem.css('left', box.left + box.width - this.labelWidth +
@@ -116,7 +116,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     CssTransformAxisLabel.prototype.calculateSize = function() {
         HtmlAxisLabel.prototype.calculateSize.call(this);
         this.width = this.height = 0;
-        if (this.position == 'left' || this.position == 'right') {
+        if (this.position === 'left' || this.position === 'right') {
             this.width = this.labelHeight + this.padding;
         } else {
             this.height = this.labelHeight + this.padding;
@@ -130,15 +130,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             '-o-transform': '',
             '-ms-transform': ''
         };
-        if (x != 0 || y != 0) {
+        if (x !== 0 || y !== 0) {
             var stdTranslate = ' translate(' + x + 'px, ' + y + 'px)';
             stransforms['-moz-transform'] += stdTranslate;
             stransforms['-webkit-transform'] += stdTranslate;
             stransforms['-o-transform'] += stdTranslate;
             stransforms['-ms-transform'] += stdTranslate;
         }
-        if (degrees != 0) {
-            var rotation = degrees / 90;
+        if (degrees !== 0) {
             var stdRotate = ' rotate(' + degrees + 'deg)';
             stransforms['-moz-transform'] += stdRotate;
             stransforms['-webkit-transform'] += stdRotate;
@@ -165,17 +164,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             y: 0,
             degrees: 0
         };
-        if (this.position == 'bottom') {
+        if (this.position === 'bottom') {
             offsets.x = box.left + box.width / 2 - this.labelWidth / 2;
             offsets.y = box.top + box.height - this.labelHeight;
-        } else if (this.position == 'top') {
+        } else if (this.position === 'top') {
             offsets.x = box.left + box.width / 2 - this.labelWidth / 2;
             offsets.y = box.top;
-        } else if (this.position == 'left') {
+        } else if (this.position === 'left') {
             offsets.degrees = -90;
             offsets.x = box.left - this.labelWidth / 2 + this.labelHeight / 2;
             offsets.y = box.height / 2 + box.top;
-        } else if (this.position == 'right') {
+        } else if (this.position === 'right') {
             offsets.degrees = 90;
             offsets.x = box.left + box.width - this.labelWidth / 2 - this.labelHeight / 2;
             offsets.y = box.height / 2 + box.top;
@@ -198,9 +197,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     function init(plot) {
         plot.hooks.processOptions.push(function(plot, options) {
-
-            if (!options.axisLabels.show)
+            if (!options.axisLabels.show) {
                 return;
+            }
 
             var axisLabels = {};
             var defaultPadding = 2; // padding between axis and tick labels
@@ -209,19 +208,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 var opts = axis.options;
                 var axisName = axis.direction + axis.n;
 
-                if (!opts || !opts.axisLabel || !axis.show)
+                if (!opts || !opts.axisLabel || !axis.show) {
                     return;
+                }
 
                 var renderer = null;
-
                 if (!opts.axisLabelUseHtml) {
                     renderer = CssTransformAxisLabel;
                 } else {
                     renderer = HtmlAxisLabel;
                 }
 
-                var padding = opts.axisLabelPadding === undefined ?
-                    defaultPadding : opts.axisLabelPadding;
+                var padding = opts.axisLabelPadding === undefined
+                    ? defaultPadding
+                    : opts.axisLabelPadding;
 
                 axisLabels[axisName] = new renderer(axisName,
                     opts.position, padding,
@@ -237,10 +237,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             plot.hooks.draw.push(function(plot, ctx) {
                 $.each(plot.getAxes(), function(axisName, axis) {
                     var opts = axis.options;
-                    if (!opts || !opts.axisLabel || !axis.show)
+                    if (!opts || !opts.axisLabel || !axis.show) {
                         return;
+                    }
 
-                    axisLabels[ axis.direction + axis.n].draw(axis.box);
+                    axisLabels[axis.direction + axis.n].draw(axis.box);
                 });
             });
         });

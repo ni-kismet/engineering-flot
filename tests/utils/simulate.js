@@ -1,3 +1,4 @@
+/* eslint-disable */
 (function() {
     'use strict';
 
@@ -26,7 +27,7 @@
             relatedTarget: undefined
         };
 
-        if (typeof(document.createEvent) === "function") {
+        if (typeof (document.createEvent) === "function") {
             evt = document.createEvent("MouseEvents");
             evt.initMouseEvent(type,
                 e.bubbles, e.cancelable, e.view, e.detail,
@@ -95,9 +96,8 @@
         dispatchEvent(el, evt);
     }
 
-
     simulate.mouseDown = simulateMouseDown;
     simulate.mouseMove = simulateMouseMove;
     simulate.mouseUp = simulateMouseUp;
-    simulate.mouseWheel =simulateMouseWheel;
+    simulate.mouseWheel = simulateMouseWheel;
 })();

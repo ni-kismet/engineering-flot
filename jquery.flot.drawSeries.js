@@ -2,17 +2,16 @@
     "use strict";
 
     function drawSeries() {
-
         function plotLine(datapoints, xoffset, yoffset, axisx, axisy, ctx) {
             var points = datapoints.points,
                 ps = datapoints.pointsize,
                 prevx = null,
                 prevy = null;
-            var x1=0.0,
-                y1=0.0,
-                x2=0.0,
-                y2=0.0,
-                i=0;
+            var x1 = 0.0,
+                y1 = 0.0,
+                x2 = 0.0,
+                y2 = 0.0,
+                i = 0;
 
             ctx.beginPath();
             for (i = ps; i < points.length; i += ps) {
@@ -21,64 +20,82 @@
                 x2 = points[i];
                 y2 = points[i + 1];
 
-                if (x1 === null || x2 === null)
+                if (x1 === null || x2 === null) {
                     continue;
+                }
 
                 // clip with ymin
                 if (y1 <= y2 && y1 < axisy.min) {
-                    if (y2 < axisy.min)
-                        continue; // line segment is outside
+                    if (y2 < axisy.min) {
+                        // line segment is outside
+                        continue;
+                    }
                     // compute new intersection point
                     x1 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                     y1 = axisy.min;
                 } else if (y2 <= y1 && y2 < axisy.min) {
-                    if (y1 < axisy.min)
+                    if (y1 < axisy.min) {
                         continue;
+                    }
+
                     x2 = (axisy.min - y1) / (y2 - y1) * (x2 - x1) + x1;
                     y2 = axisy.min;
                 }
 
                 // clip with ymax
                 if (y1 >= y2 && y1 > axisy.max) {
-                    if (y2 > axisy.max)
+                    if (y2 > axisy.max) {
                         continue;
+                    }
+
                     x1 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                     y1 = axisy.max;
                 } else if (y2 >= y1 && y2 > axisy.max) {
-                    if (y1 > axisy.max)
+                    if (y1 > axisy.max) {
                         continue;
+                    }
+
                     x2 = (axisy.max - y1) / (y2 - y1) * (x2 - x1) + x1;
                     y2 = axisy.max;
                 }
 
                 // clip with xmin
                 if (x1 <= x2 && x1 < axisx.min) {
-                    if (x2 < axisx.min)
+                    if (x2 < axisx.min) {
                         continue;
+                    }
+
                     y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x1 = axisx.min;
                 } else if (x2 <= x1 && x2 < axisx.min) {
-                    if (x1 < axisx.min)
+                    if (x1 < axisx.min) {
                         continue;
+                    }
+
                     y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x2 = axisx.min;
                 }
 
                 // clip with xmax
                 if (x1 >= x2 && x1 > axisx.max) {
-                    if (x2 > axisx.max)
+                    if (x2 > axisx.max) {
                         continue;
+                    }
+
                     y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x1 = axisx.max;
                 } else if (x2 >= x1 && x2 > axisx.max) {
-                    if (x1 > axisx.max)
+                    if (x1 > axisx.max) {
                         continue;
+                    }
+
                     y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x2 = axisx.max;
                 }
 
-                if (x1 != prevx || y1 != prevy)
+                if (x1 !== prevx || y1 !== prevy) {
                     ctx.moveTo(axisx.p2c(x1) + xoffset, axisy.p2c(y1) + yoffset);
+                }
 
                 prevx = x2;
                 prevy = y2;
@@ -91,10 +108,9 @@
             var points = datapoints.points,
                 ps = datapoints.pointsize,
                 bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min,
-                //bottom = axisy.min,
                 i = 0,
                 ypos = 1,
-                top, areaOpen = false,
+                areaOpen = false,
                 segmentStart = 0,
                 segmentEnd = 0;
 
@@ -102,8 +118,9 @@
             // direction to sketch out top, then once we hit the
             // end we go backwards to sketch the bottom
             while (true) {
-                if (ps > 0 && i > points.length + ps)
+                if (ps > 0 && i > points.length + ps) {
                     break;
+                }
 
                 i += ps; // ps is negative if going backwards
 
@@ -112,10 +129,10 @@
                     x2 = points[i],
                     y2 = points[i + ypos];
 
-                    if (ps === -2) {
-                        /* going backwards and no value for the bottom provided in the series*/
-                        y1 = y2 = bottom;
-                    }
+                if (ps === -2) {
+                    /* going backwards and no value for the bottom provided in the series*/
+                    y1 = y2 = bottom;
+                }
 
                 if (areaOpen) {
                     if (ps > 0 && x1 != null && x2 == null) {
@@ -126,7 +143,7 @@
                         continue;
                     }
 
-                    if (ps < 0 && i == segmentStart + ps) {
+                    if (ps < 0 && i === segmentStart + ps) {
                         // done with the reverse sweep
                         ctx.fill();
                         areaOpen = false;
@@ -136,33 +153,42 @@
                     }
                 }
 
-                if (x1 == null || x2 == null)
+                if (x1 == null || x2 == null) {
                     continue;
+                }
 
                 // clip x values
 
                 // clip with xmin
                 if (x1 <= x2 && x1 < axisx.min) {
-                    if (x2 < axisx.min)
+                    if (x2 < axisx.min) {
                         continue;
+                    }
+
                     y1 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x1 = axisx.min;
                 } else if (x2 <= x1 && x2 < axisx.min) {
-                    if (x1 < axisx.min)
+                    if (x1 < axisx.min) {
                         continue;
+                    }
+
                     y2 = (axisx.min - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x2 = axisx.min;
                 }
 
                 // clip with xmax
                 if (x1 >= x2 && x1 > axisx.max) {
-                    if (x2 > axisx.max)
+                    if (x2 > axisx.max) {
                         continue;
+                    }
+
                     y1 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x1 = axisx.max;
                 } else if (x2 >= x1 && x2 > axisx.max) {
-                    if (x1 > axisx.max)
+                    if (x1 > axisx.max) {
                         continue;
+                    }
+
                     y2 = (axisx.max - x1) / (x2 - x1) * (y2 - y1) + y1;
                     x2 = axisx.max;
                 }
@@ -215,7 +241,7 @@
 
                 // if the x value was changed we got a rectangle
                 // to fill
-                if (x1 != x1old) {
+                if (x1 !== x1old) {
                     ctx.lineTo(axisx.p2c(x1old), axisy.p2c(y1));
                     // it goes to (x1, y1), but we fill that below
                 }
@@ -227,7 +253,7 @@
                 ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
 
                 // fill the other rectangle if it's there
-                if (x2 != x2old) {
+                if (x2 !== x2old) {
                     ctx.lineTo(axisx.p2c(x2), axisy.p2c(y2));
                     ctx.lineTo(axisx.p2c(x2old), axisy.p2c(y2));
                 }
@@ -243,13 +269,15 @@
                 ctx.setLineDash(series.lines.dashes);
             }
 
-            var datapoints = {format: series.datapoints.format,
-                             points: series.datapoints.points,
-                             pointsize: series.datapoints.pointsize};
+            var datapoints = {
+                format: series.datapoints.format,
+                points: series.datapoints.points,
+                pointsize: series.datapoints.pointsize
+            };
 
-           if (series.decimate) {
-               datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
-           }
+            if (series.decimate) {
+                datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
+            }
 
             var lw = series.lines.lineWidth,
                 sw = series.shadowSize;
@@ -273,8 +301,10 @@
                 plotLineArea(datapoints, series.xaxis, series.yaxis, series.lines.fillTowards || 0, ctx);
             }
 
-            if (lw > 0)
+            if (lw > 0) {
                 plotLine(datapoints, 0, 0, series.xaxis, series.yaxis, ctx);
+            }
+
             ctx.restore();
         }
 
@@ -286,8 +316,9 @@
                 for (var i = 0; i < points.length; i += ps) {
                     var x = points[i],
                         y = points[i + 1];
-                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
                         continue;
+                    }
 
                     ctx.beginPath();
                     x = axisx.p2c(x);
@@ -295,7 +326,7 @@
 
                     if (symbol === 'circle') {
                         ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
-                    } else if  (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
+                    } else if (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
                         drawSymbol[symbol](ctx, x, y, radius, shadow);
                     }
                     ctx.closePath();
@@ -321,8 +352,9 @@
             // Doing the conditional here allows the shadow setting to still be
             // optional even with a lineWidth of 0.
 
-            if (lw == 0)
+            if (lw === 0) {
                 lw = 0.0001;
+            }
 
             if (lw > 0 && sw > 0) {
                 // draw shadow in two steps
@@ -389,8 +421,9 @@
 
             // clip
             if (right < axisx.min || left > axisx.max ||
-                top < axisy.min || bottom > axisy.max)
+                top < axisy.min || bottom > axisy.max) {
                 return;
+            }
 
             if (left < axisx.min) {
                 left = axisx.min;
@@ -429,22 +462,30 @@
 
                 // FIXME: inline moveTo is buggy with excanvas
                 c.moveTo(left, bottom);
-                if (drawLeft)
+                if (drawLeft) {
                     c.lineTo(left, top);
-                else
+                } else {
                     c.moveTo(left, top);
-                if (drawTop)
+                }
+
+                if (drawTop) {
                     c.lineTo(right, top);
-                else
+                } else {
                     c.moveTo(right, top);
-                if (drawRight)
+                }
+
+                if (drawRight) {
                     c.lineTo(right, bottom);
-                else
+                } else {
                     c.moveTo(right, bottom);
-                if (drawBottom)
+                }
+
+                if (drawBottom) {
                     c.lineTo(left, bottom);
-                else
+                } else {
                     c.moveTo(left, bottom);
+                }
+
                 c.stroke();
             }
         }
@@ -455,8 +496,10 @@
                     ps = datapoints.pointsize;
 
                 for (var i = 0; i < points.length; i += ps) {
-                    if (points[i] == null)
+                    if (points[i] == null) {
                         continue;
+                    }
+
                     drawBar(points[i], points[i + 1], 0, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
@@ -490,26 +533,24 @@
 
         function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
             var fill = filloptions.fill;
-            if (!fill)
+            if (!fill) {
                 return null;
+            }
 
-            if (filloptions.fillColor)
+            if (filloptions.fillColor) {
                 return getColorOrGradient(filloptions.fillColor, bottom, top, seriesColor);
+            }
 
             var c = $.color.parse(seriesColor);
-            c.a = typeof fill == "number" ? fill : 0.4;
+            c.a = typeof fill === "number" ? fill : 0.4;
             c.normalize();
             return c.toString();
         }
 
-
         this.drawSeriesLines = drawSeriesLines;
         this.drawSeriesPoints = drawSeriesPoints;
         this.drawSeriesBars = drawSeriesBars;
-
     };
 
-
     $.plot.drawSeries = new drawSeries();
-
 })(jQuery);
