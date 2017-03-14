@@ -1325,7 +1325,7 @@ Licensed under the MIT license.
             var magn = Math.pow(10, -dec),
                 norm = delta / magn;
 
-            if (norm > 2.25 && norm < 3 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+            if (tickDecimals != null && norm > 2.25 && norm < 3 && (dec + 1) <= tickDecimals) {
                 ++dec;
             }
 
@@ -1360,7 +1360,7 @@ Licensed under the MIT license.
             } else if (norm < 3) {
                 size = 2;
                 // special case for 2.5, requires an extra decimal
-                if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+                if (norm > 2.25 && (tickDecimals == null || (dec + 1) <= tickDecimals)) {
                     size = 2.5;
                 }
             } else if (norm < 7.5) {
