@@ -10,20 +10,18 @@
 
 (function($) {
     var Canvas = function(cls, container) {
-
         var element = container.children("." + cls)[0];
 
         if (element == null) {
-
             element = document.createElement("canvas");
             element.className = cls;
 
             $(element).css({
-                    direction: "ltr",
-                    position: "absolute",
-                    left: 0,
-                    top: 0
-                })
+                direction: "ltr",
+                position: "absolute",
+                left: 0,
+                top: 0
+            })
                 .appendTo(container);
 
             // If HTML5 Canvas isn't available, throw
@@ -78,7 +76,6 @@
     // @param {number} width New height of the canvas, in pixels.
 
     Canvas.prototype.resize = function(width, height) {
-
         if (width <= 0 || height <= 0) {
             throw new Error("Invalid dimensions for plot, width = " + width + ", height = " + height);
         }
@@ -94,13 +91,13 @@
 
         // Resizing should reset the state (excanvas seems to be buggy though)
 
-        if (this.width != width) {
+        if (this.width !== width) {
             element.width = width * pixelRatio;
             element.style.width = width + "px";
             this.width = width;
         }
 
-        if (this.height != height) {
+        if (this.height !== height) {
             element.height = height * pixelRatio;
             element.style.height = height + "px";
             this.height = height;
@@ -129,7 +126,6 @@
     // Finishes rendering the canvas, including managing the text overlay.
 
     Canvas.prototype.render = function() {
-
         var cache = this._textCache;
 
         // For each text layer, add elements marked as active that haven't
@@ -137,7 +133,6 @@
 
         for (var layerKey in cache) {
             if (hasOwnProperty.call(cache, layerKey)) {
-
                 var layer = this.getTextLayer(layerKey),
                     layerCache = cache[layerKey];
 
@@ -148,10 +143,10 @@
                         var styleCache = layerCache[styleKey];
                         for (var key in styleCache) {
                             if (hasOwnProperty.call(styleCache, key)) {
-
                                 var positions = styleCache[key].positions;
 
-                                for (var i = 0, position; position = positions[i]; i++) {
+                                for (var i = 0, position; positions[i]; i++) {
+                                    position = positions[i];
                                     if (position.active) {
                                         if (!position.rendered) {
                                             layer.append(position.element);
@@ -165,7 +160,7 @@
                                     }
                                 }
 
-                                if (positions.length == 0) {
+                                if (positions.length === 0) {
                                     if (styleCache[key].measured) {
                                         styleCache[key].measured = false;
                                     } else {
@@ -189,15 +184,12 @@
     // @return {object} The jQuery-wrapped text-layer div.
 
     Canvas.prototype.getTextLayer = function(classes) {
-
         var layer = this.text[classes];
 
         // Create the text layer if it doesn't exist
 
         if (layer == null) {
-
             // Create the text layer container, if it doesn't exist
-
             if (this.textContainer == null) {
                 this.textContainer = $("<div class='flot-text'></div>")
                     .css({
@@ -233,13 +225,11 @@
     // @return {object} The jQuery-wrapped text-layer div.
 
     Canvas.prototype.getSVGLayer = function(classes) {
-
         var layer = this.SVG[classes];
 
         // Create the SVG layer if it doesn't exist
 
         if (layer == null) {
-
             // Create the text layer container, if it doesn't exist
 
             var svgElement;
@@ -256,8 +246,8 @@
                     })
                     .insertAfter(this.element);
                 svgElement = $(document.createElementNS("http://www.w3.org/2000/svg", "svg")).css({
-                  width: '100%',
-                  height: '100%'
+                    width: '100%',
+                    height: '100%'
                 });
                 svgElement.appendTo(this.SVGContainer);
             }
@@ -277,7 +267,6 @@
 
         return layer;
     };
-
 
     // Creates (if necessary) and returns a text info object.
     //
@@ -320,7 +309,6 @@
     // @return {object} a text info object.
 
     Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
-
         var textStyle, layerCache, styleCache, info;
 
         // Cast the value to a string, in case we were given a number or such
@@ -354,7 +342,6 @@
         // If we can't find a matching element in our cache, create a new one
 
         if (info == null) {
-
             var element = $("<div></div>").html(text)
                 .css({
                     position: "absolute",
@@ -408,29 +395,29 @@
     //     "middle" or "bottom".
 
     Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
-
         var info = this.getTextInfo(layer, text, font, angle, width),
             positions = info.positions;
 
         // Tweak the div's position to match the text's alignment
 
-        if (halign == "center") {
+        if (halign === "center") {
             x -= info.width / 2;
-        } else if (halign == "right") {
+        } else if (halign === "right") {
             x -= info.width;
         }
 
-        if (valign == "middle") {
+        if (valign === "middle") {
             y -= info.height / 2;
-        } else if (valign == "bottom") {
+        } else if (valign === "bottom") {
             y -= info.height;
         }
 
         // Determine whether this text already exists at this position.
         // If so, mark it for inclusion in the next render pass.
 
-        for (var i = 0, position; position = positions[i]; i++) {
-            if (position.x == x && position.y == y) {
+        for (var i = 0, position; positions[i]; i++) {
+            position = positions[i];
+            if (position.x === x && position.y === y) {
                 position.active = true;
                 return;
             }
@@ -481,6 +468,7 @@
     //     Angle is currently unused, it will be implemented in the future.
 
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
+        var position, i;
         if (text == null) {
             var layerCache = this._textCache[layer];
             if (layerCache != null) {
@@ -490,7 +478,8 @@
                         for (var key in styleCache) {
                             if (hasOwnProperty.call(styleCache, key)) {
                                 var positions = styleCache[key].positions;
-                                for (var i = 0, position; position = positions[i]; i++) {
+                                for (i = 0; positions[i]; i++) {
+                                    position = positions[i];
                                     position.active = false;
                                 }
                             }
@@ -499,9 +488,10 @@
                 }
             }
         } else {
-            var positions = this.getTextInfo(layer, text, font, angle).positions;
-            for (var i = 0, position; position = positions[i]; i++) {
-                if (position.x == x && position.y == y) {
+            positions = this.getTextInfo(layer, text, font, angle).positions;
+            for (i = 0; positions[i]; i++) {
+                position = positions[i];
+                if (position.x === x && position.y === y) {
                     position.active = false;
                 }
             }
@@ -515,15 +505,15 @@
     // 1. The plot just became visible.
     // 2. The styles changed.
     Canvas.prototype.clearCache = function() {
-      var cache = this._textCache;
-      for (var layerKey in cache) {
-        if (hasOwnProperty.call(cache, layerKey)) {
-          var layer = this.getTextLayer(layerKey);
-          layer.empty();
-        }
-      };
+        var cache = this._textCache;
+        for (var layerKey in cache) {
+            if (hasOwnProperty.call(cache, layerKey)) {
+                var layer = this.getTextLayer(layerKey);
+                layer.empty();
+            }
+        };
 
-      this._textCache = {};
+        this._textCache = {};
     };
 
     if (!window.Flot) {

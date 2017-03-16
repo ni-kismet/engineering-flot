@@ -11,17 +11,17 @@ plot.pan( offset ) so you easily can add custom controls. It also fires
 
 The plugin supports these options:
 
-	zoom: {
-		interactive: false
-		amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
-	}
+    zoom: {
+        interactive: false
+        amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+    }
 
-	pan: {
-		interactive: false
-		cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-		frameRate: 20
+    pan: {
+        interactive: false
+        cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
+        frameRate: 20
         mode: "smart"       // enable smart pan mode
-	}
+    }
 
 "interactive" enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
@@ -40,19 +40,19 @@ released).
 
 Example API usage:
 
-	plot = $.plot(...);
+    plot = $.plot(...);
 
-	// zoom default amount in on the pixel ( 10, 20 )
-	plot.zoom({ center: { left: 10, top: 20 } });
+    // zoom default amount in on the pixel ( 10, 20 )
+    plot.zoom({ center: { left: 10, top: 20 } });
 
-	// zoom out again
-	plot.zoomOut({ center: { left: 10, top: 20 } });
+    // zoom out again
+    plot.zoomOut({ center: { left: 10, top: 20 } });
 
-	// zoom 200% in on the pixel (10, 20)
-	plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
+    // zoom 200% in on the pixel (10, 20)
+    plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
 
-	// pan 100 pixels to the left and 20 down
-	plot.pan({ left: -100, top: 20 })
+    // pan 100 pixels to the left and 20 down
+    plot.pan({ left: -100, top: 20 })
 
 Here, "center" specifies where the center of the zooming should happen. Note
 that this is defined in pixel space, not the space of the data points (you can
@@ -72,6 +72,7 @@ can set the default in the options.
 jquery.event.drag.js ~ v1.5 ~ Copyright (c) 2008, Three Dub Media (http://threedubmedia.com)
 Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-LICENSE.txt
 */
+/* eslint-disable */
 (function(a) {
     function e(h) {
         var k, j = this,
@@ -200,6 +201,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
     })
 })(jQuery);
 
+/* eslint-enable */
 (function($) {
     'use strict';
 
@@ -220,14 +222,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             var c = plot.offset();
             c.left = e.pageX - c.left;
             c.top = e.pageY - c.top;
-            if (zoomOut)
+            if (zoomOut) {
                 plot.zoomOut({
                     center: c
                 });
-            else
+            } else {
                 plot.zoom({
                     center: c
                 });
+            }
         }
 
         var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
@@ -262,15 +265,19 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
 
         function onDragStart(e) {
-            if (e.which != 1) // only accept left-click
+            if (e.which !== 1) {
+                // only accept left-click
                 return false;
+            }
+
             var c = plot.getPlaceholder().css('cursor');
-            if (c)
+            if (c) {
                 prevCursor = c;
+            }
+
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
             startPageX = e.pageX;
             startPageY = e.pageY;
-
             plotState = plot.navigationState();
         }
 
@@ -286,8 +293,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 return;
             }
 
-            if (panTimeout || !frameRate)
-                return;
+            if (panTimeout || !frameRate) return;
 
             panTimeout = setTimeout(function() {
                 plot.smartPan({
@@ -334,30 +340,34 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
 
         plot.zoomOut = function(args) {
-            if (!args)
+            if (!args) {
                 args = {};
+            }
 
-            if (!args.amount)
+            if (!args.amount) {
                 args.amount = plot.getOptions().zoom.amount;
+            }
 
             args.amount = 1 / args.amount;
             plot.zoom(args);
         };
 
         plot.zoom = function(args) {
-            if (!args)
+            if (!args) {
                 args = {};
+            }
 
             var c = args.center,
                 amount = args.amount || plot.getOptions().zoom.amount,
                 w = plot.width(),
                 h = plot.height();
 
-            if (!c)
+            if (!c) {
                 c = {
                     left: w / 2,
                     top: h / 2
                 };
+            }
 
             var xf = c.left / w,
                 yf = c.top / h,
@@ -390,13 +400,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     max = tmp;
                 }
 
-                var range = max - min;
-
-                // Convert range to transformed coordinates
-                if (opts.transform) {
-                    range = opts.transform(max) - opts.transform(min);
-                }
-
                 opts.autoscale = 'none';
                 opts.min = min;
                 opts.max = max;
@@ -405,8 +408,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.setupGrid();
             plot.draw();
 
-            if (!args.preventEvent)
+            if (!args.preventEvent) {
                 plot.getPlaceholder().trigger("plotzoom", [plot, args]);
+            }
         };
 
         plot.pan = function(args) {
@@ -415,10 +419,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 y: +args.top
             };
 
-            if (isNaN(delta.x))
-                delta.x = 0;
-            if (isNaN(delta.y))
-                delta.y = 0;
+            if (isNaN(delta.x)) delta.x = 0;
+            if (isNaN(delta.y)) delta.y = 0;
 
             $.each(plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
@@ -439,15 +441,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.setupGrid();
             plot.draw();
 
-            if (!args.preventEvent)
+            if (!args.preventEvent) {
                 plot.getPlaceholder().trigger("plotpan", [plot, args]);
+            }
         };
 
         var shouldSnap = function(delta) {
             return (Math.abs(delta.y) < SNAPPING_CONSTANT && Math.abs(delta.x) >= SNAPPING_CONSTANT) ||
                 (Math.abs(delta.x) < SNAPPING_CONSTANT && Math.abs(delta.y) >= SNAPPING_CONSTANT);
         }
-
 
         // adjust delta so the pan action is constrained on the vertical or horizontal direction
         // it the movements in the other direction are small
@@ -471,27 +473,25 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 panHint = {
                     start: {
                         x: startPageX - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - plot.offset().top + plot.getPlotOffset().top,
+                        y: startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: {
                         x: startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top,
+                        y: startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
                     }
                 }
             } else {
                 panHint = {
                     start: {
                         x: startPageX - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - plot.offset().top + plot.getPlotOffset().top,
+                        y: startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: false
                 }
             }
 
-            if (isNaN(delta.x))
-                delta.x = 0;
-            if (isNaN(delta.y))
-                delta.y = 0;
+            if (isNaN(delta.x)) delta.x = 0;
+            if (isNaN(delta.y)) delta.y = 0;
 
             var axes = plot.getAxes();
             Object.keys(axes).forEach(function(axisName) {
@@ -531,8 +531,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             eventHolder.unbind("dragstart", onDragStart);
             eventHolder.unbind("drag", onDrag);
             eventHolder.unbind("dragend", onDragEnd);
-            if (panTimeout)
-                clearTimeout(panTimeout);
+
+            if (panTimeout) clearTimeout(panTimeout);
         }
 
         function drawOverlay(plot, ctx) {
@@ -548,14 +548,12 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 ctx.beginPath();
 
                 if (panHint.end === false) {
-
                     ctx.moveTo(startx, starty - PANHINT_LENGTH_CONSTANT);
                     ctx.lineTo(startx, starty + PANHINT_LENGTH_CONSTANT);
 
                     ctx.moveTo(startx + PANHINT_LENGTH_CONSTANT, starty);
                     ctx.lineTo(startx - PANHINT_LENGTH_CONSTANT, starty);
                 } else {
-
                     var dirX = starty === endy;
 
                     ctx.moveTo(startx - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), starty - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
@@ -566,7 +564,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
                     ctx.moveTo(endx - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), endy - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
                     ctx.lineTo(endx + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), endy + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
-
                 }
 
                 ctx.stroke();

@@ -1,3 +1,4 @@
+/* eslint-disable */
 describe("unit tests for the precision of axis", function() {
     var plot;
     var placeholder;

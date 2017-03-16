@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe('drawSeries', function() {

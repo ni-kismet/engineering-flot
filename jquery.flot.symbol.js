@@ -5,11 +5,11 @@ Licensed under the MIT license.
 
 The symbols are accessed as strings through the standard symbol options:
 
-	series: {
-		points: {
-			symbol: "square" // or "diamond", "triangle", "cross", "plus", "ellipse", "rectangle"
-		}
-	}
+    series: {
+        points: {
+            symbol: "square" // or "diamond", "triangle", "cross", "plus", "ellipse", "rectangle"
+        }
+    }
 
 */
 
@@ -62,12 +62,12 @@ The symbols are accessed as strings through the standard symbol options:
             }
         },
         plus: function (ctx, x, y, radius, shadow) {
-            var size = radius  * Math.sqrt(Math.PI/2);
+            var size = radius * Math.sqrt(Math.PI / 2);
             ctx.moveTo(x - size, y);
             ctx.lineTo(x + size, y);
             ctx.moveTo(x, y + size);
             ctx.lineTo(x, y - size);
-        },
+        }
     };
 
     function init(plot) {

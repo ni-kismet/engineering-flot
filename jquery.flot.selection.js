@@ -6,10 +6,10 @@ Licensed under the MIT license.
 The plugin supports these options:
 
 selection: {
-	mode: null or "x" or "y" or "xy" or "smart",
-	color: color,
-	shape: "round" or "miter" or "bevel",
-	minSize: number of pixels
+    mode: null or "x" or "y" or "xy" or "smart",
+    color: color,
+    shape: "round" or "miter" or "bevel",
+    minSize: number of pixels
 }
 
 Selection support is enabled by setting the mode to one of "x", "y" or "xy".
@@ -33,11 +33,11 @@ When selection support is enabled, a "plotselected" event will be emitted on
 the DOM element you passed into the plot function. The event handler gets a
 parameter with the ranges selected on the axes, like this:
 
-	placeholder.bind( "plotselected", function( event, ranges ) {
-		alert("You selected " + ranges.xaxis.from + " to " + ranges.xaxis.to)
-		// similar for yaxis - with multiple axes, the extra ones are in
-		// x2axis, x3axis, ...
-	});
+    placeholder.bind( "plotselected", function( event, ranges ) {
+        alert("You selected " + ranges.xaxis.from + " to " + ranges.xaxis.to)
+        // similar for yaxis - with multiple axes, the extra ones are in
+        // x2axis, x3axis, ...
+    });
 
 The "plotselected" event is only fired when the user has finished making the
 selection. A "plotselecting" event is fired during the process with the same
@@ -58,7 +58,7 @@ The plugin allso adds the following methods to the plot object:
   an yaxis range and both xaxis and yaxis if the selection mode is "xy", like
   this:
 
-	setSelection({ xaxis: { from: 0, to: 10 }, yaxis: { from: 40, to: 60 } });
+    setSelection({ xaxis: { from: 0, to: 10 }, yaxis: { from: 40, to: 60 } });
 
   setSelection will trigger the "plotselected" event when called. If you don't
   want that to happen, e.g. if you're inside a "plotselected" handler, pass
@@ -81,11 +81,12 @@ The plugin allso adds the following methods to the plot object:
 (function ($) {
     function init(plot) {
         var selection = {
-                first: { x: -1, y: -1}, second: { x: -1, y: -1},
-                show: false,
-                currentMode: 'xy',
-                active: false
-            };
+            first: {x: -1, y: -1},
+            second: {x: -1, y: -1},
+            show: false,
+            currentMode: 'xy',
+            active: false
+        };
 
         var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
 
@@ -107,8 +108,8 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function onMouseDown(e) {
-            if (e.which != 1)  // only accept left-click
-                return;
+            // only accept left-click
+            if (e.which !== 1) return;
 
             // cancel out any text selections
             document.body.focus();
@@ -138,18 +139,21 @@ The plugin allso adds the following methods to the plot object:
             mouseUpHandler = null;
 
             // revert drag stuff for old-school browsers
-            if (document.onselectstart !== undefined)
+            if (document.onselectstart !== undefined) {
                 document.onselectstart = savedhandlers.onselectstart;
-            if (document.ondrag !== undefined)
+            }
+
+            if (document.ondrag !== undefined) {
                 document.ondrag = savedhandlers.ondrag;
+            }
 
             // no more dragging
             selection.active = false;
             updateSelection(e);
 
-            if (selectionIsSane())
+            if (selectionIsSane()) {
                 triggerSelectedEvent();
-            else {
+            } else {
                 // this counts as a clear
                 plot.getPlaceholder().trigger("plotunselected", [ ]);
                 plot.getPlaceholder().trigger("plotselecting", [ null ]);
@@ -159,14 +163,13 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function getSelection() {
-            if (!selectionIsSane())
-                return null;
+            if (!selectionIsSane()) return null;
 
             if (!selection.show) return null;
 
             var r = {},
-            c1 = {x: selection.first.x, y: selection.first.y},
-            c2 = {x: selection.second.x, y: selection.second.y};
+                c1 = {x: selection.first.x, y: selection.first.y},
+                c2 = {x: selection.second.x, y: selection.second.y};
 
             if (selectionDirection(plot) === 'x') {
                 c1.y = 0;
@@ -193,12 +196,13 @@ The plugin allso adds the following methods to the plot object:
             plot.getPlaceholder().trigger("plotselected", [ r ]);
 
             // backwards-compat stuff, to be removed in future
-            if (r.xaxis && r.yaxis)
+            if (r.xaxis && r.yaxis) {
                 plot.getPlaceholder().trigger("selected", [ { x1: r.xaxis.from, y1: r.yaxis.from, x2: r.xaxis.to, y2: r.yaxis.to } ]);
+            }
         }
 
         function clamp(min, value, max) {
-            return value < min ? min: (value > max ? max: value);
+            return value < min ? min : (value > max ? max : value);
         }
 
         function selectionDirection(plot) {
@@ -236,24 +240,23 @@ The plugin allso adds the following methods to the plot object:
 
             if (pos !== selection.first) updateMode(pos);
 
-            if (selectionDirection(plot) == "y")
-                pos.x = pos == selection.first ? 0 : plot.width();
+            if (selectionDirection(plot) === "y") {
+                pos.x = pos === selection.first ? 0 : plot.width();
+            }
 
-            if (selectionDirection(plot) == "x")
-                pos.y = pos == selection.first ? 0 : plot.height();
+            if (selectionDirection(plot) === "x") {
+                pos.y = pos === selection.first ? 0 : plot.height();
+            }
         }
 
         function updateSelection(pos) {
-            if (pos.pageX == null)
-                return;
+            if (pos.pageX == null) return;
 
             setSelectionPos(selection.second, pos);
             if (selectionIsSane()) {
                 selection.show = true;
                 plot.triggerRedrawOverlay();
-            }
-            else
-                clearSelection(true);
+            } else clearSelection(true);
         }
 
         function clearSelection(preventEvent) {
@@ -261,8 +264,9 @@ The plugin allso adds the following methods to the plot object:
                 selection.show = false;
                 selection.currentMode = '';
                 plot.triggerRedrawOverlay();
-                if (!preventEvent)
+                if (!preventEvent) {
                     plot.getPlaceholder().trigger("plotunselected", [ ]);
+                }
             }
         }
 
@@ -272,10 +276,13 @@ The plugin allso adds the following methods to the plot object:
 
             for (var k in axes) {
                 axis = axes[k];
-                if (axis.direction == coord) {
+                if (axis.direction === coord) {
                     key = coord + axis.n + "axis";
-                    if (!ranges[key] && axis.n == 1)
-                        key = coord + "axis"; // support x1axis as xaxis
+                    if (!ranges[key] && axis.n === 1) {
+                        // support x1axis as xaxis
+                        key = coord + "axis";
+                    }
+
                     if (ranges[key]) {
                         from = ranges[key].from;
                         to = ranges[key].to;
@@ -286,7 +293,7 @@ The plugin allso adds the following methods to the plot object:
 
             // backwards-compat stuff - to be removed in future
             if (!ranges[key]) {
-                axis = coord == "x" ? plot.getXAxes()[0] : plot.getYAxes()[0];
+                axis = coord === "x" ? plot.getXAxes()[0] : plot.getYAxes()[0];
                 from = ranges[coord + "1"];
                 to = ranges[coord + "2"];
             }
@@ -302,15 +309,13 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function setSelection(ranges, preventEvent) {
-            var axis, range, o = plot.getOptions();
+            var range;
 
             if (selectionDirection(plot) === "y") {
                 selection.first.x = 0;
                 selection.second.x = plot.width();
-            }
-            else {
+            } else {
                 range = extractRange(ranges, "x");
-
                 selection.first.x = range.axis.p2c(range.from);
                 selection.second.x = range.axis.p2c(range.to);
             }
@@ -318,18 +323,17 @@ The plugin allso adds the following methods to the plot object:
             if (selectionDirection(plot) === "x") {
                 selection.first.y = 0;
                 selection.second.y = plot.height();
-            }
-            else {
+            } else {
                 range = extractRange(ranges, "y");
-
                 selection.first.y = range.axis.p2c(range.from);
                 selection.second.y = range.axis.p2c(range.to);
             }
 
             selection.show = true;
             plot.triggerRedrawOverlay();
-            if (!preventEvent && selectionIsSane())
+            if (!preventEvent && selectionIsSane()) {
                 triggerSelectedEvent();
+            }
         }
 
         function selectionIsSane() {
@@ -353,7 +357,7 @@ The plugin allso adds the following methods to the plot object:
         function drawSelectionDecorations(ctx, x, y, w, h, oX, oY, mode) {
             var spacing = 3;
             var fullEarWidth = 15;
-            var earWidth = Math.max(0, Math.min(fullEarWidth, w/2 -2 , h/2 - 2));
+            var earWidth = Math.max(0, Math.min(fullEarWidth, w / 2 - 2, h / 2 - 2));
             ctx.fillStyle = '#ffffff';
 
             if (mode === 'xy') {
@@ -366,12 +370,12 @@ The plugin allso adds the following methods to the plot object:
                 ctx.lineTo(x, y);
                 ctx.closePath();
 
-                ctx.moveTo(x , y + h - earWidth);
-                ctx.lineTo(x  - 3, y + h - earWidth);
-                ctx.lineTo(x  - 3, y + h + 3 );
-                ctx.lineTo(x  + earWidth, y + h + 3);
-                ctx.lineTo(x  + earWidth, y + h);
-                ctx.lineTo(x , y + h);
+                ctx.moveTo(x, y + h - earWidth);
+                ctx.lineTo(x - 3, y + h - earWidth);
+                ctx.lineTo(x - 3, y + h + 3);
+                ctx.lineTo(x + earWidth, y + h + 3);
+                ctx.lineTo(x + earWidth, y + h);
+                ctx.lineTo(x, y + h);
                 ctx.closePath();
 
                 ctx.moveTo(x + w, y + earWidth);
@@ -382,12 +386,12 @@ The plugin allso adds the following methods to the plot object:
                 ctx.lineTo(x + w, y);
                 ctx.closePath();
 
-                ctx.moveTo(x + w ,  y + h  - earWidth);
-                ctx.lineTo(x + w  + 3,  y + h  - earWidth);
-                ctx.lineTo(x + w  + 3, y + h  + 3);
-                ctx.lineTo(x + w  - earWidth, y + h + 3);
-                ctx.lineTo(x + w  - earWidth, y + h );
-                ctx.lineTo(x + w , y + h );
+                ctx.moveTo(x + w, y + h - earWidth);
+                ctx.lineTo(x + w + 3, y + h - earWidth);
+                ctx.lineTo(x + w + 3, y + h + 3);
+                ctx.lineTo(x + w - earWidth, y + h + 3);
+                ctx.lineTo(x + w - earWidth, y + h);
+                ctx.lineTo(x + w, y + h);
                 ctx.closePath();
 
                 ctx.stroke();
@@ -399,16 +403,16 @@ The plugin allso adds the following methods to the plot object:
 
             if (mode === 'x') {
                 ctx.beginPath();
-                ctx.moveTo(x,  y + fullEarWidth);
-                ctx.lineTo(x,  y - fullEarWidth);
-                ctx.lineTo(x - spacing ,  y - fullEarWidth);
-                ctx.lineTo(x - spacing ,  y + fullEarWidth);
+                ctx.moveTo(x, y + fullEarWidth);
+                ctx.lineTo(x, y - fullEarWidth);
+                ctx.lineTo(x - spacing, y - fullEarWidth);
+                ctx.lineTo(x - spacing, y + fullEarWidth);
                 ctx.closePath();
 
-                ctx.moveTo(x + w,  y + fullEarWidth);
-                ctx.lineTo(x + w,  y - fullEarWidth);
-                ctx.lineTo(x + w + spacing ,  y - fullEarWidth);
-                ctx.lineTo(x + w + spacing ,  y + fullEarWidth);
+                ctx.moveTo(x + w, y + fullEarWidth);
+                ctx.lineTo(x + w, y - fullEarWidth);
+                ctx.lineTo(x + w + spacing, y - fullEarWidth);
+                ctx.lineTo(x + w + spacing, y + fullEarWidth);
                 ctx.closePath();
                 ctx.stroke();
                 ctx.fill();
@@ -417,22 +421,20 @@ The plugin allso adds the following methods to the plot object:
             if (mode === 'y') {
                 ctx.beginPath();
 
-                ctx.moveTo(x - fullEarWidth,  y);
-                ctx.lineTo(x + fullEarWidth,  y);
-                ctx.lineTo(x + fullEarWidth,  y - spacing);
-                ctx.lineTo(x - fullEarWidth,  y - spacing);
+                ctx.moveTo(x - fullEarWidth, y);
+                ctx.lineTo(x + fullEarWidth, y);
+                ctx.lineTo(x + fullEarWidth, y - spacing);
+                ctx.lineTo(x - fullEarWidth, y - spacing);
                 ctx.closePath();
 
-
-                ctx.moveTo(x - fullEarWidth,  y + h);
-                ctx.lineTo(x + fullEarWidth,  y + h);
-                ctx.lineTo(x + fullEarWidth,  y + h + spacing);
-                ctx.lineTo(x - fullEarWidth,  y + h + spacing);
+                ctx.moveTo(x - fullEarWidth, y + h);
+                ctx.lineTo(x + fullEarWidth, y + h);
+                ctx.lineTo(x + fullEarWidth, y + h + spacing);
+                ctx.lineTo(x - fullEarWidth, y + h + spacing);
                 ctx.closePath();
                 ctx.stroke();
                 ctx.fill();
             }
-
         }
 
         plot.hooks.drawOverlay.push(function (plot, ctx) {
@@ -458,7 +460,6 @@ The plugin allso adds the following methods to the plot object:
                     w = Math.abs(selection.second.x - selection.first.x) - 1,
                     h = Math.abs(selection.second.y - selection.first.y) - 1;
 
-
                 if (selectionDirection(plot) === 'x') {
                     h += y;
                     y = 0;
@@ -481,10 +482,10 @@ The plugin allso adds the following methods to the plot object:
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mousedown", onMouseDown);
 
-            if (mouseUpHandler)
+            if (mouseUpHandler) {
                 $(document).unbind("mouseup", mouseUpHandler);
+            }
         });
-
     }
 
     $.plot.plugins.push({

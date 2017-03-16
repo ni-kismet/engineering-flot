@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 var fs = require('fs');
 var concat = require('concat-files');
 
@@ -9,13 +11,13 @@ if (!fs.existsSync(distDir)) {
 }
 
 concat([
-        './jquery.colorhelpers.js',
-        './jquery.canvaswrapper.js',
-        './jquery.flot.js',
-        './jquery.flot.drawSeries.js',
-        './jquery.flot.uiConstants.js'
-    ], distDir + '/' + distFile, function(err) {
-        if (err) {
-            throw err;
-        }
-    });
+    './jquery.colorhelpers.js',
+    './jquery.canvaswrapper.js',
+    './jquery.flot.js',
+    './jquery.flot.drawSeries.js',
+    './jquery.flot.uiConstants.js'
+], distDir + '/' + distFile, function(err) {
+    if (err) {
+        throw err;
+    }
+});

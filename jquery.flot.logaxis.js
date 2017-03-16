@@ -17,8 +17,7 @@ Set axis.mode to "log" to enable.
     };
 
     var defaultTickFormatter;
-
-    var PREFERRED_LOG_TICK_VALUES = function () {
+    var PREFERRED_LOG_TICK_VALUES = (function () {
         var vals = [];
         for (var power = -39; power <= 39; power++) {
             var range = Math.pow(10, power);
@@ -29,7 +28,7 @@ Set axis.mode to "log" to enable.
         }
 
         return vals;
-    }();
+    }());
 
     var logTransform = function (v) {
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
@@ -44,7 +43,6 @@ Set axis.mode to "log" to enable.
     };
 
     var linearTickGenerator = function (min, max, noTicks) {
-
         var delta = (max - min) / noTicks,
             dec = -Math.floor(Math.log(delta) / Math.LN10);
 
@@ -129,22 +127,22 @@ Set axis.mode to "log" to enable.
         if (maxIdx - minIdx >= noTicks / 4) {
             for (var idx = maxIdx; idx >= minIdx; idx--) {
                 var tickValue = PREFERRED_LOG_TICK_VALUES[idx];
-                var pixel_coord = Math.log(tickValue / min) / Math.log(max / min);
+                var pixelCoord = Math.log(tickValue / min) / Math.log(max / min);
                 var tick = tickValue;
 
                 if (lastDisplayed === null) {
                     lastDisplayed = {
                         tickValue: tickValue,
-                        pixel_coord: pixel_coord,
-                        ideal_pixel_coord: pixel_coord
+                        pixelCoord: pixelCoord,
+                        idealPixelCoord: pixelCoord
                     };
                 } else {
                     //          if (Math.abs(pixel_coord - lastDisplayed.ideal_pixel_coord) >= inverseNoTicks) {
-                    if (Math.abs(pixel_coord - lastDisplayed.pixel_coord) >= inverseNoTicks) {
+                    if (Math.abs(pixelCoord - lastDisplayed.pixelCoord) >= inverseNoTicks) {
                         lastDisplayed = {
                             tickValue: tickValue,
-                            pixel_coord: pixel_coord,
-                            ideal_pixel_coord: lastDisplayed.ideal_pixel_coord - inverseNoTicks
+                            pixelCoord: pixelCoord,
+                            idealPixelCoord: lastDisplayed.idealPixelCoord - inverseNoTicks
                         };
                     } else {
                         tick = null;
@@ -164,21 +162,20 @@ Set axis.mode to "log" to enable.
 
     var logTickFormatter = function (value, axis, precision) {
         var tenExponent = Math.floor(Math.log(value) / Math.LN10),
-            round_with = Math.pow(10, tenExponent),
-            x = Math.round(value / round_with);
+            roundWith = Math.pow(10, tenExponent),
+            x = Math.round(value / roundWith);
 
-        if (precision){
+        if (precision) {
             if ((tenExponent >= -4) && (tenExponent <= 4)) {
                 return defaultTickFormatter(value, axis, precision);
-            }
-            else {
-                return (value / round_with).toFixed(precision) + 'e' + tenExponent;
+            } else {
+                return (value / roundWith).toFixed(precision) + 'e' + tenExponent;
             }
         }
         if ((tenExponent >= -4) && (tenExponent <= 4)) {
             //if we have float numbers, return a limited length string(ex: 0.0009 is represented as 0.000900001)
             var formattedValue = tenExponent < 0 ? value.toFixed(-tenExponent) : value.toFixed(tenExponent + 2);
-            if(formattedValue.indexOf('.') !== -1) {
+            if (formattedValue.indexOf('.') !== -1) {
                 var lastZero = formattedValue.lastIndexOf('0');
 
                 while (lastZero === formattedValue.length - 1) {
@@ -231,5 +228,4 @@ Set axis.mode to "log" to enable.
 
     $.plot.logTicksGenerator = logTickGenerator;
     $.plot.logTickFormatter = logTickFormatter;
-
 })(jQuery);
