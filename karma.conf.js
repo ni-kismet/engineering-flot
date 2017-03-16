@@ -16,11 +16,14 @@ module.exports = function (config) {
             'jquery.flot.symbol.js',
             'jquery.flot.flatdata.js',
             'jquery.flot.drawSeries.js',
-            'jquery.flot.navigate.js'
+            'jquery.flot.navigate.js',
+            'jquery.flot.time.js'
         ];
 
     var sources = [
-        'jquery.js'
+        'jquery.js',
+        'lib/globalize.js',
+        'lib/globalize.culture.en-US.js'
     ].concat(coverage_sources);
 
     var settings = {
@@ -34,7 +37,7 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
-            './node_modules/phantomjs-polyfill-find/find-polyfill.js',
+            'node_modules/phantomjs-polyfill-find/find-polyfill.js',
             'tests/utils/*.js',
             'tests/*.Test.js'
         ]),

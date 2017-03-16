@@ -66,6 +66,15 @@ API.txt for details.
             }
         }
 
+        function formatLanguage() {
+            // horrible hack
+            if (window.NIEmbeddedBrowser && window.NIEmbeddedBrowser.formatLanguage) {
+                return window.NIEmbeddedBrowser.formatLanguage;
+            }
+
+            return navigator.locale || 'en-US';
+        }
+
         function toAbsoluteTimeStr(date, showMilliseconds) {
             var unixToAbsoluteEpochDiff = 62135596800000;
             var d = date.valueOf();
@@ -77,8 +86,8 @@ API.txt for details.
             var gregorianDate = makeUtcWrapper(new Date(date - unixToAbsoluteEpochDiff)).date;
 
             var msString = showMilliseconds ? '.' + leftPadNTimes(ms, '0', 3) : '';
-            var time = Globalize.format(gregorianDate, "T", window.NIEmbeddedBrowser.formatLanguage);
-            var absTimeString = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", window.NIEmbeddedBrowser.formatLanguage);
+            var time = Globalize.format(gregorianDate, "T", formatLanguage());
+            var absTimeString = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
             absTimeString = absTimeString.replace(/\s/g, '&nbsp;');
             return absTimeString;
         }
