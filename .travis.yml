@@ -14,8 +14,8 @@ before_install:
     - sh -e /etc/init.d/xvfb start
 install:
     - npm install
-    - npm install travis-github-lint-status eslint-config-standard eslint-plugin-standard eslint-plugin-promise
+    #- npm install travis-github-lint-status eslint-config-standard eslint-plugin-standard eslint-plugin-promise
 script:
     - npm test
     - npm run coverage
-    - ./node_modules/travis-github-lint-status/index.js ./*.js
+    #- ./node_modules/travis-github-lint-status/index.js ./*.js

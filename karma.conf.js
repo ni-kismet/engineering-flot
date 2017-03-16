@@ -4,21 +4,21 @@
 var module;
 
 
-module.exports = function (config) {
+module.exports = function(config) {
     'use strict';
 
     var coverage_sources = [
-            'jquery.canvaswrapper.js',
-            'jquery.colorhelpers.js',
-            'jquery.flot.js',
-            'jquery.flot.uiConstants.js',
-            'jquery.flot.logaxis.js',
-            'jquery.flot.symbol.js',
-            'jquery.flot.flatdata.js',
-            'jquery.flot.drawSeries.js',
-            'jquery.flot.navigate.js',
-            'jquery.flot.time.js'
-        ];
+        'jquery.canvaswrapper.js',
+        'jquery.colorhelpers.js',
+        'jquery.flot.js',
+        'jquery.flot.uiConstants.js',
+        'jquery.flot.logaxis.js',
+        'jquery.flot.symbol.js',
+        'jquery.flot.flatdata.js',
+        'jquery.flot.drawSeries.js',
+        'jquery.flot.navigate.js',
+        'jquery.flot.time.js'
+    ];
 
     var sources = [
         'jquery.js',
@@ -48,7 +48,17 @@ module.exports = function (config) {
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
+            '*.js': ['eslint'],
+        },
 
+        eslint: {
+            stopOnError: true,
+            showWarnings: true,
+            engine: {
+                configFile: '.eslintrc',
+                emitError: true,
+                emitWarning: true
+            }
         },
 
         // test results reporter to use
@@ -88,7 +98,7 @@ module.exports = function (config) {
     };
 
     if (config.coverage) {
-        coverage_sources.forEach(function (pattern) {
+        coverage_sources.forEach(function(pattern) {
             if (!settings.preprocessors[pattern]) {
                 settings.preprocessors[pattern] = ['coverage'];
             } else {
