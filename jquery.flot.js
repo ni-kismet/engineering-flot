@@ -1318,14 +1318,15 @@ Licensed under the MIT license.
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
-            if (tickDecimals != null && dec > tickDecimals) {
+            if (dec > tickDecimals) {
                 dec = tickDecimals;
             }
 
             var magn = Math.pow(10, -dec),
                 norm = delta / magn;
 
-            if (norm > 2.25 && norm < 3 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+            if (norm > 2.25 && norm < 3 && (dec + 1) <= tickDecimals) {
+              //we need an extra decimals when tickSize is 2.5
                 ++dec;
             }
 
@@ -1347,7 +1348,7 @@ Licensed under the MIT license.
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
-            if (tickDecimals != null && dec > tickDecimals) {
+            if (dec > tickDecimals) {
                 dec = tickDecimals;
             }
 
@@ -1359,8 +1360,7 @@ Licensed under the MIT license.
                 size = 1;
             } else if (norm < 3) {
                 size = 2;
-                // special case for 2.5, requires an extra decimal
-                if (norm > 2.25 && (tickDecimals == null || dec + 1 <= tickDecimals)) {
+                if (norm > 2.25 && (tickDecimals == null || (dec + 1) <= tickDecimals)) {
                     size = 2.5;
                 }
             } else if (norm < 7.5) {
