@@ -16,6 +16,6 @@ install:
     - npm install
     - npm install travis-github-lint-status eslint-config-standard eslint-plugin-standard eslint-plugin-promise
 script:
-    - ./node_modules/travis-github-lint-status/index.js
     - npm test
     - npm run coverage
+    - ./node_modules/travis-github-lint-status/index.js "./*.js"
