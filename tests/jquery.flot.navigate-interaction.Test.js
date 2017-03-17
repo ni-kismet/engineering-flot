@@ -64,10 +64,19 @@ describe("flot navigate plugin interactions", function () {
         eventHolder = placeholder.find('.flot-overlay');
         simulate.mouseWheel(eventHolder[0], clientX, clientY, 3);
 
-        expect(xaxis.min).toBe(0);
-        expect(xaxis.max).toBe(100);
-        expect(yaxis.min).toBe(0);
-        expect(yaxis.max).toBeCloseTo(100, 7);
+        /*
+            I would really like better precission but:
+                * the browsers may place the graph to fractional pixel coordinates
+                * we can only deliver mouse events at integer coordinates
+                * so we can't align precisely our mouse clicks with a point specified in plot coordinates
+            hence our precission sucks.
+
+            But this test isn't about precission, so we are fine
+         */
+        expect(xaxis.min).toBeCloseTo(0, 0);
+        expect(xaxis.max).toBeCloseTo(100, 0);
+        expect(yaxis.min).toBeCloseTo(0, 0);
+        expect(yaxis.max).toBeCloseTo(100, 0);
     });
 
     it('zooms in on mouse scroll up', function () {
@@ -86,10 +95,19 @@ describe("flot navigate plugin interactions", function () {
         eventHolder = placeholder.find('.flot-overlay');
         simulate.mouseWheel(eventHolder[0], clientX, clientY, -3);
 
-        expect(xaxis.min).toBe(0);
-        expect(xaxis.max).toBe(1);
-        expect(yaxis.min).toBe(0);
-        expect(yaxis.max).toBeCloseTo(1, 7);
+        /*
+            I would really like better precission but:
+                * the browsers may place the graph to fractional pixel coordinates
+                * we can only deliver mouse events at integer coordinates
+                * so we can't align precisely our mouse clicks with a point specified in plot coordinates
+            hence our precission sucks.
+
+            But this test isn't about precission, so we are fine
+         */
+        expect(xaxis.min).toBeCloseTo(0, 1);
+        expect(xaxis.max).toBeCloseTo(1, 1);
+        expect(yaxis.min).toBeCloseTo(0, 1);
+        expect(yaxis.max).toBeCloseTo(1, 1);
     });
 
 });
