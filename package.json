@@ -3,10 +3,11 @@
   "version": "0.3.5",
   "main": "jquery.flot.js",
   "scripts": {
-    "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1",
+    "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 && npm run build-test",
     "coverage": "node node_modules/karma/bin/karma start --single-run --coverage --no-auto-watch --concurrency=1",
     "linter": "eslint ./*.js",
-    "build": "node build"
+    "build": "node build",
+    "build-test": "npm --silent run build test"
   },
   "devDependencies": {
     "concat-files": "^0.1.1",
@@ -26,6 +27,7 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-spec-reporter": "0.0.26",
     "phantomjs-polyfill-find": "0.0.1",
+    "tmp": "0.0.31",
     "travis-github-lint-status": "^1.0.1"
   }
 }
