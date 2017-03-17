@@ -1352,14 +1352,8 @@ Licensed under the MIT license.
             axis.max = max != null ? max : 1;
         }
 
-        function computeValuePrecision(min, max, direction, ticks, tickDecimals) {
-            var noTicks;
-
-            if (typeof ticks === "number" && ticks > 0) {
-                noTicks = ticks;
-            } else {
-                noTicks = 0.3 * Math.sqrt(direction === "x" ? surface.width : surface.height);
-            }
+        function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
+            var noTicks = fixupNumberOfTicks(direction, surface, ticks);
 
             var delta = (max - min) / noTicks,
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
@@ -1450,11 +1444,26 @@ Licensed under the MIT license.
             return formatted;
         };
 
+        function fixupNumberOfTicks(direction, surface, ticksOption) {
+            var noTicks;
+
+            if (typeof ticksOption === "number" && ticksOption > 0) {
+                noTicks = ticksOption;
+            } else {
+                noTicks = 0.3 * Math.sqrt(direction === "x" ? surface.width : surface.height);
+            }
+
+            return noTicks;
+        }
+
         function setupTickGeneration(axis) {
             var opts = axis.options;
+            var noTicks;
 
-            axis.delta = (axis.max - axis.min) / opts.ticks;
-            var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, opts.ticks, opts.tickDecimals);
+            noTicks = fixupNumberOfTicks(axis.direction, surface, opts.ticks);
+
+            axis.delta = saturated.delta(axis.min, axis.max, noTicks);
+            var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, noTicks, opts.tickDecimals);
 
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
             axis.tickSize = computeTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
