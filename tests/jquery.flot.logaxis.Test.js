@@ -14,7 +14,6 @@ describe("unit tests for the log scale functions", function() {
         expect(ticks).toEqual([0.2, 0.4, 0.6, 1, 2, 3, 5, 8 ]);
     });
 
-
     it('should use log scales for high dynamic range intervals', function() {
         var ticks = $.plot.logTicksGenerator(0.0001, 10000, 10);
 
@@ -147,5 +146,31 @@ describe("integration tests for log scale functions", function() {
         });
 
         expect(queryPlotForYTicks()).toEqual(['0.0001', '0.001', '0.01', '0.1', '1', '10', '100', '1000', '10000']);
+    });
+
+    it('should allow a user specified tick formatter', function() {
+        var logdata1 = [
+            [0, 0.0001],
+            [1, 0.001],
+            [2, 0.01],
+            [3, 0.1],
+            [4, 1],
+            [5, 10],
+            [6, 100],
+            [7, 1000],
+            [8, 10000]
+        ];
+
+        $.plot(placeholder, [logdata1], {
+            yaxis: {
+                mode: 'log',
+                tickFormatter: function () {
+                    return 'log tick';
+                },
+                autoscale: 'exact'
+            }
+        });
+
+        expect(queryPlotForYTicks()).toEqual(['log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick']);
     });
 });
