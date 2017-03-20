@@ -257,7 +257,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 result[axisName] = {
                     min: axis.min, // axis.options.min,
                     max: axis.max, // axis.options.max,
-                    autoscale: axis.options.autoscale
+                    autoscale: axis.options.autoscale,
+                    navigateMin: axis.options.navigateMin || 0,
+                    navigateMax: axis.options.navigateMax || 0
                 }
             });
 
@@ -498,22 +500,18 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var axis = axes[axisName];
                 var intialAxisState = initialState[axisName];
                 var opts = axis.options,
-                    min, max, d = delta[axis.direction];
+                    d = delta[axis.direction];
 
                 if (opts.disablePan === true) {
                     return;
                 }
 
                 if (d !== 0) {
-                    min = axis.c2p(axis.p2c(intialAxisState.min) + d);
-                    max = axis.c2p(axis.p2c(intialAxisState.max) + d);
-                    opts.autoscale = 'none';
-                    opts.min = min;
-                    opts.max = max;
+                    opts.navigateMin = axis.c2p(axis.p2c(intialAxisState.navigateMin) + d);
+                    opts.navigateMax = axis.c2p(axis.p2c(intialAxisState.navigateMax) + d);
+                    //opts.autoscale = "none";
                 } else {
-                    opts.min = intialAxisState.min;
-                    opts.max = intialAxisState.max;
-                    opts.autoscale = intialAxisState.autoscale;
+                    //opts.autoscale = intialAxisState.autoscale;
                 }
             });
 

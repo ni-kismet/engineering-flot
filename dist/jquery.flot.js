@@ -804,15 +804,18 @@ Licensed under the MIT license.
                     alignTicksWithAxis: null, // axis number or null for no sync
                     tickDecimals: null, // no. of decimals, null means auto
                     tickSize: null, // number or [number, "unit"]
-                    minTickSize: null // number or [number, "unit"]
+                    minTickSize: null//, // number or [number, "unit"]
+                    //navigateMin: 0,
+                    //navigateMax: 0
                 },
                 yaxis: {
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
                     autoscale: "loose", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
-                    showTickLabels: "major" // "none", "endpoints", "major", "all"
-
+                    showTickLabels: "major"//, // "none", "endpoints", "major", "all"
+                    //navigateMin: 0,
+                    //navigateMax: 0
                 },
                 xaxes: [],
                 yaxes: [],
@@ -2015,9 +2018,12 @@ Licensed under the MIT license.
 
         function setRange(axis) {
             var opts = axis.options,
-                min,
-                max,
-                delta;
+                windowWidth = opts.windowSize,
+                min = opts.min,
+                max = opts.max,
+                delta,
+                navigateMin = opts.navigateMin || 0,
+                navigateMax = opts.navigateMax || 0;
 
             switch (opts.autoscale) {
                 case "none":
@@ -2040,6 +2046,14 @@ Licensed under the MIT license.
                 case "exact":
                     min = (axis.datamin != null ? axis.datamin : opts.min);
                     max = (axis.datamax != null ? axis.datamax : opts.max);
+                    break;
+                case "sliding-window":
+                    if (axis.datamax > max) {
+                        // move the window to fit the new data,
+                        // keeping the axis range constant
+                        max = axis.datamax;
+                        min = Math.max(axis.datamax - (windowWidth || 100), min);
+                    }
                     break;
             }
 
@@ -2065,14 +2079,14 @@ Licensed under the MIT license.
                 }
             }
 
-            // grow loose or grow exact
-            if (opts.autoscale !== "none" && opts.growOnly === true) {
+            // grow loose or grow exact supported
+            if (opts.autoscale !== "none" && opts.autoscale !== "sliding-window" && opts.growOnly === true) {
                 min = (min < axis.datamin) ? min : axis.datamin;
                 max = (max > axis.datamax) ? max : axis.datamax;
             }
 
-            axis.min = min != null ? min : -1;
-            axis.max = max != null ? max : 1;
+            axis.min = (min != null ? min : -1) + navigateMin;
+            axis.max = (max != null ? max : 1) + navigateMax;
         }
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
