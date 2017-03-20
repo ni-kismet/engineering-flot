@@ -402,9 +402,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     max = tmp;
                 }
 
-                opts.autoscale = 'none';
-                opts.min = min;
-                opts.max = max;
+                opts.navigateMin = (opts.navigateMin || 0) - (axis.min - min);
+                opts.navigateMax = (opts.navigateMax || 0) - (axis.max - max);
             });
 
             plot.setupGrid();
@@ -426,17 +425,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             $.each(plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
-                    min, max, d = delta[axis.direction];
+                    d = delta[axis.direction];
 
                 if (opts.disablePan === true) {
                     return;
                 }
 
                 if (d !== 0) {
-                    min = axis.c2p(axis.p2c(axis.min) + d);
-                    max = axis.c2p(axis.p2c(axis.max) + d);
-                    opts.min = min;
-                    opts.max = max;
+                    opts.navigateMin = axis.c2p(d);
+                    opts.navigateMax = axis.c2p(d);
                 }
             });
 
@@ -509,9 +506,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 if (d !== 0) {
                     opts.navigateMin = axis.c2p(axis.p2c(intialAxisState.navigateMin) + d);
                     opts.navigateMax = axis.c2p(axis.p2c(intialAxisState.navigateMax) + d);
-                    //opts.autoscale = "none";
-                } else {
-                    //opts.autoscale = intialAxisState.autoscale;
                 }
             });
 
