@@ -2117,7 +2117,7 @@ Licensed under the MIT license.
                 ++dec;
             }
 
-            return dec;
+            return Math.abs(dec);
         };
 
         function computeTickSize(min, max, direction, options, tickDecimals) {
