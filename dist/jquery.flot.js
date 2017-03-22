@@ -805,8 +805,6 @@ Licensed under the MIT license.
                     tickDecimals: null, // no. of decimals, null means auto
                     tickSize: null, // number or [number, "unit"]
                     minTickSize: null//, // number or [number, "unit"]
-                    //navigateMin: 0,
-                    //navigateMax: 0
                 },
                 yaxis: {
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
@@ -814,8 +812,6 @@ Licensed under the MIT license.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
                     showTickLabels: "major"//, // "none", "endpoints", "major", "all"
-                    //navigateMin: 0,
-                    //navigateMax: 0
                 },
                 xaxes: [],
                 yaxes: [],
@@ -2117,7 +2113,7 @@ Licensed under the MIT license.
                 ++dec;
             }
 
-            return Math.abs(dec);
+            return dec;
         };
 
         function computeTickSize(min, max, direction, options, tickDecimals) {
