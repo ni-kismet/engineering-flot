@@ -1354,8 +1354,8 @@ Licensed under the MIT license.
 
             // grow loose or grow exact supported
             if (opts.autoscale !== "none" && opts.autoscale !== "sliding-window" && opts.growOnly === true) {
-                min = (min < axis.datamin) ? min : axis.datamin;
-                max = (max > axis.datamax) ? max : axis.datamax;
+                min = (min < axis.datamin) ? min : (axis.datamin !== null ? axis.datamin : min);
+                max = (max > axis.datamax) ? max : (axis.datamax !== null ? axis.datamax : max);
             }
 
             min = (min != null ? min : -1) + navigateMin;

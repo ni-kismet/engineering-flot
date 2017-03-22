@@ -45,9 +45,35 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(100);
         });
 
+        it('should keep the axis min and max for grow-exact autoscaling if no data is set', function () {
+            options.xaxis = {autoscale: 'exact', growOnly: true, min: 0, max: 50};
+            options.yaxis = {autoscale: 'exact', growOnly: true, min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
         it('should keep the axis min and max for loose autoscaling if no data is set', function () {
             options.xaxis = {autoscale: 'loose', min: 0, max: 50};
             options.yaxis = {autoscale: 'loose', min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
+        it('should keep the axis min and max for grow-loose autoscaling if no data is set', function () {
+            options.xaxis = {autoscale: 'loose', growOnly: true, min: 0, max: 50};
+            options.yaxis = {autoscale: 'loose', growOnly: true, min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
