@@ -255,9 +255,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
                 result[axisName] = {
-                    min: axis.min, // axis.options.min,
-                    max: axis.max, // axis.options.max,
-                    autoscale: axis.options.autoscale,
                     navigateMin: axis.options.navigateMin || 0,
                     navigateMax: axis.options.navigateMax || 0
                 }
