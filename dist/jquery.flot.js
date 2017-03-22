@@ -2085,8 +2085,17 @@ Licensed under the MIT license.
                 max = (max > axis.datamax) ? max : axis.datamax;
             }
 
-            axis.min = (min != null ? min : -1) + navigateMin;
-            axis.max = (max != null ? max : 1) + navigateMax;
+            min = (min != null ? min : -1) + navigateMin;
+            max = (max != null ? max : 1) + navigateMax;
+
+            if (min > max) {
+                var tmp = max;
+                max = min;
+                min = tmp;
+            }
+
+            axis.min = saturated.saturate(min);
+            axis.max = saturated.saturate(max);
         }
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
