@@ -32,6 +32,19 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(100);
         });
 
+        it('should swap the axis min and max for min > max', function () {
+            options.xaxis = {autoscale: 'none', min: 50, max: 0};
+            options.yaxis = {autoscale: 'none', min: 100, max: 0};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
         it('should keep the axis min and max for exact autoscaling if no data is set', function () {
             options.xaxis = {autoscale: 'exact', min: 0, max: 50};
             options.yaxis = {autoscale: 'exact', min: 0, max: 100};
