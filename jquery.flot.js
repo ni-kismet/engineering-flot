@@ -1375,15 +1375,15 @@ Licensed under the MIT license.
 
         function setRange(axis) {
             var opts = axis.options,
-                navigateMin = opts.offsetBellow || 0,
-                navigateMax = opts.offsetAbove || 0;
+                offsetBellow = opts.offsetBellow || 0,
+                offsetAbove = opts.offsetAbove || 0;
 
             autoscaleAxis(axis);
             var min = axis.autoscaledMin,
                 max = axis.autoscaledMax;
 
-            min = (min != null ? min : -1) + navigateMin;
-            max = (max != null ? max : 1) + navigateMax;
+            min = (min != null ? min : -1) + offsetBellow;
+            max = (max != null ? max : 1) + offsetAbove;
 
             if (min > max) {
                 var tmp = max;
