@@ -32,9 +32,35 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(100);
         });
 
+        it('should swap the axis min and max for min > max', function () {
+            options.xaxis = {autoscale: 'none', min: 50, max: 0};
+            options.yaxis = {autoscale: 'none', min: 100, max: 0};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
         it('should keep the axis min and max for exact autoscaling if no data is set', function () {
             options.xaxis = {autoscale: 'exact', min: 0, max: 50};
             options.yaxis = {autoscale: 'exact', min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
+        it('should keep the axis min and max for grow-exact autoscaling if no data is set', function () {
+            options.xaxis = {autoscale: 'exact', growOnly: true, min: 0, max: 50};
+            options.yaxis = {autoscale: 'exact', growOnly: true, min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -56,6 +82,64 @@ describe('flot', function() {
             expect(axes.xaxis.max).toBe(50);
             expect(axes.yaxis.min).toBe(0);
             expect(axes.yaxis.max).toBe(100);
+        });
+
+        it('should keep the axis min and max for grow-loose autoscaling if no data is set', function () {
+            options.xaxis = {autoscale: 'loose', growOnly: true, min: 0, max: 50};
+            options.yaxis = {autoscale: 'loose', growOnly: true, min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
+        it('should keep the axis min and max for window autoscaling if no data is set', function () {
+            options.xaxis = {autoscale: 'sliding-window', min: 0, max: 50};
+            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(50);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
+        it('should not shift the axis min and max for window autoscaling if data is in window', function () {
+            options.xaxis = {autoscale: 'sliding-window', min: 0, max: 10};
+            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10};
+            // default window size is 100
+            plot = $.plot(placeholder, [[]], options);
+            plot.setData([[[0, 0], [50, 50], [100, 100]]]);
+            plot.setupGrid();
+            plot.draw();
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(100);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(100);
+        });
+
+        it('should shift the axis min and max for window autoscaling if data is bigger than window', function () {
+            options.xaxis = {autoscale: 'sliding-window', min: 0, max: 10};
+            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10}; 
+            // default window size is 100
+            plot = $.plot(placeholder, [[]], options);
+            plot.setData([[[0, 0], [100, 100], [200, 200]]]);
+            plot.setupGrid();
+            plot.draw();
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(100);
+            expect(axes.xaxis.max).toBe(200);
+            expect(axes.yaxis.min).toBe(100);
+            expect(axes.yaxis.max).toBe(200);
         });
 
         it('should widen the axis max if axis min is the same as axis max', function () {

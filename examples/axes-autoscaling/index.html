@@ -6,7 +6,7 @@
 	<link href="../examples.css" rel="stylesheet" type="text/css">
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
-
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.navigate.js"></script>
   <script type="text/javascript">
 
     $(function() {
@@ -30,7 +30,13 @@
             ],
             yaxes: [
                 { position: 'left', autoscale: 'none', min: -2.0, max: 2.0 }
-            ]
+            ],
+			zoom: {
+				interactive: true
+			},
+			pan: {
+				interactive: true
+			}
         });
 
         function update () {

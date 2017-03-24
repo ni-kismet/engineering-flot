@@ -255,9 +255,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
                 result[axisName] = {
-                    min: axis.min, // axis.options.min,
-                    max: axis.max, // axis.options.max,
-                    autoscale: axis.options.autoscale
+                    offsetBellow: axis.options.offsetBellow || 0,
+                    offsetAbove: axis.options.offsetAbove || 0
                 }
             });
 
@@ -400,9 +399,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     max = tmp;
                 }
 
-                opts.autoscale = 'none';
-                opts.min = min;
-                opts.max = max;
+                opts.offsetBellow = (opts.offsetBellow || 0) - (axis.min - min);
+                opts.offsetAbove = (opts.offsetAbove || 0) - (axis.max - max);
             });
 
             plot.setupGrid();
@@ -424,17 +422,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             $.each(plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
-                    min, max, d = delta[axis.direction];
+                    d = delta[axis.direction];
 
                 if (opts.disablePan === true) {
                     return;
                 }
 
                 if (d !== 0) {
-                    min = axis.c2p(axis.p2c(axis.min) + d);
-                    max = axis.c2p(axis.p2c(axis.max) + d);
-                    opts.min = min;
-                    opts.max = max;
+                    opts.offsetBellow = axis.c2p(d);
+                    opts.offsetAbove = axis.c2p(d);
                 }
             });
 
@@ -498,22 +494,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var axis = axes[axisName];
                 var intialAxisState = initialState[axisName];
                 var opts = axis.options,
-                    min, max, d = delta[axis.direction];
+                    d = delta[axis.direction];
 
                 if (opts.disablePan === true) {
                     return;
                 }
 
                 if (d !== 0) {
-                    min = axis.c2p(axis.p2c(intialAxisState.min) + d);
-                    max = axis.c2p(axis.p2c(intialAxisState.max) + d);
-                    opts.autoscale = 'none';
-                    opts.min = min;
-                    opts.max = max;
-                } else {
-                    opts.min = intialAxisState.min;
-                    opts.max = intialAxisState.max;
-                    opts.autoscale = intialAxisState.autoscale;
+                    opts.offsetBellow = axis.c2p(axis.p2c(intialAxisState.offsetBellow) + d);
+                    opts.offsetAbove = axis.c2p(axis.p2c(intialAxisState.offsetAbove) + d);
                 }
             });
 

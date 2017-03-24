@@ -789,7 +789,8 @@ Licensed under the MIT license.
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
                     autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "exact", // Available modes: "none", "loose", "exact",
+                    autoscale: "exact", // Available modes: "none", "loose", "exact", "sliding-window"
+                    windowSize: 100, // size of sliding-window
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -812,7 +813,6 @@ Licensed under the MIT license.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
                     showTickLabels: "major" // "none", "endpoints", "major", "all"
-
                 },
                 xaxes: [],
                 yaxes: [],
@@ -2013,39 +2013,10 @@ Licensed under the MIT license.
             insertLegend();
         }
 
-        function setRange(axis) {
-            var opts = axis.options,
-                min,
-                max,
-                delta;
-
-            switch (opts.autoscale) {
-                case "none":
-                    min = +(opts.min != null ? opts.min : axis.datamin);
-                    max = +(opts.max != null ? opts.max : axis.datamax);
-                    break;
-                case "loose":
-                    if (axis.datamin != null && axis.datamax != null) {
-                        min = axis.datamin;
-                        max = axis.datamax;
-                        delta = saturated.saturate(max - min);
-                        var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
-                        min -= delta * margin;
-                        max += delta * margin;
-                    } else {
-                        min = opts.min;
-                        max = opts.max;
-                    }
-                    break;
-                case "exact":
-                    min = (axis.datamin != null ? axis.datamin : opts.min);
-                    max = (axis.datamax != null ? axis.datamax : opts.max);
-                    break;
-            }
-
-            min = (min === undefined ? null : min);
-            max = (max === undefined ? null : max);
-            delta = max - min;
+        function widenMinMax(minimum, maximum) {
+            var min = (minimum === undefined ? null : minimum);
+            var max = (maximum === undefined ? null : maximum);
+            var delta = max - min;
             if (delta === 0.0) {
                 // degenerate case
                 var widen = max === 0 ? 1 : 0.01;
@@ -2065,14 +2036,86 @@ Licensed under the MIT license.
                 }
             }
 
-            // grow loose or grow exact
-            if (opts.autoscale !== "none" && opts.growOnly === true) {
-                min = (min < axis.datamin) ? min : axis.datamin;
-                max = (max > axis.datamax) ? max : axis.datamax;
+            return {
+                min: min,
+                max: max
+            };
+        }
+
+        function autoscaleAxis(axis) {
+            var opts = axis.options,
+                min = opts.min,
+                max = opts.max,
+                datamin = axis.datamin,
+                datamax = axis.datamax,
+                delta;
+
+            switch (opts.autoscale) {
+                case "none":
+                    min = +(opts.min != null ? opts.min : axis.datamin);
+                    max = +(opts.max != null ? opts.max : axis.datamax);
+                    break;
+                case "loose":
+                    if (datamin != null && datamax != null) {
+                        min = datamin;
+                        max = datamax;
+                        delta = saturated.saturate(max - min);
+                        var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
+                        min -= delta * margin;
+                        max += delta * margin;
+                    } else {
+                        min = opts.min;
+                        max = opts.max;
+                    }
+                    break;
+                case "exact":
+                    min = (datamin != null ? datamin : opts.min);
+                    max = (datamax != null ? datamax : opts.max);
+                    break;
+                case "sliding-window":
+                    if (axis.datamax > max) {
+                        // move the window to fit the new data,
+                        // keeping the axis range constant
+                        max = axis.datamax;
+                        min = Math.max(axis.datamax - (opts.windowSize || 100), min);
+                    }
+                    break;
             }
 
-            axis.min = min != null ? min : -1;
-            axis.max = max != null ? max : 1;
+            var widenedMinMax = widenMinMax(min, max);
+            min = widenedMinMax.min;
+            max = widenedMinMax.max;
+
+            // grow loose or grow exact supported
+            if (opts.growOnly === true && opts.autoscale !== "none" && opts.autoscale !== "sliding-window") {
+                min = (min < axis.datamin) ? min : (axis.datamin !== null ? axis.datamin : min);
+                max = (max > axis.datamax) ? max : (axis.datamax !== null ? axis.datamax : max);
+            }
+
+            axis.autoscaledMin = min;
+            axis.autoscaledMax = max;
+        }
+
+        function setRange(axis) {
+            var opts = axis.options,
+                offsetBellow = opts.offsetBellow || 0,
+                offsetAbove = opts.offsetAbove || 0;
+
+            autoscaleAxis(axis);
+            var min = axis.autoscaledMin,
+                max = axis.autoscaledMax;
+
+            min = (min != null ? min : -1) + offsetBellow;
+            max = (max != null ? max : 1) + offsetAbove;
+
+            if (min > max) {
+                var tmp = max;
+                max = min;
+                min = tmp;
+            }
+
+            axis.min = saturated.saturate(min);
+            axis.max = saturated.saturate(max);
         }
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
