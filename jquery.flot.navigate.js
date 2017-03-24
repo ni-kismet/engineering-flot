@@ -255,8 +255,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
                 result[axisName] = {
-                    navigateMin: axis.options.navigateMin || 0,
-                    navigateMax: axis.options.navigateMax || 0
+                    offsetBellow: axis.options.offsetBellow || 0,
+                    offsetAbove: axis.options.offsetAbove || 0
                 }
             });
 
@@ -399,8 +399,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     max = tmp;
                 }
 
-                opts.navigateMin = (opts.navigateMin || 0) - (axis.min - min);
-                opts.navigateMax = (opts.navigateMax || 0) - (axis.max - max);
+                opts.offsetBellow = (opts.offsetBellow || 0) - (axis.min - min);
+                opts.offsetAbove = (opts.offsetAbove || 0) - (axis.max - max);
             });
 
             plot.setupGrid();
@@ -429,8 +429,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 if (d !== 0) {
-                    opts.navigateMin = axis.c2p(d);
-                    opts.navigateMax = axis.c2p(d);
+                    opts.offsetBellow = axis.c2p(d);
+                    opts.offsetAbove = axis.c2p(d);
                 }
             });
 
@@ -501,8 +501,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 if (d !== 0) {
-                    opts.navigateMin = axis.c2p(axis.p2c(intialAxisState.navigateMin) + d);
-                    opts.navigateMax = axis.c2p(axis.p2c(intialAxisState.navigateMax) + d);
+                    opts.offsetBellow = axis.c2p(axis.p2c(intialAxisState.offsetBellow) + d);
+                    opts.offsetAbove = axis.c2p(axis.p2c(intialAxisState.offsetAbove) + d);
                 }
             });
 
