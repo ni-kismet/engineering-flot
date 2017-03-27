@@ -805,14 +805,16 @@ Licensed under the MIT license.
                     alignTicksWithAxis: null, // axis number or null for no sync
                     tickDecimals: null, // no. of decimals, null means auto
                     tickSize: null, // number or [number, "unit"]
-                    minTickSize: null // number or [number, "unit"]
+                    minTickSize: null, // number or [number, "unit"]
+                    navigationOffset: { below: 0, above: 0 } // the navigation offset. this is calculated by the flot.navigate for each axis
                 },
                 yaxis: {
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
                     autoscale: "loose", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
-                    showTickLabels: "major" // "none", "endpoints", "major", "all"
+                    showTickLabels: "major", // "none", "endpoints", "major", "all"
+                    navigationOffset: { below: 0, above: 0 } // the navigation offset. this is calculated by the flot.navigate for each axis
                 },
                 xaxes: [],
                 yaxes: [],
@@ -2097,16 +2099,14 @@ Licensed under the MIT license.
         }
 
         function setRange(axis) {
-            var opts = axis.options,
-                offsetBellow = opts.offsetBellow || 0,
-                offsetAbove = opts.offsetAbove || 0;
-
             autoscaleAxis(axis);
-            var min = axis.autoscaledMin,
-                max = axis.autoscaledMax;
 
-            min = (min != null ? min : -1) + offsetBellow;
-            max = (max != null ? max : 1) + offsetAbove;
+            var min = axis.autoscaledMin,
+                max = axis.autoscaledMax,
+                navigationOffset = axis.options.navigationOffset;
+
+            min = (min != null ? min : -1) + (navigationOffset.below || 0);
+            max = (max != null ? max : 1) + (navigationOffset.above || 0);
 
             if (min > max) {
                 var tmp = max;
