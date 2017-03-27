@@ -500,9 +500,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     return;
                 }
 
-                var offsetBelow = axis.c2p(axis.p2c(intialNavigation.below) + d);
-                var offsetAbove = axis.c2p(axis.p2c(intialNavigation.above) + d);
                 if (d !== 0) {
+                    var offsetBelow = axis.c2p(axis.p2c(intialNavigation.below) + d),
+                        offsetAbove = axis.c2p(axis.p2c(intialNavigation.above) + d);
                     opts.navigationOffset = { below: offsetBelow, above: offsetAbove };
                 }
             });
