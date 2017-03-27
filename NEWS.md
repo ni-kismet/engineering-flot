@@ -1,3 +1,182 @@
+## engineering-flot 0.3.8 ##
+
+### Changes ###
+
+- log axis now allow a custom formatter to be specified.
+
+## engineering-flot 0.3.5 ##
+
+### Changes ###
+
+- add linter
+
+### Bug fixes ###
+
+- fixes the computation of precission needed for the endpoint tick labels.
+
+## engineering-flot 0.3.4 ##
+
+### Bug fixes ###
+
+- axis formatter fixes.
+
+## engineering-flot 0.3.2 ##
+
+### Bug fixes ###
+
+- fix pan and zoom to work for all autoscale modes.
+
+## engineering-flot 0.3.1 ##
+
+### Changes ###
+
+- engineering-flot should be consumed by loading the newly added dist/jquery.flot.js
+file and the needed plugins.
+- display the endpoint ticks with better precission.
+
+## engineering-flot 0.2.4 ##
+
+### Changes ###
+
+- Axis range is between axis.min and axis.max if no data available
+
+## engineering-flot 0.2.3 ##
+
+### Changes ###
+
+- add computeRangeForDataSeries and adjustSeriesDataRange methods to the plot
+- add adjustSeriesDataRange hook.
+
+## engineering-flot 0.2.2 ##
+
+### Changes ###
+
+- add new symbols to the symbols plugin
+- Fix for autoScale=loose and stop generating endpoints when not needed
+- make axilabels plugin strict
+- use karma to run the (few) tests we have
+- run the tests on TravisCI
+- add coveralls support
+
+## engineering-flot 0.2.1 ##
+
+### Changes ###
+
+- the axis autoscale option was a breaking change, increment the minor version
+(late is better that never) and fix the examples.
+
+## engineering-flot 0.1.15 ##
+
+### Changes ###
+
+- add the findNearbyItem method to the plot.
+- add an axis autoscale option that is used to specify the desired autoscale mode.
+
+## engineering-flot 0.1.14 ##
+
+### Changes ###
+
+- Performance: make the axislabels use the axisReserveSpace hook which results in
+simpler, faster code for axis labels.
+
+## engineering-flot 0.1.12 ##
+
+### Bug fixes ###
+
+- fixes for showTickLabels option introduced in 0.1.11
+
+## engineering-flot 0.1.11 ##
+
+### Changes ###
+
+- add showTickLabels option that can be used to specify which ticks labels are visible:
+ +"none", "endpoints", "major" or "all". The default is "major".
+
+- add fillTowards option, used to specify the baseline for area and bar fills. The
+most usefull ones are 0 ,-Infiniy and +Infinity.
+
+## engineering-flot 0.1.10 ##
+
+### Changes ###
+
+- add the ability to disable pan for a specific axis
+
+## engineering-flot 0.1.9 ##
+
+### Changes ###
+
+Cosmetic: improve the way the navigation hints are drawn. Add ellipse to the
+flot.symbols plugin.
+
+## engineering-flot 0.1.8 ##
+
+### Changes ###
+
+- Don't compute datamin and datamax if not autoscaling, this improves the performance in some cases.
+
+## engineering-flot 0.1.7 ##
+
+### Changes ###
+
+- implement grow-only autoscaling behaviour and add docs and example
+
+## engineering-flot 0.1.6 ##
+
+### Bug fixes ###
+
+- make the text measurements cache more robust, cache the measurements for ticks
+that were measured but not displayed too. This improves the performance a bit.
+
+## engineering-flot 0.1.5 ##
+
+### Changes ###
+
+- Add tickmarks functionality. Tick marks support the following cases:
+
+    - Major Ticks Marks visible (showTicks : true, showMinorTicks : false)
+    - Major & Minor Ticks Marks visible (showTicks : true, showMinorTicks : true)
+    - All Tick Marks hidden (showTicks : false)
+
+## engineering-flot 0.1.4 ##
+
+### Changes ###
+
+- fix examples
+
+## engineering-flot 0.1.3 ##
+
+### Changes ###
+
+import the Axis Labels Plugin from http://github.com/markrcote/flot-axislabels
+
+## engineering-flot 0.1.2 ##
+
+### Changes ###
+
+- add clearCache function that clears the measurements cache.
+
+## engineering-flot 0.1.1 ##
+
+### Changes ###
+
+- Forked the Flot codebase into engineering flot
+
+- add logaxis plugin
+- add smart pan to the navigation plugin
+- remove code for backwards compatibility
+- remove excanvas support
+- split Canvas wrapper into a separate file
+- test infrastructure
+- improve the performance by:
+    - add a flatdata plugin that enables passing data into a faster and memory
+    efficient format
+    - allow the use of a user specified decimation method
+    - reuse internal buffers if possible.
+
+- add an svg layer to Flot
+
+
+
 ## Flot 0.8.3 ##
 
 ### Changes ###
@@ -548,7 +727,7 @@ also surfaced, if your graphs are slow in IE, you may want to give it a spin:
  - Refactor replot behaviour so Flot tries to reuse the existing canvas,
    adding shutdown() methods to the plot. (based on patch by Ryley Breiddal,
    issue 269)
-   
+
    This prevents a memory leak in Chrome and hopefully makes replotting faster
    for those who are using $.plot instead of .setData()/.draw(). Also update
    jQuery to 1.5.1 to prevent IE leaks fixed in jQuery.
@@ -708,7 +887,7 @@ in event handling speed.
    The "setting options" example provides a demonstration.
 
  - Gradient bars. (suggestion by stefpet)
-  
+
  - Added a "plotunselected" event which is triggered when the selection is
    removed, see "selection" example. (suggestion by Meda Ugo)
 
@@ -735,7 +914,7 @@ in event handling speed.
 
  - Added pointOffset method for converting a point in data space to an offset
    within the placeholder.
-  
+
  - Plugin system: register an init method in the $.flot.plugins array to get
    started, see PLUGINS.txt for details on how to write plugins (it's easy).
    There are also some extra methods to enable access to internal state.
@@ -744,7 +923,7 @@ in event handling speed.
    the data and doing the plot. This can be used to modify Flot without
    changing the source, useful for writing plugins. Some hooks are defined,
    more are likely to come.
-  
+
  - Threshold plugin: you can set a threshold and a color, and the data points
    below that threshold will then get the color. Useful for marking data
    below 0, for instance.
@@ -890,9 +1069,9 @@ code shouldn't break) and markings (formerly coloredAreas).
    value they represent.
 
  - setSelection now takes a second parameter which you can use to prevent the
-   method from firing the "plotselected" handler. 
+   method from firing the "plotselected" handler.
 
- - Improved the handling of axis auto-scaling with bars. 
+ - Improved the handling of axis auto-scaling with bars.
 
 ## Bug fixes ##
 
@@ -900,7 +1079,7 @@ code shouldn't break) and markings (formerly coloredAreas).
    timothytoe)
 
  - Fixed a bug in finding max values for all-negative data sets.
- 
+
  - Prevent the possibility of eternal looping in tick calculations.
 
  - Fixed a bug when borderWidth is set to 0. (reported by Rob/sanchothefat)
