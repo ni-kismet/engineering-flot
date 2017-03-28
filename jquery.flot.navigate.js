@@ -255,7 +255,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
                 result[axisName] = {
-                    navigationOffset: axis.options.navigationOffset || {below: 0, above: 0}
+                    navigationOffset: axis.options.offset || {below: 0, above: 0}
                 }
             });
 
@@ -384,7 +384,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var opts = axis.options,
                     min = minmax[axis.direction].min,
                     max = minmax[axis.direction].max,
-                    navigationOffset = axis.options.navigationOffset;
+                    navigationOffset = axis.options.offset;
 
                 if (opts.disableZoom) {
                     return;
@@ -401,7 +401,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
                 var offsetBelow = navigationOffset.below - (axis.min - min);
                 var offsetAbove = navigationOffset.above - (axis.max - max);
-                opts.navigationOffset = { below: offsetBelow, above: offsetAbove };
+                opts.offset = { below: offsetBelow, above: offsetAbove };
             });
 
             plot.setupGrid();
@@ -430,7 +430,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 if (d !== 0) {
-                    opts.navigationOffset = { below: d, above: d };
+                    opts.offset = { below: d, above: d };
                 }
             });
 
@@ -503,7 +503,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 if (d !== 0) {
                     var offsetBelow = axis.c2p(axis.p2c(intialNavigation.below) + d),
                         offsetAbove = axis.c2p(axis.p2c(intialNavigation.above) + d);
-                    opts.navigationOffset = { below: offsetBelow, above: offsetAbove };
+                    opts.offset = { below: offsetBelow, above: offsetAbove };
                 }
             });
 

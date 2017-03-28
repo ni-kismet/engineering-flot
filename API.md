@@ -256,7 +256,9 @@ xaxis, yaxis: {
     min: null or number
     max: null or number
     autoscaleMargin: null or number
-    autoScale: "none" or "loose" or "exact"
+    windowSize: null or number
+    autoScale: "none" or "loose" or "exact" or "sliding-window"
+    growOnly: null or boolean
 
     transform: null or fn: number -> number
     inverseTransform: null or fn: number -> number
@@ -279,6 +281,8 @@ xaxis, yaxis: {
     tickLength: null or number
 
     alignTicksWithAxis: null or number
+    
+    offset: null or object({ below: number, above: number })
 }
 ```
 
@@ -354,15 +358,19 @@ the plot will furthermore extend the axis end-point to the nearest
 whole tick. The default value is "null" for the x axes and 0.02 for y
 axes which seems appropriate for most cases.
 
+The "windowSize" is the range of the plot that will be visible on "sliding-window" autoscale.
+If autoscale is not "sliding-window" this option will be ignored. Default value is 100.
+
 The "autoscale" option is used to automatically set the end-points of the axis. There
 are three options available: "none" will set the end-points to the "min"/"max" values,
 "exact" will set the end-points to minimum/maximum values in the visible area of the plot, and
-"loose" will add a margin to the "exact" mode based on the "autoscaleMargin" value.
+"loose" will add a margin to the "exact" mode based on the "autoscaleMargin" value. The "sliding-window"
+autoscale will always keep a "windowSize" range between axis.min and axis.max.
 The default value is "none" for the x axes, and "loose" for y axes.
 
 The "growOnly" option is useful when you want to have a smoother auto-scaling
 behavior. If true the scale range will grow to adapt to the data range but won't
-shrink back. This will be ignored if autoscale value is "none". The default value is false.
+shrink back. This will be ignored if autoscale value is "none" or "sliding-window". The default value is false.
 
 "transform" and "inverseTransform" are callbacks you can put in to
 change the way the data is drawn. You can design a function to
@@ -513,6 +521,9 @@ improve the looks, e.g. if you have one y axis to the left and one to
 the right, because the grid lines will then match the ticks in both
 ends. The trade-off is that the forced ticks won't necessarily be at
 natural places.
+
+"offset" can be used to move the plot area, or to reserve plot space.
+
 
 
 ## Multiple axes ##
