@@ -423,14 +423,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             $.each(plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
-                    d = axis.c2p(delta[axis.direction]);
+                    d = delta[axis.direction];
 
                 if (opts.disablePan === true) {
                     return;
                 }
 
                 if (d !== 0) {
-                    opts.offset = { below: d, above: d };
+                    var navigationOffset = axis.c2p(d);
+                    opts.offset = { below: navigationOffset, above: navigationOffset };
                 }
             });
 
@@ -492,7 +493,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             var axes = plot.getAxes();
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
-                var intialNavigation = initialState[axisName].navigationOffset;
+                var initialNavigation = initialState[axisName].navigationOffset;
                 var opts = axis.options,
                     d = delta[axis.direction];
 
@@ -501,8 +502,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 if (d !== 0) {
-                    var offsetBelow = axis.c2p(axis.p2c(intialNavigation.below) + d),
-                        offsetAbove = axis.c2p(axis.p2c(intialNavigation.above) + d);
+                    var offsetBelow = axis.c2p(axis.p2c(initialNavigation.below) + d),
+                        offsetAbove = axis.c2p(axis.p2c(initialNavigation.above) + d);
                     opts.offset = { below: offsetBelow, above: offsetAbove };
                 }
             });
