@@ -788,9 +788,9 @@ Licensed under the MIT license.
                     inverseTransform: null, // if transform is set, this should be the inverse function
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
-                    autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode
+                    autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode,
                     autoscale: "exact", // Available modes: "none", "loose", "exact", "sliding-window"
-                    windowSize: 100, // size of sliding-window
+                    windowSize: null, // null or number. This is the size of sliding-window.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
                     tickFormatter: null, // fn: number -> string
@@ -805,14 +805,16 @@ Licensed under the MIT license.
                     alignTicksWithAxis: null, // axis number or null for no sync
                     tickDecimals: null, // no. of decimals, null means auto
                     tickSize: null, // number or [number, "unit"]
-                    minTickSize: null // number or [number, "unit"]
+                    minTickSize: null, // number or [number, "unit"]
+                    offset: { below: 0, above: 0 } // the plot drawing offset. this is calculated by the flot.navigate for each axis
                 },
                 yaxis: {
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
                     autoscale: "loose", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
-                    showTickLabels: "major" // "none", "endpoints", "major", "all"
+                    showTickLabels: "major", // "none", "endpoints", "major", "all"
+                    offset: { below: 0, above: 0 } // the plot drawing offset. this is calculated by the flot.navigate for each axis
                 },
                 xaxes: [],
                 yaxes: [],
@@ -2097,16 +2099,14 @@ Licensed under the MIT license.
         }
 
         function setRange(axis) {
-            var opts = axis.options,
-                offsetBellow = opts.offsetBellow || 0,
-                offsetAbove = opts.offsetAbove || 0;
-
             autoscaleAxis(axis);
-            var min = axis.autoscaledMin,
-                max = axis.autoscaledMax;
 
-            min = (min != null ? min : -1) + offsetBellow;
-            max = (max != null ? max : 1) + offsetAbove;
+            var min = axis.autoscaledMin,
+                max = axis.autoscaledMax,
+                plotOffset = axis.options.offset;
+
+            min = (min != null ? min : -1) + (plotOffset.below || 0);
+            max = (max != null ? max : 1) + (plotOffset.above || 0);
 
             if (min > max) {
                 var tmp = max;
