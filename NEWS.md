@@ -1,3 +1,14 @@
+## engineering-flot 0.4.0 ##
+
+### Changes ###
+
+- sliding-window mode for auto scale.
+- small navigation improvements.
+
+### Bug fixes ###
+
+- precision of tick labels for large numbers.
+
 ## engineering-flot 0.3.8 ##
 
 ### Changes ###
