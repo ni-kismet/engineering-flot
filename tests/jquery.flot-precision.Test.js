@@ -54,7 +54,7 @@ describe("unit tests for the precision of axis", function() {
             [1, 1.1, 5, 2],
             [0.99963, 0.99964, null, 6],
             [1, 1.00000000000001, 10, 16],
-            [-200000, 200000, undefined, 0]
+            [-200000, 200000, undefined, -4]
             ];
 
         testVector.forEach(function (t) {

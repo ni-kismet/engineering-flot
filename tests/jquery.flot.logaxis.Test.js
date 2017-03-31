@@ -65,16 +65,9 @@ describe("unit tests for the log scale functions", function() {
         var logFormatter = $.plot.logTickFormatter,
             axis = [],
             precision = -2,
-            testVector = [
-            [801, '800'],
-            ];
+            testVector = [801, '801'];
 
-        testVector.forEach(function (t) {
-            var inputValue = t[0],
-                expectedValue = t[1];
-
-            expect(logFormatter(inputValue, axis, precision)).toBe(expectedValue);
-        });
+        expect(logFormatter(testVector[0], axis, precision)).toBe(testVector[1]);
     });
 
 });
