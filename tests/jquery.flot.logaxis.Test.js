@@ -64,10 +64,22 @@ describe("unit tests for the log scale functions", function() {
     it('should handle a negative precision when specified', function(){
         var logFormatter = $.plot.logTickFormatter,
             axis = [],
-            precision = -2,
-            testVector = [801, '801'];
+            testVector = [
+                [801, 0, '801'],
+                [801, -1, '801'],
+                [801, -2, '801'],
+                [801, -3, '801'],
+                [800, 0, '800'],
+                [800, -1, '800'],
+                [800, -20, '800']
+            ];
+        testVector.forEach(function (t) {
+            var inputValue = t[0],
+                precision = t[1]
+                expectedValue = t[2];
 
-        expect(logFormatter(testVector[0], axis, precision)).toBe(testVector[1]);
+            expect(logFormatter(inputValue, axis, precision)).toBe(expectedValue);
+            });
     });
 
 });
