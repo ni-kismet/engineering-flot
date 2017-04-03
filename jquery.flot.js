@@ -2470,7 +2470,7 @@ Licensed under the MIT license.
         };
 
         // returns the data item the mouse is over, or null if none is found
-        function findNearbyItem(mouseX, mouseY, seriesFilter, distance) {
+        function findNearbyItem(mouseX, mouseY, seriesFilter, distance, yDistanceContribution) {
             var maxDistance = distance,
                 smallestDistance = maxDistance * maxDistance + 1,
                 item = null,
@@ -2517,7 +2517,7 @@ Licensed under the MIT license.
                         // data units, because the scales of the axes may be different
                         var dx = Math.abs(axisx.p2c(x) - mouseX),
                             dy = Math.abs(axisy.p2c(y) - mouseY),
-                            dist = dx * dx + dy * dy * 0.025; // we save the sqrt
+                            dist = yDistanceContribution ? dx * dx + dy * dy * yDistanceContribution : dx * dx + dy * dy;
 
                         // use <= to ensure last point takes precedence
                         // (last generally means on top of)
