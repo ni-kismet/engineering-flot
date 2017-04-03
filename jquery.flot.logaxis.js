@@ -166,6 +166,9 @@ Set axis.mode to "log" to enable.
             x = Math.round(value / roundWith);
 
         if (precision) {
+            if (precision < 0) {
+                precision = 0;
+            }
             if ((tenExponent >= -4) && (tenExponent <= 4)) {
                 return defaultTickFormatter(value, axis, precision);
             } else {
