@@ -2517,7 +2517,7 @@ Licensed under the MIT license.
                         // data units, because the scales of the axes may be different
                         var dx = Math.abs(axisx.p2c(x) - mouseX),
                             dy = Math.abs(axisy.p2c(y) - mouseY),
-                            dist = distanceFunction(dx, dy) || dx * dx + dy * dy;
+                            dist = distanceFunction ? distanceFunction(dx, dy) : dx * dx + dy * dy;
 
                         // use <= to ensure last point takes precedence
                         // (last generally means on top of)
