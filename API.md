@@ -1216,7 +1216,7 @@ can call:
     Cleans up any event handlers Flot has currently registered. This
     is used internally.
 
- - findNearbyItem(mouseX, mouseY, seriesFilter, distance, distanceFunction)
+ - findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance)
     
     Returns the closest item to the position determined by mouseX and
     mouseY. The series on which the search is realised can be specified
