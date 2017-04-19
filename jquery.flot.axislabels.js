@@ -50,6 +50,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }
 
     AxisLabel.prototype.calculateSize = function() {
+        /*
         var elem = $('<div class="axisLabels" style="position:absolute;">' +
             this.opts.axisLabel + '</div>');
         this.plot.getPlaceholder().append(elem);
@@ -57,6 +58,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.labelWidth = elem.outerWidth(true);
         this.labelHeight = elem.outerHeight(true);
         elem.remove();
+        */
+
+        this.labelWidth = 23;
+        this.labelHeight = 16;
 
         this.width = this.height = 0;
         this.width = this.labelWidth + this.padding;
@@ -72,6 +77,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     AxisLabel.prototype.transforms = function(degrees, x, y) {
         var stransforms = {
+            'top': 0,
+            'left': 0,
             '-moz-transform': '',
             '-webkit-transform': '',
             '-o-transform': '',
@@ -91,18 +98,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             stransforms['-o-transform'] += stdRotate;
             stransforms['-ms-transform'] += stdRotate;
         }
-        var s = 'top: 0; left: 0; ';
-        for (var prop in stransforms) {
-            if (stransforms[prop]) {
-                s += prop + ':' + stransforms[prop] + ';';
-            }
-        }
-        s += ';';
-        return s;
+
+        return stransforms;
     };
 
     AxisLabel.prototype.transformOrigin = function() {
-        return ' transform-origin:' + Math.round(this.labelWidth / 2) + 'px ' + Math.round(this.labelHeight / 2) + 'px;';
+        return {
+            'transform-origin': Math.round(this.labelWidth / 2) + 'px ' + Math.round(this.labelHeight / 2) + 'px;'
+        };
     };
 
     AxisLabel.prototype.calculateOffsets = function(box) {
@@ -135,17 +138,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     AxisLabel.prototype.cleanup = function() {
         if (this.elem) {
             this.elem.remove();
+            this.elem = null;
         }
     };
 
     AxisLabel.prototype.draw = function(box) {
-        this.plot.getPlaceholder().find("." + this.axisName + "Label").remove();
-        var offsets = this.calculateOffsets(box);
-        this.elem = $('<div class="axisLabels ' + this.axisName +
-            'Label" style="position:absolute; ' +
-            this.transforms(offsets.degrees, offsets.x, offsets.y) + this.transformOrigin() +
-            '">' + this.opts.axisLabel + '</div>');
-        this.plot.getPlaceholder().append(this.elem);
+        var offsets = this.calculateOffsets(box),
+            positionAbsolute = {
+                position: 'absolute'
+            };
+        this.elem = $('<div></div>')
+            .text(this.opts.axisLabel)
+            .addClass('axisLabels ' + this.axisName + 'Label')
+            .css($.extend(
+                positionAbsolute,
+                this.transforms(offsets.degrees, offsets.x, offsets.y),
+                this.transformOrigin()))
+            .appendTo(this.plot.getPlaceholder());
     };
 
     function init(plot) {
@@ -169,6 +178,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     ? defaultPadding
                     : opts.axisLabelPadding;
 
+                var oldAxisLabel = axisLabels[axisName];
+                if (oldAxisLabel) {
+                    oldAxisLabel.cleanup();
+                }
                 axisLabels[axisName] = new AxisLabel(axisName,
                     opts.position, padding,
                     plot, opts);
