@@ -51,8 +51,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     AxisLabel.prototype.calculateSize = function() {
         var div = document.createElement('div'),
+            classNameId = this.axisName + 'Label',
             style = { position: 'absolute' };
-        div.className = 'axisLabels';
+        div.className = classNameId + ' axisLabels';
         div.style = styleToString(style);
         div.textContent = this.opts.axisLabel;
         this.placeholder.appendChild(div);
