@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Flot Examples: Axes tick labels options</title>
+    <link href="../examples.css" rel="stylesheet" type="text/css">
+    <script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../../jquery.flot.axislabels.js"></script>
+
+    <style>
+        div.x1Label {
+            color: blue;
+            font-style: italic;
+            font-size: 20px;
+        }
+        div.x2Label {
+            color: blue;
+            font-style: italic;
+            font-size: 24px;
+        }
+        div.x3Label {
+            color: green;
+            font-size: 12px;
+        }
+        div.y1Label {
+            color: red;
+            font-style: bold;
+            font-size: 10px;
+        }
+        div.y2Label {
+            color: red;
+            font-size: 18px;
+        }
+    </style>
+
+    <script type="text/javascript">
+
+    var data, options, plot;
+
+    $(function() {
+        var index = 10000;
+        function generate(start, end, fn) {
+            var res = [];
+            for (var i = 0; i <= 400; ++i) {
+                var x = start + i / 400 * (end - start);
+                res.push([x, fn(x)]);
+            }
+            return res;
+        }
+
+        function update() {
+            index += 0.01;
+            data = [
+                { data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
+            ];
+            plot.setData(data);
+            plot.setupGrid();
+            plot.draw();
+            window.requestAnimationFrame(update);
+        }
+
+        window.requestAnimationFrame(update);
+
+        data = [
+            { data: generate(index, 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
+        ];
+        options = {
+            xaxes: [
+                { position: 'bottom', axisLabel: 'Bottom 1' },
+                { position: 'bottom', axisLabel: 'Bottom 2', show: true, showTickLabels: false, showTicks: false },
+                { position: 'top', axisLabel: 'Top', show: true, showTickLabels: false, showTicks: false }
+            ],
+            yaxes: [
+                { position: 'left', axisLabel: 'Left' },
+                { position: 'right', axisLabel: 'Right', show: true, showTickLabels: false, showTicks: false }
+            ]
+        };
+
+        plot = $.plot("#placeholder", data, options);
+
+    });
+
+    function toggleAxisLabels() {
+        options.axisLabels = options.axisLabels || {show: true};
+        options.axisLabels.show = !options.axisLabels.show;
+        plot = $.plot("#placeholder", data, options);
+    }
+
+    </script>
+</head>
+<body>
+
+    <div id="header">
+        <h2>Flot Examples: Axes labels</h2>
+    </div>
+
+    <div id="content">
+
+        <div class="demo-container">
+            <div id="placeholder" class="demo-placeholder"></div>
+        </div>
+
+        <button onclick="toggleAxisLabels()">Toggle axis labels</button>
+
+    </div>
+</body>
+</html>

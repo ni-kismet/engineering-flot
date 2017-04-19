@@ -46,20 +46,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.opts = opts;
         this.width = 0;
         this.height = 0;
-    }
-
-    AxisLabel.prototype.cleanup = function() {};
-
-    HtmlAxisLabel.prototype = new AxisLabel();
-    HtmlAxisLabel.prototype.constructor = HtmlAxisLabel;
-
-    function HtmlAxisLabel(axisName, position, padding, plot, opts) {
-        AxisLabel.prototype.constructor.call(this, axisName, position,
-            padding, plot, opts);
         this.elem = null;
     }
 
-    HtmlAxisLabel.prototype.calculateSize = function() {
+    AxisLabel.prototype.calculateSize = function() {
         var elem = $('<div class="axisLabels" style="position:absolute;">' +
             this.opts.axisLabel + '</div>');
         this.plot.getPlaceholder().append(elem);
@@ -71,50 +61,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.width = this.height = 0;
         this.width = this.labelWidth + this.padding;
         this.height = this.labelHeight + this.padding;
-    };
 
-    HtmlAxisLabel.prototype.cleanup = function() {
-        if (this.elem) {
-            this.elem.remove();
-        }
-    };
-
-    HtmlAxisLabel.prototype.draw = function(box) {
-        this.plot.getPlaceholder().find('#' + this.axisName + 'Label').remove();
-        this.elem = $('<div id="' + this.axisName +
-            'Label" " class="axisLabels" style="position:absolute;">' + this.opts.axisLabel + '</div>');
-        this.plot.getPlaceholder().append(this.elem);
-        if (this.position === 'top') {
-            this.elem.css('left', box.left + box.width / 2 - this.labelWidth / 2 +
-                'px');
-            this.elem.css('top', box.top + 'px');
-        } else if (this.position === 'bottom') {
-            this.elem.css('left', box.left + box.width / 2 - this.labelWidth / 2 +
-                'px');
-            this.elem.css('top', box.top + box.height - this.labelHeight +
-                'px');
-        } else if (this.position === 'left') {
-            this.elem.css('top', box.top + box.height / 2 - this.labelHeight / 2 +
-                'px');
-            this.elem.css('left', box.left + 'px');
-        } else if (this.position === 'right') {
-            this.elem.css('top', box.top + box.height / 2 - this.labelHeight / 2 +
-                'px');
-            this.elem.css('left', box.left + box.width - this.labelWidth +
-                'px');
-        }
-    };
-
-    CssTransformAxisLabel.prototype = new HtmlAxisLabel();
-    CssTransformAxisLabel.prototype.constructor = CssTransformAxisLabel;
-
-    function CssTransformAxisLabel(axisName, position, padding, plot, opts) {
-        HtmlAxisLabel.prototype.constructor.call(this, axisName, position,
-            padding, plot, opts);
-    }
-
-    CssTransformAxisLabel.prototype.calculateSize = function() {
-        HtmlAxisLabel.prototype.calculateSize.call(this);
         this.width = this.height = 0;
         if (this.position === 'left' || this.position === 'right') {
             this.width = this.labelHeight + this.padding;
@@ -123,7 +70,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
-    CssTransformAxisLabel.prototype.transforms = function(degrees, x, y) {
+    AxisLabel.prototype.transforms = function(degrees, x, y) {
         var stransforms = {
             '-moz-transform': '',
             '-webkit-transform': '',
@@ -154,11 +101,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return s;
     };
 
-    CssTransformAxisLabel.prototype.transformOrigin = function() {
+    AxisLabel.prototype.transformOrigin = function() {
         return ' transform-origin:' + Math.round(this.labelWidth / 2) + 'px ' + Math.round(this.labelHeight / 2) + 'px;';
     };
 
-    CssTransformAxisLabel.prototype.calculateOffsets = function(box) {
+    AxisLabel.prototype.calculateOffsets = function(box) {
         var offsets = {
             x: 0,
             y: 0,
@@ -185,7 +132,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return offsets;
     };
 
-    CssTransformAxisLabel.prototype.draw = function(box) {
+    AxisLabel.prototype.cleanup = function() {
+        if (this.elem) {
+            this.elem.remove();
+        }
+    };
+
+    AxisLabel.prototype.draw = function(box) {
         this.plot.getPlaceholder().find("." + this.axisName + "Label").remove();
         var offsets = this.calculateOffsets(box);
         this.elem = $('<div class="axisLabels ' + this.axisName +
@@ -212,36 +165,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     return;
                 }
 
-                var renderer = null;
-                if (!opts.axisLabelUseHtml) {
-                    renderer = CssTransformAxisLabel;
-                } else {
-                    renderer = HtmlAxisLabel;
-                }
-
                 var padding = opts.axisLabelPadding === undefined
                     ? defaultPadding
                     : opts.axisLabelPadding;
 
-                axisLabels[axisName] = new renderer(axisName,
+                axisLabels[axisName] = new AxisLabel(axisName,
                     opts.position, padding,
                     plot, opts);
 
                 axisLabels[axisName].calculateSize();
 
+                // Incrementing the sizes of the tick labels.
                 axis.labelHeight += axisLabels[axisName].height;
                 axis.labelWidth += axisLabels[axisName].width;
             });
 
             // TODO - use the drawAxis hook
             plot.hooks.draw.push(function(plot, ctx) {
-                $.each(plot.getAxes(), function(axisName, axis) {
+                $.each(plot.getAxes(), function(flotAxisName, axis) {
                     var opts = axis.options;
                     if (!opts || !opts.axisLabel || !axis.show) {
                         return;
                     }
 
-                    axisLabels[axis.direction + axis.n].draw(axis.box);
+                    var axisName = axis.direction + axis.n;
+                    axisLabels[axisName].draw(axis.box);
                 });
             });
         });
