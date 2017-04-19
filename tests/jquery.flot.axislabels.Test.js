@@ -9,7 +9,7 @@ describe('flot axis labels plugin', function() {
         options = {
             xaxes: [
                 { position: 'bottom', axisLabel: 'Bottom 1' },
-                { position: 'bottom', axisLabel: 'Bottom 2', show: true },
+                { position: 'top', axisLabel: 'Bottom 2', show: true },
             ],
             yaxes: [
                 { position: 'left', axisLabel: 'Left' },
