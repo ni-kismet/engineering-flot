@@ -38,12 +38,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
-    function AxisLabel(axisName, position, padding, placeholder, opts) {
+    function AxisLabel(axisName, position, padding, placeholder, axisLabel) {
         this.axisName = axisName;
         this.position = position;
         this.padding = padding;
         this.placeholder = placeholder;
-        this.opts = opts;
+        this.axisLabel = axisLabel;
         this.width = 0;
         this.height = 0;
         this.elem = null;
@@ -51,11 +51,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     AxisLabel.prototype.calculateSize = function() {
         var div = document.createElement('div'),
-            classNameId = this.axisName + 'Label',
-            style = { position: 'absolute' };
+            classNameId = this.axisName + 'Label';
         div.className = classNameId + ' axisLabels';
-        div.style = styleToString(style);
-        div.textContent = this.opts.axisLabel;
+        div.style.position = 'absolute';
+        div.textContent = this.axisLabel;
         this.placeholder.appendChild(div);
 
         var box = div.getBoundingClientRect();
@@ -151,19 +150,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 this.transforms(offsets.degrees, offsets.x, offsets.y),
                 this.transformOrigin());
         div.className = 'axisLabels ' + classNameId;
-        div.style = styleToString(style);
-        div.textContent = this.opts.axisLabel;
+        Object.keys(style).forEach(function(key) {
+            div.style[key] = style[key];
+        });
+        div.textContent = this.axisLabel;
         this.placeholder.appendChild(div);
         this.elem = div;
     };
-
-    function styleToString(style) {
-        var string = Object.keys(style).reduce(function(res, name, i) {
-            var separator = (i !== 0 ? '; ' : '');
-            return res + separator + '' + name + ': ' + style[name];
-        }, '');
-        return string;
-    }
 
     function init(plot) {
         plot.hooks.processOptions.push(function(plot, options) {
@@ -186,19 +179,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     ? defaultPadding
                     : opts.axisLabelPadding;
 
-                var oldAxisLabel = axisLabels[axisName];
-                if (oldAxisLabel) {
-                    oldAxisLabel.cleanup();
+                var axisLabel = axisLabels[axisName];
+                if (axisLabel) {
+                    axisLabel.cleanup();
                 }
-                axisLabels[axisName] = new AxisLabel(axisName,
+                axisLabel = new AxisLabel(axisName,
                     opts.position, padding,
-                    plot.getPlaceholder()[0], opts);
+                    plot.getPlaceholder()[0], opts.axisLabel);
+                axisLabels[axisName] = axisLabel;
 
-                axisLabels[axisName].calculateSize();
+                axisLabel.calculateSize();
 
                 // Incrementing the sizes of the tick labels.
-                axis.labelHeight += axisLabels[axisName].height;
-                axis.labelWidth += axisLabels[axisName].width;
+                axis.labelHeight += axisLabel.height;
+                axis.labelWidth += axisLabel.width;
             });
 
             // TODO - use the drawAxis hook
