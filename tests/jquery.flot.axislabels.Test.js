@@ -1,7 +1,7 @@
 /* eslint-disable */
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
-describe("flot axis labels plugin", function() {
+describe('flot axis labels plugin', function() {
     var placeholder, plot;
     var options;
 
@@ -62,6 +62,26 @@ describe("flot axis labels plugin", function() {
 
         expect(widthNoLabels).toBeGreaterThan(width);
         expect(heightNoLabels).toBeGreaterThan(height);
+    });
+
+    it('centers the labels of x axes horizontally', function () {
+        options.xaxes[0].axisLabel = 'short label';
+        options.xaxes[1].axisLabel = 'very long axis label';
+        plot = $.plot(placeholder, [[]], options);
+
+        var box1 = $('.x1Label')[0].getBoundingClientRect(),
+            box2 = $('.x2Label')[0].getBoundingClientRect();
+        expect(box1.left + box1.width / 2).toBeCloseTo(box2.left + box2.width / 2, 0);
+    });
+
+    it('centers the labels of y axes vertically', function () {
+        options.yaxes[0].axisLabel = 'short label';
+        options.yaxes[1].axisLabel = 'very long axis label';
+        plot = $.plot(placeholder, [[]], options);
+
+        var box1 = $('.y1Label')[0].getBoundingClientRect(),
+            box2 = $('.y2Label')[0].getBoundingClientRect();
+        expect(box1.top + box1.height / 2).toBeCloseTo(box2.top + box2.height / 2, 0);
     });
 
 });
