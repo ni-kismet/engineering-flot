@@ -1,3 +1,9 @@
+## engineering-flot 0.4.2 ##
+
+### Bug fixes ###
+
+- memory leak caused by axis tick labels.
+
 ## engineering-flot 0.4.1 ##
 
 ### Changes ###
