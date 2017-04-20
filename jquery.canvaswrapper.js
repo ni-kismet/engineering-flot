@@ -164,6 +164,7 @@
                                     if (styleCache[key].measured) {
                                         styleCache[key].measured = false;
                                     } else {
+                                        styleCache[key].element.remove();
                                         delete styleCache[key];
                                     }
                                 }
