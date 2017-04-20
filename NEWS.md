@@ -1,3 +1,13 @@
+## engineering-flot 0.4.1 ##
+
+### Changes ###
+
+- ability to find the nearby item with a custom function.
+
+### Bug fixes ###
+
+- memory leak caused by axis labels.
+
 ## engineering-flot 0.4.0 ##
 
 ### Changes ###
