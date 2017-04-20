@@ -80,8 +80,35 @@ describe('flot axis labels plugin', function() {
         plot = $.plot(placeholder, [[]], options);
 
         var box1 = $('.y1Label')[0].getBoundingClientRect(),
+            box2 = $('.y2Label')[0].getBoundingClientRect(),
+            c1 = box1.top + box1.height / 2,
+            c2 = box2.top + box2.height / 2;
+        // The error on the y axes can be up to 1px because of the rotation
+        expect(Math.abs(c1 - c2)).toBeLessThan(2);
+    });
+
+    it('aligns the labels of y axes with the pixels to create a crisp text', function () {
+        options.yaxes[0].axisLabel = 'short label';
+        options.yaxes[1].axisLabel = 'very long axis label';
+        plot = $.plot(placeholder, [[]], options);
+
+        var box1 = $('.y1Label')[0].getBoundingClientRect(),
             box2 = $('.y2Label')[0].getBoundingClientRect();
-        expect(box1.top + box1.height / 2).toBeCloseTo(box2.top + box2.height / 2, 0);
+        expect(box1.left % 1).toBe(0);
+        expect(box2.left % 1).toBe(0);
+    });
+
+    it('should not duplicate the labels when the data is redrawn', function () {
+        plot = $.plot(placeholder, [[1, 2, 3]], options);
+
+        var labels$ = $('.axisLabels');
+        expect(labels$.length).toBe(4);
+
+        plot.setData([[4, 5, 6]]);
+        plot.setupGrid();
+        plot.draw();
+        labels$ = $('.axisLabels');
+        expect(labels$.length).toBe(4);
     });
 
 });

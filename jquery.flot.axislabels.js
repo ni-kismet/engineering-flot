@@ -103,7 +103,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     AxisLabel.prototype.transformOrigin = function() {
         return {
-            'transform-origin': Math.round(this.labelWidth / 2) + 'px ' + Math.round(this.labelHeight / 2) + 'px;'
+            'transform-origin': Math.round(this.labelWidth / 2) + 'px ' + Math.round(this.labelHeight / 2) + 'px'
         };
     };
 
