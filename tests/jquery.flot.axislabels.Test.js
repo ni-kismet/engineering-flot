@@ -111,4 +111,15 @@ describe('flot axis labels plugin', function() {
         expect(labels$.length).toBe(4);
     });
 
+    it('should not duplicate the labels when the plot is recreated', function () {
+        plot = $.plot(placeholder, [[1, 2, 3]], options);
+
+        var labels$ = $('.axisLabels');
+        expect(labels$.length).toBe(4);
+
+        plot = $.plot(placeholder, [[1, 2, 3]], options);
+        labels$ = $('.axisLabels');
+        expect(labels$.length).toBe(4);
+    });
+
 });
