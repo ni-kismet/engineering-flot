@@ -207,6 +207,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     axisLabels[axisName].draw(axis.box);
                 });
             });
+
+            plot.hooks.shutdown.push(function(plot, eventHolder) {
+                for (var axisName in axisLabels) {
+                    axisLabels[axisName].cleanup();
+                }
+            });
         });
     };
 
