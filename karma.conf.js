@@ -56,7 +56,7 @@ module.exports = function(config) {
             stopOnError: true,
             showWarnings: true,
             engine: {
-                configFile: '.eslintrc',
+                configFile: 'node_modules/webcharts-development-settings/.eslintrc.json',
                 emitError: true,
                 emitWarning: true
             }
