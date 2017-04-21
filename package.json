@@ -17,9 +17,6 @@
     "url": "https://github.com/ni-kismet/engineering-flot/issues"
   },
   "homepage": "https://github.com/ni-kismet/engineering-flot#readme",
-  "dependencies": {
-    "webcharts-development-settings": "0.0.3"
-  },
   "devDependencies": {
     "concat-files": "^0.1.1",
     "jasmine-core": "^2.5.2",
@@ -36,6 +33,7 @@
     "karma-spec-reporter": "0.0.26",
     "phantomjs-polyfill-find": "0.0.1",
     "tmp": "0.0.31",
-    "travis-github-lint-status": "^1.0.1"
+    "travis-github-lint-status": "^1.0.1",
+    "webcharts-development-settings": "0.0.3"
   }
 }
