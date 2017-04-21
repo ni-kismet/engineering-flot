@@ -128,7 +128,7 @@ describe('flot', function() {
 
         it('should shift the axis min and max for window autoscaling if data is bigger than window', function () {
             options.xaxis = {autoscale: 'sliding-window', min: 0, max: 10};
-            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10}; 
+            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10};
             // default window size is 100
             plot = $.plot(placeholder, [[]], options);
             plot.setData([[[0, 0], [100, 100], [200, 200]]]);
@@ -313,7 +313,6 @@ describe('flot', function() {
 
     });
 
-
     describe('adjustSeriesDataRange', function() {
 
         var placeholder, plot;
@@ -401,6 +400,24 @@ describe('flot', function() {
             var yaxis = plot.getYAxes()[0];
 
             expect(yaxis.ticks).not.toEqual([]);
+        });
+    });
+
+    describe('life cycle', function() {
+        var placeholder, options = {};
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should mark as shutdown the initial plot when creating a new one on the same placeholder', function () {
+            var plot = $.plot(placeholder, [[]], options);
+            expect(plot.isShutdown()).toBe(false);
+
+            var newPlot = $.plot(placeholder, [[]], options);
+            expect(plot.isShutdown()).toBe(true);
+            expect(newPlot.isShutdown()).toBe(false);
         });
     });
 });
