@@ -109,6 +109,35 @@ describe("flot navigate plugin", function () {
             expect(yaxis.max).toBe(5);
         });
 
+        it('uses the provided axes', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+
+            plot.zoom({
+                amount: 2,
+                center: {
+                    left: 0,
+                    top: plot.height()
+                },
+                axes: plot.getXAxes()
+            });
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(5);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
+        });
+
         it ('doesn\'t got to Infinity and beyond', function () {
             var xaxis, yaxis;
 
