@@ -399,6 +399,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 };
 
             for (var key in axes) {
+                if (!axes.hasOwnProperty(key)) {
+                    continue;
+                }
+
                 var axis = axes[key],
                     opts = axis.options,
                     min = minmax[axis.direction].min,
