@@ -183,7 +183,8 @@ Licensed under the MIT license.
                 drawOverlay: [],
                 shutdown: []
             },
-            plot = this;
+            plot = this,
+            isShutdown = false;
 
         // interactive features
 
@@ -248,6 +249,9 @@ Licensed under the MIT license.
             };
         };
         plot.shutdown = shutdown;
+        plot.isShutdown = function() {
+            return isShutdown;
+        };
         plot.destroy = function() {
             shutdown();
             placeholder.removeData("plot").empty();
@@ -950,6 +954,8 @@ Licensed under the MIT license.
             eventHolder.unbind("click", onClick);
 
             executeHooks(hooks.shutdown, [eventHolder]);
+
+            isShutdown = true;
         }
 
         function setTransformationHelpers(axis) {

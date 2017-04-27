@@ -281,7 +281,7 @@ xaxis, yaxis: {
     tickLength: null or number
 
     alignTicksWithAxis: null or number
-    
+
     offset: null or object({ below: number, above: number })
 }
 ```
@@ -1216,22 +1216,28 @@ can call:
     Cleans up any event handlers Flot has currently registered. This
     is used internally.
 
+ - isShutdown()
+
+    Returns true if the shutdown() function was called before or a new plot
+    object was created on the same placeholder with the curent one. If this
+    function is returning true then this plot should not be used anymore.
+
  - findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance)
-    
+
     Returns the closest item to the position determined by mouseX and
     mouseY. The series on which the search is realised can be specified
     using seriesFilter function.
     The search area will be a circle if the function is called without the
     last parameter, otherwise the distance will be computed based on given
     function.
- 
+
  - computeValuePrecision(min, max, direction, ticks, tickDecimals)
 
-    Used for determining the the precision for a certain axis. 
-    If the tickDecimals is specified, the maximum precision 
-    would be at most tickDecimals. Otherwise, it would be computed 
+    Used for determining the the precision for a certain axis.
+    If the tickDecimals is specified, the maximum precision
+    would be at most tickDecimals. Otherwise, it would be computed
     based on the axis minimum and maximum and the number of ticks.
- 
+
 There are also some members that let you peek inside the internal
 workings of Flot which is useful in some cases. Note that if you change
 something in the objects returned, you're changing the objects used by
