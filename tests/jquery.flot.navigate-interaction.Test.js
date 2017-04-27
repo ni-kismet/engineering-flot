@@ -54,7 +54,6 @@ describe("flot navigate plugin interactions", function () {
             [10, 10]]
         ], options);
 
-        var bbox = placeholder[0].getBoundingClientRect();
         var xaxis = plot.getXAxes()[0];
         var yaxis = plot.getYAxes()[0];
 
@@ -85,7 +84,6 @@ describe("flot navigate plugin interactions", function () {
             [10, 10]]
         ], options);
 
-        var bbox = placeholder[0].getBoundingClientRect();
         var xaxis = plot.getXAxes()[0];
         var yaxis = plot.getYAxes()[0];
 
@@ -108,6 +106,27 @@ describe("flot navigate plugin interactions", function () {
         expect(xaxis.max).toBeCloseTo(1, 1);
         expect(yaxis.min).toBeCloseTo(0, 1);
         expect(yaxis.max).toBeCloseTo(1, 1);
+    });
+
+    it('constrains the mouse scroll zoom to the hovered axis ', function () {
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], options);
+
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
+
+        var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
+        var clientY = xaxis.box.top + xaxis.box.height/2;
+
+        eventHolder = placeholder.find('.flot-overlay');
+        simulate.mouseWheel(eventHolder[0], clientX, clientY, -3);
+
+        expect(xaxis.min).toBeCloseTo(0, 1);
+        expect(xaxis.max).toBeCloseTo(1, 1);
+        expect(yaxis.min).toBeCloseTo(0, 1);
+        expect(yaxis.max).toBeCloseTo(10, 1);
     });
 
 });
