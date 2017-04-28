@@ -56,8 +56,8 @@
 				noColumns: 2
 			},
 			xaxis: {
-                autoscale: "none",
-				tickDecimals: 0
+                autoscale: "exact",
+				tickDecimals: 0,
 			},
 			yaxis: {
                 autoscale: "loose",
@@ -80,8 +80,15 @@
 			if (zoom) {
 				$.each(plot.getXAxes(), function(_, axis) {
 					var opts = axis.options;
-					opts.min = ranges.xaxis.from;
-					opts.max = ranges.xaxis.to;
+                    var offsetBelow = ranges.xaxis.from - axis.min;
+                    var offsetAbove = ranges.xaxis.to - axis.max;
+
+					if (opts.offset) {
+                    opts.offset.below += offsetBelow;
+                    opts.offset.above += offsetAbove;
+                    } else {
+                        opts.offset = {above: offsetAbove, below: offsetBelow};
+                    }
 				});
 				plot.setupGrid();
 				plot.draw();
@@ -97,6 +104,12 @@
 
 		$("#clearSelection").click(function () {
 			plot.clearSelection();
+            var axes = plot.getAxes();
+            axes.xaxis.options.offset = {above:0, below:0};
+            axes.yaxis.options.offset = {above:0, below:0};
+
+            plot.setupGrid();
+            plot.draw();
 		});
 
 		$("#setSelection").click(function () {
