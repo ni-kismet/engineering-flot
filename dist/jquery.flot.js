@@ -807,7 +807,9 @@ Licensed under the MIT license.
                     tickDecimals: null, // no. of decimals, null means auto
                     tickSize: null, // number or [number, "unit"]
                     minTickSize: null, // number or [number, "unit"]
-                    offset: { below: 0, above: 0 } // the plot drawing offset. this is calculated by the flot.navigate for each axis
+                    offset: { below: 0, above: 0 }, // the plot drawing offset. this is calculated by the flot.navigate for each axis
+                    centerLeft: null,
+                    centerHeight: null
                 },
                 yaxis: {
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
@@ -2583,7 +2585,7 @@ Licensed under the MIT license.
                 y = box.top - plotOffset.top + (axis.position === "top" ? box.height : 0);
             } else {
                 y = 0;
-                x = box.left - plotOffset.left + (axis.position === "left" ? box.width : 0);
+                x = box.left - plotOffset.left + (axis.position === "left" ? box.width : 0) + (axis.centerLeft ? axis.centerLeft : 0);
             }
 
             return {
@@ -2897,9 +2899,9 @@ Licensed under the MIT license.
                             halign = "center";
                             x = plotOffset.left + axis.p2c(tick.v);
                             if (axis.position === "bottom") {
-                                y = box.top + box.padding;
+                                y = box.top + box.padding - axis.centerHeight;
                             } else {
-                                y = box.top + box.height - box.padding;
+                                y = box.top + box.height - box.padding + axis.centerHeight;
                                 valign = "bottom";
                             }
                             newLabelBox = {x: x - info.width / 2, y: y, width: info.width, height: info.height}
@@ -2907,10 +2909,10 @@ Licensed under the MIT license.
                             valign = "middle";
                             y = plotOffset.top + axis.p2c(tick.v);
                             if (axis.position === "left") {
-                                x = box.left + box.width - box.padding;
+                                x = box.left + box.width - box.padding - axis.centerLeft;
                                 halign = "right";
                             } else {
-                                x = box.left + box.padding;
+                                x = box.left + box.padding + axis.centerLeft;
                             }
                             newLabelBox = {x: x, y: y - info.height / 2, width: info.width, height: info.height}
                         }
