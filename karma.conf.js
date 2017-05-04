@@ -18,7 +18,8 @@ module.exports = function(config) {
         'jquery.flot.drawSeries.js',
         'jquery.flot.navigate.js',
         'jquery.flot.time.js',
-        'jquery.flot.axislabels.js'
+        'jquery.flot.axislabels.js',
+        'jquery.flot.selection.js'
     ];
 
     var sources = [
