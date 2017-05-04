@@ -122,4 +122,19 @@ describe('flot axis labels plugin', function() {
         expect(labels$.length).toBe(4);
     });
 
+    it('should reserve extra space when axis.boxPosition is specified', function () {
+        var size = 20,
+            options = {
+                xaxes: [
+                    { position: 'bottom', axisLabel: 'Bottom 1', boxPosition: {centerX: size, centerY: size} },
+                    { position: 'bottom', axisLabel: 'Bottom 2', show: true }
+                ]
+            };
+        plot = $.plot(placeholder, [[1, 2, 3]], options);
+
+        var axes = plot.getXAxes();
+        expect(axes[0].labelHeight).toBe(axes[1].labelHeight + size);
+        expect(axes[0].labelWidth).toBe(axes[1].labelWidth + size);
+    });
+
 });

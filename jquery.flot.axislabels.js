@@ -191,10 +191,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 axisLabel.calculateSize();
 
                 // Incrementing the sizes of the tick labels.
-                axis.centerLeft = axis.options.centerLeft ? axis.options.centerLeft : 0;
-                axis.centerHeight = axis.options.centerHeight ? axis.options.centerHeight : 0;
-                axis.labelHeight += axisLabel.height + axis.centerHeight;
-                axis.labelWidth += axisLabel.width + axis.centerLeft;
+                axis.labelHeight += axisLabel.height + axis.boxPosition.centerY;
+                axis.labelWidth += axisLabel.width + axis.boxPosition.centerX;
             });
 
             // TODO - use the drawAxis hook
