@@ -57,7 +57,7 @@
 			},
 			xaxis: {
                 autoscale: "exact",
-				tickDecimals: 0,
+                tickDecimals: 0
 			},
 			yaxis: {
                 autoscale: "loose",
@@ -79,13 +79,13 @@
 
 			if (zoom) {
 				$.each(plot.getXAxes(), function(_, axis) {
-					var opts = axis.options;
-                    var offsetBelow = ranges.xaxis.from - axis.min;
-                    var offsetAbove = ranges.xaxis.to - axis.max;
+					var opts = axis.options,
+                        offsetBelow = ranges.xaxis.from - axis.min,
+                        offsetAbove = ranges.xaxis.to - axis.max;
 
 					if (opts.offset) {
-                    opts.offset.below += offsetBelow;
-                    opts.offset.above += offsetAbove;
+                        opts.offset.below += offsetBelow;
+                        opts.offset.above += offsetAbove;
                     } else {
                         opts.offset = {above: offsetAbove, below: offsetBelow};
                     }
