@@ -807,7 +807,8 @@ Licensed under the MIT license.
                     tickDecimals: null, // no. of decimals, null means auto
                     tickSize: null, // number or [number, "unit"]
                     minTickSize: null, // number or [number, "unit"]
-                    offset: { below: 0, above: 0 } // the plot drawing offset. this is calculated by the flot.navigate for each axis
+                    offset: { below: 0, above: 0 }, // the plot drawing offset. this is calculated by the flot.navigate for each axis
+                    boxPosition: { centerX: 0, centerY: 0 } //position of the axis on the corresponding axis box
                 },
                 yaxis: {
                     autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
@@ -815,7 +816,8 @@ Licensed under the MIT license.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
                     showTickLabels: "major", // "none", "endpoints", "major", "all"
-                    offset: { below: 0, above: 0 } // the plot drawing offset. this is calculated by the flot.navigate for each axis
+                    offset: { below: 0, above: 0 },  // the plot drawing offset. this is calculated by the flot.navigate for each axis
+                    boxPosition: { centerX: 0, centerY: 0 } //position of the axis on the corresponding axis box
                 },
                 xaxes: [],
                 yaxes: [],
@@ -1150,6 +1152,11 @@ Licensed under the MIT license.
             for (i = 0; i < options.yaxes.length; ++i) {
                 getOrCreateAxis(yaxes, i + 1).options = options.yaxes[i];
             }
+
+            //process boxPosition options used for axis.box size
+            $.each(allAxes(), function(_, axis) {
+                axis.boxPosition = axis.options.boxPosition || {centerX: 0, centerY: 0};
+            });
 
             // add hooks from options
             for (var n in hooks) {
@@ -2583,7 +2590,7 @@ Licensed under the MIT license.
                 y = box.top - plotOffset.top + (axis.position === "top" ? box.height : 0);
             } else {
                 y = 0;
-                x = box.left - plotOffset.left + (axis.position === "left" ? box.width : 0);
+                x = box.left - plotOffset.left + (axis.position === "left" ? box.width : 0) + axis.boxPosition.centerX;
             }
 
             return {
@@ -2897,9 +2904,9 @@ Licensed under the MIT license.
                             halign = "center";
                             x = plotOffset.left + axis.p2c(tick.v);
                             if (axis.position === "bottom") {
-                                y = box.top + box.padding;
+                                y = box.top + box.padding - axis.boxPosition.centerY;
                             } else {
-                                y = box.top + box.height - box.padding;
+                                y = box.top + box.height - box.padding + axis.boxPosition.centerY;
                                 valign = "bottom";
                             }
                             newLabelBox = {x: x - info.width / 2, y: y, width: info.width, height: info.height}
@@ -2907,10 +2914,10 @@ Licensed under the MIT license.
                             valign = "middle";
                             y = plotOffset.top + axis.p2c(tick.v);
                             if (axis.position === "left") {
-                                x = box.left + box.width - box.padding;
+                                x = box.left + box.width - box.padding - axis.boxPosition.centerX;
                                 halign = "right";
                             } else {
-                                x = box.left + box.padding;
+                                x = box.left + box.padding + axis.boxPosition.centerX;
                             }
                             newLabelBox = {x: x, y: y - info.height / 2, width: info.width, height: info.height}
                         }
