@@ -32,11 +32,15 @@ describe("flot selection plugin", function () {
         // this is done in graph-tools
         $(placeholder).bind("plotselected", function (event, ranges) {
             $.each(plot.getXAxes(), function(_, axis) {
-                applySelection(axis, ranges.xaxis);
+                if(axis.options.disableSelection !== true) {
+                    applySelection(axis, ranges.xaxis);
+                }
             });
 
             $.each(plot.getYAxes(), function(_, axis) {
-                applySelection(axis, ranges.yaxis);
+                if(axis.options.disableSelection !== true) {
+                    applySelection(axis, ranges.yaxis);
+                }
             });
 
             plot.setupGrid();
@@ -84,6 +88,27 @@ describe("flot selection plugin", function () {
         });
 
         it('can be disabled per axis', function () {
+            var xaxis, yaxis;
+            var range = {xaxis: {from: 25, to: 75}, yaxis: {from: 25, to: 75}};
+
+            options.xaxis = {autoscale: 'none', min: 0, max: 100, disableSelection: true};
+            options.yaxis = {autoscale: 'none', min: 0, max: 100};
+
+            plot = $.plot(placeholder, [[[25, 25], [75, 75]]], options);
+
+            plot.setSelection(range);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(100);
+            expect(yaxis.min).toBe(25);
+            expect(yaxis.max).toBe(75);
+
+        });
+
+        it('works with all supported modes', function () {
             var xaxis, yaxis;
             var range = {xaxis: {from: 25, to: 75}, yaxis: {from: 25, to: 75}};
 
