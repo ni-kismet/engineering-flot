@@ -128,7 +128,7 @@ describe('flot', function() {
 
         it('should shift the axis min and max for window autoscaling if data is bigger than window', function () {
             options.xaxis = {autoscale: 'sliding-window', min: 0, max: 10};
-            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10}; 
+            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10};
             // default window size is 100
             plot = $.plot(placeholder, [[]], options);
             plot.setData([[[0, 0], [100, 100], [200, 200]]]);
@@ -401,6 +401,55 @@ describe('flot', function() {
             var yaxis = plot.getYAxes()[0];
 
             expect(yaxis.ticks).not.toEqual([]);
+        });
+    });
+
+    describe('setData', function () {
+        var placeholder;
+        var data = [[[1,2], [3,4]]];
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('stores data in the internal buffer', function () {
+            var expected = [1, 2, 3 ,4];
+
+            var plot = $.plot(placeholder, [], {});
+            plot.setData(data);
+
+            var series = plot.getData();
+            expect(series.length).toEqual(1);
+            expect(series[0].data).toEqual(data[0]);
+            expect(series[0].datapoints.points).toEqual(expected);
+            expect(series[0].datapoints.pointsize).toEqual(2);
+        });
+
+        it('reuses the internal buffer', function () {
+            var plot = $.plot(placeholder, [[]], {});
+            var buffer = plot.getData()[0].datapoints.points;
+
+            plot.setData(data);
+
+            expect(plot.getData()[0].datapoints.points).toBe(buffer);
+        });
+
+
+        it('expands the internal buffer as neccessary', function () {
+            var plot = $.plot(placeholder, [[[3,4]]], {});
+            expect(plot.getData()[0].datapoints.points.length).toBe(2);
+
+            plot.setData(data);
+            expect(plot.getData()[0].datapoints.points.length).toBe(4);
+        });
+
+        it('shrinks the internal buffer as neccessary', function () {
+            var plot = $.plot(placeholder, [[[3,4], [5,6], [6,7], [8,9]]], {});
+            expect(plot.getData()[0].datapoints.points.length).toBe(8);
+
+            plot.setData(data);
+            expect(plot.getData()[0].datapoints.points.length).toBe(4);
         });
     });
 });
