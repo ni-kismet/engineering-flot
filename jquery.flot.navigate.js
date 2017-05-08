@@ -222,13 +222,30 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             var c = plot.offset();
             c.left = e.pageX - c.left;
             c.top = e.pageY - c.top;
+
+            var ec = plot.getPlaceholder().offset();
+            ec.left = e.pageX - ec.left;
+            ec.top = e.pageY - ec.top;
+
+            var axes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+                var box = axis.box;
+                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                    (ec.top > box.top) && (ec.top < box.top + box.height);
+            });
+
+            if (axes.length === 0) {
+                axes = undefined;
+            }
+
             if (zoomOut) {
                 plot.zoomOut({
-                    center: c
+                    center: c,
+                    axes: axes
                 });
             } else {
                 plot.zoom({
-                    center: c
+                    center: c,
+                    axes: axes
                 });
             }
         }
@@ -358,7 +375,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             var c = args.center,
                 amount = args.amount || plot.getOptions().zoom.amount,
                 w = plot.width(),
-                h = plot.height();
+                h = plot.height(),
+                axes = args.axes || plot.getAxes();
 
             if (!c) {
                 c = {
@@ -380,14 +398,19 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     }
                 };
 
-            $.each(plot.getAxes(), function(_, axis) {
-                var opts = axis.options,
+            for (var key in axes) {
+                if (!axes.hasOwnProperty(key)) {
+                    continue;
+                }
+
+                var axis = axes[key],
+                    opts = axis.options,
                     min = minmax[axis.direction].min,
                     max = minmax[axis.direction].max,
                     navigationOffset = axis.options.offset;
 
                 if (opts.disableZoom) {
-                    return;
+                    continue;
                 }
 
                 min = $.plot.saturated.saturate(axis.c2p(min));
@@ -402,7 +425,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var offsetBelow = navigationOffset.below - (axis.min - min);
                 var offsetAbove = navigationOffset.above - (axis.max - max);
                 opts.offset = { below: offsetBelow, above: offsetAbove };
-            });
+            };
 
             plot.setupGrid();
             plot.draw();

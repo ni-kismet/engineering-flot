@@ -136,7 +136,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     AxisLabel.prototype.cleanup = function() {
         if (this.elem) {
-            this.elem.remove();
+            this.elem.parentNode && this.elem.parentNode.removeChild(this.elem);
             this.elem = null;
         }
     };
