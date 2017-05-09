@@ -853,6 +853,8 @@ Licensed under the MIT license.
                         }
                     }
                 }
+
+                points.length = k; //trims the internal buffer to the correct length
             }
 
             // give the hooks a chance to run
