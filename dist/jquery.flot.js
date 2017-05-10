@@ -3898,13 +3898,15 @@ Licensed under the MIT license.
         }
 
         function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-            function drawCircle(ctx, x, y, radius, shadow) {
+            function drawCircle(ctx, x, y, radius, shadow, fill) {
+                ctx.moveTo(x + radius, y);
                 ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
             }
             function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy, drawSymbolFn) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize;
 
+                ctx.beginPath();
                 for (var i = 0; i < points.length; i += ps) {
                     var x = points[i],
                         y = points[i + 1];
@@ -3912,18 +3914,12 @@ Licensed under the MIT license.
                         continue;
                     }
 
-                    ctx.beginPath();
                     x = axisx.p2c(x);
                     y = axisy.p2c(y) + offset;
 
-                    drawSymbolFn(ctx, x, y, radius, shadow);
-                    ctx.closePath();
-
-                    if (fill) {
-                        ctx.fill();
-                    }
-                    ctx.stroke();
+                    drawSymbolFn(ctx, x, y, radius, shadow, fill);
                 }
+                ctx.stroke();
             }
 
             ctx.save();

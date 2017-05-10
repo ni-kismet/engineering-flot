@@ -36,6 +36,7 @@ The symbols are accessed as strings through the standard symbol options:
             ctx.lineTo(x + size, y);
             ctx.lineTo(x, y + size);
             ctx.lineTo(x - size, y);
+            ctx.lineTo(x, y - size);
         },
         triangle: function (ctx, x, y, radius, shadow) {
             // pi * r^2 = 1/2 * s^2 * sin (pi / 3)  =>  s = r * sqrt(2 * pi / sin(pi / 3))
@@ -46,6 +47,7 @@ The symbols are accessed as strings through the standard symbol options:
             if (!shadow) {
                 ctx.lineTo(x, y - height / 2);
                 ctx.lineTo(x - size / 2, y + height / 2);
+                ctx.lineTo(x + size / 2, y + height / 2);
             }
         },
         cross: function (ctx, x, y, radius, shadow) {
@@ -56,9 +58,13 @@ The symbols are accessed as strings through the standard symbol options:
             ctx.moveTo(x - size, y + size);
             ctx.lineTo(x + size, y - size);
         },
-        ellipse: function(ctx, x, y, radius, shadow) {
+        ellipse: function(ctx, x, y, radius, shadow, fill) {
             if (!shadow) {
+                ctx.moveTo(x + radius, y);
                 ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+                if (fill) {
+                    ctx.fill();
+                }
             }
         },
         plus: function (ctx, x, y, radius, shadow) {

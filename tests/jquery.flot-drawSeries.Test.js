@@ -164,15 +164,11 @@ describe('drawSeries', function() {
 
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
-            spyOn(ctx, 'fill').and.callThrough();
-            spyOn(ctx, 'stroke').and.callThrough();
 
             drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock, getColorOrGradientMock);
 
             expect(ctx.moveTo).not.toHaveBeenCalled();
             expect(ctx.lineTo).not.toHaveBeenCalled();
-            expect(ctx.fill).not.toHaveBeenCalled();
-            expect(ctx.stroke).not.toHaveBeenCalled();
         });
 
         it('should draw circles for values', function () {
