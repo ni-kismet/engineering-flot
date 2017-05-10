@@ -1,3 +1,19 @@
+## engineering-flot 0.4.5 ##
+
+### Changes ###
+
+- ability to reserve space to the left or right of the axis.
+
+### Bug fixes ###
+
+- wrong buffer size when writing smaller data.
+
+## engineering-flot 0.4.4 ##
+
+### Changes ###
+
+- zooming only the hovered axis.
+
 ## engineering-flot 0.4.2 ##
 
 ### Bug fixes ###
