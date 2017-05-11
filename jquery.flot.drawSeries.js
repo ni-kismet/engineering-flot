@@ -309,10 +309,16 @@
         }
 
         function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-            function plotPoints(datapoints, radius, fillStyle, offset, shadow, axisx, axisy, symbol) {
+            function drawCircle(ctx, x, y, radius, shadow, fill) {
+                ctx.moveTo(x + radius, y);
+                ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
+            }
+            drawCircle.fill = true;
+            function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy, drawSymbolFn) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize;
 
+                ctx.beginPath();
                 for (var i = 0; i < points.length; i += ps) {
                     var x = points[i],
                         y = points[i + 1];
@@ -320,23 +326,15 @@
                         continue;
                     }
 
-                    ctx.beginPath();
                     x = axisx.p2c(x);
                     y = axisy.p2c(y) + offset;
 
-                    if (symbol === 'circle') {
-                        ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
-                    } else if (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
-                        drawSymbol[symbol](ctx, x, y, radius, shadow);
-                    }
-                    ctx.closePath();
-
-                    if (fillStyle) {
-                        ctx.fillStyle = fillStyle;
-                        ctx.fill();
-                    }
-                    ctx.stroke();
+                    drawSymbolFn(ctx, x, y, radius, shadow, fill);
                 }
+                if (drawSymbolFn.fill && !shadow) {
+                    ctx.fill();
+                }
+                ctx.stroke();
             }
 
             ctx.save();
@@ -345,7 +343,16 @@
             var lw = series.points.lineWidth,
                 sw = series.shadowSize,
                 radius = series.points.radius,
-                symbol = series.points.symbol;
+                symbol = series.points.symbol,
+                drawSymbolFn;
+
+            if (symbol === 'circle') {
+                drawSymbolFn = drawCircle;
+            } else if (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
+                drawSymbolFn = drawSymbol[symbol];
+            } else if (typeof drawSymbol === 'function') {
+                drawSymbolFn = drawSymbol;
+            }
 
             // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
@@ -361,19 +368,20 @@
                 var w = sw / 2;
                 ctx.lineWidth = w;
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.datapoints, radius, null, w + w / 2, true,
-                    series.xaxis, series.yaxis, symbol);
+                plotPoints(series.datapoints, radius, false, w + w / 2, true,
+                    series.xaxis, series.yaxis, drawSymbolFn);
 
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.datapoints, radius, null, w / 2, true,
-                    series.xaxis, series.yaxis, symbol);
+                plotPoints(series.datapoints, radius, false, w / 2, true,
+                    series.xaxis, series.yaxis, drawSymbolFn);
             }
 
             ctx.lineWidth = lw;
+            ctx.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient);
             ctx.strokeStyle = series.color;
             plotPoints(series.datapoints, radius,
-                getFillStyle(series.points, series.color, null, null, getColorOrGradient), 0, false,
-                series.xaxis, series.yaxis, symbol);
+                true, 0, false,
+                series.xaxis, series.yaxis, drawSymbolFn);
             ctx.restore();
         }
 
