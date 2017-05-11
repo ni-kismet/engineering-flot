@@ -203,11 +203,37 @@ describe('drawSeries', function() {
             expect(drawSymbolMock.dollar).toHaveBeenCalled();
         });
 
-        var drawSymbolMock = {
-            'dollar': function (ctx, x, y, radius, shadow) {
+        it('should not fill when the symbol function doesn`t need fill', function () {
+            drawSymbolMock['dollar'].fill = undefined;
+            series.points.symbol = 'dollar';
+            series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
+
+            spyOn(ctx, 'fill').and.callThrough();
+
+            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock['dollar'], getColorOrGradientMock);
+
+            expect(ctx.fill).not.toHaveBeenCalled();
+        });
+
+        it('should fill only once when the symbol function needs fill', function () {
+            drawSymbolMock['dollar'].fill = true;
+            series.points.symbol = 'dollar';
+            series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
+
+            spyOn(ctx, 'fill').and.callThrough();
+
+            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock['dollar'], getColorOrGradientMock);
+
+            expect(ctx.fill).toHaveBeenCalled();
+            expect(ctx.fill.calls.count()).toBe(1);
+        });
+
+        var dollar = function (ctx, x, y, radius, shadow) {
                 ctx.strokeText('$', x, y);
-            }
-        }
+            },
+            drawSymbolMock = {
+                'dollar': dollar
+            };
 
     });
 
