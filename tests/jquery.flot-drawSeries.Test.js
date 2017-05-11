@@ -6,7 +6,8 @@ describe('drawSeries', function() {
     describe('drawSeriesLines', function() {
         var minx = 0, maxx = 200, miny = 0, maxy = 100,
             series, ctx, plotWidth, plotHeight, plotOffset,
-            drawSeriesLines = jQuery.plot.drawSeries.drawSeriesLines;
+            drawSeriesLines = jQuery.plot.drawSeries.drawSeriesLines,
+            getColorOrGradient;
 
         beforeEach(function() {
             series = {
@@ -35,6 +36,7 @@ describe('drawSeries', function() {
             plotWidth = 200;
             plotHeight = 100;
             plotOffset = { top: 0, left: 0 };
+            getColorOrGradient = jasmine.createSpy().and.returnValue('rgb(10,200,10)');
         });
 
         it('should draw nothing when the values are null', function () {
@@ -43,7 +45,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
             expect(ctx.moveTo).not.toHaveBeenCalled();
             expect(ctx.lineTo).not.toHaveBeenCalled();
@@ -54,7 +56,7 @@ describe('drawSeries', function() {
 
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
             expect(ctx.lineTo).toHaveBeenCalled();
         });
@@ -68,7 +70,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
             expect(ctx.moveTo).toHaveBeenCalledWith(0, 0);
             expect(ctx.lineTo).toHaveBeenCalledWith(1, 1);
@@ -85,7 +87,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
             validatePointsAreInsideTheAxisRanges(
                 ctx.moveTo.calls.allArgs().concat(
@@ -105,7 +107,7 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradientMock);
+            drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
             validatePointsAreInsideTheAxisRanges(
                 ctx.moveTo.calls.allArgs().concat(
@@ -126,7 +128,8 @@ describe('drawSeries', function() {
     describe('drawSeriesPoints', function() {
         var minx = 0, maxx = 200, miny = 0, maxy = 100,
             series, ctx, plotWidth, plotHeight, plotOffset,
-            drawSeriesPoints = jQuery.plot.drawSeries.drawSeriesPoints;
+            drawSeriesPoints = jQuery.plot.drawSeries.drawSeriesPoints,
+            dollar, getColorOrGradient;
 
         beforeEach(function() {
             series = {
@@ -157,6 +160,10 @@ describe('drawSeries', function() {
             plotWidth = 200;
             plotHeight = 100;
             plotOffset = { top: 0, left: 0 };
+            dollar = jasmine.createSpy().and.callFake(function (ctx, x, y, radius, shadow) {
+                ctx.strokeText('$', x, y);
+            });
+            getColorOrGradient = jasmine.createSpy().and.returnValue('rgb(10,200,10)');
         });
 
         it('should draw nothing when the values are null', function () {
@@ -165,18 +172,18 @@ describe('drawSeries', function() {
             spyOn(ctx, 'moveTo').and.callThrough();
             spyOn(ctx, 'lineTo').and.callThrough();
 
-            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock, getColorOrGradientMock);
+            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
             expect(ctx.moveTo).not.toHaveBeenCalled();
             expect(ctx.lineTo).not.toHaveBeenCalled();
         });
 
-        it('should draw circles for values', function () {
+        it('should draw circles by default for values', function () {
             series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
 
             spyOn(ctx, 'arc').and.callThrough();
 
-            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock, getColorOrGradientMock);
+            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
             expect(ctx.arc).toHaveBeenCalled();
         });
@@ -185,64 +192,45 @@ describe('drawSeries', function() {
             series.points.symbol = 'dollar';
             series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
 
-            spyOn(drawSymbolMock, 'dollar').and.callThrough();
+            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, {'dollar': dollar}, getColorOrGradient);
 
-            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock, getColorOrGradientMock);
-
-            expect(drawSymbolMock.dollar).toHaveBeenCalled();
+            expect(dollar).toHaveBeenCalled();
         });
 
         it('should draw custom symbols given by function for values', function () {
             series.points.symbol = 'dollar';
             series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
 
-            spyOn(drawSymbolMock, 'dollar').and.callThrough();
+            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, dollar, getColorOrGradient);
 
-            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock['dollar'], getColorOrGradientMock);
-
-            expect(drawSymbolMock.dollar).toHaveBeenCalled();
+            expect(dollar).toHaveBeenCalled();
         });
 
         it('should not fill when the symbol function doesn`t need fill', function () {
-            drawSymbolMock['dollar'].fill = undefined;
+            dollar.fill = undefined;
             series.points.symbol = 'dollar';
             series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
 
             spyOn(ctx, 'fill').and.callThrough();
 
-            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock['dollar'], getColorOrGradientMock);
+            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, dollar, getColorOrGradient);
 
             expect(ctx.fill).not.toHaveBeenCalled();
         });
 
         it('should fill only once when the symbol function needs fill', function () {
-            drawSymbolMock['dollar'].fill = true;
+            dollar.fill = true;
             series.points.symbol = 'dollar';
             series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
 
             spyOn(ctx, 'fill').and.callThrough();
 
-            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbolMock['dollar'], getColorOrGradientMock);
+            drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, dollar, getColorOrGradient);
 
             expect(ctx.fill).toHaveBeenCalled();
             expect(ctx.fill.calls.count()).toBe(1);
         });
 
-        var dollar = function (ctx, x, y, radius, shadow) {
-                ctx.strokeText('$', x, y);
-            },
-            drawSymbolMock = {
-                'dollar': dollar
-            };
-
     });
-
-    function getColorOrGradientMock(spec, bottom, top, defaultColor) {
-        if (typeof spec === 'string') {
-            return spec;
-        } else {
-            throw 'test case not supported by the getColorOrGradientMock';
-        }
-    }
 
 });
