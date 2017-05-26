@@ -2401,10 +2401,7 @@ Licensed under the MIT license.
                 point2 = axis.c2p(canvas2),
                 precision = computeValuePrecision(point1, point2, axis.direction, 1);
 
-            if (precision < 20) {
-                return precision;
-            }
-            return 20;
+            return precision;
         }
 
         function setEndpointTicks(axis) {

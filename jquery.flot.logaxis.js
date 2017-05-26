@@ -72,11 +72,10 @@ Set axis.mode to "log" to enable.
         if (!noTicks) {
             noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
         }
-        //axis.options.offset.below = 100;
-      //  axis.options.offset.above = 100;
+
 //TODO investigate axis.options.offset not working aproprietly
         if (min <= 0) {
-            //for empty graph make axis.min=0.1 if it is not strictly positive
+            //for empty graph if axis.min is not strictly positive make it 0.1
             if (axis.datamin === null) {
                 min = axis.min = 0.1;
             } else {
@@ -115,7 +114,6 @@ Set axis.mode to "log" to enable.
 
         var lastDisplayed = null,
             inverseNoTicks = 1 / noTicks,
-            minLogTick = min < PREFERRED_LOG_TICK_VALUES[0] ? PREFERRED_LOG_TICK_VALUES[0] : min,
             tickValue, pixelCoord, tick;
 
         // Count the number of tick values would appear, if we can get at least
@@ -123,7 +121,7 @@ Set axis.mode to "log" to enable.
         if (maxIdx - minIdx >= noTicks / 4) {
             for (var idx = maxIdx; idx >= minIdx; idx--) {
                 tickValue = PREFERRED_LOG_TICK_VALUES[idx];
-                pixelCoord = Math.log(tickValue / minLogTick) / Math.log(max / minLogTick);
+                pixelCoord = Math.log(tickValue / min) / Math.log(max / min);
                 tick = tickValue;
 
                 if (lastDisplayed === null) {
