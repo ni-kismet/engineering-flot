@@ -281,8 +281,9 @@ xaxis, yaxis: {
     tickLength: null or number
 
     alignTicksWithAxis: null or number
-    
+
     offset: null or object({ below: number, above: number })
+    boxPosition: { centerX: number, centerY: number }
 }
 ```
 
@@ -524,7 +525,8 @@ natural places.
 
 "offset" can be used to move the plot area, or to reserve plot space.
 
-
+"boxPosition" is used to reserve extra space needed in the corresponding axis
+box as well as to specify where the axis should be placed inside the box.
 
 ## Multiple axes ##
 
@@ -1217,21 +1219,26 @@ can call:
     is used internally.
 
  - findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance)
-    
+
     Returns the closest item to the position determined by mouseX and
     mouseY. The series on which the search is realised can be specified
     using seriesFilter function.
     The search area will be a circle if the function is called without the
     last parameter, otherwise the distance will be computed based on given
     function.
- 
+
  - computeValuePrecision(min, max, direction, ticks, tickDecimals)
 
-    Used for determining the the precision for a certain axis. 
-    If the tickDecimals is specified, the maximum precision 
-    would be at most tickDecimals. Otherwise, it would be computed 
+    Used for determining the the precision for a certain axis.
+    If the tickDecimals is specified, the maximum precision
+    would be at most tickDecimals. Otherwise, it would be computed
     based on the axis minimum and maximum and the number of ticks.
- 
+
+ - computeTickSize (min, max, noTicks, tickDecimals)
+
+    Returs the size used for axis ticks. This is used internally.
+
+
 There are also some members that let you peek inside the internal
 workings of Flot which is useful in some cases. Note that if you change
 something in the objects returned, you're changing the objects used by

@@ -19,8 +19,6 @@ describe("unit tests for the precision of axis", function() {
     });
 
     it('should use the precision given by tickDecimals when specified', function() {
-        var options = [];
-
         plot = $.plot("#placeholder", [sampledata], {});
 
         var testVector = [
@@ -45,7 +43,6 @@ describe("unit tests for the precision of axis", function() {
     });
 
     it('should use the maximum precision when tickDecimals not specified', function() {
-
         plot = $.plot("#placeholder", [sampledata], {});
 
         var testVector = [
@@ -78,10 +75,11 @@ describe("unit tests for the precision of axis", function() {
             [99, 99.02, 10, 'linear', '99.00000', '99.02000'],
             [0.99963, 0.99964, null, 'linear', '0.99963000', '0.99964000'],
             [1, 1.00000000001, 100, 'linear', '1.00000000000000', '1.00000000001000'],
-            [1, 10, 10, 'log', '1.000', '10.00'],
-            [0.1, 100, 11, 'log', '0.1000', '100.0'],
+            [1, 10, 10, 'log', '1.000', '10.000'],
+            [1, 10000000, 10, 'log', '1.00', '1.00e7'],
+            [0.1, 100, 11, 'log', '0.100', '100.000'],
             [0.99963, 0.99964, null, 'log', '0.99963000', '0.99964000'],
-            [1, 2000000, null, 'log', '1.00', '2e6' ],
+            [1, 2000000, null, 'log', '1.00', '2.000e6' ],
             [-2000000, 2000000, null, 'linear', '-2000000', '2000000' ]
             ];
 

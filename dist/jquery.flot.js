@@ -1009,6 +1009,7 @@ Licensed under the MIT license.
         plot.findNearbyItem = findNearbyItem;
         plot.computeValuePrecision = computeValuePrecision;
         plot.defaultTickFormatter = defaultTickFormatter;
+        plot.computeTickSize = computeTickSize;
 
         // public attributes
         plot.hooks = hooks;
@@ -2135,7 +2136,7 @@ Licensed under the MIT license.
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
-            if (dec > tickDecimals) {
+            if (tickDecimals && dec > tickDecimals) {
                 dec = tickDecimals;
             }
 
@@ -2150,17 +2151,7 @@ Licensed under the MIT license.
             return dec;
         };
 
-        function computeTickSize(min, max, direction, options, tickDecimals) {
-            var noTicks;
-
-            if (typeof options.ticks === "number" && options.ticks > 0) {
-                noTicks = options.ticks;
-            } else {
-            // heuristic based on the model a*sqrt(x) fitted to
-            // some data points that seemed reasonable
-                noTicks = 0.3 * Math.sqrt(direction === "x" ? surface.width : surface.height);
-            }
-
+        function computeTickSize (min, max, noTicks, tickDecimals) {
             var delta = saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
@@ -2187,6 +2178,21 @@ Licensed under the MIT license.
             }
 
             size *= magn;
+            return size;
+        }
+
+        function getAxisTickSize(min, max, direction, options, tickDecimals) {
+            var noTicks;
+
+            if (typeof options.ticks === "number" && options.ticks > 0) {
+                noTicks = options.ticks;
+            } else {
+            // heuristic based on the model a*sqrt(x) fitted to
+            // some data points that seemed reasonable
+                noTicks = 0.3 * Math.sqrt(direction === "x" ? surface.width : surface.height);
+            }
+
+            var size = computeTickSize(min, max, noTicks, tickDecimals);
 
             if (options.minTickSize != null && size < options.minTickSize) {
                 size = options.minTickSize;
@@ -2242,7 +2248,7 @@ Licensed under the MIT license.
             var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, noTicks, opts.tickDecimals);
 
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
-            axis.tickSize = computeTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
+            axis.tickSize = getAxisTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
 
             // Time mode was moved to a plug-in in 0.8, and since so many people use it
             // we'll add an especially friendly reminder to make sure they included it.
