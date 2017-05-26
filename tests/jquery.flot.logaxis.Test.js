@@ -104,16 +104,16 @@ describe("unit tests for the log scale functions", function() {
         });
     });
 
-    xit('should handle a negative precision when specified', function(){
+    it('should handle a negative precision when specified', function(){
         var logFormatter = $.plot.logTickFormatter,
             axis = [],
             testVector = [
-                [801, 0, '801.00'],
-                [801, -1, '801.0'],
-                [801, -2, '801'],
-                [801, -3, '801'],
-                [800, 0, '800.00'],
-                [800, -1, '800.0'],
+                [801, 0, '801'],
+                [801, -1, '801.00'],
+                [801, -2, '801.0'],
+                [801, -3, '801.0'],
+                [800, 0, '800'],
+                [800, -1, '800.00'],
             ];
         testVector.forEach(function (t) {
             var inputValue = t[0],

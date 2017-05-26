@@ -194,7 +194,7 @@ Set axis.mode to "log" to enable.
             return 2;
         }
 
-        //for numbers close to zero, the precision from float will be big number
+        //for numbers close to zero, the precision from flot will be a big number
         //while for big numbers, the precision will be negative
         var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
             newPrecision = Math.abs(log10Value + precision);
