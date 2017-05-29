@@ -65,24 +65,18 @@ Set axis.mode to "log" to enable.
             maxIdx = -1,
             min = axis.min,
             max = axis.max,
-            firstData,
-            secondData,
             surface = plot.getCanvas();
 
         if (!noTicks) {
             noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
         }
 
-//TODO investigate axis.options.offset not working aproprietly
         if (min <= 0) {
             //for empty graph if axis.min is not strictly positive make it 0.1
             if (axis.datamin === null) {
                 min = axis.min = 0.1;
             } else {
-                firstData = axis.direction === "x" ? plot.getData()[0].datapoints.points[0] : plot.getData()[0].datapoints.points[1]; //0 for ox, 1 for oy
-                secondData = axis.direction === "x" ? plot.getData()[0].datapoints.points[2] : plot.getData()[0].datapoints.points[3]; //0 for ox, 1 for oy
-                axis.options.offset.below += Math.max((min + Math.abs(firstData - secondData)) / 2, PREFERRED_LOG_TICK_VALUES[0]);
-                min = PREFERRED_LOG_TICK_VALUES[0];
+                min = processAxisOffset(plot, axis);
             }
         }
 
@@ -202,6 +196,25 @@ Set axis.mode to "log" to enable.
         return newPrecision <= 20 ? Math.ceil(newPrecision) : 20;
     }
 
+    function processAxisOffset(plot, axis) {
+        var series = plot.getData(),
+            i, data, j, min = 0.1;
+
+        //the axis will start for 0.1 or the minimum datapoint between 0 and 0.1
+        for (i = series.length - 1; i >= 0; i--) {
+            data = series[i].datapoints.points;
+            for (j = data.length - 1; j > 0; j--) {
+                if (data[j] < min && data[j] > 0) {
+                    min = data[j];
+                }
+            }
+        }
+
+        axis.min = min;
+
+        return min;
+    }
+
     // round to nearby lower multiple of base
     function floorInBase(n, base) {
         return base * Math.floor(n / base);
@@ -217,7 +230,6 @@ Set axis.mode to "log" to enable.
                         var noTicks = 11;
                         return logTickGenerator(plot, axis, noTicks);
                     };
-
                     if (typeof axis.options.tickFormatter !== 'function') {
                         axis.options.tickFormatter = logTickFormatter;
                     }
