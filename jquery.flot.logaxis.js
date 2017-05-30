@@ -153,10 +153,10 @@ Set axis.mode to "log" to enable.
             x = Math.round(value / roundWith);
 
         if (precision) {
-            var updatedPrecision = recomputePrecision(value, precision);
             if ((tenExponent >= -4) && (tenExponent <= 4)) {
-                return defaultTickFormatter(value, axis, updatedPrecision);
+                return defaultTickFormatter(value, axis, precision);
             } else {
+                var updatedPrecision = recomputePrecision(value, precision);
                 return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
             }
         }
@@ -184,10 +184,6 @@ Set axis.mode to "log" to enable.
 
     // update the axis precision for logaxis format
     var recomputePrecision = function(num, precision) {
-        if (num === 0) {
-            return 2;
-        }
-
         //for numbers close to zero, the precision from flot will be a big number
         //while for big numbers, the precision will be negative
         var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
@@ -198,23 +194,15 @@ Set axis.mode to "log" to enable.
 
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
-            i, data, j, min = 0.1, step = 2,
-            start = axis.direction === "x" ? 0 : 1;
-
-        //handling intensityGraph
-        if (series[0].data.length !== 0) {
-            return 0;
-        }
-
-        //the axis will start from 0.1 or the minimum datapoint between 0 and 0.1
-        for (i = series.length - 1; i >= 0; i--) {
-            data = series[i].datapoints.points;
-            for (j = start; j <= data.length - 1; j += step) {
-                if (data[j] < min && data[j] > 0) {
-                    min = data[j];
-                }
-            }
-        }
+            minCondition = function(a, b) { return a < b && a > 0; },
+            range = series
+            .filter(function(series) {
+                return series.xaxis === axis || series.yaxis === axis;
+            })
+            .map(function(series) {
+                return plot.computeRangeForDataSeries(series, null, minCondition);
+            }),
+            min = axis.direction === 'x' ? Math.min(0.1, range[0].xmin) : Math.min(0.1, range[0].ymin);
 
         axis.min = min;
 
@@ -229,6 +217,7 @@ Set axis.mode to "log" to enable.
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
             defaultTickFormatter = plot.defaultTickFormatter;
+
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;
                 if (opts.mode === 'log') {
