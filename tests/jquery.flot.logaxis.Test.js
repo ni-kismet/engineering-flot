@@ -80,19 +80,20 @@ describe("unit tests for the log scale functions", function() {
         var logFormatter = $.plot.logTickFormatter,
         axis = [],
         testVector = [
-            [1.7000000000000002, '1.7000', 3],
-            [1.7000000000000002, '1.700', 2],
-            [17.000000000000002, '17.00000', 3],
-            [172, '172.0000', 1],
+            [1.7000000000000002, '1.700', 3],
+            [1.7000000000000002, '1.70', 2],
+            [17.000000000000002, '17.0000', 3],
+            [172, '172.000', 1],
             [1.000, '1.000', 3],
             [1, '1.00', 2],
-            [0.00004, '4.00e-5', 3],
-            [4.13567003E-8, '4.14e-8', 9],
-            [413.567003E-8, '4.1357e-6', 9],
-            [3.1623E-21, '3.2e-21', 21],
-            [4.13567003E+8, '4.1e8', -9],
-            [413.567003E+8, '4.14e10', -9],
-            [3.1623E+21, '3.16e21', -20]
+            [0.00004, '4.0e-5', 3],
+            [4.13567003E-8, '4.1e-8', 9],
+            [413.567003E-8, '4.136e-6', 9],
+            [3.1623E-21, '3e-21', 21],
+            [4.13567003E+8, '4e8', -9],
+            [413.567003E+8, '4.1e10', -9],
+            [3.1623E+21, '3.2e21', -20],
+            [0, '0.00', 10]
         ];
 
         testVector.forEach(function (t) {
@@ -109,11 +110,11 @@ describe("unit tests for the log scale functions", function() {
             axis = [],
             testVector = [
                 [801, 0, '801'],
-                [801, -1, '801.00'],
-                [801, -2, '801.0'],
-                [801, -3, '801.0'],
+                [801, -1, '801.0'],
+                [801, -2, '801'],
+                [801, -3, '801'],
                 [800, 0, '800'],
-                [800, -1, '800.00'],
+                [800, -1, '800.0'],
             ];
         testVector.forEach(function (t) {
             var inputValue = t[0],
@@ -252,25 +253,10 @@ describe("integration tests for log scale functions", function() {
         expect(queryPlotForYTicks()).toEqual(['log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick']);
     });
 
-    it('should set the minimum of the logaxis according to data values', function() {
-        var logdata1 = [
-            [-1, 0],
-            [0, 0.0001],
-            [1, 0.001],
-            [2, 0.01],
-            [3, 0.1],
-            [4, 1],
-            [5, 10],
-            [6, 100],
-            [7, 1000],
-            [8, 10000]
-        ];
+    it('should set the minimum of the logaxis to minimum datapoint between 0 and 0.1', function() {
+        var logdata1 = [[0, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100]];
 
         var plot = $.plot(placeholder, [logdata1], {
-                xaxis: {
-                    mode: 'log',
-                    autoscale: 'exact'
-                },
                 yaxis: {
                     mode: 'log',
                     autoscale: 'exact'
@@ -278,7 +264,6 @@ describe("integration tests for log scale functions", function() {
             }),
             axes = plot.getAxes();
 
-        expect(axes.xaxis.min).toBe(0.1);
         expect(axes.yaxis.min).toBe(0.0001);
     });
 });

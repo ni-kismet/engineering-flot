@@ -193,7 +193,7 @@ Set axis.mode to "log" to enable.
         var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
             newPrecision = Math.abs(log10Value + precision);
 
-        return newPrecision <= 20 ? Math.ceil(newPrecision) : 20;
+        return newPrecision <= 20 ? Math.floor(newPrecision) : 20;
     }
 
     function processAxisOffset(plot, axis) {
@@ -201,7 +201,12 @@ Set axis.mode to "log" to enable.
             i, data, j, min = 0.1, step = 2,
             start = axis.direction === "x" ? 0 : 1;
 
-        //the axis will start for 0.1 or the minimum datapoint between 0 and 0.1
+        //handling intensityGraph
+        if (series[0].data.length !== 0) {
+            return 0;
+        }
+
+        //the axis will start from 0.1 or the minimum datapoint between 0 and 0.1
         for (i = series.length - 1; i >= 0; i--) {
             data = series[i].datapoints.points;
             for (j = start; j <= data.length - 1; j += step) {
