@@ -198,12 +198,13 @@ Set axis.mode to "log" to enable.
 
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
-            i, data, j, min = 0.1;
+            i, data, j, min = 0.1, step = 2,
+            start = axis.direction === "x" ? 0 : 1;
 
         //the axis will start for 0.1 or the minimum datapoint between 0 and 0.1
         for (i = series.length - 1; i >= 0; i--) {
             data = series[i].datapoints.points;
-            for (j = data.length - 1; j > 0; j--) {
+            for (j = start; j <= data.length - 1; j += step) {
                 if (data[j] < min && data[j] > 0) {
                     min = data[j];
                 }

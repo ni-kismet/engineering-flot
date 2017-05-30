@@ -251,4 +251,34 @@ describe("integration tests for log scale functions", function() {
 
         expect(queryPlotForYTicks()).toEqual(['log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick', 'log tick']);
     });
+
+    it('should set the minimum of the logaxis according to data values', function() {
+        var logdata1 = [
+            [-1, 0],
+            [0, 0.0001],
+            [1, 0.001],
+            [2, 0.01],
+            [3, 0.1],
+            [4, 1],
+            [5, 10],
+            [6, 100],
+            [7, 1000],
+            [8, 10000]
+        ];
+
+        var plot = $.plot(placeholder, [logdata1], {
+                xaxis: {
+                    mode: 'log',
+                    autoscale: 'exact'
+                },
+                yaxis: {
+                    mode: 'log',
+                    autoscale: 'exact'
+                }
+            }),
+            axes = plot.getAxes();
+
+        expect(axes.xaxis.min).toBe(0.1);
+        expect(axes.yaxis.min).toBe(0.0001);
+    });
 });

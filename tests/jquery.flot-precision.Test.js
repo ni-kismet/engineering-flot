@@ -81,7 +81,8 @@ describe("unit tests for the precision of axis", function() {
             [0.1, 100, 11, 'log', '0.100', '100.000'],
             [0.99963, 0.99964, null, 'log', '0.99963000', '0.99964000'],
             [1, 2000000, null, 'log', '1.00', '2.000e6'],
-            [1.04567e-43, 1, null, 'log', '1.046e-43', '1.0']
+            [1.04567e-43, 1, null, 'log', '1.046e-43', '1.0'],
+            [0, 1, null, 'log', '0.100', '1.000']
             ];
 
         testVector.forEach(function (t) {
