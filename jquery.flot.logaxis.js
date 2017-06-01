@@ -99,7 +99,7 @@ Set axis.mode to "log" to enable.
         });
 
         if (minIdx === -1) {
-            minIdx = 0;
+            minIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
         }
 
         if (maxIdx === -1) {

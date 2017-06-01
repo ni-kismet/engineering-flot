@@ -260,4 +260,25 @@ describe("integration tests for log scale functions", function() {
         expect(axes.xaxis.min).toBe(0.1);
         expect(axes.yaxis.min).toBe(0.0001);
     });
+
+    it('should generate ticks for data outside PREFERRED_LOG_TICK_VALUES maximum', function() {
+        var logdata1 = [
+            [0, 1E40],
+            [1, 2E40],
+            [2, 3E40],
+            [3, 4E40]
+        ];
+
+        var plot = $.plot(placeholder, [logdata1], {
+                yaxis: {
+                    mode: 'log',
+                    autoscale: 'exact'
+                }
+            }),
+            ticks = queryPlotForYTicks();
+
+        expect(ticks[0]).toBe('1e40');
+        expect(ticks[ticks.length - 1]).toBe('4e40');
+    });
+
 });

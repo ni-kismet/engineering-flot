@@ -3126,7 +3126,7 @@ Licensed under the MIT license.
                 };
 
             for (var j = 0; j < points.length; j += ps) {
-                if (autoscaleCondition !== null && !autoscaleCondition(points[j])) {
+                if ((autoscaleCondition !== null && autoscaleCondition !== undefined) && !autoscaleCondition(points[j])) {
                     continue;
                 }
 
