@@ -194,13 +194,13 @@ Set axis.mode to "log" to enable.
 
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
-            minCondition = function(a, b) { return a < b && a > 0; },
+            autoscaleCondition = function(a) { return a > 0; },
             range = series
             .filter(function(series) {
                 return series.xaxis === axis || series.yaxis === axis;
             })
             .map(function(series) {
-                return plot.computeRangeForDataSeries(series, null, minCondition);
+                return plot.computeRangeForDataSeries(series, null, autoscaleCondition);
             }),
             min = axis.direction === 'x' ? Math.min(0.1, range[0].xmin) : Math.min(0.1, range[0].ymin);
 

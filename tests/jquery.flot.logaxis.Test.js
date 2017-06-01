@@ -76,7 +76,7 @@ describe("unit tests for the log scale functions", function() {
         });
     });
 
-    it('should custom a desired precision when specified', function(){
+    it('should custom the precision when specified', function(){
         var logFormatter = $.plot.logTickFormatter,
         axis = [],
         testVector = [

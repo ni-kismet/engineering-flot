@@ -3111,7 +3111,7 @@ Licensed under the MIT license.
             }
         }
 
-        function computeRangeForDataSeries(series, force, minCondition) {
+        function computeRangeForDataSeries(series, force, autoscaleCondition) {
             var points = series.datapoints.points,
                 ps = series.datapoints.pointsize,
                 format = series.datapoints.format,
@@ -3125,12 +3125,8 @@ Licensed under the MIT license.
                     ymax: bottomSentry
                 };
 
-            if (minCondition === undefined || minCondition === null) {
-                minCondition = function(a, b) { return a < b; };
-            }
-
             for (var j = 0; j < points.length; j += ps) {
-                if (points[j] === null) {
+                if (autoscaleCondition !== null && !autoscaleCondition(points[j])) {
                     continue;
                 }
 
@@ -3146,7 +3142,7 @@ Licensed under the MIT license.
                     }
 
                     if (f.x === true) {
-                        if (minCondition(val, range.xmin)) {
+                        if (val < range.xmin) {
                             range.xmin = val;
                         }
 
@@ -3156,7 +3152,7 @@ Licensed under the MIT license.
                     }
 
                     if (f.y === true) {
-                        if (minCondition(val, range.ymin)) {
+                        if (val < range.ymin) {
                             range.ymin = val;
                         }
 
