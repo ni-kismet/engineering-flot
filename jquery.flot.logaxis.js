@@ -17,18 +17,8 @@ Set axis.mode to "log" to enable.
     };
 
     var defaultTickFormatter;
-    var PREFERRED_LOG_TICK_VALUES = (function () {
-        var vals = [];
-        for (var power = -39; power <= 39; power++) {
-            var range = Math.pow(10, power);
-            for (var mult = 1; mult <= 9; mult++) {
-                var val = range * mult;
-                vals.push(val);
-            }
-        }
 
-        return vals;
-    }());
+    var PREFERRED_LOG_TICK_VALUES = extendPreferedLogTickValues(9e39);
 
     var logTransform = function (v) {
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
@@ -80,6 +70,10 @@ Set axis.mode to "log" to enable.
             }
         }
 
+        if (max > PREFERRED_LOG_TICK_VALUES[PREFERRED_LOG_TICK_VALUES.length - 1]) {
+            PREFERRED_LOG_TICK_VALUES.push.apply(PREFERRED_LOG_TICK_VALUES, extendPreferedLogTickValues(max));
+        }
+
         PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
             if (val >= min) {
                 minIdx = i;
@@ -97,14 +91,6 @@ Set axis.mode to "log" to enable.
                 return false;
             }
         });
-
-        if (minIdx === -1) {
-            minIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
-        }
-
-        if (maxIdx === -1) {
-            maxIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
-        }
 
         var lastDisplayed = null,
             inverseNoTicks = 1 / noTicks,
@@ -194,19 +180,38 @@ Set axis.mode to "log" to enable.
 
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
-            autoscaleCondition = function(a) { return a > 0; },
             range = series
             .filter(function(series) {
                 return series.xaxis === axis || series.yaxis === axis;
             })
             .map(function(series) {
-                return plot.computeRangeForDataSeries(series, null, autoscaleCondition);
+                return plot.computeRangeForDataSeries(series, null, isValid);
             }),
             min = axis.direction === 'x' ? Math.min(0.1, range[0].xmin) : Math.min(0.1, range[0].ymin);
 
         axis.min = min;
 
         return min;
+    }
+
+    function isValid(a) {
+        return a > 0;
+    }
+
+    function extendPreferedLogTickValues(endLimit) {
+        var start = PREFERRED_LOG_TICK_VALUES ? PREFERRED_LOG_TICK_VALUES[PREFERRED_LOG_TICK_VALUES.length - 1] * 10 : 1e-39,
+            log10Start = Math.floor(Math.log(start) * Math.LOG10E),
+            log10End = Math.floor(Math.log(endLimit) * Math.LOG10E),
+            val, range, vals = [];
+
+        for (var power = log10Start; power <= log10End; power++) {
+            range = Math.pow(10, power);
+            for (var mult = 1; mult <= 9; mult++) {
+                val = range * mult;
+                vals.push(val);
+            }
+        }
+        return vals;
     }
 
     // round to nearby lower multiple of base

@@ -2387,7 +2387,7 @@ Licensed under the MIT license.
             }
         }
 
-        function computeRangeForDataSeries(series, force, autoscaleCondition) {
+        function computeRangeForDataSeries(series, force, isValid) {
             var points = series.datapoints.points,
                 ps = series.datapoints.pointsize,
                 format = series.datapoints.format,
@@ -2402,7 +2402,7 @@ Licensed under the MIT license.
                 };
 
             for (var j = 0; j < points.length; j += ps) {
-                if ((autoscaleCondition !== null && autoscaleCondition !== undefined) && !autoscaleCondition(points[j])) {
+                if (typeof (isValid) === 'function' && !isValid(points[j])) {
                     continue;
                 }
 

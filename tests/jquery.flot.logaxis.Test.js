@@ -76,7 +76,7 @@ describe("unit tests for the log scale functions", function() {
         });
     });
 
-    it('should custom the precision when specified', function(){
+    it('should custom the specified precision of endpoints', function(){
         var logFormatter = $.plot.logTickFormatter,
         axis = [],
         testVector = [
@@ -109,7 +109,7 @@ describe("unit tests for the log scale functions", function() {
         var testVector = [
             [0, 50, [0.1, 0.4, 1, 3, 8, 20, 50]],
             [1E-40, 1.01, [2e-36, 2e-32, 2e-28, 2e-24, 2e-20, 2e-16, 2e-12, 2, 0.0002, 2]],
-            [1E-40, 1E+40, [2e-36, 2e-32, 2e-28, 2e-24, 10000000, 1000000000000000000 , 1e+29, 9.000000000000001e+39]]
+            [1E-40, 1E+40, [2e-36, 2e-32, 2e-28, 2e-24, 10000000, 1000000000000000000 , 1e+29, 1e40]]
             ];
 
         testVector.forEach(function (t) {
@@ -262,23 +262,28 @@ describe("integration tests for log scale functions", function() {
     });
 
     it('should generate ticks for data outside PREFERRED_LOG_TICK_VALUES maximum', function() {
-        var logdata1 = [
-            [0, 1E40],
-            [1, 2E40],
-            [2, 3E40],
-            [3, 4E40]
-        ];
+        var logdata = [
+            [[0, 1E40], [1, 4E40], [2, 8E40], [3, 2E41], [4, 6E41], [5, 9E41], [6, 3E42]],
+            [[0, 1E38], [1, 4E39], [2, 8E40], [3, 2E41], [4, 6E41], [5, 9E41], [6, 3E42]],
+            [[0, 1], [1, 1E10], [2, 1E20], [3, 1E30], [4, 1E40], [5, 1E50]]
+        ],
+            expectedTicks = [
+            ['1e40', '2e40', '5e40', '1e41', '2e41', '5e41', '10e41', '3e42'],
+            ['1e38', '3e38', '10e38', '3e39', '1e40', '3e40', '1e41', '3e41', '10e41', '3e42'],
+            ['2000', '1e8', '5e12', '2e17', '1e22', '5e26', '2e31', '10e35', '5e40', '2e45', '1e50']
+        ],
+            plot, i;
 
-        var plot = $.plot(placeholder, [logdata1], {
-                yaxis: {
-                    mode: 'log',
-                    autoscale: 'exact'
-                }
-            }),
+        for (i = 0; i < logdata.length; i++) {
+            plot = $.plot(placeholder, [logdata[i]], {
+                  yaxis: {
+                      mode: 'log',
+                      autoscale: 'exact'
+                  }
+                }),
             ticks = queryPlotForYTicks();
-
-        expect(ticks[0]).toBe('1e40');
-        expect(ticks[ticks.length - 1]).toBe('4e40');
+            expect(queryPlotForYTicks()).toEqual(expectedTicks[i]);
+        }
     });
 
 });
