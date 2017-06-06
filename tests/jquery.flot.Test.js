@@ -387,6 +387,72 @@ describe('flot', function() {
 
     });
 
+    describe('computeTickSize', function() {
+        var placeholder;
+        var plot;
+        var sampledata = [[0, 1], [1, 1.1], [2, 1.2]];
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should return the correct size', function () {
+          plot = $.plot(placeholder, [sampledata], {});
+
+          var testVector = [
+              [1, 10, 10, 1],
+              [1, 1.01, 10, 0.001],
+              [0.99963, 0.99964, 5, 0.000002],
+              [1, 1.1, 5, 0.02],
+              [0, 10000, 5, 2000],
+              [0, 10, 4, 2.5],
+              [0, 750, 10, 100],
+              [0, 740, 10, 50]
+              ];
+
+          testVector.forEach(function (t) {
+              var min = t[0],
+                  max = t[1],
+                  ticks = t[2],
+                  expectedValue = t[3];
+
+              var size = plot.computeTickSize(min, max, ticks);
+
+              expect(size).toEqual(expectedValue);
+          });
+        });
+
+        it('should depend on tickDecimals when specified', function () {
+          plot = $.plot(placeholder, [sampledata], {});
+
+          var testVector = [
+              [1, 10, 10, 3, 1],
+              [1, 1.01, 10, 2, 0.01],
+              [0.99963, 0.99964, 5, 3, 0.001],
+              [1, 1.1, 5, 1, 0.1],
+              [0, 10000, 5, 1, 2000],
+              [1, 1.00000000000001, 10, 5, 0.00001],
+              [0, 10, 4, 0, 2],
+              [0, 750, 10, 1, 100],
+              [0, 740, 10, 10, 50],
+              [0, 1000, 4, 2, 250]
+              ];
+
+          testVector.forEach(function (t) {
+              var min = t[0],
+                  max = t[1],
+                  ticks = t[2],
+                  tickDecimals = t[3],
+                  expectedValue = t[4];
+
+              var size = plot.computeTickSize(min, max, ticks, tickDecimals);
+
+              expect(size).toEqual(expectedValue);
+          });
+        });
+    });
+
     describe('tick generation', function() {
         var placeholder;
 

@@ -17,18 +17,8 @@ Set axis.mode to "log" to enable.
     };
 
     var defaultTickFormatter;
-    var PREFERRED_LOG_TICK_VALUES = (function () {
-        var vals = [];
-        for (var power = -39; power <= 39; power++) {
-            var range = Math.pow(10, power);
-            for (var mult = 1; mult <= 9; mult++) {
-                var val = range * mult;
-                vals.push(val);
-            }
-        }
 
-        return vals;
-    }());
+    var PREFERRED_LOG_TICK_VALUES = extendPreferedLogTickValues(9e39);
 
     var logTransform = function (v) {
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
@@ -42,30 +32,8 @@ Set axis.mode to "log" to enable.
         return Math.exp(v);
     };
 
-    var linearTickGenerator = function (min, max, noTicks) {
-        var delta = (max - min) / noTicks,
-            dec = -Math.floor(Math.log(delta) / Math.LN10);
-
-        var magn = Math.pow(10, -dec),
-            norm = delta / magn, // norm is between 1.0 and 10.0
-            size;
-
-        if (norm < 1.5) {
-            size = 1;
-        } else if (norm < 3) {
-            size = 2;
-            // special case for 2.5, requires an extra decimal
-            if (norm > 2.25) {
-                size = 2.5;
-                ++dec;
-            }
-        } else if (norm < 7.5) {
-            size = 5;
-        } else {
-            size = 10;
-        }
-
-        size *= magn;
+    var linearTickGenerator = function (plot, min, max, noTicks) {
+        var size = plot.computeTickSize(min, max, noTicks);
         var ticks = [],
             start = floorInBase(min, size),
             i = 0,
@@ -81,17 +49,29 @@ Set axis.mode to "log" to enable.
         return ticks;
     };
 
-    var logTickGenerator = function (min, max, noTicks) {
-        var ticks = [];
-        var minIdx = -1;
-        var maxIdx = -1;
+    var logTickGenerator = function (plot, axis, noTicks) {
+        var ticks = [],
+            minIdx = -1,
+            maxIdx = -1,
+            min = axis.min,
+            max = axis.max,
+            surface = plot.getCanvas();
 
         if (!noTicks) {
-            noTicks = 10;
+            noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
         }
 
         if (min <= 0) {
-            min = PREFERRED_LOG_TICK_VALUES[0];
+            //for empty graph if axis.min is not strictly positive make it 0.1
+            if (axis.datamin === null) {
+                min = axis.min = 0.1;
+            } else {
+                min = processAxisOffset(plot, axis);
+            }
+        }
+
+        if (max > PREFERRED_LOG_TICK_VALUES[PREFERRED_LOG_TICK_VALUES.length - 1]) {
+            PREFERRED_LOG_TICK_VALUES.push.apply(PREFERRED_LOG_TICK_VALUES, extendPreferedLogTickValues(max));
         }
 
         PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
@@ -112,35 +92,26 @@ Set axis.mode to "log" to enable.
             }
         });
 
-        if (minIdx === -1) {
-            minIdx = 0;
-        }
-
-        if (maxIdx === -1) {
-            maxIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
-        }
+        var lastDisplayed = null,
+            inverseNoTicks = 1 / noTicks,
+            tickValue, pixelCoord, tick;
 
         // Count the number of tick values would appear, if we can get at least
         // nTicks / 4 accept them.
-        var lastDisplayed = null;
-        var inverseNoTicks = 1 / noTicks;
         if (maxIdx - minIdx >= noTicks / 4) {
             for (var idx = maxIdx; idx >= minIdx; idx--) {
-                var tickValue = PREFERRED_LOG_TICK_VALUES[idx];
-                var pixelCoord = Math.log(tickValue / min) / Math.log(max / min);
-                var tick = tickValue;
+                tickValue = PREFERRED_LOG_TICK_VALUES[idx];
+                pixelCoord = Math.log(tickValue / min) / Math.log(max / min);
+                tick = tickValue;
 
                 if (lastDisplayed === null) {
                     lastDisplayed = {
-                        tickValue: tickValue,
                         pixelCoord: pixelCoord,
                         idealPixelCoord: pixelCoord
                     };
                 } else {
-                    //          if (Math.abs(pixel_coord - lastDisplayed.ideal_pixel_coord) >= inverseNoTicks) {
                     if (Math.abs(pixelCoord - lastDisplayed.pixelCoord) >= inverseNoTicks) {
                         lastDisplayed = {
-                            tickValue: tickValue,
                             pixelCoord: pixelCoord,
                             idealPixelCoord: lastDisplayed.idealPixelCoord - inverseNoTicks
                         };
@@ -149,30 +120,30 @@ Set axis.mode to "log" to enable.
                     }
                 }
 
-                if (tick) ticks.push(tick);
+                if (tick) {
+                    ticks.push(tick);
+                }
             }
             // Since we went in backwards order.
             ticks.reverse();
         } else {
-            ticks = linearTickGenerator(min, max, noTicks);
+            ticks = linearTickGenerator(plot, min, max, noTicks);
         }
 
         return ticks;
     };
 
     var logTickFormatter = function (value, axis, precision) {
-        var tenExponent = Math.floor(Math.log(value) / Math.LN10),
+        var tenExponent = value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0,
             roundWith = Math.pow(10, tenExponent),
             x = Math.round(value / roundWith);
 
         if (precision) {
-            if (precision < 0) {
-                precision = 0;
-            }
             if ((tenExponent >= -4) && (tenExponent <= 4)) {
                 return defaultTickFormatter(value, axis, precision);
             } else {
-                return (value / roundWith).toFixed(precision) + 'e' + tenExponent;
+                var updatedPrecision = recomputePrecision(value, precision);
+                return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
             }
         }
         if ((tenExponent >= -4) && (tenExponent <= 4)) {
@@ -197,6 +168,52 @@ Set axis.mode to "log" to enable.
         }
     };
 
+    // update the axis precision for logaxis format
+    var recomputePrecision = function(num, precision) {
+        //for numbers close to zero, the precision from flot will be a big number
+        //while for big numbers, the precision will be negative
+        var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
+            newPrecision = Math.abs(log10Value + precision);
+
+        return newPrecision <= 20 ? Math.floor(newPrecision) : 20;
+    }
+
+    function processAxisOffset(plot, axis) {
+        var series = plot.getData(),
+            range = series
+            .filter(function(series) {
+                return series.xaxis === axis || series.yaxis === axis;
+            })
+            .map(function(series) {
+                return plot.computeRangeForDataSeries(series, null, isValid);
+            }),
+            min = axis.direction === 'x' ? Math.min(0.1, range[0].xmin) : Math.min(0.1, range[0].ymin);
+
+        axis.min = min;
+
+        return min;
+    }
+
+    function isValid(a) {
+        return a > 0;
+    }
+
+    function extendPreferedLogTickValues(endLimit) {
+        var start = PREFERRED_LOG_TICK_VALUES ? PREFERRED_LOG_TICK_VALUES[PREFERRED_LOG_TICK_VALUES.length - 1] * 10 : 1e-39,
+            log10Start = Math.floor(Math.log(start) * Math.LOG10E),
+            log10End = Math.floor(Math.log(endLimit) * Math.LOG10E),
+            val, range, vals = [];
+
+        for (var power = log10Start; power <= log10End; power++) {
+            range = Math.pow(10, power);
+            for (var mult = 1; mult <= 9; mult++) {
+                val = range * mult;
+                vals.push(val);
+            }
+        }
+        return vals;
+    }
+
     // round to nearby lower multiple of base
     function floorInBase(n, base) {
         return base * Math.floor(n / base);
@@ -205,14 +222,14 @@ Set axis.mode to "log" to enable.
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
             defaultTickFormatter = plot.defaultTickFormatter;
+
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;
                 if (opts.mode === 'log') {
                     axis.tickGenerator = function (axis) {
                         var noTicks = 11;
-                        return logTickGenerator(axis.min, axis.max, noTicks);
+                        return logTickGenerator(plot, axis, noTicks);
                     };
-
                     if (typeof axis.options.tickFormatter !== 'function') {
                         axis.options.tickFormatter = logTickFormatter;
                     }
