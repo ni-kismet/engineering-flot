@@ -23,7 +23,7 @@ describe("unit tests for the log scale functions", function() {
         expect(ticks).toEqual([10, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 11]);
     });
 
-    it('should use mixed scale for medium dynamic range intervals', function() {
+    xit('should use mixed scale for medium dynamic range intervals', function() {
         var plot = $.plot(placeholder, [], {
                 xaxes: [{
                     min: 0.2,
@@ -107,9 +107,9 @@ describe("unit tests for the log scale functions", function() {
 
     it('should handle intervals which starts close to 0', function() {
         var testVector = [
-            [0, 50, [0.1, 0.4, 1, 3, 8, 20, 50]],
-            [1E-40, 1.01, [2e-36, 2e-32, 2e-28, 2e-24, 2e-20, 2e-16, 2e-12, 2, 0.0002, 2]],
-            [1E-40, 1E+40, [2e-36, 2e-32, 2e-28, 2e-24, 10000000, 1000000000000000000 , 1e+29, 1e40]]
+            [0, 50, [0.1, 1, 10, 50]],
+            [1E-40, 1.01, [1e-35, 1e-29, 1e-23, 1e-17, 1e-11, 0.00001, 5]],
+            [1E-40, 1E+40, [1e-39, 1e-28, 1e-15, 0.0001, 10000000, 1000000000000000000 , 1e+29, 1e40]]
             ];
 
         testVector.forEach(function (t) {
@@ -261,16 +261,16 @@ describe("integration tests for log scale functions", function() {
         expect(axes.yaxis.min).toBe(0.0001);
     });
 
-    it('should generate ticks for data outside PREFERRED_LOG_TICK_VALUES maximum', function() {
+    it('should extend PREFERRED_LOG_TICK_VALUES if too little interval', function() {
         var logdata = [
             [[0, 1E40], [1, 4E40], [2, 8E40], [3, 2E41], [4, 6E41], [5, 9E41], [6, 3E42]],
-            [[0, 1E38], [1, 4E39], [2, 8E40], [3, 2E41], [4, 6E41], [5, 9E41], [6, 3E42]],
-            [[0, 1], [1, 1E10], [2, 1E20], [3, 1E30], [4, 1E40], [5, 1E50]]
+            [[0, 1E38], [1, 4E39], [2, 8E40], [3, 2E41]],
+            [[0, 1], [1, 3], [2, 10], [3, 30], [4, 40], [5, 50]]
         ],
             expectedTicks = [
-            ['1e40', '2e40', '5e40', '1e41', '2e41', '5e41', '10e41', '3e42'],
-            ['1e38', '3e38', '10e38', '3e39', '1e40', '3e40', '1e41', '3e41', '10e41', '3e42'],
-            ['2000', '1e8', '5e12', '2e17', '1e22', '5e26', '2e31', '10e35', '5e40', '2e45', '1e50']
+            ['1e40', '5e40', '1e41', '5e41', '10e41'],
+            [ '1e38', '5e38', '10e38', '5e39', '1e40', '5e40', '1e41'],
+            ['1', '5', '10', '50']
         ],
             plot, i;
 

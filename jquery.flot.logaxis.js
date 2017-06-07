@@ -18,7 +18,7 @@ Set axis.mode to "log" to enable.
 
     var defaultTickFormatter;
 
-    var PREFERRED_LOG_TICK_VALUES = extendPreferedLogTickValues(9e39);
+    var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10);
 
     var logTransform = function (v) {
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
@@ -70,10 +70,6 @@ Set axis.mode to "log" to enable.
             }
         }
 
-        if (max > PREFERRED_LOG_TICK_VALUES[PREFERRED_LOG_TICK_VALUES.length - 1]) {
-            PREFERRED_LOG_TICK_VALUES.push.apply(PREFERRED_LOG_TICK_VALUES, extendPreferedLogTickValues(max));
-        }
-
         PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
             if (val >= min) {
                 minIdx = i;
@@ -91,6 +87,13 @@ Set axis.mode to "log" to enable.
                 return false;
             }
         });
+
+        if (maxIdx - minIdx <= noTicks / 4 && PREFERRED_LOG_TICK_VALUES.length < 700) {
+            //try with multiple of 5 for tick values
+            PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
+            minIdx *= 2;
+            maxIdx *= 2;
+        }
 
         var lastDisplayed = null,
             inverseNoTicks = 1 / noTicks,
@@ -198,15 +201,14 @@ Set axis.mode to "log" to enable.
         return a > 0;
     }
 
-    function extendPreferedLogTickValues(endLimit) {
-        var start = PREFERRED_LOG_TICK_VALUES ? PREFERRED_LOG_TICK_VALUES[PREFERRED_LOG_TICK_VALUES.length - 1] * 10 : 1e-39,
-            log10Start = Math.floor(Math.log(start) * Math.LOG10E),
-            log10End = Math.floor(Math.log(endLimit) * Math.LOG10E),
+    function computePreferedLogTickValues(endLimit, rangeStep) {
+        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
+            log10Start = -log10End,
             val, range, vals = [];
 
         for (var power = log10Start; power <= log10End; power++) {
             range = Math.pow(10, power);
-            for (var mult = 1; mult <= 9; mult++) {
+            for (var mult = 1; mult < 9; mult += rangeStep) {
                 val = range * mult;
                 vals.push(val);
             }
