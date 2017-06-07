@@ -107,8 +107,8 @@ describe("unit tests for the log scale functions", function() {
 
     it('should handle intervals which starts close to 0', function() {
         var testVector = [
-            [0, 50, [0.1, 1, 10, 50]],
-            [1E-40, 1.01, [1e-35, 1e-29, 1e-23, 1e-17, 1e-11, 0.00001, 5]],
+            [0, 50, [0.1, 1, 10, 100]],
+            [1E-40, 1.01, [1e-35, 1e-29, 1e-23, 1e-17, 1e-11, 0.00001, 10]],
             [1E-40, 1E+40, [1e-39, 1e-28, 1e-15, 0.0001, 10000000, 1000000000000000000 , 1e+29, 1e40]],
             [Number.MIN_VALUE, 1e-20, [9.999999999999994e-273, 9.999999999999997e-231, 9.999999999999998e-189, 9.999999999999996e-147, 9.999999999999998e-105, 1e-62, 1e-20]]
             ];
@@ -262,15 +262,15 @@ describe("integration tests for log scale functions", function() {
         expect(axes.yaxis.min).toBe(0.0001);
     });
 
-    it('should extend PREFERRED_LOG_TICK_VALUES if too little interval', function() {
+    it('should use EXTENDED_LOG_TICK_VALUES if the interval is too little', function() {
         var logdata = [
-            [[0, 1E40], [1, 4E40], [2, 8E40], [3, 2E41], [4, 6E41], [5, 9E41], [6, 3E42]],
-            [[0, 1E38], [1, 4E39], [2, 8E40], [3, 2E41]],
+            [[0, 1E40], [1, 4E40], [2, 8E40], [3, 1E41], [4, 2E41], [5, 4E41]],
+            [[0, 1000], [1, 1010], [2, 1E4], [3, 1E5]],
             [[0, 1], [1, 3], [2, 10], [3, 30], [4, 40], [5, 50]]
         ],
             expectedTicks = [
-            ['1e40', '5e40', '1e41', '5e41', '10e41'],
-            [ '1e38', '5e38', '10e38', '5e39', '1e40', '5e40', '1e41'],
+            ['1e40', '5e40', '1e41'],
+            ['1000', '5000', '10000', '50000', '1e5'],
             ['1', '5', '10', '50']
         ],
             plot, i;
@@ -286,5 +286,31 @@ describe("integration tests for log scale functions", function() {
             expect(queryPlotForYTicks()).toEqual(expectedTicks[i]);
         }
     });
+
+    it('should use PREFERRED_LOG_TICK_VALUES for large interval', function() {
+        var logdata = [
+            [[0, 1], [1, 4E20], [2, 8E30], [3, 4E41]],
+            [[0, 1000], [1, 1E5], [2, 1E7], [3, 1E10]],
+            [[0, 1e-12], [1, 1e-5], [2, 10], [3, 30], [4, 40], [5, 500]]
+        ],
+            expectedTicks = [
+            ['100', '10e5', '1e10', '1e14', '10e17', '1e22', '10e25', '10e29', '1e34', '1e38'],
+            ['1000', '10000', '1e5', '10e5', '1e7', '1e8', '10e8', '1e10'],
+            ['1e-11', '1e-9', '1e-7', '1e-5', '0.001', '0.1', '10']
+        ],
+            plot, i;
+
+        for (i = 0; i < logdata.length; i++) {
+            plot = $.plot(placeholder, [logdata[i]], {
+                  yaxis: {
+                      mode: 'log',
+                      autoscale: 'exact'
+                  }
+                }),
+            ticks = queryPlotForYTicks();
+            expect(queryPlotForYTicks()).toEqual(expectedTicks[i]);
+        }
+    });
+
 
 });

@@ -18,7 +18,8 @@ Set axis.mode to "log" to enable.
 
     var defaultTickFormatter;
 
-    var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10);
+    var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
+        EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
 
     var logTransform = function (v) {
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
@@ -55,7 +56,8 @@ Set axis.mode to "log" to enable.
             maxIdx = -1,
             min = axis.min,
             max = axis.max,
-            surface = plot.getCanvas();
+            surface = plot.getCanvas(),
+            logTickValues = PREFERRED_LOG_TICK_VALUES;
 
         if (!noTicks) {
             noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
@@ -88,9 +90,9 @@ Set axis.mode to "log" to enable.
             }
         });
 
-        if (maxIdx - minIdx <= noTicks / 4 && PREFERRED_LOG_TICK_VALUES.length < 700) {
+        if (maxIdx - minIdx <= noTicks / 4 && logTickValues.length !== EXTENDED_LOG_TICK_VALUES.length) {
             //try with multiple of 5 for tick values
-            PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
+            logTickValues = EXTENDED_LOG_TICK_VALUES;
             minIdx *= 2;
             maxIdx *= 2;
         }
@@ -103,7 +105,7 @@ Set axis.mode to "log" to enable.
         // nTicks / 4 accept them.
         if (maxIdx - minIdx >= noTicks / 4) {
             for (var idx = maxIdx; idx >= minIdx; idx--) {
-                tickValue = PREFERRED_LOG_TICK_VALUES[idx];
+                tickValue = logTickValues[idx];
                 pixelCoord = Math.log(tickValue / min) / Math.log(max / min);
                 tick = tickValue;
 
