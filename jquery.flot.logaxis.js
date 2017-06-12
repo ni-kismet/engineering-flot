@@ -144,7 +144,7 @@ Set axis.mode to "log" to enable.
             x = Math.round(value / roundWith);
 
         if (precision) {
-            if ((tenExponent >= -4) && (tenExponent <= 4)) {
+            if ((tenExponent >= -4) && (tenExponent <= 7)) {
                 return defaultTickFormatter(value, axis, precision);
             } else {
                 var updatedPrecision = recomputePrecision(value, precision);

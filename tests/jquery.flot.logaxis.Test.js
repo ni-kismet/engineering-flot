@@ -262,7 +262,7 @@ describe("integration tests for log scale functions", function() {
         expect(axes.yaxis.min).toBe(0.0001);
     });
 
-    it('should use EXTENDED_LOG_TICK_VALUES if the interval is too little', function() {
+    it('should multiply the possible ticks with 5 if the original interval is too little', function() {
         var logdata = [
             [[0, 1E40], [1, 4E40], [2, 8E40], [3, 1E41], [4, 2E41], [5, 4E41]],
             [[0, 1000], [1, 1010], [2, 1E4], [3, 1E5]],
@@ -270,7 +270,7 @@ describe("integration tests for log scale functions", function() {
         ],
             expectedTicks = [
             ['1e40', '5e40', '1e41'],
-            ['1000', '5000', '10000', '50000', '1e5'],
+            ['1000', '5000', '10000', '50000', '100000'],
             ['1', '5', '10', '50']
         ],
             plot, i;
@@ -287,15 +287,15 @@ describe("integration tests for log scale functions", function() {
         }
     });
 
-    it('should use PREFERRED_LOG_TICK_VALUES for large interval', function() {
+    it('should use only power of ten for large intervals', function() {
         var logdata = [
             [[0, 1], [1, 4E20], [2, 8E30], [3, 4E41]],
             [[0, 1000], [1, 1E5], [2, 1E7], [3, 1E10]],
             [[0, 1e-12], [1, 1e-5], [2, 10], [3, 30], [4, 40], [5, 500]]
         ],
             expectedTicks = [
-            ['100', '10e5', '1e10', '1e14', '10e17', '1e22', '10e25', '10e29', '1e34', '1e38'],
-            ['1000', '10000', '1e5', '10e5', '1e7', '1e8', '10e8', '1e10'],
+            ['100', '1000000', '1e10', '1e14', '10e17', '1e22', '10e25', '10e29', '1e34', '1e38'],
+            ['1000', '10000', '100000', '1000000', '10000000', '1e8', '10e8', '1e10'],
             ['1e-11', '1e-9', '1e-7', '1e-5', '0.001', '0.1', '10']
         ],
             plot, i;
