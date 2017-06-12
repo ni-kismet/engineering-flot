@@ -92,7 +92,7 @@ Licensed under the MIT license.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
                     showTickLabels: "major", // "none", "endpoints", "major", "all"
-                    offset: { below: 0, above: 0 },  // the plot drawing offset. this is calculated by the flot.navigate for each axis
+                    offset: { below: 0, above: 0 }, // the plot drawing offset. this is calculated by the flot.navigate for each axis
                     boxPosition: { centerX: 0, centerY: 0 } //position of the axis on the corresponding axis box
                 },
                 xaxes: [],
@@ -113,8 +113,8 @@ Licensed under the MIT license.
                         fill: false,
                         fillColor: null,
                         steps: false
-                            // Omit 'zero', so we can later default its value to
-                            // match that of the 'fill' option.
+                        // Omit 'zero', so we can later default its value to
+                        // match that of the 'fill' option.
                     },
                     bars: {
                         show: false,
@@ -1420,7 +1420,7 @@ Licensed under the MIT license.
                 norm = delta / magn;
 
             if (norm > 2.25 && norm < 3 && (dec + 1) <= tickDecimals) {
-              //we need an extra decimals when tickSize is 2.5
+                //we need an extra decimals when tickSize is 2.5
                 ++dec;
             }
 
@@ -2305,10 +2305,8 @@ Licensed under the MIT license.
                     entries.sort(function(a, b) {
                         return a.label === b.label
                             ? 0
-                            : ((a.label < b.label) !== ascending
-                                ? 1
-                                : -1 // Logical XOR
-                              );
+                            : ((a.label < b.label) !== ascending ? 1 : -1 // Logical XOR
+                            );
                     });
                 }
             }
@@ -2567,7 +2565,7 @@ Licensed under the MIT license.
                         if (series[i].bars.horizontal
                             ? (mx <= Math.max(b, x) && mx >= Math.min(b, x) &&
                                 my >= y + barLeft && my <= y + barRight)
-                                : (mx >= x + barLeft && mx <= x + barRight &&
+                            : (mx >= x + barLeft && mx <= x + barRight &&
                                 my >= Math.min(b, y) && my <= Math.max(b, y))) {
                             item = [i, j / ps];
                         }

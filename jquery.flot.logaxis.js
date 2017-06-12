@@ -151,7 +151,7 @@ Set axis.mode to "log" to enable.
                 return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
             }
         }
-        if ((tenExponent >= -4) && (tenExponent <= 4)) {
+        if ((tenExponent >= -4) && (tenExponent <= 7)) {
             //if we have float numbers, return a limited length string(ex: 0.0009 is represented as 0.000900001)
             var formattedValue = tenExponent < 0 ? value.toFixed(-tenExponent) : value.toFixed(tenExponent + 2);
             if (formattedValue.indexOf('.') !== -1) {
@@ -186,12 +186,12 @@ Set axis.mode to "log" to enable.
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
             range = series
-            .filter(function(series) {
-                return series.xaxis === axis || series.yaxis === axis;
-            })
-            .map(function(series) {
-                return plot.computeRangeForDataSeries(series, null, isValid);
-            }),
+                .filter(function(series) {
+                    return series.xaxis === axis || series.yaxis === axis;
+                })
+                .map(function(series) {
+                    return plot.computeRangeForDataSeries(series, null, isValid);
+                }),
             min = axis.direction === 'x' ? Math.min(0.1, range[0].xmin) : Math.min(0.1, range[0].ymin);
 
         axis.min = min;
