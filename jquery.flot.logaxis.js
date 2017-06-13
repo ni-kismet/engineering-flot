@@ -18,7 +18,8 @@ Set axis.mode to "log" to enable.
 
     var defaultTickFormatter;
 
-    var PREFERRED_LOG_TICK_VALUES = extendPreferedLogTickValues(9e39);
+    var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
+        EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
 
     var logTransform = function (v) {
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
@@ -55,7 +56,8 @@ Set axis.mode to "log" to enable.
             maxIdx = -1,
             min = axis.min,
             max = axis.max,
-            surface = plot.getCanvas();
+            surface = plot.getCanvas(),
+            logTickValues = PREFERRED_LOG_TICK_VALUES;
 
         if (!noTicks) {
             noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
@@ -68,10 +70,6 @@ Set axis.mode to "log" to enable.
             } else {
                 min = processAxisOffset(plot, axis);
             }
-        }
-
-        if (max > PREFERRED_LOG_TICK_VALUES[PREFERRED_LOG_TICK_VALUES.length - 1]) {
-            PREFERRED_LOG_TICK_VALUES.push.apply(PREFERRED_LOG_TICK_VALUES, extendPreferedLogTickValues(max));
         }
 
         PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
@@ -92,6 +90,13 @@ Set axis.mode to "log" to enable.
             }
         });
 
+        if (maxIdx - minIdx <= noTicks / 4 && logTickValues.length !== EXTENDED_LOG_TICK_VALUES.length) {
+            //try with multiple of 5 for tick values
+            logTickValues = EXTENDED_LOG_TICK_VALUES;
+            minIdx *= 2;
+            maxIdx *= 2;
+        }
+
         var lastDisplayed = null,
             inverseNoTicks = 1 / noTicks,
             tickValue, pixelCoord, tick;
@@ -100,7 +105,7 @@ Set axis.mode to "log" to enable.
         // nTicks / 4 accept them.
         if (maxIdx - minIdx >= noTicks / 4) {
             for (var idx = maxIdx; idx >= minIdx; idx--) {
-                tickValue = PREFERRED_LOG_TICK_VALUES[idx];
+                tickValue = logTickValues[idx];
                 pixelCoord = Math.log(tickValue / min) / Math.log(max / min);
                 tick = tickValue;
 
@@ -139,14 +144,14 @@ Set axis.mode to "log" to enable.
             x = Math.round(value / roundWith);
 
         if (precision) {
-            if ((tenExponent >= -4) && (tenExponent <= 4)) {
+            if ((tenExponent >= -4) && (tenExponent <= 7)) {
                 return defaultTickFormatter(value, axis, precision);
             } else {
                 var updatedPrecision = recomputePrecision(value, precision);
                 return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
             }
         }
-        if ((tenExponent >= -4) && (tenExponent <= 4)) {
+        if ((tenExponent >= -4) && (tenExponent <= 7)) {
             //if we have float numbers, return a limited length string(ex: 0.0009 is represented as 0.000900001)
             var formattedValue = tenExponent < 0 ? value.toFixed(-tenExponent) : value.toFixed(tenExponent + 2);
             if (formattedValue.indexOf('.') !== -1) {
@@ -181,12 +186,12 @@ Set axis.mode to "log" to enable.
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
             range = series
-            .filter(function(series) {
-                return series.xaxis === axis || series.yaxis === axis;
-            })
-            .map(function(series) {
-                return plot.computeRangeForDataSeries(series, null, isValid);
-            }),
+                .filter(function(series) {
+                    return series.xaxis === axis || series.yaxis === axis;
+                })
+                .map(function(series) {
+                    return plot.computeRangeForDataSeries(series, null, isValid);
+                }),
             min = axis.direction === 'x' ? Math.min(0.1, range[0].xmin) : Math.min(0.1, range[0].ymin);
 
         axis.min = min;
@@ -198,15 +203,14 @@ Set axis.mode to "log" to enable.
         return a > 0;
     }
 
-    function extendPreferedLogTickValues(endLimit) {
-        var start = PREFERRED_LOG_TICK_VALUES ? PREFERRED_LOG_TICK_VALUES[PREFERRED_LOG_TICK_VALUES.length - 1] * 10 : 1e-39,
-            log10Start = Math.floor(Math.log(start) * Math.LOG10E),
-            log10End = Math.floor(Math.log(endLimit) * Math.LOG10E),
+    function computePreferedLogTickValues(endLimit, rangeStep) {
+        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
+            log10Start = -log10End,
             val, range, vals = [];
 
         for (var power = log10Start; power <= log10End; power++) {
             range = Math.pow(10, power);
-            for (var mult = 1; mult <= 9; mult++) {
+            for (var mult = 1; mult < 9; mult += rangeStep) {
                 val = range * mult;
                 vals.push(val);
             }
