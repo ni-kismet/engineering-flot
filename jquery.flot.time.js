@@ -280,8 +280,7 @@ API.txt for details.
     var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
         [1, "year"]]);
 
-    //record the minimum value of the data
-    var axisFirstData;
+    var axisFirstData; //record first value of the datapoints
 
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
