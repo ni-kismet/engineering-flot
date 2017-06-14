@@ -95,7 +95,9 @@ API.txt for details.
         function toRelativeTimeStr(date, showMilliseconds) {
             var result = '';
 
-            var d = date.valueOf();
+            var dateValue = date.valueOf(),
+                minDateValue = axisFirstData.date.valueOf(),
+                d = dateValue - minDateValue;
 
             if (d < 0) {
                 d = -d;
@@ -278,11 +280,22 @@ API.txt for details.
     var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
         [1, "year"]]);
 
+    //record the minimum value of the data
+    var axisFirstData;
+
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
             $.each(plot.getAxes(), function(axisName, axis) {
                 var opts = axis.options;
                 if (opts.format === "time") {
+                    plot.hooks.processDatapoints.push(function(plot, series, datapoints) {
+                        var firstPlotData;
+                        if (datapoints.points.length !== 0) {
+                            firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+                        } else { firstPlotData = 0; }
+
+                        axisFirstData = dateGenerator(firstPlotData, axis.options);
+                    });
                     axis.tickGenerator = function(axis) {
                         var ticks = [];
                         var d = dateGenerator(axis.min, opts);
