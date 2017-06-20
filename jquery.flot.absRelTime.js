@@ -249,6 +249,18 @@ API.txt for details.
 
     var axisFirstData; //record first value of the datapoints
 
+    function updateAxisFirstData(plot, axis) {
+        var plotData = plot.getData()[0],
+            datapoints = plotData.datapoints,
+            firstPlotData;
+
+        if (datapoints.points.length !== 0) {
+            firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+        } else { firstPlotData = 0; }
+
+        axisFirstData = firstPlotData * 1000;
+    }
+
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
             $.each(plot.getAxes(), function(axisName, axis) {
@@ -257,15 +269,9 @@ API.txt for details.
                     axis.tickGenerator = function(axis) {
                         var ticks = [],
                             d = dateGenerator(axis.min, opts),
-                            minSize = 0,
-                            plotData = plot.getData()[0],
-                            datapoints = plotData.datapoints,
-                            firstPlotData;
-                        if (datapoints.points.length !== 0) {
-                            firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
-                        } else { firstPlotData = 0; }
+                            minSize = 0;
 
-                        axisFirstData = firstPlotData * 1000;
+                        updateAxisFirstData(plot, axis);
 
                         // make quarter use a possibility if quarters are
                         // mentioned in either of these options
