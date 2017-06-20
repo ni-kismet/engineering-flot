@@ -95,7 +95,8 @@ API.txt for details.
         function toRelativeTimeStr(date, showMilliseconds) {
             var result = '';
 
-            var d = date.valueOf();
+            var dateValue = date.valueOf(),
+                d = dateValue - axisFirstData;
 
             if (d < 0) {
                 d = -d;
@@ -125,8 +126,6 @@ API.txt for details.
 
         var r = [];
         var escape = false;
-        var hours = d.getHours();
-        var isAM = hours < 12;
 
         if (!monthNames) {
             monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -136,40 +135,10 @@ API.txt for details.
             dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         }
 
-        var hours12;
-
-        if (hours > 12) {
-            hours12 = hours - 12;
-        } else if (hours === 0) {
-            hours12 = 12;
-        } else {
-            hours12 = hours;
-        }
-
         for (var i = 0; i < fmt.length; ++i) {
             var c = fmt.charAt(i);
             if (escape) {
                 switch (c) {
-                    case 'a': c = "" + dayNames[d.getDay()]; break;
-                    case 'b': c = "" + monthNames[d.getMonth()]; break;
-                    case 'd': c = leftPad(d.getDate()); break;
-                    case 'e': c = leftPad(d.getDate(), " "); break;
-                    case 'h': // For back-compat with 0.7; remove in 1.0
-                    case 'H': c = leftPad(hours); break;
-                    case 'I': c = leftPad(hours12); break;
-                    case 'l': c = leftPad(hours12, " "); break;
-                    case 'm': c = leftPad(d.getMonth() + 1); break;
-                    case 'M': c = leftPad(d.getMinutes()); break;
-                    // quarters not in Open Group's strftime specification
-                    case 'q':
-                        c = "" + (Math.floor(d.getMonth() / 3) + 1); break;
-                    case 'S': c = leftPad(d.getSeconds()); break;
-                    case 'y': c = leftPad(d.getFullYear() % 100); break;
-                    case 'Y': c = "" + leftPadNTimes(d.getFullYear(), '0', 4); break;
-                    case 'p': c = (isAM) ? ("" + "am") : ("" + "pm"); break;
-                    case 'P': c = (isAM) ? ("" + "AM") : ("" + "PM"); break;
-                    case 'w': c = "" + d.getDay(); break;
-                    case 'f': c = "" + leftPadNTimes(d.getMilliseconds(), null, 3); break;
                     case 'r': c = toRelativeTimeStr(d.date, showMilliseconds); break;
                     case 'A': c = toAbsoluteTimeStr(d.date, showMilliseconds); break;
                 }
@@ -278,15 +247,25 @@ API.txt for details.
     var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
         [1, "year"]]);
 
+    var axisFirstData; //record first value of the datapoints
+
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
             $.each(plot.getAxes(), function(axisName, axis) {
                 var opts = axis.options;
                 if (opts.format === "time") {
                     axis.tickGenerator = function(axis) {
-                        var ticks = [];
-                        var d = dateGenerator(axis.min, opts);
-                        var minSize = 0;
+                        var ticks = [],
+                            d = dateGenerator(axis.min, opts),
+                            minSize = 0,
+                            plotData = plot.getData()[0],
+                            datapoints = plotData.datapoints,
+                            firstPlotData;
+                        if (datapoints.points.length !== 0) {
+                            firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+                        } else { firstPlotData = 0; }
+
+                        axisFirstData = firstPlotData * 1000;
 
                         // make quarter use a possibility if quarters are
                         // mentioned in either of these options
@@ -440,50 +419,6 @@ API.txt for details.
                         if (opts.timeformat !== null && opts.timeformat !== undefined) {
                             return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames, axis.tickSize[1] === 'millisecond');
                         }
-
-                        // possibly use quarters if quarters are mentioned in
-                        // any of these places
-                        var useQuarters = (axis.options.tickSize &&
-                                axis.options.tickSize[1] === "quarter") ||
-                            (axis.options.minTickSize &&
-                                axis.options.minTickSize[1] === "quarter");
-
-                        var t = axis.tickSize[0] * timeUnitSize[axis.tickSize[1]];
-                        var span = axis.max - axis.min;
-                        var suffix = (opts.twelveHourClock) ? " %p" : "";
-                        var hourCode = (opts.twelveHourClock) ? "%I" : "%H";
-                        var fmt;
-
-                        if (t < timeUnitSize.minute) {
-                            fmt = hourCode + ":%M:%S" + suffix;
-                        } else if (t < timeUnitSize.day) {
-                            if (span < 2 * timeUnitSize.day) {
-                                fmt = hourCode + ":%M" + suffix;
-                            } else {
-                                fmt = "%b %d " + hourCode + ":%M" + suffix;
-                            }
-                        } else if (t < timeUnitSize.month) {
-                            fmt = "%b %d";
-                        } else if ((useQuarters && t < timeUnitSize.quarter) ||
-                            (!useQuarters && t < timeUnitSize.year)) {
-                            if (span < timeUnitSize.year) {
-                                fmt = "%b";
-                            } else {
-                                fmt = "%b %Y";
-                            }
-                        } else if (useQuarters && t < timeUnitSize.year) {
-                            if (span < timeUnitSize.year) {
-                                fmt = "Q%q";
-                            } else {
-                                fmt = "Q%q %Y";
-                            }
-                        } else {
-                            fmt = "%Y";
-                        }
-
-                        var rt = formatDate(d, fmt, opts.monthNames, opts.dayNames);
-
-                        return rt;
                     };
                 }
             });
