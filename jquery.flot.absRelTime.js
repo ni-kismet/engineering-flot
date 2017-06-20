@@ -30,7 +30,7 @@ API.txt for details.
     // Returns a string with the date d formatted according to fmt.
     // A subset of the Open Group's strftime format is supported.
 
-    function formatDate(d, fmt, monthNames, dayNames, showMilliseconds) {
+    function formatDate(d, fmt, monthNames, dayNames, showMilliseconds, axis, plot) {
         if (typeof d.strftime === "function") {
             return d.strftime(fmt);
         }
@@ -95,6 +95,7 @@ API.txt for details.
         function toRelativeTimeStr(date, showMilliseconds) {
             var result = '';
 
+            updateAxisFirstData(plot, axis);
             var dateValue = date.valueOf(),
                 d = dateValue - axisFirstData;
 
@@ -271,8 +272,6 @@ API.txt for details.
                             d = dateGenerator(axis.min, opts),
                             minSize = 0;
 
-                        updateAxisFirstData(plot, axis);
-
                         // make quarter use a possibility if quarters are
                         // mentioned in either of these options
                         var spec = (opts.tickSize && opts.tickSize[1] ===
@@ -423,7 +422,7 @@ API.txt for details.
                         var d = dateGenerator(v, axis.options);
                         // first check global format
                         if (opts.timeformat !== null && opts.timeformat !== undefined) {
-                            return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames, axis.tickSize[1] === 'millisecond');
+                            return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames, axis.tickSize[1] === 'millisecond', axis, plot);
                         }
                     };
                 }
