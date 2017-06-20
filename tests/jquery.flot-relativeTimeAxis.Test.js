@@ -107,4 +107,10 @@ describe('A Flot chart with relative time axes', function () {
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([{v: 3600, label: '00:00:00'}, {v: 4200, label: '00:10:00'}]);
     });
 
+    it('shows time starting from 00:00:00.000 for empty graph', function () {
+        plot = createPlotWithRelativeTimeAxis(placeholder, [[]]);
+
+        expect(plot.getAxes().xaxis.ticks[0].label).toEqual('00:00:00.000');
+    });
+
 });

@@ -256,7 +256,7 @@ API.txt for details.
 
         if (datapoints.points.length !== 0) {
             firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
-        } else { firstPlotData = 0; }
+        } else { firstPlotData = axis.min; }
 
         axisFirstData = firstPlotData * 1000;
     }
