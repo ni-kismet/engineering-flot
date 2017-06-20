@@ -251,15 +251,22 @@ API.txt for details.
     var axisFirstData; //record first value of the datapoints
 
     function updateAxisFirstData(plot, axis) {
-        var plotData = plot.getData()[0],
-            datapoints = plotData.datapoints,
-            firstPlotData;
+        var plotData = plot.getData(),
+            i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
 
         if (datapoints.points.length !== 0) {
-            firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
-        } else { firstPlotData = axis.min; }
+            minFirstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+        } else { minFirstPlotData = axis.min; }
 
-        axisFirstData = firstPlotData * 1000;
+        for (i = 1; i < plotData.length; i++) {
+            datapoints = plotData[i].datapoints;
+            firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+            if (minFirstPlotData > firstPlotData) {
+                minFirstPlotData = firstPlotData;
+            }
+        }
+
+        axisFirstData = minFirstPlotData * 1000;
     }
 
     function init(plot) {
