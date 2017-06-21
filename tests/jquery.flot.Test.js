@@ -1,15 +1,11 @@
-/* eslint-disable */
-/* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
-
 describe('flot', function() {
-
     describe('setRange', function() {
         var placeholder, plot;
 
         var options = {
             series: {
                 shadowSize: 0, // don't draw shadows
-                lines: { show: false},
+                lines: { show: false },
                 points: { show: true, fill: false, symbol: 'circle' }
             }
         };
@@ -231,13 +227,12 @@ describe('flot', function() {
     });
 
     describe('computeRangeForDataSeries', function() {
-
         var placeholder, plot;
 
         var options = {
             series: {
                 shadowSize: 0, // don't draw shadows
-                lines: { show: false},
+                lines: { show: false },
                 points: { show: true, fill: false, symbol: 'circle' }
             }
         };
@@ -310,12 +305,9 @@ describe('flot', function() {
             expect(limits.ymin).toBe(1);
             expect(limits.ymax).toBe(3);
         });
-
     });
 
-
     describe('adjustSeriesDataRange', function() {
-
         var placeholder, plot;
 
         beforeEach(function() {
@@ -333,7 +325,7 @@ describe('flot', function() {
                     },
                     limits = {xmin: 10, ymin: 11, xmax: 12, ymax: 13};
 
-                var limits = plot.adjustSeriesDataRange(series, limits);
+                limits = plot.adjustSeriesDataRange(series, limits);
 
                 expect(limits.ymin).toBe(0);
                 expect(limits.ymax).toBe(13);
@@ -349,7 +341,7 @@ describe('flot', function() {
                     },
                     limits = {xmin: 10, ymin: -11, xmax: 12, ymax: -9};
 
-                var limits = plot.adjustSeriesDataRange(series, limits);
+                limits = plot.adjustSeriesDataRange(series, limits);
 
                 expect(limits.ymin).toBe(-11);
                 expect(limits.ymax).toBe(0);
@@ -365,7 +357,7 @@ describe('flot', function() {
                     },
                     limits = {xmin: 10, ymin: -11, xmax: 12, ymax: -9};
 
-                var limits = plot.adjustSeriesDataRange(series, limits);
+                limits = plot.adjustSeriesDataRange(series, limits);
 
                 expect(limits.ymin).toBe(-11);
                 expect(limits.ymax).toBe(-9);
@@ -379,12 +371,11 @@ describe('flot', function() {
                 },
                 limits = {xmin: 10, ymin: 11, xmax: 12, ymax: 13};
 
-            var limits = plot.adjustSeriesDataRange(series, limits);
+            limits = plot.adjustSeriesDataRange(series, limits);
 
-            expect(limits.xmin).toBe(10 - 6/2);
-            expect(limits.xmax).toBe(12 + 6/2);
+            expect(limits.xmin).toBe(10 - 6 / 2);
+            expect(limits.xmax).toBe(12 + 6 / 2);
         });
-
     });
 
     describe('computeTickSize', function() {
@@ -398,58 +389,57 @@ describe('flot', function() {
         });
 
         it('should return the correct size', function () {
-          plot = $.plot(placeholder, [sampledata], {});
+            plot = $.plot(placeholder, [sampledata], {});
 
-          var testVector = [
-              [1, 10, 10, 1],
-              [1, 1.01, 10, 0.001],
-              [0.99963, 0.99964, 5, 0.000002],
-              [1, 1.1, 5, 0.02],
-              [0, 10000, 5, 2000],
-              [0, 10, 4, 2.5],
-              [0, 750, 10, 100],
-              [0, 740, 10, 50]
-              ];
+            var testVector = [
+                [1, 10, 10, 1],
+                [1, 1.01, 10, 0.001],
+                [0.99963, 0.99964, 5, 0.000002],
+                [1, 1.1, 5, 0.02],
+                [0, 10000, 5, 2000],
+                [0, 10, 4, 2.5],
+                [0, 750, 10, 100],
+                [0, 740, 10, 50]
+            ];
 
-          testVector.forEach(function (t) {
-              var min = t[0],
-                  max = t[1],
-                  ticks = t[2],
-                  expectedValue = t[3];
+            testVector.forEach(function (t) {
+                var min = t[0],
+                    max = t[1],
+                    ticks = t[2],
+                    expectedValue = t[3],
+                    size = plot.computeTickSize(min, max, ticks);
 
-              var size = plot.computeTickSize(min, max, ticks);
-
-              expect(size).toEqual(expectedValue);
-          });
+                expect(size).toEqual(expectedValue);
+            });
         });
 
-        it('should depend on tickDecimals when specified', function () {
-          plot = $.plot(placeholder, [sampledata], {});
+        it('should depend on tickDecimals when specified', function() {
+            plot = $.plot(placeholder, [sampledata], {});
 
-          var testVector = [
-              [1, 10, 10, 3, 1],
-              [1, 1.01, 10, 2, 0.01],
-              [0.99963, 0.99964, 5, 3, 0.001],
-              [1, 1.1, 5, 1, 0.1],
-              [0, 10000, 5, 1, 2000],
-              [1, 1.00000000000001, 10, 5, 0.00001],
-              [0, 10, 4, 0, 2],
-              [0, 750, 10, 1, 100],
-              [0, 740, 10, 10, 50],
-              [0, 1000, 4, 2, 250]
-              ];
+            var testVector = [
+                [1, 10, 10, 3, 1],
+                [1, 1.01, 10, 2, 0.01],
+                [0.99963, 0.99964, 5, 3, 0.001],
+                [1, 1.1, 5, 1, 0.1],
+                [0, 10000, 5, 1, 2000],
+                [1, 1.00000000000001, 10, 5, 0.00001],
+                [0, 10, 4, 0, 2],
+                [0, 750, 10, 1, 100],
+                [0, 740, 10, 10, 50],
+                [0, 1000, 4, 2, 250]
+            ];
 
-          testVector.forEach(function (t) {
-              var min = t[0],
-                  max = t[1],
-                  ticks = t[2],
-                  tickDecimals = t[3],
-                  expectedValue = t[4];
+            testVector.forEach(function(t) {
+                var min = t[0],
+                    max = t[1],
+                    ticks = t[2],
+                    tickDecimals = t[3],
+                    expectedValue = t[4];
 
-              var size = plot.computeTickSize(min, max, ticks, tickDecimals);
+                var size = plot.computeTickSize(min, max, ticks, tickDecimals);
 
-              expect(size).toEqual(expectedValue);
-          });
+                expect(size).toEqual(expectedValue);
+            });
         });
     });
 
@@ -483,7 +473,7 @@ describe('flot', function() {
             var decimate = jasmine.createSpy('decimate').and.returnValue(expected);
             var data = [{data: [], decimate: decimate}];
 
-            var plot = $.plot(placeholder, data, {series: {lines: {show: true}}});
+            $.plot(placeholder, data, {series: {lines: {show: true}}});
 
             expect(decimate).toHaveBeenCalled();
         });
@@ -493,7 +483,7 @@ describe('flot', function() {
             var decimatePoints = jasmine.createSpy('decimate').and.returnValue(expected);
             var data = [{data: [], decimatePoints: decimatePoints}];
 
-            var plot = $.plot(placeholder, data, {series: {lines: {show: false}, points: {show: true}}});
+            $.plot(placeholder, data, {series: {lines: {show: false}, points: {show: true}}});
 
             expect(decimatePoints).toHaveBeenCalled();
         });
@@ -503,7 +493,7 @@ describe('flot', function() {
             var decimateBars = jasmine.createSpy('decimate').and.returnValue(expected);
             var data = [{data: [], decimate: decimateBars}];
 
-            var plot = $.plot(placeholder, data, {series: {lines: {show: false}, bars: {show: true}}});
+            $.plot(placeholder, data, {series: {lines: {show: false}, bars: {show: true}}});
 
             expect(decimateBars).toHaveBeenCalled();
         });
@@ -511,7 +501,7 @@ describe('flot', function() {
 
     describe('setData', function () {
         var placeholder;
-        var data = [[[1,2], [3,4]]];
+        var data = [[[1, 2], [3, 4]]];
 
         beforeEach(function() {
             placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
@@ -519,7 +509,7 @@ describe('flot', function() {
         });
 
         it('stores data in the internal buffer', function () {
-            var expected = [1, 2, 3 ,4];
+            var expected = [1, 2, 3, 4];
 
             var plot = $.plot(placeholder, [], {});
             plot.setData(data);
@@ -540,9 +530,8 @@ describe('flot', function() {
             expect(plot.getData()[0].datapoints.points).toBe(buffer);
         });
 
-
         it('expands the internal buffer as neccessary', function () {
-            var plot = $.plot(placeholder, [[[3,4]]], {});
+            var plot = $.plot(placeholder, [[[3, 4]]], {});
             expect(plot.getData()[0].datapoints.points.length).toBe(2);
 
             plot.setData(data);
@@ -550,13 +539,11 @@ describe('flot', function() {
         });
 
         it('shrinks the internal buffer as neccessary', function () {
-            var plot = $.plot(placeholder, [[[3,4], [5,6], [6,7], [8,9]]], {});
+            var plot = $.plot(placeholder, [[[3, 4], [5, 6], [6, 7], [8, 9]]], {});
             expect(plot.getData()[0].datapoints.points.length).toBe(8);
 
             plot.setData(data);
             expect(plot.getData()[0].datapoints.points.length).toBe(4);
         });
-
-
     });
 });
