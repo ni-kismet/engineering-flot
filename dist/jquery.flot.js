@@ -887,6 +887,7 @@ Licensed under the MIT license.
                 processRawData: [],
                 processDatapoints: [],
                 processOffset: [],
+                setupGrid: [],
                 adjustSeriesDataRange: [],
                 drawBackground: [],
                 drawSeries: [],
@@ -2010,6 +2011,8 @@ Licensed under the MIT license.
             if (showGrid) {
                 drawAxisLabels();
             }
+
+            executeHooks(hooks.setupGrid, []);
         }
 
         function widenMinMax(minimum, maximum) {
