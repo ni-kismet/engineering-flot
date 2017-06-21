@@ -30,7 +30,8 @@
 				tickFormatter: function(value, axis) {
 					return value.toFixed(axis.tickDecimals) + "€";
 				}
-			} ]
+			} ],
+			legend: { position: "sw" }
 		}
 
 		$.plot("#placeholder", data, options);
