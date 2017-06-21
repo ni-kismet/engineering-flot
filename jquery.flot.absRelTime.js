@@ -96,6 +96,7 @@ API.txt for details.
             var result = '';
 
             updateAxisFirstData(plot, axis);
+
             var dateValue = date.valueOf(),
                 d = dateValue - axisFirstData;
 
@@ -255,14 +256,18 @@ API.txt for details.
             i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
 
         if (datapoints.points.length !== 0) {
-            minFirstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+            if (plotData[0].xaxis === axis || plotData[0].yaxis === axis) {
+                minFirstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+            } else { minFirstPlotData = axis.max; }
         } else { minFirstPlotData = axis.min; }
 
         for (i = 1; i < plotData.length; i++) {
             datapoints = plotData[i].datapoints;
-            firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
-            if (minFirstPlotData > firstPlotData) {
-                minFirstPlotData = firstPlotData;
+            if (plotData[i].xaxis === axis || plotData[i].yaxis === axis) {
+                firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+                if (minFirstPlotData > firstPlotData) {
+                    minFirstPlotData = firstPlotData;
+                }
             }
         }
 

@@ -113,22 +113,6 @@ describe('A Flot chart with relative time axes', function () {
         expect(plot.getAxes().xaxis.ticks[0].label).toEqual('00:00:00.000');
     });
 
-    it('works with multiple axis', function () {
-        plot = $.plot(placeholder, [[[3600, 1], [4200, 2]]], {
-            xaxes: [{
-                format: 'time',
-                timeformat: '%r'
-            },
-            {
-                position: 'top'
-            }],
-            yaxis: {}
-        });
-
-        var xaxis = plot.getAxes().xaxis;
-        expect(firstAndLast(xaxis.ticks)).toEqual([{v: 3600, label: '00:00:00'}, {v: 4200, label: '00:10:00'}]);
-    });
-
     it('works with multiple dataseries', function () {
         plot = $.plot(placeholder, [[[4200, 1], [4800, 2]], [[3600, 1], [4200, 2]]], {
             xaxis: {
@@ -139,6 +123,29 @@ describe('A Flot chart with relative time axes', function () {
         });
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([{v: 3600, label: '00:00:00'}, {v: 4800, label: '00:20:00'}]);
+    });
+
+    it('works with multiple axis', function () {
+        plot = $.plot(placeholder, [{
+          data: [[4200, 1.1], [4800, 2.1]],
+          xaxis: 2},
+          {data: [[3600, 1], [4200, 2]],
+          xaxis: 1}],
+          {xaxes: [{
+              format: 'time',
+              timeformat: '%r'
+          },{
+              position: 'top',
+              format: 'time',
+              timeformat: '%r'
+          }],
+          yaxis: {}
+          });
+
+        var xaxis1 = plot.getAxes().xaxis,
+            xaxis2 = plot.getAxes().x2axis;
+        expect(firstAndLast(xaxis1.ticks)).toEqual([{v: 3600, label: '00:00:00'}, {v: 4200, label: '00:10:00'}]);
+        expect(firstAndLast(xaxis2.ticks)).toEqual([{v: 4200, label: '00:00:00'}, {v: 4800, label: '00:10:00'}]);
     });
 
 });
