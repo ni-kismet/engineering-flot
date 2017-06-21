@@ -470,6 +470,45 @@ describe('flot', function() {
         });
     });
 
+    describe('decimation', function () {
+        var placeholder;
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('calls the "decimate" function of data series when the plot type is line', function () {
+            var expected = [1, 2, 3, 3];
+            var decimate = jasmine.createSpy('decimate').and.returnValue(expected);
+            var data = [{data: [], decimate: decimate}];
+
+            var plot = $.plot(placeholder, data, {series: {lines: {show: true}}});
+
+            expect(decimate).toHaveBeenCalled();
+        });
+
+        it('calls the "decimatePoints" function of data series when the plot type is points', function () {
+            var expected = [1, 2, 3, 3];
+            var decimatePoints = jasmine.createSpy('decimate').and.returnValue(expected);
+            var data = [{data: [], decimatePoints: decimatePoints}];
+
+            var plot = $.plot(placeholder, data, {series: {lines: {show: false}, points: {show: true}}});
+
+            expect(decimatePoints).toHaveBeenCalled();
+        });
+
+        it('calls the "decimate" function of data series when the plot type is bars', function () {
+            var expected = [1, 2, 3, 3];
+            var decimateBars = jasmine.createSpy('decimate').and.returnValue(expected);
+            var data = [{data: [], decimate: decimateBars}];
+
+            var plot = $.plot(placeholder, data, {series: {lines: {show: false}, bars: {show: true}}});
+
+            expect(decimateBars).toHaveBeenCalled();
+        });
+    });
+
     describe('setData', function () {
         var placeholder;
         var data = [[[1,2], [3,4]]];
@@ -517,5 +556,7 @@ describe('flot', function() {
             plot.setData(data);
             expect(plot.getData()[0].datapoints.points.length).toBe(4);
         });
+
+
     });
 });

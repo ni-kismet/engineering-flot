@@ -230,7 +230,5 @@ describe('drawSeries', function() {
             expect(ctx.fill).toHaveBeenCalled();
             expect(ctx.fill.calls.count()).toBe(1);
         });
-
     });
-
 });
