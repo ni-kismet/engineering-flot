@@ -62,7 +62,6 @@ describe('A Flot chart with absolute time axes', function () {
             {v: 1 + tzDiff, label: '12:00:01.000&nbsp;AM<br>1/1/0001'},
             {v: 2 + tzDiff, label: '12:00:02.000&nbsp;AM<br>1/1/0001'}
         ]);
-
     });
 
     it('shows time bigger than 1 minute correctly', function () {
