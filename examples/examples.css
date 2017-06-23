@@ -109,6 +109,7 @@ fieldset {
 		border-style: groove;
 		border-color: threedface;
 		border-image: initial;
+		padding: 10px;
 }
 
 legend {
@@ -119,6 +120,8 @@ legend {
 		border-style: none;
 		border-color: initial;
 		border-image: initial;
+		padding-left: 10px;
+		padding-right: 10px;
 }
 
 input[type="radio"] {
