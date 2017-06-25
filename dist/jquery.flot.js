@@ -2991,6 +2991,10 @@ Licensed under the MIT license.
                 };
 
             for (var j = 0; j < points.length; j += ps) {
+                if (points[j] === null) {
+                    continue;
+                }
+
                 if (typeof (isValid) === 'function' && !isValid(points[j])) {
                     continue;
                 }

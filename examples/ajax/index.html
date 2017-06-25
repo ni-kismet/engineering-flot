@@ -6,16 +6,22 @@
 	<link href="../examples.css" rel="stylesheet" type="text/css">
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery.flot.legend.js"></script>
+
+
 	<script type="text/javascript">
 
 	$(function() {
 
 		var options = {
-			lines: {
-				show: true
-			},
-			points: {
-				show: true
+			series: {
+				lines: {
+					show: true,
+					lineWidth: 2
+				},
+				points: {
+					show: true
+				}
 			},
 			xaxis: {
 				tickDecimals: 0,

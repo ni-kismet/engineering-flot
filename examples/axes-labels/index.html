@@ -10,27 +10,27 @@
 
     <style>
         div.x1Label {
-            color: blue;
-            font-style: italic;
+            color: #224499;
             font-size: 20px;
+            font-family: Tahoma, Geneva, sans-serif;
         }
         div.x2Label {
-            color: blue;
+            color: #224499;
             font-style: italic;
             font-size: 24px;
         }
         div.x3Label {
-            color: green;
-            font-size: 12px;
+            color: #225511;
+            font-size: 14px;
         }
         div.y1Label {
-            color: red;
-            font-style: bold;
-            font-size: 10px;
+            color: #772211;
+            font-size: 18px;
         }
         div.y2Label {
-            color: red;
-            font-size: 18px;
+            color: #772211;
+            font-style: bold;
+            font-size: 15px;
         }
     </style>
 
@@ -52,7 +52,7 @@
         function update() {
             index += 0.01;
             data = [
-                { data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
+                { data: generate(index, index + 10, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
             ];
             plot.setData(data);
             plot.setupGrid();
@@ -67,13 +67,13 @@
         ];
         options = {
             xaxes: [
-                { position: 'bottom', axisLabel: 'Bottom 1', showTickLabels: false },
-                { position: 'bottom', axisLabel: 'Bottom 2', show: true, showTickLabels: false, showTicks: false },
-                { position: 'top', axisLabel: 'Top', show: true, showTickLabels: false, showTicks: false }
+                { position: 'bottom', axisLabel: 'X Axis', showTickLabels: false },
+                { position: 'bottom', axisLabel: 'Second X Axis', show: true, showTickLabels: false, showMinorTicks: true, gridLines: false, min: 0, max: 2},
+                { position: 'top', axisLabel: 'Third X Axis', show: true, showTickLabels: false, showTicks: false, gridLines: false }
             ],
             yaxes: [
-                { position: 'left', axisLabel: 'Left', showTickLabels: false },
-                { position: 'right', axisLabel: 'Right', show: true, showTickLabels: false, showTicks: false }
+                { position: 'left', axisLabel: 'Y Axis', showTickLabels: false },
+                { position: 'right', axisLabel: 'Second Y Axis', show: true, showTickLabels: false, showTicks: false, gridLines: false }
             ]
         };
 
