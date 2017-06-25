@@ -1,5 +1,7 @@
 # engineering-flot [![Build Status](https://travis-ci.org/ni-kismet/engineering-flot.svg?branch=master)](https://travis-ci.org/ni-kismet/engineering-flot) [![Coverage Status](https://coveralls.io/repos/github/ni-kismet/engineering-flot/badge.svg?branch=master)](https://coveralls.io/github/ni-kismet/engineering-flot?branch=master)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ni-kismet/engineering-flot.svg)](https://greenkeeper.io/)
+
 ## About ##
 
 engineering-flot is a Javascript plotting library for engineering and scientific
