@@ -95,10 +95,8 @@ API.txt for details.
         function toRelativeTimeStr(date, showMilliseconds) {
             var result = '';
 
-            updateAxisFirstData(plot, axis);
-
             var dateValue = date.valueOf(),
-                d = dateValue - axisFirstData;
+                d = dateValue - axis.relativeFirstData;
 
             if (d < 0) {
                 d = -d;
@@ -249,8 +247,6 @@ API.txt for details.
     var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
         [1, "year"]]);
 
-    var axisFirstData; //record first value of the datapoints
-
     function updateAxisFirstData(plot, axis) {
         var plotData = plot.getData(),
             i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
@@ -271,7 +267,7 @@ API.txt for details.
             }
         }
 
-        axisFirstData = minFirstPlotData * 1000;
+        axis.relativeFirstData = minFirstPlotData * 1000;
     }
 
     function init(plot) {
@@ -283,6 +279,10 @@ API.txt for details.
                         var ticks = [],
                             d = dateGenerator(axis.min, opts),
                             minSize = 0;
+
+                        if (!axis.relativeFirstData) {
+                            updateAxisFirstData(plot, axis);
+                        }
 
                         // make quarter use a possibility if quarters are
                         // mentioned in either of these options
