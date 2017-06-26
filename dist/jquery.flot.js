@@ -766,18 +766,6 @@ Licensed under the MIT license.
             options = {
                 // the color theme used for graphs
                 colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
-                legend: {
-                    show: true,
-                    noColumns: 1, // number of colums in legend table
-                    labelFormatter: null, // fn: string -> string
-                    labelBoxBorderColor: "#ccc", // border color for the little label boxes
-                    container: null, // container (as jQuery object) to put legend in, null means default on top of graph
-                    position: "ne", // position of default legend container within plot
-                    margin: 5, // distance from grid edge to default legend container within plot
-                    backgroundColor: null, // null means auto-detect
-                    backgroundOpacity: 0.85, // set to 0 to avoid background
-                    sorted: null // default to no legend sorting
-                },
                 xaxis: {
                     show: null, // null = auto-detect, true = always, false = never
                     position: "bottom", // or "top"
@@ -899,6 +887,7 @@ Licensed under the MIT license.
                 processRawData: [],
                 processDatapoints: [],
                 processOffset: [],
+                setupGrid: [],
                 adjustSeriesDataRange: [],
                 drawBackground: [],
                 drawSeries: [],
@@ -2023,7 +2012,7 @@ Licensed under the MIT license.
                 drawAxisLabels();
             }
 
-            insertLegend();
+            executeHooks(hooks.setupGrid, []);
         }
 
         function widenMinMax(minimum, maximum) {
@@ -2987,128 +2976,6 @@ Licensed under the MIT license.
             }
         }
 
-        function insertLegend() {
-            if (options.legend.container != null) {
-                $(options.legend.container).html("");
-            } else {
-                placeholder.find(".legend").remove();
-            }
-
-            if (!options.legend.show) {
-                return;
-            }
-
-            var fragments = [],
-                entries = [],
-                rowStarted = false,
-                lf = options.legend.labelFormatter,
-                s, label;
-
-            // Build a list of legend entries, with each having a label and a color
-            for (var i = 0; i < series.length; ++i) {
-                s = series[i];
-                if (s.label) {
-                    label = lf ? lf(s.label, s) : s.label;
-                    if (label) {
-                        entries.push({
-                            label: label,
-                            color: s.color
-                        });
-                    }
-                }
-            }
-
-            // Sort the legend using either the default or a custom comparator
-            if (options.legend.sorted) {
-                if ($.isFunction(options.legend.sorted)) {
-                    entries.sort(options.legend.sorted);
-                } else if (options.legend.sorted === "reverse") {
-                    entries.reverse();
-                } else {
-                    var ascending = options.legend.sorted !== "descending";
-                    entries.sort(function(a, b) {
-                        return a.label === b.label
-                            ? 0
-                            : ((a.label < b.label) !== ascending ? 1 : -1 // Logical XOR
-                            );
-                    });
-                }
-            }
-
-            // Generate markup for the list of entries, in their final order
-
-            for (i = 0; i < entries.length; ++i) {
-                var entry = entries[i];
-
-                if (i % options.legend.noColumns === 0) {
-                    if (rowStarted) {
-                        fragments.push('</tr>');
-                    }
-
-                    fragments.push('<tr>');
-                    rowStarted = true;
-                }
-
-                fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
-                    '<td class="legendLabel">' + entry.label + '</td>'
-                );
-            }
-
-            if (rowStarted) {
-                fragments.push('</tr>');
-            }
-
-            if (fragments.length === 0) {
-                return;
-            }
-
-            var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
-            if (options.legend.container != null) {
-                $(options.legend.container).html(table);
-            } else {
-                var pos = "",
-                    p = options.legend.position,
-                    m = options.legend.margin;
-                if (m[0] == null) {
-                    m = [m, m];
-                }
-
-                if (p.charAt(0) === "n") {
-                    pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
-                } else if (p.charAt(0) === "s") {
-                    pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
-                }
-
-                if (p.charAt(1) === "e") {
-                    pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
-                } else if (p.charAt(1) === "w") {
-                    pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
-                }
-
-                var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos + ';') + '</div>').appendTo(placeholder);
-                if (options.legend.backgroundOpacity !== 0.0) {
-                    // put in the transparent background
-                    // separately to avoid blended labels and
-                    // label boxes
-                    var c = options.legend.backgroundColor;
-                    if (c == null) {
-                        c = options.grid.backgroundColor;
-                        if (c && typeof c === "string") {
-                            c = $.color.parse(c);
-                        } else {
-                            c = $.color.extract(legend, 'background-color');
-                        }
-
-                        c.a = 1;
-                        c = c.toString();
-                    }
-                    var div = legend.children();
-                    $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos + 'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
-                }
-            }
-        }
-
         function computeRangeForDataSeries(series, force, isValid) {
             var points = series.datapoints.points,
                 ps = series.datapoints.pointsize,
@@ -3124,6 +2991,10 @@ Licensed under the MIT license.
                 };
 
             for (var j = 0; j < points.length; j += ps) {
+                if (points[j] === null) {
+                    continue;
+                }
+
                 if (typeof (isValid) === 'function' && !isValid(points[j])) {
                     continue;
                 }
@@ -3869,19 +3740,7 @@ Licensed under the MIT license.
                 datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
             }
 
-            var lw = series.lines.lineWidth,
-                sw = series.shadowSize;
-            // FIXME: consider another form of shadow when filling is turned on
-            if (lw > 0 && sw > 0) {
-                // draw shadow as a thick and thin line with transparency
-                ctx.lineWidth = sw;
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                // position shadow at angle from the mid of line
-                var angle = Math.PI / 18;
-                plotLine(datapoints, Math.sin(angle) * (lw / 2 + sw / 2), Math.cos(angle) * (lw / 2 + sw / 2), series.xaxis, series.yaxis, ctx);
-                ctx.lineWidth = sw / 2;
-                plotLine(datapoints, Math.sin(angle) * (lw / 2 + sw / 4), Math.cos(angle) * (lw / 2 + sw / 4), series.xaxis, series.yaxis, ctx);
-            }
+            var lw = series.lines.lineWidth;
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
@@ -3930,8 +3789,17 @@ Licensed under the MIT license.
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
+            var datapoints = {
+                format: series.datapoints.format,
+                points: series.datapoints.points,
+                pointsize: series.datapoints.pointsize
+            };
+
+            if (series.decimatePoints) {
+                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth);
+            }
+
             var lw = series.points.lineWidth,
-                sw = series.shadowSize,
                 radius = series.points.radius,
                 symbol = series.points.symbol,
                 drawSymbolFn;
@@ -3946,30 +3814,15 @@ Licensed under the MIT license.
 
             // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
-            // Doing the conditional here allows the shadow setting to still be
-            // optional even with a lineWidth of 0.
 
             if (lw === 0) {
                 lw = 0.0001;
             }
 
-            if (lw > 0 && sw > 0) {
-                // draw shadow in two steps
-                var w = sw / 2;
-                ctx.lineWidth = w;
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.datapoints, radius, false, w + w / 2, true,
-                    series.xaxis, series.yaxis, drawSymbolFn);
-
-                ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.datapoints, radius, false, w / 2, true,
-                    series.xaxis, series.yaxis, drawSymbolFn);
-            }
-
             ctx.lineWidth = lw;
             ctx.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient);
             ctx.strokeStyle = series.color;
-            plotPoints(series.datapoints, radius,
+            plotPoints(datapoints, radius,
                 true, 0, false,
                 series.xaxis, series.yaxis, drawSymbolFn);
             ctx.restore();
@@ -4105,7 +3958,16 @@ Licensed under the MIT license.
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
-            // FIXME: figure out a way to add shadows (for instance along the right edge)
+            var datapoints = {
+                format: series.datapoints.format,
+                points: series.datapoints.points,
+                pointsize: series.datapoints.pointsize
+            };
+
+            if (series.decimate) {
+                datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
+            }
+
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
 
@@ -4125,7 +3987,8 @@ Licensed under the MIT license.
             var fillStyleCallback = series.bars.fill ? function(bottom, top) {
                 return getFillStyle(series.bars, series.color, bottom, top, getColorOrGradient);
             } : null;
-            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
+
+            plotBars(datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 

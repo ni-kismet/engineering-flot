@@ -1,17 +1,22 @@
 dist: trusty
 language: node_js
 node_js:
-- '6'
+    - '8'
 addons:
-  firefox: latest
-  chrome: stable
+    firefox: latest
+    chrome: stable
+cache:
+    directories:
+        - node_modules
 before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
+    - npm install -g npm
+    - npm install -g greenkeeper-lockfile@1
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
 install:
     - npm install
-    #- npm install travis-github-lint-status eslint-config-standard eslint-plugin-standard eslint-plugin-promise
 script:
     - npm test
     - npm run coverage
-    #- ./node_modules/travis-github-lint-status/index.js ./*.js

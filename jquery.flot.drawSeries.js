@@ -279,19 +279,7 @@
                 datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
             }
 
-            var lw = series.lines.lineWidth,
-                sw = series.shadowSize;
-            // FIXME: consider another form of shadow when filling is turned on
-            if (lw > 0 && sw > 0) {
-                // draw shadow as a thick and thin line with transparency
-                ctx.lineWidth = sw;
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                // position shadow at angle from the mid of line
-                var angle = Math.PI / 18;
-                plotLine(datapoints, Math.sin(angle) * (lw / 2 + sw / 2), Math.cos(angle) * (lw / 2 + sw / 2), series.xaxis, series.yaxis, ctx);
-                ctx.lineWidth = sw / 2;
-                plotLine(datapoints, Math.sin(angle) * (lw / 2 + sw / 4), Math.cos(angle) * (lw / 2 + sw / 4), series.xaxis, series.yaxis, ctx);
-            }
+            var lw = series.lines.lineWidth;
 
             ctx.lineWidth = lw;
             ctx.strokeStyle = series.color;
@@ -340,8 +328,17 @@
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
+            var datapoints = {
+                format: series.datapoints.format,
+                points: series.datapoints.points,
+                pointsize: series.datapoints.pointsize
+            };
+
+            if (series.decimatePoints) {
+                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth);
+            }
+
             var lw = series.points.lineWidth,
-                sw = series.shadowSize,
                 radius = series.points.radius,
                 symbol = series.points.symbol,
                 drawSymbolFn;
@@ -356,30 +353,15 @@
 
             // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
-            // Doing the conditional here allows the shadow setting to still be
-            // optional even with a lineWidth of 0.
 
             if (lw === 0) {
                 lw = 0.0001;
             }
 
-            if (lw > 0 && sw > 0) {
-                // draw shadow in two steps
-                var w = sw / 2;
-                ctx.lineWidth = w;
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                plotPoints(series.datapoints, radius, false, w + w / 2, true,
-                    series.xaxis, series.yaxis, drawSymbolFn);
-
-                ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                plotPoints(series.datapoints, radius, false, w / 2, true,
-                    series.xaxis, series.yaxis, drawSymbolFn);
-            }
-
             ctx.lineWidth = lw;
             ctx.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient);
             ctx.strokeStyle = series.color;
-            plotPoints(series.datapoints, radius,
+            plotPoints(datapoints, radius,
                 true, 0, false,
                 series.xaxis, series.yaxis, drawSymbolFn);
             ctx.restore();
@@ -515,7 +497,16 @@
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
 
-            // FIXME: figure out a way to add shadows (for instance along the right edge)
+            var datapoints = {
+                format: series.datapoints.format,
+                points: series.datapoints.points,
+                pointsize: series.datapoints.pointsize
+            };
+
+            if (series.decimate) {
+                datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
+            }
+
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
 
@@ -535,7 +526,8 @@
             var fillStyleCallback = series.bars.fill ? function(bottom, top) {
                 return getFillStyle(series.bars, series.color, bottom, top, getColorOrGradient);
             } : null;
-            plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
+
+            plotBars(datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 
