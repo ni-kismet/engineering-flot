@@ -243,6 +243,7 @@ describe('drawSeries', function() {
                 bars: {
                     lineWidth: 1,
                     show: true,
+                    fillColor: 'blue',
                     barWidth: 10
                 },
                 datapoints: {
@@ -294,35 +295,44 @@ describe('drawSeries', function() {
         });
 
         it('should draw bars for fillTowards infinity', function () {
-            series.datapoints.points = [150, 25, 50, 75, 200, 100];
+            series.datapoints.points = [150, 25];
             series.bars.fillTowards = Infinity;
 
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
-                expectedValue1 = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
-                expectedValue2 = yaxis.p2c(maxy);
+                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                topValue = yaxis.p2c(maxy),
+                yValue = xaxis.p2c(series.datapoints.points[1]);
 
             spyOn(ctx, 'lineTo').and.callThrough();
 
             drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
-            expect(ctx.lineTo.calls.argsFor(0)).toEqual([expectedValue1, expectedValue2]);
+            expect(ctx.lineTo.calls.argsFor(0)).toEqual([leftValue, topValue]);
+            expect(ctx.lineTo.calls.argsFor(1)).toEqual([rightValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(2)).toEqual([leftValue, yValue]);
         });
 
         it('should draw bars for fillTowards -infinity', function () {
-            series.datapoints.points = [150, 25, 50, 75, 200, 100];
+            series.datapoints.points = [150, 25];
             series.bars.fillTowards = -Infinity;
 
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
-                expectedValue1 = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
-                expectedValue2 = yaxis.p2c(miny);
+                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                bottomValue = yaxis.p2c(miny),
+                yValue = xaxis.p2c(series.datapoints.points[1]);
+
 
             spyOn(ctx, 'lineTo').and.callThrough();
 
             drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
-            expect(ctx.lineTo.calls.argsFor(2)).toEqual([expectedValue1, expectedValue2]);
+            expect(ctx.lineTo.calls.argsFor(0)).toEqual([leftValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(1)).toEqual([rightValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(2)).toEqual([rightValue, bottomValue]);
         });
 
         it('should draw bars for fillTowards zero', function () {
@@ -331,14 +341,18 @@ describe('drawSeries', function() {
 
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
-                expectedValue1 = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
-                expectedValue2 = yaxis.p2c(0);
+                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                zeroValue = yaxis.p2c(0),
+                yValue = xaxis.p2c(series.datapoints.points[1]);
 
             spyOn(ctx, 'lineTo').and.callThrough();
 
             drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
-            expect(ctx.lineTo.calls.argsFor(2)).toEqual([expectedValue1, 0]);
+            expect(ctx.lineTo.calls.argsFor(0)).toEqual([leftValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(1)).toEqual([rightValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(2)).toEqual([rightValue, zeroValue]);
         });
     });
 });
