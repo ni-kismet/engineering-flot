@@ -3944,14 +3944,16 @@ Licensed under the MIT license.
         function drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
                 var points = datapoints.points,
-                    ps = datapoints.pointsize;
+                    ps = datapoints.pointsize,
+                    fillTowards = series.bars.fillTowards || 0,
+                    bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min;
 
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null) {
                         continue;
                     }
 
-                    drawBar(points[i], points[i + 1], 0, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
 

@@ -231,4 +231,64 @@ describe('drawSeries', function() {
             expect(ctx.fill.calls.count()).toBe(1);
         });
     });
+
+    describe('drawSeriesBars', function() {
+        var minx = 0, maxx = 200, miny = 0, maxy = 100,
+            series, ctx, plotWidth, plotHeight, plotOffset,
+            drawSeriesBars = jQuery.plot.drawSeries.drawSeriesBars,
+            getColorOrGradient;
+
+        beforeEach(function() {
+            series = {
+                bars: {
+                    lineWidth: 1,
+                    show: true
+                },
+                datapoints: {
+                    format: null,
+                    points: null,
+                    pointsize: 2
+                },
+                xaxis: {
+                    min: minx,
+                    max: maxx,
+                    p2c: function(p) { return p; }
+                },
+                yaxis: {
+                    min: miny,
+                    max: maxy,
+                    p2c: function(p) { return p; }
+                }
+            };
+            ctx = setFixtures('<div id="test-container" style="width: 200px;height: 100px;border-style: solid;border-width: 1px"><canvas id="theCanvas" style="width: 100%; height: 100%" /></div>')
+                .find('#theCanvas')[0]
+                .getContext('2d');
+            plotWidth = 200;
+            plotHeight = 100;
+            plotOffset = { top: 0, left: 0 };
+            getColorOrGradient = jasmine.createSpy().and.returnValue('rgb(10,200,10)');
+        });
+
+        it('should draw nothing when the values are null', function () {
+            series.datapoints.points = [null, null, null, null];
+
+            spyOn(ctx, 'moveTo').and.callThrough();
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.moveTo).not.toHaveBeenCalled();
+            expect(ctx.lineTo).not.toHaveBeenCalled();
+        });
+
+        it('should draw bars for values', function () {
+            series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo).toHaveBeenCalled();
+        });
+    });
 });
