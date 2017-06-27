@@ -233,7 +233,7 @@ describe('drawSeries', function() {
     });
 
     describe('drawSeriesBars', function() {
-        var minx = 0, maxx = 200, miny = 0, maxy = 100,
+        var minx = -200, maxx = 200, miny = -100, maxy = 100,
             series, ctx, plotWidth, plotHeight, plotOffset,
             drawSeriesBars = jQuery.plot.drawSeries.drawSeriesBars,
             getColorOrGradient;
@@ -242,7 +242,8 @@ describe('drawSeries', function() {
             series = {
                 bars: {
                     lineWidth: 1,
-                    show: true
+                    show: true,
+                    barWidth: 10
                 },
                 datapoints: {
                     format: null,
@@ -252,11 +253,13 @@ describe('drawSeries', function() {
                 xaxis: {
                     min: minx,
                     max: maxx,
+                    autoscale: 'exact',
                     p2c: function(p) { return p; }
                 },
                 yaxis: {
                     min: miny,
                     max: maxy,
+                    autoscale: 'exact',
                     p2c: function(p) { return p; }
                 }
             };
@@ -266,7 +269,6 @@ describe('drawSeries', function() {
             plotWidth = 200;
             plotHeight = 100;
             plotOffset = { top: 0, left: 0 };
-            getColorOrGradient = jasmine.createSpy().and.returnValue('rgb(10,200,10)');
         });
 
         it('should draw nothing when the values are null', function () {
@@ -289,6 +291,54 @@ describe('drawSeries', function() {
             drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
 
             expect(ctx.lineTo).toHaveBeenCalled();
+        });
+
+        it('should draw bars for fillTowards infinity', function () {
+            series.datapoints.points = [150, 25, 50, 75, 200, 100];
+            series.bars.fillTowards = Infinity;
+
+            var xaxis = series.xaxis,
+                yaxis = series.yaxis,
+                expectedValue1 = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
+                expectedValue2 = yaxis.p2c(maxy);
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo.calls.argsFor(0)).toEqual([expectedValue1, expectedValue2]);
+        });
+
+        it('should draw bars for fillTowards -infinity', function () {
+            series.datapoints.points = [150, 25, 50, 75, 200, 100];
+            series.bars.fillTowards = -Infinity;
+
+            var xaxis = series.xaxis,
+                yaxis = series.yaxis,
+                expectedValue1 = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                expectedValue2 = yaxis.p2c(miny);
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo.calls.argsFor(2)).toEqual([expectedValue1, expectedValue2]);
+        });
+
+        it('should draw bars for fillTowards zero', function () {
+            series.datapoints.points = [50, 25, -50, 75, 100, 100];
+            series.bars.fillTowards = 0;
+
+            var xaxis = series.xaxis,
+                yaxis = series.yaxis,
+                expectedValue1 = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                expectedValue2 = yaxis.p2c(0);
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo.calls.argsFor(2)).toEqual([expectedValue1, 0]);
         });
     });
 });
