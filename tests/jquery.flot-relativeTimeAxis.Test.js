@@ -131,16 +131,16 @@ describe('A Flot chart with relative time axes', function () {
             xaxis: 2},
         {data: [[3600, 1], [4200, 2]],
             xaxis: 1}],
-        {xaxes: [{
-            format: 'time',
-            timeformat: '%r'
-        }, {
-            position: 'top',
-            format: 'time',
-            timeformat: '%r'
-        }],
-        yaxis: {}
-        });
+            {xaxes: [{
+                format: 'time',
+                timeformat: '%r'
+            }, {
+                position: 'top',
+                format: 'time',
+                timeformat: '%r'
+            }],
+                yaxis: {}
+            });
 
         var xaxis1 = plot.getAxes().xaxis,
             xaxis2 = plot.getAxes().x2axis;
