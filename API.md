@@ -257,7 +257,7 @@ xaxis, yaxis: {
     max: null or number
     autoscaleMargin: null or number
     windowSize: null or number
-    autoScale: "none" or "loose" or "exact" or "sliding-window"
+    autoscale: "none" or "loose" or "exact" or "sliding-window"
     growOnly: null or boolean
 
     transform: null or fn: number -> number
@@ -354,7 +354,7 @@ makes interactive use more stable).
 The "autoscaleMargin" is a bit esoteric: it's the fraction of margin
 that the scaling algorithm will add to avoid that the outermost points
 ends up on the grid border. Note that this margin is only applied when
-autoScale option is set to "loose". If a margin is specified,
+autoscale option is set to "loose". If a margin is specified,
 the plot will furthermore extend the axis end-point to the nearest
 whole tick. The default value is "null" for the x axes and 0.02 for y
 axes which seems appropriate for most cases.
