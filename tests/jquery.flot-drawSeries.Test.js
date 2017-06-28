@@ -280,14 +280,6 @@ describe('drawSeries', function() {
             return [r, g, b, a * 255];
         }
 
-        function isClose(c1, c2) {
-            var tolerance = 2,
-            close = c2
-                .map(function(v, i) { return Math.abs(v - c1[i]); })
-                .every(function(d) { return d <= tolerance; });
-            return close;
-        }
-
         it('should draw nothing when the values are null', function () {
             series.datapoints.points = [null, null, null, null];
 
@@ -380,19 +372,19 @@ describe('drawSeries', function() {
                     bars: {
                         lineWidth: 1,
                         show: true,
-                        fillColor: 'blue',
-                        barWidth: 10
+                        fillColor: 'blue'
                     }
-                }
+                },
+                xaxis: { autoscale:'exact' }
             });
             var ctx = $(placeholder).find('.flot-base').get(0).getContext('2d')
                 insideColor1 = getPixelColor(ctx, ctx.canvas.width / 2, ctx.canvas.height / 2),
-                insideColor2 = getPixelColor(ctx, ctx.canvas.width / 2 - 10, ctx.canvas.height / 2 - 10),
-                insideColor3 =getPixelColor(ctx, ctx.canvas.width / 2 + 10, ctx.canvas.height / 2 + 10);
+                insideColor2 = getPixelColor(ctx, ctx.canvas.width / 2 + 35, ctx.canvas.height / 2 - 20),
+                insideColor3 =getPixelColor(ctx, ctx.canvas.width / 2 - 10, ctx.canvas.height / 2 + 30);
 
-            expect(isClose(insideColor1, rgba(0,0,255,1))).toBeTruthy();
-            expect(isClose(insideColor2, rgba(0,0,255,1))).toBeTruthy();
-            expect(isClose(insideColor3, rgba(0,0,255,1))).toBeTruthy();
+            expect(Array.prototype.slice.call(insideColor1)).toEqual(rgba(0,0,255,1));
+            expect(Array.prototype.slice.call(insideColor2)).toEqual(rgba(0,0,255,1));
+            expect(Array.prototype.slice.call(insideColor3)).toEqual(rgba(0,0,255,1));
         });
     });
 });
