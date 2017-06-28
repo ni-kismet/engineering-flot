@@ -272,6 +272,22 @@ describe('drawSeries', function() {
             plotOffset = { top: 0, left: 0 };
         });
 
+        function getPixelColor(ctx, x, y) {
+            return ctx.getImageData(x, y, 1, 1).data;
+        }
+
+        function rgba(r, g, b, a) {
+            return [r, g, b, a * 255];
+        }
+
+        function isClose(c1, c2) {
+            var tolerance = 2,
+            close = c2
+                .map(function(v, i) { return Math.abs(v - c1[i]); })
+                .every(function(d) { return d <= tolerance; });
+            return close;
+        }
+
         it('should draw nothing when the values are null', function () {
             series.datapoints.points = [null, null, null, null];
 
@@ -353,6 +369,30 @@ describe('drawSeries', function() {
             expect(ctx.lineTo.calls.argsFor(0)).toEqual([leftValue, yValue]);
             expect(ctx.lineTo.calls.argsFor(1)).toEqual([rightValue, yValue]);
             expect(ctx.lineTo.calls.argsFor(2)).toEqual([rightValue, zeroValue]);
+        });
+
+        it('should draw bars with specified color', function () {
+            var fixture = setFixtures('<div id="demo-container" style="width: 800px;height: 600px">').find('#demo-container').get(0),
+                placeholder = $('<div id="placeholder" style="width: 100%;height: 100%">');
+            placeholder.appendTo(fixture);
+            $.plot(placeholder, [[[45, 25]]], {
+                series: {
+                    bars: {
+                        lineWidth: 1,
+                        show: true,
+                        fillColor: 'blue',
+                        barWidth: 10
+                    }
+                }
+            });
+            var ctx = $(placeholder).find('.flot-base').get(0).getContext('2d')
+                insideColor1 = getPixelColor(ctx, ctx.canvas.width / 2, ctx.canvas.height / 2),
+                insideColor2 = getPixelColor(ctx, ctx.canvas.width / 2 - 10, ctx.canvas.height / 2 - 10),
+                insideColor3 =getPixelColor(ctx, ctx.canvas.width / 2 + 10, ctx.canvas.height / 2 + 10);
+
+            expect(isClose(insideColor1, rgba(0,0,255,1))).toBeTruthy();
+            expect(isClose(insideColor2, rgba(0,0,255,1))).toBeTruthy();
+            expect(isClose(insideColor3, rgba(0,0,255,1))).toBeTruthy();
         });
     });
 });

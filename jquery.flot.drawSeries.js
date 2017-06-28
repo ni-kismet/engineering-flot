@@ -367,46 +367,22 @@
             ctx.restore();
         }
 
-        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
-            var left, right, bottom, top,
-                drawLeft, drawRight, drawTop, drawBottom,
+        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, lineWidth) {
+            var left = x + barLeft,
+                right = x + barRight,
+                bottom = b, top = y,
+                drawLeft, drawRight, drawTop, drawBottom = false,
                 tmp;
 
-            // in horizontal mode, we start the bar from the left
-            // instead of from the bottom so it appears to be
-            // horizontal rather than vertical
-            if (horizontal) {
-                drawBottom = drawRight = drawTop = true;
-                drawLeft = false;
-                left = b;
-                right = x;
-                top = y + barLeft;
-                bottom = y + barRight;
+            drawLeft = drawRight = drawTop = true;
 
-                // account for negative bars
-                if (right < left) {
-                    tmp = right;
-                    right = left;
-                    left = tmp;
-                    drawLeft = true;
-                    drawRight = false;
-                }
-            } else {
-                drawLeft = drawRight = drawTop = true;
-                drawBottom = false;
-                left = x + barLeft;
-                right = x + barRight;
-                bottom = b;
-                top = y;
-
-                // account for negative bars
-                if (top < bottom) {
-                    tmp = top;
-                    top = bottom;
-                    bottom = tmp;
-                    drawBottom = true;
-                    drawTop = false;
-                }
+            // account for negative bars
+            if (top < bottom) {
+                tmp = top;
+                top = bottom;
+                bottom = tmp;
+                drawBottom = true;
+                drawTop = false;
             }
 
             // clip
@@ -492,7 +468,7 @@
                         continue;
                     }
 
-                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.lineWidth);
                 }
             }
 

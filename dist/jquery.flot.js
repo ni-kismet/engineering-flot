@@ -835,7 +835,6 @@ Licensed under the MIT license.
                         fill: true,
                         fillColor: null,
                         align: "left", // "left", "right", or "center"
-                        horizontal: false,
                         zero: true
                     },
                     shadowSize: 3,
@@ -3051,13 +3050,8 @@ Licensed under the MIT license.
                         delta = -series.bars.barWidth / 2;
                 }
 
-                if (series.bars.horizontal) {
-                    range.ymin += delta;
-                    range.ymax += delta + series.bars.barWidth;
-                } else {
-                    range.xmin += delta;
-                    range.xmax += delta + series.bars.barWidth;
-                }
+                range.xmin += delta;
+                range.xmax += delta + series.bars.barWidth;
             }
 
             if ((series.bars.show && series.bars.zero) || (series.lines.show && series.lines.zero)) {
@@ -3157,11 +3151,8 @@ Licensed under the MIT license.
                         if (x == null) continue;
 
                         // for a bar graph, the cursor must be inside the bar
-                        if (series[i].bars.horizontal
-                            ? (mx <= Math.max(b, x) && mx >= Math.min(b, x) &&
-                                my >= y + barLeft && my <= y + barRight)
-                            : (mx >= x + barLeft && mx <= x + barRight &&
-                                my >= Math.min(b, y) && my <= Math.max(b, y))) {
+                        if (mx >= x + barLeft && mx <= x + barRight &&
+                                my >= Math.min(b, y) && my <= Math.max(b, y)) {
                             item = [i, j / ps];
                         }
                     }
@@ -3399,7 +3390,7 @@ Licensed under the MIT license.
             drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
                 function() {
                     return fillStyle;
-                }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
+                }, series.xaxis, series.yaxis, octx, series.bars.lineWidth);
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
@@ -3828,46 +3819,22 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
-        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
-            var left, right, bottom, top,
-                drawLeft, drawRight, drawTop, drawBottom,
+        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, lineWidth) {
+            var left = x + barLeft,
+                right = x + barRight,
+                bottom = b, top = y,
+                drawLeft, drawRight, drawTop, drawBottom = false,
                 tmp;
 
-            // in horizontal mode, we start the bar from the left
-            // instead of from the bottom so it appears to be
-            // horizontal rather than vertical
-            if (horizontal) {
-                drawBottom = drawRight = drawTop = true;
-                drawLeft = false;
-                left = b;
-                right = x;
-                top = y + barLeft;
-                bottom = y + barRight;
+            drawLeft = drawRight = drawTop = true;
 
-                // account for negative bars
-                if (right < left) {
-                    tmp = right;
-                    right = left;
-                    left = tmp;
-                    drawLeft = true;
-                    drawRight = false;
-                }
-            } else {
-                drawLeft = drawRight = drawTop = true;
-                drawBottom = false;
-                left = x + barLeft;
-                right = x + barRight;
-                bottom = b;
-                top = y;
-
-                // account for negative bars
-                if (top < bottom) {
-                    tmp = top;
-                    top = bottom;
-                    bottom = tmp;
-                    drawBottom = true;
-                    drawTop = false;
-                }
+            // account for negative bars
+            if (top < bottom) {
+                tmp = top;
+                top = bottom;
+                bottom = tmp;
+                drawBottom = true;
+                drawTop = false;
             }
 
             // clip
@@ -3953,7 +3920,7 @@ Licensed under the MIT license.
                         continue;
                     }
 
-                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.lineWidth);
                 }
             }
 
