@@ -231,4 +231,160 @@ describe('drawSeries', function() {
             expect(ctx.fill.calls.count()).toBe(1);
         });
     });
+
+    describe('drawSeriesBars', function() {
+        var minx = -200, maxx = 200, miny = -100, maxy = 100,
+            series, ctx, plotWidth, plotHeight, plotOffset,
+            drawSeriesBars = jQuery.plot.drawSeries.drawSeriesBars,
+            getColorOrGradient;
+
+        beforeEach(function() {
+            series = {
+                bars: {
+                    lineWidth: 1,
+                    show: true,
+                    fillColor: 'blue',
+                    barWidth: 10
+                },
+                datapoints: {
+                    format: null,
+                    points: null,
+                    pointsize: 2
+                },
+                xaxis: {
+                    min: minx,
+                    max: maxx,
+                    autoscale: 'exact',
+                    p2c: function(p) { return p; }
+                },
+                yaxis: {
+                    min: miny,
+                    max: maxy,
+                    autoscale: 'exact',
+                    p2c: function(p) { return p; }
+                }
+            };
+            ctx = setFixtures('<div id="test-container" style="width: 200px;height: 100px;border-style: solid;border-width: 1px"><canvas id="theCanvas" style="width: 100%; height: 100%" /></div>')
+                .find('#theCanvas')[0]
+                .getContext('2d');
+            plotWidth = 200;
+            plotHeight = 100;
+            plotOffset = { top: 0, left: 0 };
+        });
+
+        function getPixelColor(ctx, x, y) {
+            return ctx.getImageData(x, y, 1, 1).data;
+        }
+
+        function rgba(r, g, b, a) {
+            return [r, g, b, a * 255];
+        }
+
+        it('should draw nothing when the values are null', function () {
+            series.datapoints.points = [null, null, null, null];
+
+            spyOn(ctx, 'moveTo').and.callThrough();
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.moveTo).not.toHaveBeenCalled();
+            expect(ctx.lineTo).not.toHaveBeenCalled();
+        });
+
+        it('should draw bars for values', function () {
+            series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo).toHaveBeenCalled();
+        });
+
+        it('should draw bars for fillTowards infinity', function () {
+            series.datapoints.points = [150, 25];
+            series.bars.fillTowards = Infinity;
+
+            var xaxis = series.xaxis,
+                yaxis = series.yaxis,
+                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                topValue = yaxis.p2c(maxy),
+                yValue = xaxis.p2c(series.datapoints.points[1]);
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo.calls.argsFor(0)).toEqual([leftValue, topValue]);
+            expect(ctx.lineTo.calls.argsFor(1)).toEqual([rightValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(2)).toEqual([leftValue, yValue]);
+        });
+
+        it('should draw bars for fillTowards -infinity', function () {
+            series.datapoints.points = [150, 25];
+            series.bars.fillTowards = -Infinity;
+
+            var xaxis = series.xaxis,
+                yaxis = series.yaxis,
+                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                bottomValue = yaxis.p2c(miny),
+                yValue = xaxis.p2c(series.datapoints.points[1]);
+
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo.calls.argsFor(0)).toEqual([leftValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(1)).toEqual([rightValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(2)).toEqual([rightValue, bottomValue]);
+        });
+
+        it('should draw bars for fillTowards zero', function () {
+            series.datapoints.points = [50, 25, -50, 75, 100, 100];
+            series.bars.fillTowards = 0;
+
+            var xaxis = series.xaxis,
+                yaxis = series.yaxis,
+                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                zeroValue = yaxis.p2c(0),
+                yValue = xaxis.p2c(series.datapoints.points[1]);
+
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo.calls.argsFor(0)).toEqual([leftValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(1)).toEqual([rightValue, yValue]);
+            expect(ctx.lineTo.calls.argsFor(2)).toEqual([rightValue, zeroValue]);
+        });
+
+        it('should draw bars with specified color', function () {
+            var fixture = setFixtures('<div id="demo-container" style="width: 800px;height: 600px">').find('#demo-container').get(0),
+                placeholder = $('<div id="placeholder" style="width: 100%;height: 100%">');
+            placeholder.appendTo(fixture);
+            $.plot(placeholder, [[[45, 25]]], {
+                series: {
+                    bars: {
+                        lineWidth: 1,
+                        show: true,
+                        fillColor: 'blue'
+                    }
+                },
+                xaxis: { autoscale:'exact' }
+            });
+            var ctx = $(placeholder).find('.flot-base').get(0).getContext('2d')
+                insideColor1 = getPixelColor(ctx, ctx.canvas.width / 2, ctx.canvas.height / 2),
+                insideColor2 = getPixelColor(ctx, ctx.canvas.width / 2 + 35, ctx.canvas.height / 2 - 20),
+                insideColor3 =getPixelColor(ctx, ctx.canvas.width / 2 - 10, ctx.canvas.height / 2 + 30);
+
+            expect(Array.prototype.slice.call(insideColor1)).toEqual(rgba(0,0,255,1));
+            expect(Array.prototype.slice.call(insideColor2)).toEqual(rgba(0,0,255,1));
+            expect(Array.prototype.slice.call(insideColor3)).toEqual(rgba(0,0,255,1));
+        });
+    });
 });
