@@ -2,7 +2,7 @@
 
 var args = process.argv.slice(2);
 var fs = require('fs');
-var concat = require('concat-files');
+var concat = require('concat');
 var tmp = require('tmp');
 
 var distDir = './dist';
@@ -19,11 +19,7 @@ function concatenateFiles(destinationPath, callback) {
         './jquery.flot.js',
         './jquery.flot.drawSeries.js',
         './jquery.flot.uiConstants.js'
-    ], destinationPath, callback || function(err, result) {
-        if (err) {
-            throw err;
-        }
-    });
+    ], destinationPath);
 }
 
 if (args[0] === 'test') {

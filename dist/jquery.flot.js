@@ -197,6 +197,7 @@
         yellow: [255, 255, 0]
     };
 })(jQuery);
+
 ///////////////////////////////////////////////////////////////////////////
 // The Canvas object is a wrapper around an HTML5 <canvas> tag.
 //
@@ -722,6 +723,7 @@
 
     window.Flot.Canvas = Canvas;
 })(jQuery);
+
 /* Javascript plotting library for jQuery, version 0.8.3.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
@@ -3450,6 +3452,7 @@ Licensed under the MIT license.
         return base * Math.floor(n / base);
     }
 })(jQuery);
+
 (function($) {
     "use strict";
 
@@ -3984,6 +3987,7 @@ Licensed under the MIT license.
 
     $.plot.drawSeries = new drawSeries();
 })(jQuery);
+
 (function ($) {
     'use strict';
     $.plot.uiConstants = {
