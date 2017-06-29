@@ -393,7 +393,9 @@ describe('drawSeries', function() {
             placeholder.appendTo(fixture);
             var testVector = [[[[[0.1, 1], [0.2, 10]]], 0.08],
                             [[[[1, 1], [2, 10]]], 0.8],
-                            [[[[10, 1], [20, 10]]], 8]],
+                            [[[[10, 1], [20, 10]]], 8],
+                            [[[[1000, 1], [2000, 10], [2100, 10]]], 80],
+                            [[[]], 0.8]],
                 plot;
             for (var i = 0; i< testVector.length; i++) {
                 plot = $.plot(placeholder, testVector[i][0], {

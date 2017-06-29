@@ -847,10 +847,7 @@ Licensed under the MIT license.
             }
 
             // compute barWidth
-            for (i = 0; i < series.length; ++i) {
-                s = series[i];
-                s.bars.barWidth = 0.8 * (s.datapoints.points[s.datapoints.pointsize] - s.datapoints.points[0]) || 0.8;
-            }
+            computeBarWidth(series);
 
             // give the hooks a chance to run
             for (i = 0; i < series.length; ++i) {
@@ -886,6 +883,21 @@ Licensed under the MIT license.
                     axis.datamax = null;
                 }
             });
+        }
+
+        function computeBarWidth(series) {
+            for (var i = 0; i < series.length; ++i) {
+                var s = series[i],
+                    pointsize = s.datapoints.pointsize, distance,
+                    minDistance = s.datapoints.points[pointsize] - s.datapoints.points[0] || 1;
+                for (var j = pointsize; j < s.datapoints.points.length - pointsize; j += pointsize) {
+                    distance = s.datapoints.points[pointsize + j] - s.datapoints.points[j];
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                    }
+                }
+                s.bars.barWidth = 0.8 * minDistance;
+            }
         }
 
         function setupCanvases() {
