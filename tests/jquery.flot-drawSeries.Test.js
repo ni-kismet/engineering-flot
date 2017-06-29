@@ -386,5 +386,27 @@ describe('drawSeries', function() {
             expect(Array.prototype.slice.call(insideColor2)).toEqual(rgba(0,0,255,1));
             expect(Array.prototype.slice.call(insideColor3)).toEqual(rgba(0,0,255,1));
         });
+
+        it('should use a barWidth based on points distance', function () {
+            var fixture = setFixtures('<div id="demo-container" style="width: 800px;height: 600px">').find('#demo-container').get(0),
+                placeholder = $('<div id="placeholder" style="width: 100%;height: 100%">');
+            placeholder.appendTo(fixture);
+            var testVector = [[[[[0.1, 1], [0.2, 10]]], 0.08],
+                            [[[[1, 1], [2, 10]]], 0.8],
+                            [[[[10, 1], [20, 10]]], 8]],
+                plot;
+            for (var i = 0; i< testVector.length; i++) {
+                plot = $.plot(placeholder, testVector[i][0], {
+                    series: {
+                        bars: {
+                            lineWidth: 1,
+                            show: true,
+                        }
+                    },
+                });
+
+                expect(plot.getData()[0].bars.barWidth).toBeCloseTo(testVector[i][1], 4);
+            }
+        });
     });
 });

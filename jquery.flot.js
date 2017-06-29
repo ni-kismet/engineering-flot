@@ -846,6 +846,12 @@ Licensed under the MIT license.
                 points.length = k; //trims the internal buffer to the correct length
             }
 
+            // compute barWidth
+            for (i = 0; i < series.length; ++i) {
+                s = series[i];
+                s.bars.barWidth = 0.8 * (s.datapoints.points[s.datapoints.pointsize] - s.datapoints.points[0]) || 0.8;
+            }
+
             // give the hooks a chance to run
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
