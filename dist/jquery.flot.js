@@ -1572,7 +1572,6 @@ Licensed under the MIT license.
                 points.length = k; //trims the internal buffer to the correct length
             }
 
-            // compute barWidth
             computeBarWidth(series);
 
             // give the hooks a chance to run
@@ -1617,7 +1616,7 @@ Licensed under the MIT license.
                     pointsize = s.datapoints.pointsize, distance,
                     minDistance = s.datapoints.points[pointsize] - s.datapoints.points[0] || 1;
                 for (var j = pointsize; j < s.datapoints.points.length - pointsize; j += pointsize) {
-                    distance = s.datapoints.points[pointsize + j] - s.datapoints.points[j];
+                    distance = Math.abs(s.datapoints.points[pointsize + j] - s.datapoints.points[j]);
                     if (distance < minDistance) {
                         minDistance = distance;
                     }

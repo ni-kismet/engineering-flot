@@ -395,7 +395,8 @@ describe('drawSeries', function() {
                             [[[[1, 1], [2, 10]]], 0.8],
                             [[[[10, 1], [20, 10]]], 8],
                             [[[[1000, 1], [2000, 10], [2100, 10]]], 80],
-                            [[[]], 0.8]],
+                            [[[]], 0.8],
+                            [[[[-5, 1], [30, 15], [20, 7], [5, 2]]], 8]],
                 plot;
             for (var i = 0; i< testVector.length; i++) {
                 plot = $.plot(placeholder, testVector[i][0], {
