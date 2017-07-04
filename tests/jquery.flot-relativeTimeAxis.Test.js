@@ -25,13 +25,18 @@ describe('A Flot chart with relative time axes', function () {
     };
 
     var createPlotWithRelativeTimeAxis = function (placeholder, data) {
-        return $.plot(placeholder, data, {
+        var plot = $.plot(placeholder, [[[0, 0]]], {
             xaxis: {
                 format: 'time',
                 timeformat: '%r'
             },
             yaxis: {}
         });
+        plot.getData()[0].datapoints = null;
+        plot.setData(data);
+        plot.setupGrid();
+        plot.draw();
+        return plot;
     };
 
     var createPlotWithVerticalRelativeTimeAxis = function (placeholder, data) {
@@ -94,10 +99,68 @@ describe('A Flot chart with relative time axes', function () {
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([{v: -0.002, label: '-00:00:00.002'}, {v: -0.001, label: '-00:00:00.001'}]);
     });
-
     it('works with vertical axes', function () {
-        plot = createPlotWithVerticalRelativeTimeAxis(placeholder, [[[0, 1], [1, 2]]]);
+        plot = createPlotWithVerticalRelativeTimeAxis(placeholder, [[[0, 0], [1, 1]]]);
 
-        expect(firstAndLast(plot.getAxes().yaxis.ticks)).toEqual([{v: 1, label: '00:00:01.000'}, {v: 2, label: '00:00:02.000'}]);
+        expect(firstAndLast(plot.getAxes().yaxis.ticks)).toEqual([{v: 0, label: '00:00:00.000'}, {v: 1, label: '00:00:01.000'}]);
+    });
+
+    it('shows time relative to first data sample', function () {
+        plot = $.plot(placeholder, [[[3600, 1], [4200, 2]]], {
+            xaxis: {
+                format: 'time',
+                timeformat: '%r'
+            },
+            yaxis: {}
+        });
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([{v: 3600, label: '00:00:00'}, {v: 4200, label: '00:10:00'}]);
+    });
+
+    it('shows time starting from 00:00:00.000 for empty graph', function () {
+        var plot = $.plot(placeholder, [[]], {
+            xaxis: {
+                format: 'time',
+                timeformat: '%r'
+            },
+            yaxis: {}
+        });
+
+        expect(plot.getAxes().xaxis.ticks[0].label).toEqual('00:00:00.000');
+    });
+
+    it('works with multiple dataseries', function () {
+        plot = $.plot(placeholder, [[[4200, 1], [4800, 2]], [[3600, 1], [4200, 2]]], {
+            xaxis: {
+                format: 'time',
+                timeformat: '%r'
+            },
+            yaxis: {}
+        });
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([{v: 3600, label: '00:00:00'}, {v: 4800, label: '00:20:00'}]);
+    });
+
+    it('works with multiple axis', function () {
+        plot = $.plot(placeholder, [{
+            data: [[4200, 1.1], [4800, 2.1]],
+            xaxis: 2},
+        {data: [[3600, 1], [4200, 2]],
+            xaxis: 1}],
+        {xaxes: [{
+            format: 'time',
+            timeformat: '%r'
+        }, {
+            position: 'top',
+            format: 'time',
+            timeformat: '%r'
+        }],
+        yaxis: {}
+        });
+
+        var xaxis1 = plot.getAxes().xaxis,
+            xaxis2 = plot.getAxes().x2axis;
+        expect(firstAndLast(xaxis1.ticks)).toEqual([{v: 3600, label: '00:00:00'}, {v: 4200, label: '00:10:00'}]);
+        expect(firstAndLast(xaxis2.ticks)).toEqual([{v: 4200, label: '00:00:00'}, {v: 4800, label: '00:10:00'}]);
     });
 });

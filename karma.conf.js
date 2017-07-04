@@ -17,7 +17,7 @@ module.exports = function(config) {
         'jquery.flot.flatdata.js',
         'jquery.flot.drawSeries.js',
         'jquery.flot.navigate.js',
-        'jquery.flot.time.js',
+        'jquery.flot.absRelTime.js',
         'jquery.flot.axislabels.js'
     ];
 
