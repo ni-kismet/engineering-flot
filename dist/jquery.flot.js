@@ -197,6 +197,7 @@
         yellow: [255, 255, 0]
     };
 })(jQuery);
+
 ///////////////////////////////////////////////////////////////////////////
 // The Canvas object is a wrapper around an HTML5 <canvas> tag.
 //
@@ -722,6 +723,7 @@
 
     window.Flot.Canvas = Canvas;
 })(jQuery);
+
 /* Javascript plotting library for jQuery, version 0.8.3.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
@@ -835,7 +837,6 @@ Licensed under the MIT license.
                         fill: true,
                         fillColor: null,
                         align: "left", // "left", "right", or "center"
-                        horizontal: false,
                         zero: true
                     },
                     shadowSize: 3,
@@ -3051,13 +3052,8 @@ Licensed under the MIT license.
                         delta = -series.bars.barWidth / 2;
                 }
 
-                if (series.bars.horizontal) {
-                    range.ymin += delta;
-                    range.ymax += delta + series.bars.barWidth;
-                } else {
-                    range.xmin += delta;
-                    range.xmax += delta + series.bars.barWidth;
-                }
+                range.xmin += delta;
+                range.xmax += delta + series.bars.barWidth;
             }
 
             if ((series.bars.show && series.bars.zero) || (series.lines.show && series.lines.zero)) {
@@ -3157,11 +3153,8 @@ Licensed under the MIT license.
                         if (x == null) continue;
 
                         // for a bar graph, the cursor must be inside the bar
-                        if (series[i].bars.horizontal
-                            ? (mx <= Math.max(b, x) && mx >= Math.min(b, x) &&
-                                my >= y + barLeft && my <= y + barRight)
-                            : (mx >= x + barLeft && mx <= x + barRight &&
-                                my >= Math.min(b, y) && my <= Math.max(b, y))) {
+                        if (mx >= x + barLeft && mx <= x + barRight &&
+                                my >= Math.min(b, y) && my <= Math.max(b, y)) {
                             item = [i, j / ps];
                         }
                     }
@@ -3396,10 +3389,10 @@ Licensed under the MIT license.
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = highlightColor;
 
-            drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
+            $.plot.drawSeries.drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
                 function() {
                     return fillStyle;
-                }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
+                }, series.xaxis, series.yaxis, octx, series.bars.lineWidth);
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
@@ -3459,6 +3452,7 @@ Licensed under the MIT license.
         return base * Math.floor(n / base);
     }
 })(jQuery);
+
 (function($) {
     "use strict";
 
@@ -3828,46 +3822,22 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
-        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
-            var left, right, bottom, top,
-                drawLeft, drawRight, drawTop, drawBottom,
+        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, lineWidth) {
+            var left = x + barLeft,
+                right = x + barRight,
+                bottom = b, top = y,
+                drawLeft, drawRight, drawTop, drawBottom = false,
                 tmp;
 
-            // in horizontal mode, we start the bar from the left
-            // instead of from the bottom so it appears to be
-            // horizontal rather than vertical
-            if (horizontal) {
-                drawBottom = drawRight = drawTop = true;
-                drawLeft = false;
-                left = b;
-                right = x;
-                top = y + barLeft;
-                bottom = y + barRight;
+            drawLeft = drawRight = drawTop = true;
 
-                // account for negative bars
-                if (right < left) {
-                    tmp = right;
-                    right = left;
-                    left = tmp;
-                    drawLeft = true;
-                    drawRight = false;
-                }
-            } else {
-                drawLeft = drawRight = drawTop = true;
-                drawBottom = false;
-                left = x + barLeft;
-                right = x + barRight;
-                bottom = b;
-                top = y;
-
-                // account for negative bars
-                if (top < bottom) {
-                    tmp = top;
-                    top = bottom;
-                    bottom = tmp;
-                    drawBottom = true;
-                    drawTop = false;
-                }
+            // account for negative bars
+            if (top < bottom) {
+                tmp = top;
+                top = bottom;
+                bottom = tmp;
+                drawBottom = true;
+                drawTop = false;
             }
 
             // clip
@@ -3944,14 +3914,16 @@ Licensed under the MIT license.
         function drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
                 var points = datapoints.points,
-                    ps = datapoints.pointsize;
+                    ps = datapoints.pointsize,
+                    fillTowards = series.bars.fillTowards || 0,
+                    bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min;
 
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null) {
                         continue;
                     }
 
-                    drawBar(points[i], points[i + 1], 0, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.lineWidth);
                 }
             }
 
@@ -3970,6 +3942,8 @@ Licensed under the MIT license.
 
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
+
+            computeBarWidth(series);
 
             var barLeft;
 
@@ -3992,6 +3966,18 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
+        function computeBarWidth(series) {
+            var pointsize = series.datapoints.pointsize, distance,
+                minDistance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+            for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
+                distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                }
+            }
+            series.bars.barWidth = 0.8 * minDistance;
+        }
+
         function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
             var fill = filloptions.fill;
             if (!fill) {
@@ -4011,10 +3997,12 @@ Licensed under the MIT license.
         this.drawSeriesLines = drawSeriesLines;
         this.drawSeriesPoints = drawSeriesPoints;
         this.drawSeriesBars = drawSeriesBars;
+        this.drawBar = drawBar;
     };
 
     $.plot.drawSeries = new drawSeries();
 })(jQuery);
+
 (function ($) {
     'use strict';
     $.plot.uiConstants = {

@@ -367,46 +367,22 @@
             ctx.restore();
         }
 
-        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
-            var left, right, bottom, top,
-                drawLeft, drawRight, drawTop, drawBottom,
+        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, lineWidth) {
+            var left = x + barLeft,
+                right = x + barRight,
+                bottom = b, top = y,
+                drawLeft, drawRight, drawTop, drawBottom = false,
                 tmp;
 
-            // in horizontal mode, we start the bar from the left
-            // instead of from the bottom so it appears to be
-            // horizontal rather than vertical
-            if (horizontal) {
-                drawBottom = drawRight = drawTop = true;
-                drawLeft = false;
-                left = b;
-                right = x;
-                top = y + barLeft;
-                bottom = y + barRight;
+            drawLeft = drawRight = drawTop = true;
 
-                // account for negative bars
-                if (right < left) {
-                    tmp = right;
-                    right = left;
-                    left = tmp;
-                    drawLeft = true;
-                    drawRight = false;
-                }
-            } else {
-                drawLeft = drawRight = drawTop = true;
-                drawBottom = false;
-                left = x + barLeft;
-                right = x + barRight;
-                bottom = b;
-                top = y;
-
-                // account for negative bars
-                if (top < bottom) {
-                    tmp = top;
-                    top = bottom;
-                    bottom = tmp;
-                    drawBottom = true;
-                    drawTop = false;
-                }
+            // account for negative bars
+            if (top < bottom) {
+                tmp = top;
+                top = bottom;
+                bottom = tmp;
+                drawBottom = true;
+                drawTop = false;
             }
 
             // clip
@@ -483,14 +459,16 @@
         function drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
                 var points = datapoints.points,
-                    ps = datapoints.pointsize;
+                    ps = datapoints.pointsize,
+                    fillTowards = series.bars.fillTowards || 0,
+                    bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min;
 
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null) {
                         continue;
                     }
 
-                    drawBar(points[i], points[i + 1], 0, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.lineWidth);
                 }
             }
 
@@ -509,6 +487,8 @@
 
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
+
+            computeBarWidth(series);
 
             var barLeft;
 
@@ -531,6 +511,18 @@
             ctx.restore();
         }
 
+        function computeBarWidth(series) {
+            var pointsize = series.datapoints.pointsize, distance,
+                minDistance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+            for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
+                distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                }
+            }
+            series.bars.barWidth = 0.8 * minDistance;
+        }
+
         function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
             var fill = filloptions.fill;
             if (!fill) {
@@ -550,6 +542,7 @@
         this.drawSeriesLines = drawSeriesLines;
         this.drawSeriesPoints = drawSeriesPoints;
         this.drawSeriesBars = drawSeriesBars;
+        this.drawBar = drawBar;
     };
 
     $.plot.drawSeries = new drawSeries();

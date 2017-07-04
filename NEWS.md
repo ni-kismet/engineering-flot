@@ -1,3 +1,17 @@
+## engineering-flot 0.4.7 ##
+
+### Changes ###
+
+- fillTowards for bars.
+- removing vertical bars.
+- log axis improvements.
+
+## engineering-flot 0.4.6 ##
+
+### Changes ###
+
+- scatter graph performance improvements.
+
 ## engineering-flot 0.4.5 ##
 
 ### Changes ###
