@@ -280,7 +280,7 @@ API.txt for details.
                             d = dateGenerator(axis.min, opts),
                             minSize = 0;
 
-                        if (!axis.relativeFirstData) {
+                        if (axis.relativeFirstData === undefined || axis.relativeFirstData === null) {
                             updateAxisFirstData(plot, axis);
                         }
 
