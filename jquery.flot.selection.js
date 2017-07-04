@@ -77,7 +77,6 @@ The plugin allso adds the following methods to the plot object:
   event. If there's currently no selection, the function returns null.
 
 */
-
 (function ($) {
     function init(plot) {
         var selection = {
