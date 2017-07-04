@@ -30,7 +30,7 @@ API.txt for details.
     // Returns a string with the date d formatted according to fmt.
     // A subset of the Open Group's strftime format is supported.
 
-    function formatDate(d, fmt, monthNames, dayNames, showMilliseconds, axis, plot) {
+    function formatDate(d, fmt, monthNames, dayNames, showMilliseconds, axis) {
         if (typeof d.strftime === "function") {
             return d.strftime(fmt);
         }
@@ -434,7 +434,7 @@ API.txt for details.
                         var d = dateGenerator(v, axis.options);
                         // first check global format
                         if (opts.timeformat !== null && opts.timeformat !== undefined) {
-                            return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames, axis.tickSize[1] === 'millisecond', axis, plot);
+                            return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames, axis.tickSize[1] === 'millisecond', axis);
                         }
                     };
                 }
