@@ -2663,7 +2663,7 @@ Licensed under the MIT license.
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = highlightColor;
 
-            drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
+            $.plot.drawSeries.drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
                 function() {
                     return fillStyle;
                 }, series.xaxis, series.yaxis, octx, series.bars.lineWidth);
