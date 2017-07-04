@@ -244,7 +244,7 @@ describe('drawSeries', function() {
                     lineWidth: 1,
                     show: true,
                     fillColor: 'blue',
-                    barWidth: 10
+                    barWidth: 0.8
                 },
                 datapoints: {
                     format: null,
@@ -344,7 +344,7 @@ describe('drawSeries', function() {
         });
 
         it('should draw bars for fillTowards zero', function () {
-            series.datapoints.points = [50, 25, -50, 75, 100, 100];
+            series.datapoints.points = [150, 25];
             series.bars.fillTowards = 0;
 
             var xaxis = series.xaxis,
@@ -406,6 +406,33 @@ describe('drawSeries', function() {
                             show: true,
                         }
                     },
+                });
+
+                expect(plot.getData()[0].bars.barWidth).toBeCloseTo(testVector[i][1], 4);
+            }
+        });
+
+        it('barWidth should adapt to axis type', function () {
+            var fixture = setFixtures('<div id="demo-container" style="width: 800px;height: 600px">').find('#demo-container').get(0),
+                placeholder = $('<div id="placeholder" style="width: 100%;height: 100%">');
+            placeholder.appendTo(fixture);
+            var testVector = [[[[[0.1, 1], [0.2, 10]]], 0.08],
+                            [[[[1, 1], [2, 10]]], 0.8],
+                            [[[[10, 1], [20, 10]]], 8],
+                            [[[[1000, 1], [2000, 10], [2100, 10]]], 80],
+                            [[[[-5, 1], [30, 15], [20, 7], [5, 2]]], 8]],
+                plot;
+            for (var i = 0; i< testVector.length; i++) {
+                plot = $.plot(placeholder, testVector[i][0], {
+                    series: {
+                        bars: {
+                            lineWidth: 1,
+                            show: true,
+                        }
+                    },
+                    xaxis: {
+                        mode: 'log'
+                    }
                 });
 
                 expect(plot.getData()[0].bars.barWidth).toBeCloseTo(testVector[i][1], 4);

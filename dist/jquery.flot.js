@@ -1572,8 +1572,6 @@ Licensed under the MIT license.
                 points.length = k; //trims the internal buffer to the correct length
             }
 
-            computeBarWidth(series);
-
             // give the hooks a chance to run
             for (i = 0; i < series.length; ++i) {
                 s = series[i];
@@ -1608,21 +1606,6 @@ Licensed under the MIT license.
                     axis.datamax = null;
                 }
             });
-        }
-
-        function computeBarWidth(series) {
-            for (var i = 0; i < series.length; ++i) {
-                var s = series[i],
-                    pointsize = s.datapoints.pointsize, distance,
-                    minDistance = s.datapoints.points[pointsize] - s.datapoints.points[0] || 1;
-                for (var j = pointsize; j < s.datapoints.points.length - pointsize; j += pointsize) {
-                    distance = Math.abs(s.datapoints.points[pointsize + j] - s.datapoints.points[j]);
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                    }
-                }
-                s.bars.barWidth = 0.8 * minDistance;
-            }
         }
 
         function setupCanvases() {
@@ -3406,7 +3389,7 @@ Licensed under the MIT license.
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = highlightColor;
 
-            drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
+            $.plot.drawSeries.drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
                 function() {
                     return fillStyle;
                 }, series.xaxis, series.yaxis, octx, series.bars.lineWidth);
@@ -3960,6 +3943,8 @@ Licensed under the MIT license.
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
 
+            computeBarWidth(series);
+
             var barLeft;
 
             switch (series.bars.align) {
@@ -3981,6 +3966,18 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
+        function computeBarWidth(series) {
+            var pointsize = series.datapoints.pointsize, distance,
+                minDistance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+            for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
+                distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                }
+            }
+            series.bars.barWidth = 0.8 * minDistance;
+        }
+
         function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
             var fill = filloptions.fill;
             if (!fill) {
@@ -4000,6 +3997,7 @@ Licensed under the MIT license.
         this.drawSeriesLines = drawSeriesLines;
         this.drawSeriesPoints = drawSeriesPoints;
         this.drawSeriesBars = drawSeriesBars;
+        this.drawBar = drawBar;
     };
 
     $.plot.drawSeries = new drawSeries();
