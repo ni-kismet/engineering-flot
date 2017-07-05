@@ -378,6 +378,71 @@ describe('flot', function() {
         });
     });
 
+    describe('setupTickFormatter', function() {
+        var placeholder, plot, sampledata = [[0, 1], [1, 1.1], [2, 1.2]];
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should set a default tick formatter to each default axis', function () {
+            plot = $.plot(placeholder, [sampledata], { });
+
+            plot.getXAxes().concat(plot.getYAxes()).forEach(function(axis) {
+                expect(typeof axis.tickFormatter).toBe('function');
+            });
+        });
+
+        it('should set a default tick formatter to each specified axis', function () {
+            plot = $.plot(placeholder, [sampledata], {
+                xaxis: { autoscale: 'exact' },
+                yaxes: [
+                    { autoscale: 'exact' },
+                    { autoscale: 'none', min: -1, max: 1 }
+                ]
+            });
+
+            plot.getXAxes().concat(plot.getYAxes()).forEach(function(axis) {
+                expect(typeof axis.tickFormatter).toBe('function');
+            });
+        });
+
+        it('should set and use the specified tick formatter', function () {
+            var formatters = [
+                jasmine.createSpy('formatter'),
+                jasmine.createSpy('formatter'),
+                jasmine.createSpy('formatter')
+            ];
+            plot = $.plot(placeholder, [sampledata], {
+                xaxis: { autoscale: 'exact', tickFormatter: formatters[0] },
+                yaxes: [
+                    { autoscale: 'exact', tickFormatter: formatters[1] },
+                    { autoscale: 'none', min: -1, max: 1, tickFormatter: formatters[2], show: true }
+                ]
+            });
+
+            formatters.forEach(function(formatter) {
+                expect(formatter).toHaveBeenCalled();
+            });
+        });
+
+        it('should leave the formatter set to the axis unchanged when updating the plot', function () {
+            var formatter = jasmine.createSpy('formatter');
+            plot = $.plot(placeholder, [sampledata], { });
+
+            // the absolute/relative time plugin is setting the tickFormatter
+            //directly to the axes just like here:
+            plot.getXAxes()[0].tickFormatter = formatter;
+
+            plot.setData([sampledata, sampledata]);
+            plot.setupGrid();
+            plot.draw();
+
+            expect(plot.getXAxes()[0].tickFormatter).toBe(formatter);
+        });
+    });
+
     describe('computeTickSize', function() {
         var placeholder;
         var plot;
@@ -443,7 +508,7 @@ describe('flot', function() {
         });
     });
 
-    describe('tick generation', function() {
+    describe('defaultTickGenerator', function() {
         var placeholder;
 
         beforeEach(function() {

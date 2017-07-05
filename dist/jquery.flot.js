@@ -3464,7 +3464,7 @@ Licensed under the MIT license.
 (function($) {
     "use strict";
 
-    function drawSeries() {
+    function DrawSeries() {
         function plotLine(datapoints, xoffset, yoffset, axisx, axisy, ctx) {
             var points = datapoints.points,
                 ps = datapoints.pointsize,
@@ -4008,7 +4008,7 @@ Licensed under the MIT license.
         this.drawBar = drawBar;
     };
 
-    $.plot.drawSeries = new drawSeries();
+    $.plot.drawSeries = new DrawSeries();
 })(jQuery);
 
 (function ($) {
