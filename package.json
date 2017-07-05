@@ -1,6 +1,6 @@
 {
   "name": "engineering-flot",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "main": "dist/jquery.flot.js",
   "scripts": {
     "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 && npm run build-test",
