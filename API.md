@@ -266,7 +266,7 @@ xaxis, yaxis: {
     ticks: null or number or ticks array or (fn: axis -> ticks array)
     tickSize: number or array
     minTickSize: number or array
-    tickFormatter: (fn: number, object -> string) or string
+    tickFormatter: (fn: number, object, number -> string) or string
     tickDecimals: null or number
 
     showTickLabels: "major", "none", "endpoints", or "all"
@@ -465,13 +465,13 @@ You can control how the ticks look like with "tickDecimals", the
 number of decimals to display (default is auto-detected).
 
 Alternatively, for ultimate control over how ticks are formatted you can
-provide a function to "tickFormatter". The function is passed two
-parameters, the tick value and an axis object with information, and
-should return a string. The default formatter looks like this:
+provide a function to "tickFormatter". The function is passed three
+parameters, the tick value, an axis object with information and the precision,
+and should return a string. The default formatter looks like this:
 
 ```js
-function formatter(val, axis) {
-    return val.toFixed(axis.tickDecimals);
+function formatter(val, axis, precision) {
+    return val.toFixed(precision);
 }
 ```
 
