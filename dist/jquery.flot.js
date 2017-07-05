@@ -1959,6 +1959,7 @@ Licensed under the MIT license.
                 var axisOpts = axis.options;
                 axis.show = axisOpts.show == null ? axis.used : axisOpts.show;
                 axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
+                setupTickFormatter(axis);
                 setRange(axis);
             });
 
@@ -2191,6 +2192,23 @@ Licensed under the MIT license.
             return options.tickSize || size;
         };
 
+        function defaultTickGenerator(axis) {
+            var ticks = [],
+                start = floorInBase(axis.min, axis.tickSize),
+                i = 0,
+                v = Number.NaN,
+                prev;
+
+            do {
+                prev = v;
+                v = start + i * axis.tickSize;
+                ticks.push(v);
+                ++i;
+            } while (v < axis.max && v !== prev);
+
+            return ticks;
+        }
+
         function defaultTickFormatter(value, axis, precision) {
             var oldTickDecimals = axis.tickDecimals;
 
@@ -2228,6 +2246,19 @@ Licensed under the MIT license.
             return noTicks;
         }
 
+        function setupTickFormatter(axis) {
+            var opts = axis.options;
+            if (!axis.tickFormatter) {
+                if (typeof opts.tickFormatter === 'function') {
+                    axis.tickFormatter = function(v, axis, precision) {
+                        return "" + opts.tickFormatter(v, axis, precision);
+                    };
+                } else {
+                    axis.tickFormatter = defaultTickFormatter;
+                }
+            }
+        }
+
         function setupTickGeneration(axis) {
             var opts = axis.options;
             var noTicks;
@@ -2251,30 +2282,7 @@ Licensed under the MIT license.
             // like flot.time.js.
 
             if (!axis.tickGenerator) {
-                axis.tickGenerator = function(axis) {
-                    var ticks = [],
-                        start = floorInBase(axis.min, axis.tickSize),
-                        i = 0,
-                        v = Number.NaN,
-                        prev;
-
-                    do {
-                        prev = v;
-                        v = start + i * axis.tickSize;
-                        ticks.push(v);
-                        ++i;
-                    } while (v < axis.max && v !== prev);
-
-                    return ticks;
-                };
-
-                axis.tickFormatter = defaultTickFormatter;
-            }
-
-            if ($.isFunction(opts.tickFormatter)) {
-                axis.tickFormatter = function(v, axis, precision) {
-                    return "" + opts.tickFormatter(v, axis, precision);
-                };
+                axis.tickGenerator = defaultTickGenerator;
             }
 
             if (opts.alignTicksWithAxis != null) {
