@@ -15,7 +15,8 @@ describe("flot navigate plugin", function () {
             amount: 10
         },
         pan: {
-            interactive: true
+            interactive: true,
+            frameRate: -1
         }
 
     };
@@ -278,6 +279,66 @@ describe("flot navigate plugin", function () {
         });
     });
 
+    describe('touchDrag', function() {
+      it('should drag the plot (start + move + end)',function() {
+
+        plot = $.plot(placeholder, [
+            [
+                [0, 0],
+                [10, 10]
+            ]
+        ], options);
+
+        xaxis = plot.getXAxes()[0];
+        yaxis = plot.getYAxes()[0];
+
+        sendTouchEvent(plot.getXAxes()[0].p2c(5),plot.getYAxes()[0].p2c(5),placeholder[0].childNodes[2],"touchstart");
+        sendTouchEvent(plot.getXAxes()[0].p2c(6),plot.getYAxes()[0].p2c(6),placeholder[0].childNodes[2],"touchmove");
+        sendTouchEvent(0,0,placeholder[0].childNodes[2],"touchend");
+
+        expect(xaxis.min).toBeCloseTo(-1,2);
+        expect(yaxis.max).toBeCloseTo(9,2);
+        expect(xaxis.max).toBeCloseTo(9,2);
+        expect(yaxis.min).toBeCloseTo(-1,2);
+
+      });
+    });
+
+  function sendTouchEvent(x, y, element, eventType) {
+
+    const touchObj = //new Touch(
+      {
+        identifier: Date.now(),
+        target: element,
+        clientX: x,
+        clientY: y,
+        radiusX: 2.5,
+        radiusY: 2.5,
+        rotationAngle: 10,
+        force: 0.5,
+      };//);
+
+    var event;
+    //var event = document.createEvent('UIEvent');
+    //event.initUIEvent(eventType, true, true);
+    if (typeof UIEvent === "function") {
+      event = new UIEvent(eventType)
+    } else {
+      event = document.createEvent('UIEvent');
+      event.initUIEvent(eventType, true, true);
+    }
+
+    event.cancelable = true,
+    event.bubbles= true,
+    event.touches= [touchObj],
+    event.targetTouches= [],
+    event.changedTouches= [touchObj],
+    event.shiftKey= true,
+
+    element.dispatchEvent(event);
+
+  }
+
     describe('smartPan', function () {
         it('uses the provided x delta', function () {
             var xaxis, yaxis;
@@ -326,6 +387,8 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
         });
+
+
 
         it('snaps to the x direction when delta y is small', function () {
             var xaxis, yaxis;

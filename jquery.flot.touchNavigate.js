@@ -1,20 +1,9 @@
-/* Flot plugin for adding the ability to pan and zoom the plot.
+/* Flot plugin for adding the ability to pan the plot.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Copyright (c) 2016 Ciprian Ceteras.
 Licensed under the MIT license.
-
-The default behaviour is scrollwheel up/down to zoom in, drag
-to pan. The plugin defines plot.zoom({ center }), plot.zoomOut() and
-plot.pan( offset ) so you easily can add custom controls. It also fires
-"plotpan" and "plotzoom" events, useful for synchronizing plots.
-
 The plugin supports these options:
-
-    zoom: {
-        interactive: false
-        amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
-    }
 
     pan: {
         interactive: false
@@ -30,7 +19,7 @@ around; the same for zoom.
 "amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
 the current viewport.
 
-"cursor" is a standard CSS mouse cursor string used for visual feedback to the
+"cursor" is a standard CSS touch cursor string used for visual feedback to the
 user when dragging.
 
 "frameRate" specifies the maximum number of times per second the plot will
@@ -42,15 +31,6 @@ Example API usage:
 
     plot = $.plot(...);
 
-    // zoom default amount in on the pixel ( 10, 20 )
-    plot.zoom({ center: { left: 10, top: 20 } });
-
-    // zoom out again
-    plot.zoomOut({ center: { left: 10, top: 20 } });
-
-    // zoom 200% in on the pixel (10, 20)
-    plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
-
     // pan 100 pixels to the left and 20 down
     plot.pan({ left: -100, top: 20 })
 
@@ -60,22 +40,9 @@ use the p2c helpers on the axes in Flot to help you convert between these).
 
 "amount" is the amount to zoom the viewport relative to the current range, so
 1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out). You
-can set the default in the options.
+can set the default in the options. */
 
-*/
-
-// First two dependencies, jquery.event.drag.js and
-// jquery.mousewheel.js, we put them inline here to save people the
-// effort of downloading them.
-
-/*
-jquery.event.drag.js ~ v1.5 ~ Copyright (c) 2008, Three Dub Media (http://threedubmedia.com)
-Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-LICENSE.txt
-*/
-/* eslint-disable */
-
-/* eslint-enable */
-(function($) {
+(function(a) {
     'use strict';
 
     var options = {
@@ -114,20 +81,20 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
 
         function saveNavigationData(plot, e) {
-            if (e.originalEvent.touches && e.originalEvent.touches[0]) {
+            if (e.touches && e.touches[0]) {
                 var opts = plot.getOptions();
                 opts.navigationData = {
-                  lastClientX: e.originalEvent.touches[0].clientX,
-                  lastClientY: e.originalEvent.touches[0].clientY
-                  }
-              }
-          }
+                  lastClientX: e.touches[0].clientX,
+                  lastClientY: e.touches[0].clientY
+                }
+            }
+        }
 
-       function retrieveNavigationData(plot) {
+        function retrieveNavigationData(plot) {
             return plot.getOptions().navigationData || {};
-       }
+        }
 
-      function onDragStart(e) {
+       function onDragStart(e) {
             e.stopPropagation();
             e.preventDefault();
               var c = plot.getPlaceholder().css('cursor');
@@ -136,8 +103,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
               }
 
               plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-              startPageX = e.pageX || e.originalEvent.touches[0].clientX;
-              startPageY = e.pageY || e.originalEvent.touches[0].clientY;
+              startPageX = e.touches[0].pageX || e.touches[0].clientX;
+              startPageY = e.touches[0].pageY || e.touches[0].clientY;
               plotState = plot.navigationState();
 
               saveNavigationData(plot, e);
@@ -150,8 +117,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
               if (frameRate === -1) {
                   plot.smartPan({
-                      x: startPageX - (e.pageX || e.originalEvent.touches[0].clientX),
-                      y: startPageY - (e.pageY || e.originalEvent.touches[0].clientY)
+                      x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
+                      y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
                   }, plotState);
 
                   return;
@@ -161,55 +128,29 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
               panTimeout = setTimeout(function() {
                   plot.smartPan({
-                      x: startPageX - (e.pageX || e.originalEvent.touches[0].clientX),
-                      y: startPageY - (e.pageY || e.originalEvent.touches[0].clientY)
+                      x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
+                      y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
                   }, plotState);
 
                   panTimeout = null;
               }, 1 / frameRate * 1000);
 
               saveNavigationData(plot, e);
-          }
+        }
 
         function onDragEnd(e) {
-          e.stopPropagation();
-          e.preventDefault();
-          if (panTimeout) {
-              clearTimeout(panTimeout);
-              panTimeout = null;
-          }
-
-          plot.getPlaceholder().css('cursor', prevCursor);
-          var data = retrieveNavigationData(plot);
-          plot.smartPan({
-              x: startPageX - (e.pageX || data.clientX),
-              y: startPageY - (e.pageY || data.clientY)
-          }, plotState);
-          panHint = null;
+            // not sure if this should do anything
         }
 
-
-      function bindEvents(plot, eventHolder) {
+       function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
 
-
-
             if (o.pan.interactive) {
-                eventHolder.bind("dragstart", {
-                    distance: 10
-                }, onDragStart);
-                eventHolder.bind("drag", onDrag);
-                eventHolder.bind("dragend", onDragEnd);
-
-                eventHolder.bind("touchstart", {
-                    distance: 10
-                }, onDragStart);
-                eventHolder.bind("touchmove", onDrag);
-                eventHolder.bind("touchend", onDragEnd);
+              eventHolder[0].addEventListener("touchstart", onDragStart, false);
+              eventHolder[0].addEventListener("touchmove", onDrag, false);
+              eventHolder[0].addEventListener("touchend", onDragEnd, false);
             }
         }
-
-
 
         plot.pan = function(args) {
             var delta = {
@@ -315,14 +256,11 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
         };
 
-        function shutdown(plot, eventHolder) {;
-            eventHolder.unbind("dragstart", onDragStart);
-            eventHolder.unbind("drag", onDrag);
-            eventHolder.unbind("dragend", onDragEnd);
+        function shutdown(plot, eventHolder) {
 
-            eventHolder.unbind("touchstart", onDragStart);
-            eventHolder.unbind("touchmove", onDrag);
-            eventHolder.unbind("touchend", onDragEnd);
+            eventHolder[0].removeEventListener("touchstart", onDragStart);
+            eventHolder[0].removeEventListener('touchmove', onDrag);
+            eventHolder[0].removeEventListener('touchend', onDragEnd);
 
             if (panTimeout) clearTimeout(panTimeout);
         }
@@ -337,4 +275,4 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         name: 'navigateTouch',
         version: '1.3'
     });
-})(jQuery);
+})();

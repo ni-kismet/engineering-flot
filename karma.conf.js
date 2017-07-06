@@ -17,6 +17,7 @@ module.exports = function(config) {
         'jquery.flot.flatdata.js',
         'jquery.flot.drawSeries.js',
         'jquery.flot.navigate.js',
+        'jquery.flot.touchNavigate.js',
         'jquery.flot.absRelTime.js',
         'jquery.flot.axislabels.js'
     ];
@@ -39,6 +40,8 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: sources.concat([
             'node_modules/phantomjs-polyfill-find/find-polyfill.js',
+            //'node_modules/hammerjs/hammer.min.js',
+            //'node_modules/hammer-touchemulator/touch-emulator.js',
             'tests/utils/*.js',
             'tests/*.Test.js'
         ]),
@@ -54,7 +57,7 @@ module.exports = function(config) {
         },
 
         eslint: {
-            stopOnError: true,
+            stopOnError: false,
             showWarnings: true,
             engine: {
                 configFile: 'node_modules/webcharts-development-settings/.eslintrc.json',
