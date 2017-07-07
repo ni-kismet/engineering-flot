@@ -60,7 +60,6 @@ can set the default in the options. */
     function initTouchNavigation(plot, options) {
         var startPageX = 0,
             startPageY = 0,
-            panTimeout = null,
             plotState = false;
 
         function saveNavigationData(plot, e) {
@@ -114,8 +113,6 @@ can set the default in the options. */
             eventHolder[0].removeEventListener("touchstart", onDragStart);
             eventHolder[0].removeEventListener('touchmove', onDrag);
             eventHolder[0].removeEventListener('touchend', onDragEnd);
-
-            if (panTimeout) clearTimeout(panTimeout);
         }
 
         if (options.pan.enableTouch === true) {
