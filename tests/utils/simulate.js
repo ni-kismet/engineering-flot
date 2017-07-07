@@ -96,8 +96,60 @@
         dispatchEvent(el, evt);
     }
 
+    function simulateTouchStart(el, x, y) {
+        sendTouchEvent(x, y, el, "touchstart");
+    }
+
+    function simulateTouchMove(el, x, y) {
+        sendTouchEvent(x, y, el, "touchmove");
+    }
+
+    function simulateTouchEnd(el, x, y) {
+        sendTouchEvent(x, y, el, "touchend");
+    }
+
+    function simulateTouchDrag(el, x,  y, deltaX, deltaY) {
+        simulateTouchStart(el, x, y);
+        simulateTouchMove(el, x + deltaX, y + deltaY);
+        simulateTouchEnd(el, x + deltaX, y + deltaY);
+    }
+
+    function sendTouchEvent(x, y, element, eventType) {
+        var touchObj = {
+            identifier: Date.now(),
+            target: element,
+            clientX: x,
+            clientY: y,
+            radiusX: 2.5,
+            radiusY: 2.5,
+            rotationAngle: 10,
+            force: 0.5,
+        };
+
+        var event;
+        if (typeof UIEvent === "function") {
+            event = new UIEvent(eventType)
+
+        } else {
+            event = document.createEvent('UIEvent');
+            event.initUIEvent(eventType, true, true);
+        }
+
+        event.touches = [touchObj];
+        event.targetTouches = [];
+        event.changedTouches = [touchObj];
+        event.shiftKey = true;
+
+        element.dispatchEvent(event);
+    }
+
     simulate.mouseDown = simulateMouseDown;
     simulate.mouseMove = simulateMouseMove;
     simulate.mouseUp = simulateMouseUp;
     simulate.mouseWheel = simulateMouseWheel;
+    simulate.touchstart = simulateTouchStart;
+    simulate.touchmove = simulateTouchMove;
+    simulate.touchend = simulateTouchEnd;
+    simulate.touchdrag = simulateTouchDrag;
+
 })();

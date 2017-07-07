@@ -15,7 +15,9 @@ describe("flot navigate plugin", function () {
             amount: 10
         },
         pan: {
-            interactive: true
+            interactive: true,
+            frameRate: -1,
+            enableTouch: true
         }
 
     };
@@ -278,6 +280,31 @@ describe("flot navigate plugin", function () {
         });
     });
 
+    describe('touchDrag', function() {
+      it('should drag the plot (start + move + end)',function() {
+
+        plot = $.plot(placeholder, [
+            [
+                [0, 0],
+                [10, 10]
+            ]
+        ], options);
+
+        xaxis = plot.getXAxes()[0];
+        yaxis = plot.getYAxes()[0];
+
+        simulate.touchstart(placeholder[0].childNodes[2], plot.getXAxes()[0].p2c(5), plot.getYAxes()[0].p2c(5));
+        simulate.touchmove(placeholder[0].childNodes[2],plot.getXAxes()[0].p2c(6),plot.getYAxes()[0].p2c(6));
+        simulate.touchend(placeholder[0].childNodes[2],0,0);
+
+        expect(xaxis.min).toBeCloseTo(-1,2);
+        expect(yaxis.max).toBeCloseTo(9,2);
+        expect(xaxis.max).toBeCloseTo(9,2);
+        expect(yaxis.min).toBeCloseTo(-1,2);
+
+      });
+    });
+
     describe('smartPan', function () {
         it('uses the provided x delta', function () {
             var xaxis, yaxis;
@@ -326,6 +353,8 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
         });
+
+
 
         it('snaps to the x direction when delta y is small', function () {
             var xaxis, yaxis;
