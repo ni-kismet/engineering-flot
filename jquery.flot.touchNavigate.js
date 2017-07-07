@@ -48,11 +48,6 @@ can set the default in the options. */
     'use strict';
 
     var options = {
-        pan: {
-            interactive: false,
-            cursor: "move",
-            frameRate: 60
-        }
     };
 
     function init(plot) {
