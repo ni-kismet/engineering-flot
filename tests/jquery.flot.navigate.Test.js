@@ -16,7 +16,8 @@ describe("flot navigate plugin", function () {
         },
         pan: {
             interactive: true,
-            frameRate: -1
+            frameRate: -1,
+            enableTouch: true
         }
 
     };

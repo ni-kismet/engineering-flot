@@ -48,26 +48,20 @@ can set the default in the options. */
     'use strict';
 
     var options = {
+        pan: {
+            enableTouch: false
+        }
     };
 
     function init(plot) {
+        plot.hooks.processOptions.push(initTouchNavigation);
+    }
+
+    function initTouchNavigation(plot, options) {
         var startPageX = 0,
             startPageY = 0,
             panTimeout = null,
             plotState = false;
-
-        plot.navigationState = function() {
-            var axes = this.getAxes();
-            var result = {};
-            Object.keys(axes).forEach(function(axisName) {
-                var axis = axes[axisName];
-                result[axisName] = {
-                    navigationOffset: axis.options.offset || {below: 0, above: 0}
-                }
-            });
-
-            return result;
-        }
 
         function saveNavigationData(plot, e) {
             if (e.touches && e.touches[0]) {
@@ -124,8 +118,10 @@ can set the default in the options. */
             if (panTimeout) clearTimeout(panTimeout);
         }
 
-        plot.hooks.bindEvents.push(bindEvents);
-        plot.hooks.shutdown.push(shutdown);
+        if (options.pan.enableTouch === true) {
+            plot.hooks.bindEvents.push(bindEvents);
+            plot.hooks.shutdown.push(shutdown);
+        }
     }
 
     $.plot.plugins.push({
