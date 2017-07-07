@@ -42,7 +42,9 @@ use the p2c helpers on the axes in Flot to help you convert between these).
 1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out). You
 can set the default in the options. */
 
-(function(a) {
+/* global jQuery */
+
+(function($) {
     'use strict';
 
     var options = {
@@ -54,106 +56,88 @@ can set the default in the options. */
     };
 
     function init(plot) {
-
-        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
-        var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
-
-
-        var prevCursor = 'default',
-            startPageX = 0,
+        var startPageX = 0,
             startPageY = 0,
-            panHint = null,
             panTimeout = null,
-            plotState = false,
-            prevDist = null;
+            plotState = false;
 
         plot.navigationState = function() {
-              var axes = this.getAxes();
-              var result = {};
-              Object.keys(axes).forEach(function(axisName) {
-                  var axis = axes[axisName];
-                      result[axisName] = {
-                      navigationOffset: axis.options.offset || {below: 0, above: 0}
-                  }
-                });
+            var axes = this.getAxes();
+            var result = {};
+            Object.keys(axes).forEach(function(axisName) {
+                var axis = axes[axisName];
+                result[axisName] = {
+                    navigationOffset: axis.options.offset || {below: 0, above: 0}
+                }
+            });
 
-                return result;
+            return result;
         }
 
         function saveNavigationData(plot, e) {
             if (e.touches && e.touches[0]) {
                 var opts = plot.getOptions();
                 opts.navigationData = {
-                  lastClientX: e.touches[0].clientX,
-                  lastClientY: e.touches[0].clientY
+                    lastClientX: e.touches[0].clientX,
+                    lastClientY: e.touches[0].clientY
                 }
             }
         }
 
-        function retrieveNavigationData(plot) {
-            return plot.getOptions().navigationData || {};
-        }
-
-       function onDragStart(e) {
+        function onDragStart(e) {
             e.stopPropagation();
             e.preventDefault();
-              var c = plot.getPlaceholder().css('cursor');
-              if (c) {
-                  prevCursor = c;
-              }
+            plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
+            startPageX = e.touches[0].pageX || e.touches[0].clientX;
+            startPageY = e.touches[0].pageY || e.touches[0].clientY;
+            plotState = plot.navigationState();
 
-              plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-              startPageX = e.touches[0].pageX || e.touches[0].clientX;
-              startPageY = e.touches[0].pageY || e.touches[0].clientY;
-              plotState = plot.navigationState();
-
-              saveNavigationData(plot, e);
+            saveNavigationData(plot, e);
         }
 
         function onDrag(e) {
-          e.stopPropagation();
-          e.preventDefault();
-              var frameRate = plot.getOptions().pan.frameRate;
+            e.stopPropagation();
+            e.preventDefault();
+            var frameRate = plot.getOptions().pan.frameRate;
 
-              if (frameRate === -1) {
-                  plot.smartPan({
-                      x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
-                      y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
-                  }, plotState);
+            if (frameRate === -1) {
+                plot.smartPan({
+                    x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
+                    y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
+                }, plotState);
 
-                  return;
-              }
+                return;
+            }
 
-              if (panTimeout || !frameRate) return;
+            if (panTimeout || !frameRate) return;
 
-              panTimeout = setTimeout(function() {
-                  plot.smartPan({
-                      x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
-                      y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
-                  }, plotState);
+            panTimeout = setTimeout(function() {
+                plot.smartPan({
+                    x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
+                    y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
+                }, plotState);
 
-                  panTimeout = null;
-              }, 1 / frameRate * 1000);
+                panTimeout = null;
+            }, 1 / frameRate * 1000);
 
-              saveNavigationData(plot, e);
+            saveNavigationData(plot, e);
         }
 
-        function onDragEnd(e) {
+        function onDragEnd() {
             // not sure if this should do anything
         }
 
-       function bindEvents(plot, eventHolder) {
+        function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
 
             if (o.pan.interactive) {
-              eventHolder[0].addEventListener("touchstart", onDragStart, false);
-              eventHolder[0].addEventListener("touchmove", onDrag, false);
-              eventHolder[0].addEventListener("touchend", onDragEnd, false);
+                eventHolder[0].addEventListener("touchstart", onDragStart, false);
+                eventHolder[0].addEventListener("touchmove", onDrag, false);
+                eventHolder[0].addEventListener("touchend", onDragEnd, false);
             }
         }
 
         function shutdown(plot, eventHolder) {
-
             eventHolder[0].removeEventListener("touchstart", onDragStart);
             eventHolder[0].removeEventListener('touchmove', onDrag);
             eventHolder[0].removeEventListener('touchend', onDragEnd);
@@ -171,4 +155,4 @@ can set the default in the options. */
         name: 'navigateTouch',
         version: '1.3'
     });
-})();
+})(jQuery);
