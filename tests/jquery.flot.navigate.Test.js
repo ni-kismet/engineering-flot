@@ -293,9 +293,9 @@ describe("flot navigate plugin", function () {
         xaxis = plot.getXAxes()[0];
         yaxis = plot.getYAxes()[0];
 
-        sendTouchEvent(plot.getXAxes()[0].p2c(5),plot.getYAxes()[0].p2c(5),placeholder[0].childNodes[2],"touchstart");
-        sendTouchEvent(plot.getXAxes()[0].p2c(6),plot.getYAxes()[0].p2c(6),placeholder[0].childNodes[2],"touchmove");
-        sendTouchEvent(0,0,placeholder[0].childNodes[2],"touchend");
+        simulate.touchstart(placeholder[0].childNodes[2], plot.getXAxes()[0].p2c(5), plot.getYAxes()[0].p2c(5));
+        simulate.touchmove(placeholder[0].childNodes[2],plot.getXAxes()[0].p2c(6),plot.getYAxes()[0].p2c(6));
+        simulate.touchend(placeholder[0].childNodes[2],0,0);
 
         expect(xaxis.min).toBeCloseTo(-1,2);
         expect(yaxis.max).toBeCloseTo(9,2);
@@ -304,41 +304,6 @@ describe("flot navigate plugin", function () {
 
       });
     });
-
-  function sendTouchEvent(x, y, element, eventType) {
-
-    const touchObj = //new Touch(
-      {
-        identifier: Date.now(),
-        target: element,
-        clientX: x,
-        clientY: y,
-        radiusX: 2.5,
-        radiusY: 2.5,
-        rotationAngle: 10,
-        force: 0.5,
-      };//);
-
-    var event;
-    //var event = document.createEvent('UIEvent');
-    //event.initUIEvent(eventType, true, true);
-    if (typeof UIEvent === "function") {
-      event = new UIEvent(eventType)
-    } else {
-      event = document.createEvent('UIEvent');
-      event.initUIEvent(eventType, true, true);
-    }
-
-    event.cancelable = true,
-    event.bubbles= true,
-    event.touches= [touchObj],
-    event.targetTouches= [],
-    event.changedTouches= [touchObj],
-    event.shiftKey= true,
-
-    element.dispatchEvent(event);
-
-  }
 
     describe('smartPan', function () {
         it('uses the provided x delta', function () {
