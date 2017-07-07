@@ -93,27 +93,11 @@ can set the default in the options. */
         function onDrag(e) {
             e.stopPropagation();
             e.preventDefault();
-            var frameRate = plot.getOptions().pan.frameRate;
 
-            if (frameRate === -1) {
-                plot.smartPan({
-                    x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
-                    y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
-                }, plotState);
-
-                return;
-            }
-
-            if (panTimeout || !frameRate) return;
-
-            panTimeout = setTimeout(function() {
-                plot.smartPan({
-                    x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
-                    y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
-                }, plotState);
-
-                panTimeout = null;
-            }, 1 / frameRate * 1000);
+            plot.smartPan({
+                x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
+                y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
+            }, plotState);
 
             saveNavigationData(plot, e);
         }
@@ -148,6 +132,6 @@ can set the default in the options. */
         init: init,
         options: options,
         name: 'navigateTouch',
-        version: '1.3'
+        version: '0.1'
     });
 })(jQuery);
