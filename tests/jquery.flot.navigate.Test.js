@@ -297,11 +297,38 @@ describe("flot navigate plugin", function () {
         simulate.touchmove(placeholder[0].childNodes[2],plot.getXAxes()[0].p2c(6),plot.getYAxes()[0].p2c(6));
         simulate.touchend(placeholder[0].childNodes[2],0,0);
 
-        expect(xaxis.min).toBeCloseTo(-1,2);
+        expect(xaxis.min).toBeCloseTo(1,2);
         expect(yaxis.max).toBeCloseTo(9,2);
-        expect(xaxis.max).toBeCloseTo(9,2);
-        expect(yaxis.min).toBeCloseTo(-1,2);
+        expect(xaxis.max).toBeCloseTo(1,2);
+        expect(yaxis.min).toBeCloseTo(9,2);
 
+      });
+    });
+
+    describe('touchZoom', function() {
+      it('should zoom the plot',function() {
+
+        plot = $.plot(placeholder, [
+            [
+                [0, 0],
+                [10, 10]
+            ]
+        ], options);
+
+        xaxis = plot.getXAxes()[0];
+        yaxis = plot.getYAxes()[0];
+
+        simulate.sendTouchEvent2(plot.getXAxes()[0].p2c(2) + plot.offset().left, plot.getYAxes()[0].p2c(2) + plot.offset().top,plot.getXAxes()[0].p2c(6) + plot.offset().left, plot.getYAxes()[0].p2c(6) + plot.offset().top,
+                                 placeholder[0].childNodes[2],"touchstart");
+        simulate.sendTouchEvent2(plot.getXAxes()[0].p2c(1) + plot.offset().left, plot.getYAxes()[0].p2c(1) + plot.offset().top,plot.getXAxes()[0].p2c(7) + plot.offset().left, plot.getYAxes()[0].p2c(7) + plot.offset().top,
+                                 placeholder[0].childNodes[2],"touchmove");
+        simulate.sendTouchEvent2(plot.getXAxes()[0].p2c(1) + plot.offset().left, plot.getYAxes()[0].p2c(1) + plot.offset().top,plot.getXAxes()[0].p2c(7) + plot.offset().left, plot.getYAxes()[0].p2c(7) + plot.offset().top,
+                                 placeholder[0].childNodes[2],"touchend");
+
+        expect(xaxis.min).toBeCloseTo(1.33, 2);
+        expect(xaxis.max).toBeCloseTo(8, 2);
+        expect(yaxis.min).toBeCloseTo(1.33, 2);
+        expect(yaxis.max).toBeCloseTo(8, 2);
       });
     });
 
