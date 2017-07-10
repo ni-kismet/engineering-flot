@@ -1,3 +1,14 @@
+## engineering-flot 0.4.8 ##
+
+### Changes ###
+
+- bar width is computed based on the distance between points.
+- relative time axis.
+
+### Bug fixes ###
+
+- any axis regardless its visibility has a tick formatter.
+
 ## engineering-flot 0.4.7 ##
 
 ### Changes ###
