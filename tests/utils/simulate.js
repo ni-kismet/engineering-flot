@@ -103,6 +103,8 @@
 
         var evt = mouseEvent("dblclick", clickX, clickY, clickX, clickY, button);
         dispatchEvent(el, evt);
+    }
+    
     function simulateTouchStart(el, x, y) {
         sendTouchEvent(x, y, el, "touchstart");
     }
