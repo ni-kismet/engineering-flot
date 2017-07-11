@@ -133,7 +133,22 @@ describe("flot navigate plugin interactions", function () {
         plot = $.plot(placeholder, [
             [[0, 0],
             [10, 10]]
-        ], options);
+        ], {
+        xaxes: [{
+            autoscale: 'exact'
+        }],
+        yaxes: [{
+            autoscale: 'exact'
+        }],
+        zoom: {
+            interactive: false,
+        },
+        pan: {
+            interactive: true
+        },
+        selection: {
+            mode: 'smart',
+        }});
 
         var xaxis = plot.getXAxes()[0];
         var yaxis = plot.getYAxes()[0];
@@ -144,10 +159,13 @@ describe("flot navigate plugin interactions", function () {
         eventHolder = placeholder.find('.flot-overlay');
         var spy = spyOn(eventHolder[0], 'ondblclick').and.callThrough();
 
-        simulate.mouseWheel(eventHolder[0], clientX, clientY, 3);
+        var spyRecenter = jasmine.createSpy('spy');
+        $(plot.getPlaceholder()).on('re-center', spyRecenter);
+
         simulate.dblclick(eventHolder[0], 10, 20);
 
         expect(spy).toHaveBeenCalled();
+        expect(spyRecenter).toHaveBeenCalled();
     });
 
 });
