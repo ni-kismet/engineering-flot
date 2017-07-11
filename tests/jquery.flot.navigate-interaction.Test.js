@@ -141,11 +141,13 @@ describe("flot navigate plugin interactions", function () {
         var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
         var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
 
-        eventHolder = placeholder.find('.flot-overlay')[0];
-        simulate.mouseWheel(eventHolder, clientX, clientY, 3);
-        simulate.dblclick(eventHolder, 10, 20);
+        eventHolder = placeholder.find('.flot-overlay');
+        var spy = spyOn(eventHolder[0], 'ondblclick').and.callThrough();
 
-        spyOn(eventHolder, 'ondblclick').and.callThrough();
+        simulate.mouseWheel(eventHolder[0], clientX, clientY, 3);
+        simulate.dblclick(eventHolder[0], 10, 20);
+
+        expect(spy).toHaveBeenCalled();
     });
 
 });
