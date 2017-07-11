@@ -318,38 +318,24 @@ describe("flot navigate plugin", function () {
         xaxis = plot.getXAxes()[0];
         yaxis = plot.getYAxes()[0];
 
-        var coords = new Array();
-        coords[0] = {
-            x : plot.getXAxes()[0].p2c(2) + plot.offset().left,
-            y : plot.getYAxes()[0].p2c(2) + plot.offset().top
-        }
-        coords[1] = {
-            x: plot.getXAxes()[0].p2c(6) + plot.offset().left,
-            y: plot.getYAxes()[0].p2c(6) + plot.offset().top
+        function getPairOfCoords(x, y) {
+            return {
+                x : xaxis.p2c(x) + plot.offset().left,
+                y : yaxis.p2c(y) + plot.offset().top
+            }
         }
 
+        var coords = [
+                getPairOfCoords(2, 2),
+                getPairOfCoords(6, 6)
+            ];
         simulate.sendTouchEvents(coords, placeholder[0].childNodes[2], "touchstart");
 
-        coords[0] = {
-            x : plot.getXAxes()[0].p2c(1) + plot.offset().left,
-            y : plot.getYAxes()[0].p2c(1) + plot.offset().top
-        }
-        coords[1] = {
-            x: plot.getXAxes()[0].p2c(7) + plot.offset().left,
-            y: plot.getYAxes()[0].p2c(7) + plot.offset().top
-        }
-
+        coords = [
+            getPairOfCoords(1, 1),
+            getPairOfCoords(7, 7)
+        ];
         simulate.sendTouchEvents(coords, placeholder[0].childNodes[2], "touchmove");
-
-        coords[0] = {
-            x : plot.getXAxes()[0].p2c(1) + plot.offset().left,
-            y : plot.getYAxes()[0].p2c(1) + plot.offset().top
-        }
-        coords[1] = {
-            x: plot.getXAxes()[0].p2c(7) + plot.offset().left,
-            y: plot.getYAxes()[0].p2c(7) + plot.offset().top
-        }
-
         simulate.sendTouchEvents(coords, placeholder[0].childNodes[2], "touchend");
 
         expect(xaxis.min).toBeCloseTo(1.33, 2);

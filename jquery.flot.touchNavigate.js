@@ -1,47 +1,3 @@
-/* Flot plugin for adding the ability to pan the plot.
-
-Copyright (c) 2007-2014 IOLA and Ole Laursen.
-Copyright (c) 2016 Ciprian Ceteras.
-Licensed under the MIT license.
-The plugin supports these options:
-
-    pan: {
-        interactive: false
-        cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-        frameRate: 20
-        mode: "smart"       // enable smart pan mode
-    }
-
-"interactive" enables the built-in drag/click behaviour. If you enable
-interactive for pan, then you'll have a basic plot that supports moving
-around; the same for zoom.
-
-"amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
-the current viewport.
-
-"cursor" is a standard CSS touch cursor string used for visual feedback to the
-user when dragging.
-
-"frameRate" specifies the maximum number of times per second the plot will
-update itself while the user is panning around on it (set to null to disable
-intermediate pans, the plot will then not update until the mouse button is
-released).
-
-Example API usage:
-
-    plot = $.plot(...);
-
-    // pan 100 pixels to the left and 20 down
-    plot.pan({ left: -100, top: 20 })
-
-Here, "center" specifies where the center of the zooming should happen. Note
-that this is defined in pixel space, not the space of the data points (you can
-use the p2c helpers on the axes in Flot to help you convert between these).
-
-"amount" is the amount to zoom the viewport relative to the current range, so
-1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out). You
-can set the default in the options. */
-
 /* global jQuery */
 
 (function($) {
@@ -59,17 +15,8 @@ can set the default in the options. */
             startPageY = 0,
             plotState = false,
             scaling = false,
+            pan = true,
             prevDist = null;
-
-        function saveNavigationData(plot, e) {
-            if (e.touches && e.touches[0]) {
-                var opts = plot.getOptions();
-                opts.navigationData = {
-                    lastClientX: e.touches[0].clientX,
-                    lastClientY: e.touches[0].clientY
-                }
-            }
-        }
 
         function isPinchEvent(e) {
             return e.touches && e.touches.length === 2;
@@ -80,13 +27,12 @@ can set the default in the options. */
             e.preventDefault();
 
             scaling = isPinchEvent(e);
-
             if (!scaling) {
                 plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
                 startPageX = e.touches[0].clientX;
                 startPageY = e.touches[0].clientY;
                 plotState = plot.navigationState();
-                saveNavigationData(plot, e);
+                pan = true;
             } else {
                 prevDist = pinchDistance(e);
             }
@@ -98,13 +44,13 @@ can set the default in the options. */
 
             scaling = isPinchEvent(e);
 
-            if (!scaling) {
+            if (!scaling && pan) {
                 plot.smartPan({
                     x: startPageX - (e.touches[0].clientX),
                     y: startPageY - (e.touches[0].clientY)
                 }, plotState);
-                saveNavigationData(plot, e);
-            } else {
+            } else if (scaling) {
+                pan = false;
                 var dist = pinchDistance(e);
                 onZoomPinch(e, dist < prevDist);
                 prevDist = dist;
@@ -112,17 +58,16 @@ can set the default in the options. */
         }
 
         function onDragEnd(e) {
-            if (scaling) {
-                if (isPinchEvent(e)) {
-                    scaling = false;
-                    prevDist = null
-                }
+            if (!isPinchEvent(e)) {
+                prevDist = null;
+            }
+            if (scaling && !isPinchEvent(e)) { //if it was a pinch event and is not anymore it means pinch ended
+                pan = false;
             }
         }
 
         function onZoomPinch(e, zoomOut) {
             e.preventDefault();
-
             var offset = plot.offset(),
                 center = {
                     left: 0,
@@ -180,6 +125,6 @@ can set the default in the options. */
         init: init,
         options: options,
         name: 'navigateTouch',
-        version: '0.1'
+        version: '0.2'
     });
 })(jQuery);

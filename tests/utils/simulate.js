@@ -144,7 +144,7 @@
     }
 
     function sendTouchEvents(coords, element, eventType) {
-        var touchObjects = new Array();
+        var touchObjects = [];
 
         for(var i = 0; i < coords.length; i++) {
             touchObjects[i] = {
