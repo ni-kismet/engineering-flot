@@ -143,28 +143,21 @@
         element.dispatchEvent(event);
     }
 
-    function sendTouchEvent2(x1, y1, x2, y2, element, eventType) {
-        var touchObj1 = {
-            identifier: Date.now(),
-            target: element,
-            clientX: x1,
-            clientY: y1,
-            radiusX: 2.5,
-            radiusY: 2.5,
-            rotationAngle: 10,
-            force: 0.5,
-        };
+    function sendTouchEvents(coords, element, eventType) {
+        var touchObjects = new Array();
 
-        var touchObj2 = {
-            identifier: Date.now(),
-            target: element,
-            clientX: x2,
-            clientY: y2,
-            radiusX: 2.5,
-            radiusY: 2.5,
-            rotationAngle: 10,
-            force: 0.5,
-        };
+        for(var i = 0; i < coords.length; i++) {
+            touchObjects[i] = {
+                identifier: Date.now(),
+                target: element,
+                clientX: coords[i].x,
+                clientY: coords[i].y,
+                radiusX: 2.5,
+                radiusY: 2.5,
+                rotationAngle: 10,
+                force: 0.5,
+            };
+        }
 
         var event;
         if (typeof UIEvent === "function") {
@@ -175,9 +168,9 @@
             event.initUIEvent(eventType, true, true);
         }
 
-        event.touches = [touchObj1, touchObj2];
+        event.touches = touchObjects;
         event.targetTouches = [];
-        event.changedTouches = [touchObj1, touchObj2];
+        event.changedTouches = touchObjects;
         event.shiftKey = true;
 
         element.dispatchEvent(event);
@@ -191,5 +184,5 @@
     simulate.touchmove = simulateTouchMove;
     simulate.touchend = simulateTouchEnd;
     simulate.touchdrag = simulateTouchDrag;
-    simulate.sendTouchEvent2 = sendTouchEvent2;
+    simulate.sendTouchEvents = sendTouchEvents;
 })();

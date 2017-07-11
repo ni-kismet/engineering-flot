@@ -87,8 +87,8 @@ can set the default in the options. */
                 scaling = false;
 
                 plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-                startPageX = e.touches[0].pageX || e.touches[0].clientX;
-                startPageY = e.touches[0].pageY || e.touches[0].clientY;
+                startPageX = e.touches[0].clientX;
+                startPageY = e.touches[0].clientY;
                 plotState = plot.navigationState();
 
                 saveNavigationData(plot, e);
@@ -105,27 +105,21 @@ can set the default in the options. */
             scaling = isPinchEvent(e);
 
             if (!scaling) {
-                return false;
                 plot.smartPan({
-                    x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
-                    y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
+                    x: startPageX - (e.touches[0].clientX),
+                    y: startPageY - (e.touches[0].clientY)
                 }, plotState);
-
                 saveNavigationData(plot, e);
-            } else if (isPinchEvent(e)) {
+            } else {
                 var dist = pinchDistance(e);
-                if (Math.abs(100 * (dist - prevDist) / prevDist) > 5) {
-                    onZoomPinch(e, dist < prevDist);
-                    prevDist = dist;
-                }
+                onZoomPinch(e, dist < prevDist);
+                prevDist = dist;
             }
         }
 
         function onDragEnd(e) {
-            // not sure if this should do anything
             if (scaling) {
                 if (isPinchEvent(e)) {
-                    //var dist = pinchDistance(e);
                     scaling = false;
                     prevDist = null
                 }
@@ -133,22 +127,26 @@ can set the default in the options. */
         }
 
         function onZoomPinch(e, zoomOut) {
-            var c = plot.offset(),
+            var offset = plot.offset(),
+                center = {
+                    left: 0,
+                    top: 0
+                },
                 pageX = (e.touches[0].clientX + e.touches[1].clientX) / 2,
                 pageY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
 
-            c.left = pageX - c.left; //pageX
-            c.top = pageY - c.top; //pageY
-            var amount = pinchDistance(e) / prevDist ;
+            center.left = pageX - offset.left;
+            center.top = pageY - offset.top;
+            var amount = pinchDistance(e) / prevDist;
             e.preventDefault();
             if (zoomOut) {
                 plot.zoomOut({
-                    center: c,
+                    center: center,
                     amount: 1 / amount
                 });
             } else {
                 plot.zoom({
-                    center: c,
+                    center: center,
                     amount: amount
                 });
             }
