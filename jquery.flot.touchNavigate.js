@@ -48,9 +48,6 @@ can set the default in the options. */
     'use strict';
 
     var options = {
-        pan: {
-            enableTouch: false
-        }
     };
 
     function init(plot) {
