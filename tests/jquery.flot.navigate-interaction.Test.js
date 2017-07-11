@@ -129,4 +129,43 @@ describe("flot navigate plugin interactions", function () {
         expect(yaxis.max).toBeCloseTo(10, 1);
     });
 
+    it('zooms mode handles event on mouse dblclick', function () {
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], {
+        xaxes: [{
+            autoscale: 'exact'
+        }],
+        yaxes: [{
+            autoscale: 'exact'
+        }],
+        zoom: {
+            interactive: false,
+        },
+        pan: {
+            interactive: true
+        },
+        selection: {
+            mode: 'smart',
+        }});
+
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
+
+        var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
+        var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
+
+        eventHolder = placeholder.find('.flot-overlay');
+        var spy = spyOn(eventHolder[0], 'ondblclick').and.callThrough();
+
+        var spyRecenter = jasmine.createSpy('spy');
+        $(plot.getPlaceholder()).on('re-center', spyRecenter);
+
+        simulate.dblclick(eventHolder[0], 10, 20);
+
+        expect(spy).toHaveBeenCalled();
+        expect(spyRecenter).toHaveBeenCalled();
+    });
+
 });

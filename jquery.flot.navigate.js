@@ -342,6 +342,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             var o = plot.getOptions();
             if (o.zoom.interactive) {
                 eventHolder.mousewheel(onMouseWheel);
+                eventHolder.dblclick(onDblClick);
             }
 
             if (o.pan.interactive) {
