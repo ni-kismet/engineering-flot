@@ -81,19 +81,16 @@ can set the default in the options. */
         function onDragStart(e) {
             e.stopPropagation();
             e.preventDefault();
+
             scaling = isPinchEvent(e);
 
-            if (!isPinchEvent(e)) {
-                scaling = false;
-
+            if (!scaling) {
                 plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
                 startPageX = e.touches[0].clientX;
                 startPageY = e.touches[0].clientY;
                 plotState = plot.navigationState();
-
                 saveNavigationData(plot, e);
             } else {
-                scaling = true;
                 prevDist = pinchDistance(e);
             }
         }
@@ -127,18 +124,20 @@ can set the default in the options. */
         }
 
         function onZoomPinch(e, zoomOut) {
+            e.preventDefault();
+
             var offset = plot.offset(),
                 center = {
                     left: 0,
                     top: 0
                 },
                 pageX = (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                pageY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                pageY = (e.touches[0].clientY + e.touches[1].clientY) / 2,
+                amount = pinchDistance(e) / prevDist;
 
             center.left = pageX - offset.left;
             center.top = pageY - offset.top;
-            var amount = pinchDistance(e) / prevDist;
-            e.preventDefault();
+
             if (zoomOut) {
                 plot.zoomOut({
                     center: center,
