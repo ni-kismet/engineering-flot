@@ -25,9 +25,9 @@
             e.stopPropagation();
             e.preventDefault();
 
+            plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
             scaling = isPinchEvent(e);
             if (!scaling) {
-                plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
                 startPageX = e.touches[0].clientX;
                 startPageY = e.touches[0].clientY;
                 plotState = plot.navigationState();
@@ -43,7 +43,7 @@
             scaling = isPinchEvent(e);
             if (scaling) {
                 var dist = pinchDistance(e);
-                onZoomPinch(e, dist < prevDist);
+                onZoomPinch(e);
                 prevDist = dist;
 
                 // plot.smartPan({
@@ -61,16 +61,15 @@
         function onDragEnd(e) {
             if (!isPinchEvent(e)) {
                 prevDist = null;
-            }
-            //if it was a pinch event and is not anymore it means a pinch just ended
-            if (scaling && !isPinchEvent(e)) {
-                startPageX = e.touches[0].clientX;
-                startPageY = e.touches[0].clientY;
-                plotState = plot.navigationState();
+                if (scaling && e.touches[0]) {
+                    startPageX = e.touches[0].clientX;
+                    startPageY = e.touches[0].clientY;
+                    plotState = plot.navigationState();
+                }
             }
         }
 
-        function onZoomPinch(e, zoomOut) {
+        function onZoomPinch(e) {
             var offset = plot.offset(),
                 center = {
                     left: 0,
@@ -83,17 +82,10 @@
             center.left = pageX - offset.left;
             center.top = pageY - offset.top;
 
-            if (zoomOut) {
-                plot.zoomOut({
-                    center: center,
-                    amount: 1 / amount
-                });
-            } else {
-                plot.zoom({
-                    center: center,
-                    amount: amount
-                });
-            }
+            plot.zoom({
+                center: center,
+                amount: amount
+            });
         }
 
         function pinchDistance(e) {
