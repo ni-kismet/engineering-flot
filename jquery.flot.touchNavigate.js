@@ -15,7 +15,6 @@
             startPageY = 0,
             plotState = false,
             scaling = false,
-            pan = true,
             prevDist = null;
 
         function isPinchEvent(e) {
@@ -32,28 +31,30 @@
                 startPageX = e.touches[0].clientX;
                 startPageY = e.touches[0].clientY;
                 plotState = plot.navigationState();
-                pan = true;
-            } else {
+            } else if (scaling) {
                 prevDist = pinchDistance(e);
+                startPageX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                startPageY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                plotState = plot.navigationState();
             }
         }
 
         function onDrag(e) {
-            e.stopPropagation();
-            e.preventDefault();
-
             scaling = isPinchEvent(e);
+            if (scaling) {
+                var dist = pinchDistance(e);
+                onZoomPinch(e, dist < prevDist);
+                prevDist = dist;
 
-            if (!scaling && pan) {
+                // plot.smartPan({
+                //     x: startPageX - (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                //     y: startPageY - (e.touches[0].clientY + e.touches[1].clientY) / 2
+                // }, plotState);
+            } else if (!scaling) {
                 plot.smartPan({
                     x: startPageX - (e.touches[0].clientX),
                     y: startPageY - (e.touches[0].clientY)
                 }, plotState);
-            } else if (scaling) {
-                pan = false;
-                var dist = pinchDistance(e);
-                onZoomPinch(e, dist < prevDist);
-                prevDist = dist;
             }
         }
 
@@ -61,13 +62,15 @@
             if (!isPinchEvent(e)) {
                 prevDist = null;
             }
-            if (scaling && !isPinchEvent(e)) { //if it was a pinch event and is not anymore it means pinch ended
-                pan = false;
+            //if it was a pinch event and is not anymore it means a pinch just ended
+            if (scaling && !isPinchEvent(e)) {
+                startPageX = e.touches[0].clientX;
+                startPageY = e.touches[0].clientY;
+                plotState = plot.navigationState();
             }
         }
 
         function onZoomPinch(e, zoomOut) {
-            e.preventDefault();
             var offset = plot.offset(),
                 center = {
                     left: 0,
