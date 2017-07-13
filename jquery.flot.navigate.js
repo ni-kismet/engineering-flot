@@ -453,8 +453,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 if (d !== 0) {
-                    var navigationOffset = axis.c2p(d);
-                    opts.offset = { below: navigationOffset, above: navigationOffset };
+                    var navigationOffset = axis.c2p(opts.offset.below) - axis.c2p(opts.offset.below + d);
+                    opts.offset = { below: navigationOffset + (opts.offset.below || 0), above: navigationOffset + (opts.offset.above || 0) };
                 }
             });
 
@@ -464,6 +464,14 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (!args.preventEvent) {
                 plot.getPlaceholder().trigger("plotpan", [plot, args]);
             }
+        };
+
+        plot.recenter = function() {
+            $.each(plot.getAxes(), function(_, axis) {
+                axis.options.offset = { below: 0, above: 0 };
+            });
+                plot.setupGrid();
+                plot.draw();
         };
 
         var shouldSnap = function(delta) {
