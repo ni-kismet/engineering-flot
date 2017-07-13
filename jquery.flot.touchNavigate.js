@@ -52,6 +52,8 @@
                     left: (e.touches[0].clientX + e.touches[1].clientX) / 2 - prevPageX,
                     top: (e.touches[0].clientY + e.touches[1].clientY) / 2 - prevPageY
                 });
+                prevPageX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                prevPageY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
 
                 var dist = pinchDistance(e);
                 onZoomPinch(e);
