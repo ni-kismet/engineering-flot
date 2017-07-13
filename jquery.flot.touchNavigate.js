@@ -22,7 +22,6 @@
             twoTouches = false,
             prevTapTime = 0;
 
-
         function isPinchEvent(e) {
             return e.touches && e.touches.length === 2;
         }
@@ -79,7 +78,7 @@
                         maxDistanceBetweenTaps = 50,
                         maxIntervalBetweenTaps = 500;
 
-                    if (0 <= intervalBetweenTaps && intervalBetweenTaps < maxIntervalBetweenTaps) {
+                    if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
                         if (distance(prevTapX, prevTapY, prevPanX, prevPanY) < maxDistanceBetweenTaps) {
                             plot.recenter();
                         }
