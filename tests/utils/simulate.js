@@ -153,6 +153,39 @@
 
     }
 
+    function sendTouchEvents(coords, element, eventType) {
+        var touchObjects = [];
+
+        for(var i = 0; i < coords.length; i++) {
+            touchObjects[i] = {
+                identifier: Date.now(),
+                target: element,
+                clientX: coords[i].x,
+                clientY: coords[i].y,
+                radiusX: 2.5,
+                radiusY: 2.5,
+                rotationAngle: 10,
+                force: 0.5,
+            };
+        }
+
+        var event;
+        if (typeof UIEvent === "function") {
+            event = new UIEvent(eventType)
+
+        } else {
+            event = document.createEvent('UIEvent');
+            event.initUIEvent(eventType, true, true);
+        }
+
+        event.touches = touchObjects;
+        event.targetTouches = [];
+        event.changedTouches = touchObjects;
+        event.shiftKey = true;
+
+        element.dispatchEvent(event);
+    }
+
     simulate.mouseDown = simulateMouseDown;
     simulate.mouseMove = simulateMouseMove;
     simulate.mouseUp = simulateMouseUp;
@@ -162,4 +195,5 @@
     simulate.touchmove = simulateTouchMove;
     simulate.touchend = simulateTouchEnd;
     simulate.touchdrag = simulateTouchDrag;
+    simulate.sendTouchEvents = sendTouchEvents;
 })();

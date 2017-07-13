@@ -1,47 +1,3 @@
-/* Flot plugin for adding the ability to pan the plot.
-
-Copyright (c) 2007-2014 IOLA and Ole Laursen.
-Copyright (c) 2016 Ciprian Ceteras.
-Licensed under the MIT license.
-The plugin supports these options:
-
-    pan: {
-        interactive: false
-        cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-        frameRate: 20
-        mode: "smart"       // enable smart pan mode
-    }
-
-"interactive" enables the built-in drag/click behaviour. If you enable
-interactive for pan, then you'll have a basic plot that supports moving
-around; the same for zoom.
-
-"amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
-the current viewport.
-
-"cursor" is a standard CSS touch cursor string used for visual feedback to the
-user when dragging.
-
-"frameRate" specifies the maximum number of times per second the plot will
-update itself while the user is panning around on it (set to null to disable
-intermediate pans, the plot will then not update until the mouse button is
-released).
-
-Example API usage:
-
-    plot = $.plot(...);
-
-    // pan 100 pixels to the left and 20 down
-    plot.pan({ left: -100, top: 20 })
-
-Here, "center" specifies where the center of the zooming should happen. Note
-that this is defined in pixel space, not the space of the data points (you can
-use the p2c helpers on the axes in Flot to help you convert between these).
-
-"amount" is the amount to zoom the viewport relative to the current range, so
-1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out). You
-can set the default in the options. */
-
 /* global jQuery */
 
 (function($) {
@@ -58,45 +14,107 @@ can set the default in the options. */
     }
 
     function initTouchNavigation(plot, options) {
-        var startPageX = 0,
-            startPageY = 0,
-            plotState = false;
+        var prevPanX = 0,
+            prevPanY = 0,
+            prevTapX = 0,
+            prevTapY = 0,
+            prevDist = null,
+            twoTouches = false,
+            prevTapTime = 0;
 
-        function saveNavigationData(plot, e) {
-            if (e.touches && e.touches[0]) {
-                var opts = plot.getOptions();
-                opts.navigationData = {
-                    lastClientX: e.touches[0].clientX,
-                    lastClientY: e.touches[0].clientY
-                }
-            }
+        function isPinchEvent(e) {
+            return e.touches && e.touches.length === 2;
         }
 
         function onDragStart(e) {
             e.stopPropagation();
             e.preventDefault();
-            plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            startPageX = e.touches[0].pageX || e.touches[0].clientX;
-            startPageY = e.touches[0].pageY || e.touches[0].clientY;
-            plotState = plot.navigationState();
 
-            saveNavigationData(plot, e);
+            twoTouches = isPinchEvent(e);
+            if (!twoTouches) {
+                prevTapX = prevPanX;
+                prevTapY = prevPanY;
+                prevPanX = e.touches[0].clientX;
+                prevPanY = e.touches[0].clientY;
+            } else {
+                prevDist = pinchDistance(e);
+                prevPanX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                prevPanY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            }
         }
 
         function onDrag(e) {
-            e.stopPropagation();
-            e.preventDefault();
+            twoTouches = isPinchEvent(e);
+            if (twoTouches) {
+                plot.pan({
+                    left: (e.touches[0].clientX + e.touches[1].clientX) / 2 - prevPanX,
+                    top: (e.touches[0].clientY + e.touches[1].clientY) / 2 - prevPanY
+                });
+                prevPanX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                prevPanY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
 
-            plot.smartPan({
-                x: startPageX - (e.touches[0].pageX || e.touches[0].clientX),
-                y: startPageY - (e.touches[0].pageY || e.touches[0].clientY)
-            }, plotState);
-
-            saveNavigationData(plot, e);
+                var dist = pinchDistance(e);
+                onZoomPinch(e);
+                prevDist = dist;
+            } else {
+                plot.pan({
+                    left: (e.touches[0].clientX - prevPanX),
+                    top: (e.touches[0].clientY - prevPanY)
+                });
+                prevPanX = e.touches[0].clientX;
+                prevPanY = e.touches[0].clientY;
+            }
         }
 
-        function onDragEnd() {
-            // not sure if this should do anything
+        function onDragEnd(e) {
+            if (!isPinchEvent(e)) {
+                prevDist = null;
+                if (twoTouches && e.touches.length === 1) {
+                    prevPanX = e.touches[0].clientX;
+                    prevPanY = e.touches[0].clientY;
+                } else if (!twoTouches) {
+                    var currentTime = new Date().getTime(),
+                        intervalBetweenTaps = currentTime - prevTapTime,
+                        maxDistanceBetweenTaps = 50,
+                        maxIntervalBetweenTaps = 500;
+
+                    if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
+                        if (distance(prevTapX, prevTapY, prevPanX, prevPanY) < maxDistanceBetweenTaps) {
+                            plot.recenter();
+                        }
+                    }
+                    prevTapTime = currentTime;
+                }
+            }
+        }
+
+        function onZoomPinch(e) {
+            var offset = plot.offset(),
+                center = {
+                    left: 0,
+                    top: 0
+                },
+                midPointX = (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                midPointY = (e.touches[0].clientY + e.touches[1].clientY) / 2,
+                zoomAmount = pinchDistance(e) / prevDist;
+
+            center.left = midPointX - offset.left;
+            center.top = midPointY - offset.top;
+
+            plot.zoom({
+                center: center,
+                amount: zoomAmount
+            });
+        }
+
+        function distance(x1, y1, x2, y2) {
+            return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        }
+
+        function pinchDistance(e) {
+            var t1 = e.touches[0],
+                t2 = e.touches[1];
+            return distance(t1.clientX, t1.clientY, t2.clientX, t2.clientY);
         }
 
         function bindEvents(plot, eventHolder) {
@@ -125,6 +143,6 @@ can set the default in the options. */
         init: init,
         options: options,
         name: 'navigateTouch',
-        version: '0.1'
+        version: '0.3'
     });
 })(jQuery);
