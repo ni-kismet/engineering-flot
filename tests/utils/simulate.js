@@ -96,6 +96,15 @@
         dispatchEvent(el, evt);
     }
 
+    function simulateDblclick(el, x, y, button) {
+        var bBox = el.getBoundingClientRect();
+        var clickX = bBox.left + x;
+        var clickY = bBox.top + y;
+
+        var evt = mouseEvent("dblclick", clickX, clickY, clickX, clickY, button);
+        dispatchEvent(el, evt);
+    }
+
     function simulateTouchStart(el, x, y) {
         sendTouchEvent(x, y, el, "touchstart");
     }
@@ -141,6 +150,7 @@
         event.shiftKey = true;
 
         element.dispatchEvent(event);
+
     }
 
     function sendTouchEvents(coords, element, eventType) {
@@ -180,6 +190,7 @@
     simulate.mouseMove = simulateMouseMove;
     simulate.mouseUp = simulateMouseUp;
     simulate.mouseWheel = simulateMouseWheel;
+    simulate.dblclick = simulateDblclick;
     simulate.touchstart = simulateTouchStart;
     simulate.touchmove = simulateTouchMove;
     simulate.touchend = simulateTouchEnd;

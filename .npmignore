@@ -8,4 +8,4 @@
 !jquery.flot.navigate.js
 !jquery.flot.selection.js
 !jquery.flot.symbol.js
-!jquery.flot.time.js
+!jquery.flot.absRelTime.js
