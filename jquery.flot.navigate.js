@@ -470,7 +470,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             $.each(plot.getAxes(), function(_, axis) {
                 axis.options.offset = { below: 0, above: 0 };
             });
-            plot.getPlaceholder().trigger("re-center", e);
             plot.setupGrid();
             plot.draw();
         };
