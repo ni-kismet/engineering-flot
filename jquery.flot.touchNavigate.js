@@ -14,14 +14,14 @@
     }
 
     function initTouchNavigation(plot, options) {
-        var prevPageX = 0,
-            prevPageY = 0,
-            scaling = false,
-            lastTapTime = 0,
-            lastTapX = 0,
-            lastTapY = 0,
-            timeout,
-            prevDist = null;
+        var prevPanX = 0,
+            prevPanY = 0,
+            prevTapX = 0,
+            prevTapY = 0,
+            prevDist = null,
+            twoTouches = false,
+            prevTapTime = 0;
+
 
         function isPinchEvent(e) {
             return e.touches && e.touches.length === 2;
@@ -31,64 +31,60 @@
             e.stopPropagation();
             e.preventDefault();
 
-            scaling = isPinchEvent(e);
-            if (!scaling) {
-                lastTapX = prevPageX;
-                lastTapY = prevPageY;
-
-                prevPageX = e.touches[0].clientX;
-                prevPageY = e.touches[0].clientY;
-            } else if (scaling) {
+            twoTouches = isPinchEvent(e);
+            if (!twoTouches) {
+                prevTapX = prevPanX;
+                prevTapY = prevPanY;
+                prevPanX = e.touches[0].clientX;
+                prevPanY = e.touches[0].clientY;
+            } else {
                 prevDist = pinchDistance(e);
-                prevPageX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                prevPageY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                prevPanX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                prevPanY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
             }
         }
 
         function onDrag(e) {
-            scaling = isPinchEvent(e);
-            if (scaling) {
+            twoTouches = isPinchEvent(e);
+            if (twoTouches) {
                 plot.pan({
-                    left: (e.touches[0].clientX + e.touches[1].clientX) / 2 - prevPageX,
-                    top: (e.touches[0].clientY + e.touches[1].clientY) / 2 - prevPageY
+                    left: (e.touches[0].clientX + e.touches[1].clientX) / 2 - prevPanX,
+                    top: (e.touches[0].clientY + e.touches[1].clientY) / 2 - prevPanY
                 });
-                prevPageX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                prevPageY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                prevPanX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                prevPanY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
 
                 var dist = pinchDistance(e);
                 onZoomPinch(e);
                 prevDist = dist;
-
-            } else if (!scaling) {
+            } else {
                 plot.pan({
-                    left: (e.touches[0].clientX - prevPageX),
-                    top: (e.touches[0].clientY - prevPageY)
+                    left: (e.touches[0].clientX - prevPanX),
+                    top: (e.touches[0].clientY - prevPanY)
                 });
-                prevPageX = e.touches[0].clientX;
-                prevPageY = e.touches[0].clientY;
+                prevPanX = e.touches[0].clientX;
+                prevPanY = e.touches[0].clientY;
             }
         }
 
         function onDragEnd(e) {
-            var xaxis = plot.getXAxes()[0],
-                yaxis = plot.getYAxes()[0];
             if (!isPinchEvent(e)) {
                 prevDist = null;
-                if (scaling && e.touches[0]) {
-                    prevPageX = e.touches[0].clientX;
-                    prevPageY = e.touches[0].clientY;
-                } else {
-                    var currentTime = new Date().getTime();
-                    var tapLength = currentTime - lastTapTime;
-                    if (tapLength < 500 && tapLength > 0) {
-                        if (distance(xaxis.c2p(lastTapX - plot.offset().left), yaxis.c2p(lastTapY - plot.offset().top),
-                                    xaxis.c2p(prevPageX - plot.offset().left), yaxis.c2p(prevPageY - plot.offset().top)) < 0.2) {
-                            console.log("double tap");
+                if (twoTouches && e.touches.length === 1) {
+                    prevPanX = e.touches[0].clientX;
+                    prevPanY = e.touches[0].clientY;
+                } else if (!twoTouches) {
+                    var currentTime = new Date().getTime(),
+                        intervalBetweenTaps = currentTime - prevTapTime,
+                        maxDistanceBetweenTaps = 50,
+                        maxIntervalBetweenTaps = 500;
+
+                    if (0 <= intervalBetweenTaps && intervalBetweenTaps < maxIntervalBetweenTaps) {
+                        if (distance(prevTapX, prevTapY, prevPanX, prevPanY) < maxDistanceBetweenTaps) {
                             plot.recenter();
-                            event.preventDefault();
                         }
                     }
-                    lastTapTime = currentTime;
+                    prevTapTime = currentTime;
                 }
             }
         }
@@ -99,27 +95,27 @@
                     left: 0,
                     top: 0
                 },
-                pageX = (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                pageY = (e.touches[0].clientY + e.touches[1].clientY) / 2,
-                amount = pinchDistance(e) / prevDist;
+                midPointX = (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                midPointY = (e.touches[0].clientY + e.touches[1].clientY) / 2,
+                zoomAmount = pinchDistance(e) / prevDist;
 
-            center.left = pageX - offset.left;
-            center.top = pageY - offset.top;
+            center.left = midPointX - offset.left;
+            center.top = midPointY - offset.top;
 
             plot.zoom({
                 center: center,
-                amount: amount
+                amount: zoomAmount
             });
-        }
-
-        function pinchDistance(e) {
-            var dist = Math.sqrt((e.touches[0].clientX - e.touches[1].clientX) * (e.touches[0].clientX - e.touches[1].clientX) +
-            (e.touches[0].clientY - e.touches[1].clientY) * (e.touches[0].clientY - e.touches[1].clientY));
-            return dist;
         }
 
         function distance(x1, y1, x2, y2) {
             return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        }
+
+        function pinchDistance(e) {
+            var t1 = e.touches[0],
+                t2 = e.touches[1];
+            return distance(t1.clientX, t1.clientY, t2.clientX, t2.clientY);
         }
 
         function bindEvents(plot, eventHolder) {
@@ -148,6 +144,6 @@
         init: init,
         options: options,
         name: 'navigateTouch',
-        version: '0.2'
+        version: '0.3'
     });
 })(jQuery);
