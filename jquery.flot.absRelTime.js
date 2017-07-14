@@ -96,7 +96,7 @@ API.txt for details.
             var result = '';
 
             var dateValue = date.valueOf(),
-                d = dateValue - axis.relativeFirstData;
+                d = dateValue - (axis.relativeFirstData === undefined ? 0 : axis.relativeFirstData);
 
             if (d < 0) {
                 d = -d;
@@ -248,9 +248,7 @@ API.txt for details.
         [1, "year"]]);
 
     function updateAxisFirstData(plot, axis) {
-        if (plot.getData().length === 0) {
-            axis.relativeFirstData = 0;
-        } else {
+        if (plot.getData().length > 0) {
             var plotData = plot.getData(),
                 i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
 
@@ -284,7 +282,7 @@ API.txt for details.
                             d = dateGenerator(axis.min, opts),
                             minSize = 0;
 
-                        if (axis.relativeFirstData === undefined || axis.relativeFirstData === null) {
+                        if (axis.relativeFirstData === undefined) {
                             updateAxisFirstData(plot, axis);
                         }
 
