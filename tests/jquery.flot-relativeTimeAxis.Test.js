@@ -32,7 +32,6 @@ describe('A Flot chart with relative time axes', function () {
             },
             yaxis: {}
         });
-        plot.getData()[0].datapoints = null;
         plot.setData(data);
         plot.setupGrid();
         plot.draw();
