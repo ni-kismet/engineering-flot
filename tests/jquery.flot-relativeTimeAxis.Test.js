@@ -24,6 +24,19 @@ describe('A Flot chart with relative time axes', function () {
         return [arr[0], arr[arr.length - 1]];
     };
 
+    var createPlotWithRelativeTimeAxisNoPlotData = function (placeholder) {
+        return $.plot(placeholder, [], {
+            xaxis: {
+                show: true,
+                format: 'time',
+                timeformat: '%r'
+            },
+            yaxis: {
+                show: true
+            }
+        });
+    };
+
     var createPlotWithRelativeTimeAxis = function (placeholder, data) {
         var plot = $.plot(placeholder, [[[0, 0]]], {
             xaxis: {
@@ -50,6 +63,13 @@ describe('A Flot chart with relative time axes', function () {
             }
         });
     };
+
+    it('shows time ticks when there is no plot data', function () {
+        plot = createPlotWithRelativeTimeAxisNoPlotData(placeholder);
+
+        var ticks = firstAndLast(plot.getAxes().xaxis.ticks);
+        expect(ticks[0]).not.toEqual(ticks[1]);
+    });
 
     it('shows time ticks', function () {
         plot = createPlotWithRelativeTimeAxis(placeholder, [[[0, 1], [1, 2]]]);
