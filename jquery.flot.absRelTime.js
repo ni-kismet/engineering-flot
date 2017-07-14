@@ -96,7 +96,7 @@ API.txt for details.
             var result = '';
 
             var dateValue = date.valueOf(),
-                d = dateValue - axis.relativeFirstData;
+                d = dateValue - (axis.relativeFirstData === undefined ? 0 : axis.relativeFirstData);
 
             if (d < 0) {
                 d = -d;
@@ -248,26 +248,28 @@ API.txt for details.
         [1, "year"]]);
 
     function updateAxisFirstData(plot, axis) {
-        var plotData = plot.getData(),
-            i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
+        if (plot.getData().length > 0) {
+            var plotData = plot.getData(),
+                i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
 
-        if (datapoints.points.length !== 0) {
-            if (plotData[0].xaxis === axis || plotData[0].yaxis === axis) {
-                minFirstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
-            } else { minFirstPlotData = axis.max; }
-        } else { minFirstPlotData = axis.min; }
+            if (datapoints.points.length !== 0) {
+                if (plotData[0].xaxis === axis || plotData[0].yaxis === axis) {
+                    minFirstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+                } else { minFirstPlotData = axis.max; }
+            } else { minFirstPlotData = axis.min; }
 
-        for (i = 1; i < plotData.length; i++) {
-            datapoints = plotData[i].datapoints;
-            if (plotData[i].xaxis === axis || plotData[i].yaxis === axis) {
-                firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
-                if (minFirstPlotData > firstPlotData) {
-                    minFirstPlotData = firstPlotData;
+            for (i = 1; i < plotData.length; i++) {
+                datapoints = plotData[i].datapoints;
+                if (plotData[i].xaxis === axis || plotData[i].yaxis === axis) {
+                    firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+                    if (minFirstPlotData > firstPlotData) {
+                        minFirstPlotData = firstPlotData;
+                    }
                 }
             }
-        }
 
-        axis.relativeFirstData = minFirstPlotData * 1000;
+            axis.relativeFirstData = minFirstPlotData * 1000;
+        }
     }
 
     function init(plot) {
@@ -280,7 +282,7 @@ API.txt for details.
                             d = dateGenerator(axis.min, opts),
                             minSize = 0;
 
-                        if (axis.relativeFirstData === undefined || axis.relativeFirstData === null) {
+                        if (axis.relativeFirstData === undefined) {
                             updateAxisFirstData(plot, axis);
                         }
 
