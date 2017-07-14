@@ -2171,7 +2171,7 @@ Licensed under the MIT license.
                         });
                     },
                     drawAxisLabel = function (tick, labelBoxes) {
-                        if (!tick.label || tick.v < axis.min || tick.v > axis.max) {
+                        if (!tick || !tick.label || tick.v < axis.min || tick.v > axis.max) {
                             return nullBox;
                         }
 
