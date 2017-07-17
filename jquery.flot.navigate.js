@@ -454,8 +454,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 if (d !== 0) {
-                    var navigationOffset = axis.c2p(opts.offset.below) - axis.c2p(opts.offset.below + d);
-                    opts.offset = { below: navigationOffset + (opts.offset.below || 0), above: navigationOffset + (opts.offset.above || 0) };
+                    var navigationOffsetBelow = axis.c2p(axis.p2c(axis.min)) - axis.c2p(axis.p2c(axis.min) + d),
+                        navigationOffsetAbove = axis.c2p(axis.p2c(axis.max)) - axis.c2p(axis.p2c(axis.max) + d);
+                    opts.offset = { below: navigationOffsetBelow + (opts.offset.below || 0), above: navigationOffsetAbove + (opts.offset.above || 0) };
                 }
             });
 
