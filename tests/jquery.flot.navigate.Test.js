@@ -323,11 +323,10 @@ describe("flot navigate plugin", function () {
         simulate.touchmove(canvasElement, pointCoords[1].x, pointCoords[1].y);
         simulate.touchend(canvasElement, pointCoords[1].x, pointCoords[1].y);
 
-        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 2);
-        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 2);
-        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 2);
-        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].x - canvasCoords[1].x), 2);
-
+        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
       });
     });
 
@@ -378,11 +377,96 @@ describe("flot navigate plugin", function () {
         simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], "touchmove");
         simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], "touchend");
 
-        expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 2);
-        expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 2);
-        expect(yaxis.min).toBeCloseTo((midPointCoords.y - initialYmin) * (1 - 1/amount) + initialYmin, 2);
-        expect(yaxis.max).toBeCloseTo(initialYmax - (initialYmax - midPointCoords.y) * (1 - 1/amount), 2);
+        expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
+        expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
+        expect(yaxis.min).toBeCloseTo((midPointCoords.y - initialYmin) * (1 - 1/amount) + initialYmin, 6);
+        expect(yaxis.max).toBeCloseTo(initialYmax - (initialYmax - midPointCoords.y) * (1 - 1/amount), 6);
       });
+    });
+
+    describe('touchLogarithmicPan', function() {
+        it('should pan the logarithmic plot', function() {
+            var d1 = [];
+            for (var i = 0; i < 14; i += 0.2) {
+                d1.push([i, 1.01 + Math.sin(i)]);
+            }
+            function piTickGenerator(axis) {
+                var res = [],
+                i = Math.floor(axis.min / Math.PI);
+                do {
+                    var v = i * Math.PI;
+                    res.push([v, i + "\u03c0"]);
+                    ++i;
+                } while (v < axis.max);
+                return res;
+            }
+
+            var plot = $.plot(placeholder, [d1], {
+                series: {
+                    lines: {
+                        show: true
+                    },
+                    points: {
+                        show: true
+                    }
+                },
+                xaxis: {
+                    ticks: piTickGenerator,
+                    autoscale: 'exact'
+                },
+                yaxis: {
+                    mode: 'log',
+                    showTickLabels: "all",
+                    autoscale: 'exact'
+                },
+                zoom: {
+                    interactive: true
+                },
+                pan: {
+                    interactive: true,
+                    enableTouch: true
+                }
+            });
+
+            function getPairOfCoords(x, y) {
+                return {
+                    x : xaxis.p2c(x) + plot.offset().left,
+                    y : yaxis.p2c(y) + plot.offset().top
+                }
+            }
+
+            var canvasElement = placeholder[0].childNodes[2],
+                xaxis = plot.getXAxes()[0],
+                yaxis = plot.getYAxes()[0],
+                initialXmin = xaxis.min,
+                initialXmax = xaxis.max,
+                initialYmin = yaxis.min,
+                initialYmax = yaxis.max,
+                canvasCoords = [
+                        {
+                            x : Math.PI * 4,
+                            y : 0.7
+                        },
+                        {
+                            x : Math.PI * 2,
+                            y : 10
+                        }
+                ],
+                pointCoords = [
+                        getPairOfCoords(canvasCoords[0].x, canvasCoords[0].y),
+                        getPairOfCoords(canvasCoords[1].x, canvasCoords[1].y)
+                ];
+
+            simulate.touchstart(canvasElement, pointCoords[0].x, pointCoords[0].y);
+            simulate.touchmove(canvasElement, pointCoords[1].x, pointCoords[1].y);
+            simulate.touchend(canvasElement, pointCoords[1].x, pointCoords[1].y);
+
+            expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+            expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+            expect(yaxis.min).toBeCloseTo((yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y))), 6);
+            expect(yaxis.max).toBeCloseTo((yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y))), 6);
+
+        });
     });
 
     describe('smartPan', function () {

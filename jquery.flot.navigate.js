@@ -454,15 +454,14 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 }
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = axis.c2p(axis.p2c(axis.min)) - axis.c2p(axis.p2c(axis.min) + d),
-                        navigationOffsetAbove = axis.c2p(axis.p2c(axis.max)) - axis.c2p(axis.p2c(axis.max) + d);
+                    var navigationOffsetBelow = axis.c2p(axis.p2c(axis.min) - d) - axis.c2p(axis.p2c(axis.min)),
+                        navigationOffsetAbove = axis.c2p(axis.p2c(axis.max) - d) - axis.c2p(axis.p2c(axis.max));
                     opts.offset = { below: navigationOffsetBelow + (opts.offset.below || 0), above: navigationOffsetAbove + (opts.offset.above || 0) };
                 }
             });
 
             plot.setupGrid();
             plot.draw();
-
             if (!args.preventEvent) {
                 plot.getPlaceholder().trigger("plotpan", [plot, args]);
             }

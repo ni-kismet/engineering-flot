@@ -101,20 +101,6 @@
             center.left = midPointX - offset.left;
             center.top = midPointY - offset.top;
 
-            var ec = plot.getPlaceholder().offset();
-            ec.left = midPointX - ec.left;
-            ec.top = midPointY - ec.top;
-
-            var axes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
-                var box = axis.box;
-                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
-                        (ec.top > box.top) && (ec.top < box.top + box.height);
-            });
-
-            if (axes.length === 0) {
-                axes = undefined;
-            }
-
             plot.zoom({
                 center: center,
                 amount: zoomAmount
