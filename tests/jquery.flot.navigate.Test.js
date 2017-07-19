@@ -597,8 +597,8 @@ describe("flot navigate plugin", function () {
         simulate.touchend(canvasElement, pointCoords[limit].x, pointCoords[limit].y);
 
         // compare axes after sequential drag with axes after direct drag
-        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[1].x - canvasCoords[limit].x), 0);
-        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[1].x - canvasCoords[limit].x), 0);
+        expect(Math.abs(xaxis.min - (initialXmin + (canvasCoords[1].x - canvasCoords[limit].x)))).toBeLessThan(1);
+        expect(Math.abs(xaxis.max - (initialXmax + (canvasCoords[1].x - canvasCoords[limit].x)))).toBeLessThan(1);
         expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[1].y - canvasCoords[limit].y), 0);
         expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[1].y - canvasCoords[limit].y), 0);
       });
