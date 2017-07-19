@@ -127,8 +127,8 @@
         var touchObj = {
             identifier: Date.now(),
             target: element,
-            clientX: x,
-            clientY: y,
+            pageX: x,
+            pageY: y,
             radiusX: 2.5,
             radiusY: 2.5,
             rotationAngle: 10,
@@ -160,8 +160,8 @@
             touchObjects[i] = {
                 identifier: Date.now(),
                 target: element,
-                clientX: coords[i].x,
-                clientY: coords[i].y,
+                pageX: coords[i].x,
+                pageY: coords[i].y,
                 radiusX: 2.5,
                 radiusY: 2.5,
                 rotationAngle: 10,

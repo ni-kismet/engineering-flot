@@ -34,12 +34,12 @@
             if (!twoTouches) {
                 prevTapX = prevPanX;
                 prevTapY = prevPanY;
-                prevPanX = e.touches[0].clientX;
-                prevPanY = e.touches[0].clientY;
+                prevPanX = e.touches[0].pageX;
+                prevPanY = e.touches[0].pageY;
             } else {
                 prevDist = pinchDistance(e);
-                prevPanX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                prevPanY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                prevPanX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
+                prevPanY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
             }
         }
 
@@ -47,22 +47,22 @@
             twoTouches = isPinchEvent(e);
             if (twoTouches) {
                 plot.pan({
-                    left: (e.touches[0].clientX + e.touches[1].clientX) / 2 - prevPanX,
-                    top: (e.touches[0].clientY + e.touches[1].clientY) / 2 - prevPanY
+                    left: (e.touches[0].pageX + e.touches[1].pageX) / 2 - prevPanX,
+                    top: (e.touches[0].pageY + e.touches[1].pageY) / 2 - prevPanY
                 });
-                prevPanX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                prevPanY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                prevPanX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
+                prevPanY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
 
                 var dist = pinchDistance(e);
                 onZoomPinch(e);
                 prevDist = dist;
             } else {
                 plot.pan({
-                    left: (e.touches[0].clientX - prevPanX),
-                    top: (e.touches[0].clientY - prevPanY)
+                    left: (e.touches[0].pageX - prevPanX),
+                    top: (e.touches[0].pageY - prevPanY)
                 });
-                prevPanX = e.touches[0].clientX;
-                prevPanY = e.touches[0].clientY;
+                prevPanX = e.touches[0].pageX;
+                prevPanY = e.touches[0].pageY;
             }
         }
 
@@ -70,8 +70,8 @@
             if (!isPinchEvent(e)) {
                 prevDist = null;
                 if (twoTouches && e.touches.length === 1) {
-                    prevPanX = e.touches[0].clientX;
-                    prevPanY = e.touches[0].clientY;
+                    prevPanX = e.touches[0].pageX;
+                    prevPanY = e.touches[0].pageY;
                 } else if (!twoTouches) {
                     var currentTime = new Date().getTime(),
                         intervalBetweenTaps = currentTime - prevTapTime,
@@ -94,8 +94,8 @@
                     left: 0,
                     top: 0
                 },
-                midPointX = (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                midPointY = (e.touches[0].clientY + e.touches[1].clientY) / 2,
+                midPointX = (e.touches[0].pageX + e.touches[1].pageX) / 2,
+                midPointY = (e.touches[0].pageY + e.touches[1].pageY) / 2,
                 zoomAmount = pinchDistance(e) / prevDist;
 
             center.left = midPointX - offset.left;
@@ -114,7 +114,7 @@
         function pinchDistance(e) {
             var t1 = e.touches[0],
                 t2 = e.touches[1];
-            return distance(t1.clientX, t1.clientY, t2.clientX, t2.clientY);
+            return distance(t1.pageX, t1.pageY, t2.pageX, t2.pageY);
         }
 
         function bindEvents(plot, eventHolder) {
