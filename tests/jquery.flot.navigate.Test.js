@@ -429,9 +429,9 @@ describe("flot navigate plugin", function () {
                 },
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-            simulate.sendTouchEvents(initialCoords, placeholder[0].childNodes[2], 'touchstart');
-            simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], 'touchmove');
-            simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], 'touchend');
+            simulate.sendTouchEvents(initialCoords, canvasElement, 'touchstart');
+            simulate.sendTouchEvents(finalCoords, canvasElement, 'touchmove');
+            simulate.sendTouchEvents(finalCoords, canvasElement, 'touchend');
 
             expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
             expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
@@ -580,7 +580,7 @@ describe("flot navigate plugin", function () {
             initialXmax = xaxis.max,
             initialYmin = yaxis.min,
             initialYmax = yaxis.max,
-            limit = 80,
+            limit = 5,
             canvasCoords = [],
             pointCoords = [];
 
@@ -602,5 +602,52 @@ describe("flot navigate plugin", function () {
         expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[1].y - canvasCoords[limit].y), 0);
         expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[1].y - canvasCoords[limit].y), 0);
       });
+    });
+
+    describe('plotRecenter', function() {
+        it('should recenter the plot',function() {
+
+          plot = $.plot(placeholder, [
+              [
+                  [-10, 120],
+                  [-10, 120]
+              ]
+          ], options);
+
+          var canvasElement = placeholder[0].childNodes[2],
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              canvasCoords = [ { x : 1, y : 2 }, { x : 3, y : 5 }],
+              pointCoords = [
+                      getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                      getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+              ];
+
+          simulate.touchstart(canvasElement, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(canvasElement, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(canvasElement, pointCoords[1].x, pointCoords[1].y);
+
+          //check if the drag modified the plot correctly
+          expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+          expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+          expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+          //simulate double tap
+          simulate.touchstart(canvasElement, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(canvasElement, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchstart(canvasElement, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(canvasElement, pointCoords[1].x, pointCoords[1].y);
+
+          //check if axis values returned to initial coordinates
+          expect(xaxis.min).toBeCloseTo(initialXmin, 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax, 6);
+          expect(yaxis.min).toBeCloseTo(initialYmin, 6);
+          expect(yaxis.max).toBeCloseTo(initialYmax, 6);
+        });
     });
 });
