@@ -580,23 +580,23 @@ describe("flot navigate plugin", function () {
             canvasCoords = [],
             pointCoords = [];
 
-        for (var i = 1; i <= 100; i++) {
+        for (var i = 1; i <= 20; i++) {
             canvasCoords[i] = { x: i, y: i };
             pointCoords[i] = getPairOfCoords(xaxis, yaxis, canvasCoords[i].x, canvasCoords[i].y);
         }
 
         //simulate drag from (1, 1) to (100, 100) sequentially
         simulate.touchstart(canvasElement, pointCoords[1].x, pointCoords[1].y);
-        for (var i = 2; i <= 100; i++) {
+        for (var i = 2; i <= 20; i++) {
             simulate.touchmove(canvasElement, pointCoords[i].x, pointCoords[i].y);
         }
-        simulate.touchend(canvasElement, pointCoords[100].x, pointCoords[100].y);
+        simulate.touchend(canvasElement, pointCoords[20].x, pointCoords[20].y);
 
         // compare axes after sequential drag with axes after direct drag
-        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[1].x - canvasCoords[100].x), 0);
-        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[1].x - canvasCoords[100].x), 0);
-        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[1].y - canvasCoords[100].y), 0);
-        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[1].y - canvasCoords[100].y), 0);
+        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[1].x - canvasCoords[20].x), 0);
+        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[1].x - canvasCoords[20].x), 0);
+        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[1].y - canvasCoords[20].y), 0);
+        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[1].y - canvasCoords[20].y), 0);
       });
     });
 });
