@@ -2,17 +2,17 @@
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe("flot navigate plugin", function () {
-    var placeholder, plot;
-    var options = {
-        xaxes: [{ autoscale: 'exact' }],
-        yaxes: [{ autoscale: 'exact' }],
-        zoom: { interactive: true, amount: 10 },
-        pan: { interactive: true, frameRate: -1, enableTouch: true }
-    };
+    var placeholder, plot, options;
 
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
+        options = {
+            xaxes: [{ autoscale: 'exact' }],
+            yaxes: [{ autoscale: 'exact' }],
+            zoom: { interactive: true, amount: 10 },
+            pan: { interactive: true, frameRate: -1, enableTouch: true }
+        };
     });
 
     function getPairOfCoords(xaxis, yaxis, x, y) {
@@ -561,6 +561,10 @@ describe("flot navigate plugin", function () {
       });
 
       it('should drag the point in the same way for many sequential moves as for one long move',function() {
+
+         //deactivate ticks for precision
+        options.yaxes[0].showTickLabels = 'none';
+        options.xaxes[0].showTickLabels = 'all';
 
         plot = $.plot(placeholder, [
             [
