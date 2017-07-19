@@ -40,6 +40,26 @@
 			return res;
 		}
 
+		function panMessage(placeholder) {
+			placeholder.bind("plotpan", function (event, plot) {
+				var axes = plot.getAxes();
+				$(".message").html("Panning to x: "  + axes.xaxis.min.toFixed(2)
+				+ " &ndash; " + axes.xaxis.max.toFixed(2)
+				+ " and y: " + axes.yaxis.min.toFixed(2)
+				+ " &ndash; " + axes.yaxis.max.toFixed(2));
+			});
+		}
+
+		function zoomMessage(placeholder) {
+			placeholder.bind("plotzoom", function (event, plot) {
+				var axes = plot.getAxes();
+				$(".message").html("Zooming to x: "  + axes.xaxis.min.toFixed(2)
+				+ " &ndash; " + axes.xaxis.max.toFixed(2)
+				+ " and y: " + axes.yaxis.min.toFixed(2)
+				+ " &ndash; " + axes.yaxis.max.toFixed(2));
+			});
+		}
+
 		var d0 = [];
 		for (var t = 0; t <= 2 * Math.PI; t += 0.01) {
 			d0.push([sumf(Math.cos, t, 10), sumf(Math.sin, t, 10)]);
@@ -110,12 +130,11 @@
 			  }
 			},
 			xaxis: {
-		   	  	ticks: piTickGenerator,
 				autoscale: 'exact'
 			},
 			yaxis: {
 				mode: 'log',
-	            showTickLabels: "all",
+	            showTickLabels: 'all',
 				autoscale: 'exact'
 			},
 			zoom: {
@@ -127,37 +146,11 @@
 			}
 		});
 
-		placeholder.bind("plotpan", function (event, plot) {
-			var axes = plot.getAxes();
-			$(".message").html("Panning to x: "  + axes.xaxis.min.toFixed(2)
-			+ " &ndash; " + axes.xaxis.max.toFixed(2)
-			+ " and y: " + axes.yaxis.min.toFixed(2)
-			+ " &ndash; " + axes.yaxis.max.toFixed(2));
-		});
+		panMessage(placeholder);
+		zoomMessage(placeholder);
 
-		placeholder.bind("plotzoom", function (event, plot) {
-			var axes = plot.getAxes();
-			$(".message").html("Zooming to x: "  + axes.xaxis.min.toFixed(2)
-			+ " &ndash; " + axes.xaxis.max.toFixed(2)
-			+ " and y: " + axes.yaxis.min.toFixed(2)
-			+ " &ndash; " + axes.yaxis.max.toFixed(2));
-		});
-
-		placeholder2.bind("plotpan", function (event, plot) {
-			var axes = plot.getAxes();
-			$(".message").html("Panning to x: "  + axes.xaxis.min.toFixed(4)
-			+ " &ndash; " + axes.xaxis.max.toFixed(4)
-			+ " and y: " + axes.yaxis.min.toFixed(4)
-			+ " &ndash; " + axes.yaxis.max.toFixed(4));
-		});
-
-		placeholder2.bind("plotzoom", function (event, plot) {
-			var axes = plot.getAxes();
-			$(".message").html("Zooming to x: "  + axes.xaxis.min.toFixed(4)
-			+ " &ndash; " + axes.xaxis.max.toFixed(4)
-			+ " and y: " + axes.yaxis.min.toFixed(4)
-			+ " &ndash; " + axes.yaxis.max.toFixed(4));
-		});
+		panMessage(placeholder2);
+		zoomMessage(placeholder2);
 
 		// Add the Flot version string to the footer
 		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
