@@ -400,11 +400,6 @@ describe("flot navigate plugin", function () {
     });
 
     describe('touchZoom', function() {
-
-        function getDistance(coords) {
-                return Math.sqrt((coords[0].x - coords[1].x) * (coords[0].x - coords[1].x) + ((coords[0].y - coords[1].y) * (coords[0].y - coords[1].y)));
-            }
-
         it('should zoom the plot',function() {
             plot = $.plot(placeholder, [
                 [
@@ -434,9 +429,9 @@ describe("flot navigate plugin", function () {
                 },
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-            simulate.sendTouchEvents(initialCoords, placeholder[0].childNodes[2], "touchstart");
-            simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], "touchmove");
-            simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], "touchend");
+            simulate.sendTouchEvents(initialCoords, placeholder[0].childNodes[2], 'touchstart');
+            simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], 'touchmove');
+            simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], 'touchend');
 
             expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
             expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
@@ -445,8 +440,8 @@ describe("flot navigate plugin", function () {
           });
 
         it('should zoom the plot correctly using pageXY when the canvas is placed in the bottom scrollable area of the page', function () {
-              var newDiv = $('<div style="height: 800px"> hello </div>');
-              $(newDiv).insertBefore('#test-container');
+              var largeDiv = $('<div style="height: 800px"> </div>');
+              $(largeDiv).insertBefore(placeholder);
 
               plot = $.plot(placeholder, [
                   [
@@ -476,19 +471,23 @@ describe("flot navigate plugin", function () {
                   },
                   amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-              simulate.sendTouchEvents(initialCoords, placeholder[0].childNodes[2], "touchstart");
-              simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], "touchmove");
-              simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], "touchend");
+              simulate.sendTouchEvents(initialCoords, placeholder[0].childNodes[2], 'touchstart');
+              simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], 'touchmove');
+              simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], 'touchend');
 
               expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
               expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
               expect(yaxis.min).toBeCloseTo((midPointCoords.y - initialYmin) * (1 - 1/amount) + initialYmin, 6);
               expect(yaxis.max).toBeCloseTo(initialYmax - (initialYmax - midPointCoords.y) * (1 - 1/amount), 6);
           });
+
+        function getDistance(coords) {
+            return Math.sqrt((coords[0].x - coords[1].x) * (coords[0].x - coords[1].x) + ((coords[0].y - coords[1].y) * (coords[0].y - coords[1].y)));
+        }
     });
 
     describe('touchDrag', function() {
-      it('should drag the plot (start + move + end)',function() {
+      it('should drag the plot',function() {
 
         plot = $.plot(placeholder, [
             [
@@ -577,26 +576,27 @@ describe("flot navigate plugin", function () {
             initialXmax = xaxis.max,
             initialYmin = yaxis.min,
             initialYmax = yaxis.max,
+            limit = 80,
             canvasCoords = [],
             pointCoords = [];
 
-        for (var i = 1; i <= 20; i++) {
+        for (var i = 1; i <= limit; i++) {
             canvasCoords[i] = { x: i, y: i };
             pointCoords[i] = getPairOfCoords(xaxis, yaxis, canvasCoords[i].x, canvasCoords[i].y);
         }
 
         //simulate drag from (1, 1) to (100, 100) sequentially
         simulate.touchstart(canvasElement, pointCoords[1].x, pointCoords[1].y);
-        for (var i = 2; i <= 20; i++) {
+        for (var i = 2; i <= limit; i++) {
             simulate.touchmove(canvasElement, pointCoords[i].x, pointCoords[i].y);
         }
-        simulate.touchend(canvasElement, pointCoords[20].x, pointCoords[20].y);
+        simulate.touchend(canvasElement, pointCoords[limit].x, pointCoords[limit].y);
 
         // compare axes after sequential drag with axes after direct drag
-        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[1].x - canvasCoords[20].x), 0);
-        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[1].x - canvasCoords[20].x), 0);
-        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[1].y - canvasCoords[20].y), 0);
-        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[1].y - canvasCoords[20].y), 0);
+        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[1].x - canvasCoords[limit].x), 0);
+        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[1].x - canvasCoords[limit].x), 0);
+        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[1].y - canvasCoords[limit].y), 0);
+        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[1].y - canvasCoords[limit].y), 0);
       });
     });
 });
