@@ -445,7 +445,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (isNaN(delta.x)) delta.x = 0;
             if (isNaN(delta.y)) delta.y = 0;
 
-            $.each(plot.getAxes(), function(_, axis) {
+            $.each(args.axes || plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
                     d = delta[axis.direction];
 
