@@ -215,7 +215,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             cursor: "move",
             frameRate: 60
         }
-    };
+    },
+    panAxes = undefined;
 
     function init(plot) {
         function onZoomClick(e, zoomOut) {
@@ -283,6 +284,20 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (e.which !== 1) {
                 // only accept left-click
                 return false;
+            }
+
+            var ec = plot.getPlaceholder().offset();
+            ec.left = e.pageX - ec.left;
+            ec.top = e.pageY - ec.top;
+
+            panAxes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+                var box = axis.box;
+                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                    (ec.top > box.top) && (ec.top < box.top + box.height);
+            });
+
+            if (panAxes.length === 0) {
+                panAxes = undefined;
             }
 
             var c = plot.getPlaceholder().css('cursor');
@@ -530,9 +545,19 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (isNaN(delta.x)) delta.x = 0;
             if (isNaN(delta.y)) delta.y = 0;
 
-            var axes = plot.getAxes();
+            var axes;
+
+            if (panAxes) {
+                axes = panAxes;
+            } else {
+                axes = plot.getAxes();
+            }
+
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
+                if (panAxes) {
+                    axisName = (axis.direction === 'x') ? 'xaxis' : 'yaxis';
+                }
                 var initialNavigation = initialState[axisName].navigationOffset;
                 var opts = axis.options,
                     d = delta[axis.direction];
@@ -573,8 +598,20 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 ctx.lineJoin = "round";
                 var startx = Math.round(panHint.start.x),
                     starty = Math.round(panHint.start.y),
-                    endx = Math.round(panHint.end.x),
+                    endx, endy;
+
+                if (panAxes) {
+                    if (panAxes[0].direction === 'x') {
+                        endy = Math.round(panHint.start.y);
+                        endx = Math.round(panHint.end.x);
+                    } else if (panAxes[0].direction === 'y') {
+                        endx = Math.round(panHint.start.x);
+                        endy = Math.round(panHint.end.y);
+                    }
+                } else {
+                    endx = Math.round(panHint.end.x);
                     endy = Math.round(panHint.end.y);
+                }
 
                 ctx.beginPath();
 
