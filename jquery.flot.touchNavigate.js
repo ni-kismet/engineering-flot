@@ -154,8 +154,10 @@
                         maxIntervalBetweenTaps = 500;
 
                     if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
-                        if (distance(prevTapX, prevTapY, prevPanX, prevPanY) < maxDistanceBetweenTaps) {
-                            plot.recenter();
+                        if ((xAxisTouched && (prevTapX - prevPanX < maxDistanceBetweenTaps)) ||
+                            (yAxisTouched && (prevTapY - prevPanY < maxDistanceBetweenTaps)) ||
+                            (distance(prevTapX, prevTapY, prevPanX, prevPanY) < maxDistanceBetweenTaps)) {
+                            plot.recenter({ axes: axis });
                         }
                     }
                     prevTapTime = currentTime;

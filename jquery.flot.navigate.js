@@ -467,9 +467,17 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
         };
 
-        plot.recenter = function() {
-            $.each(plot.getAxes(), function(_, axis) {
-                axis.options.offset = { below: 0, above: 0 };
+        plot.recenter = function(args) {
+            $.each(args.axes || plot.getAxes(), function(_, axis) {
+                if (args.axes) {
+                    if (this.direction === 'x') {
+                        axis.options.offset = { below: 0 };
+                    } else if (this.direction === 'y') {
+                        axis.options.offset = { above: 0 };
+                    }
+                } else {
+                    axis.options.offset = { below: 0, above: 0 };
+                }
             });
             plot.setupGrid();
             plot.draw();
