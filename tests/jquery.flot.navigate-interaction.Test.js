@@ -34,10 +34,10 @@ describe("flot navigate plugin interactions", function () {
 
         eventHolder = placeholder.find('.flot-overlay');
 
-        simulate.mouseDown(eventHolder[0], 10, 20);
-        simulate.mouseMove(eventHolder[0], 10, 20);
-        simulate.mouseMove(eventHolder[0], 10 + plot.width(), 20);
-        simulate.mouseUp(eventHolder[0], 10 + plot.width(), 20);
+        simulate.mouseDown(eventHolder[0], 50, 70);
+        simulate.mouseMove(eventHolder[0], 50, 70);
+        simulate.mouseMove(eventHolder[0], 50 + plot.width(), 70);
+        simulate.mouseUp(eventHolder[0], 50 + plot.width(), 70);
 
         var xaxis = plot.getXAxes()[0];
         var yaxis = plot.getYAxes()[0];

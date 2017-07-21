@@ -22,6 +22,7 @@
             twoTouches = false,
             prevTapTime = 0,
             axis = null,
+            prevAxisTouched = 'none',
             xAxisTouched = false,
             yAxisTouched = false;
 
@@ -150,16 +151,21 @@
                 } else if (!twoTouches) {
                     var currentTime = new Date().getTime(),
                         intervalBetweenTaps = currentTime - prevTapTime,
-                        maxDistanceBetweenTaps = 50,
+                        maxDistanceBetweenTaps = 20,
                         maxIntervalBetweenTaps = 500;
 
                     if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
-                        if ((xAxisTouched && (prevTapX - prevPanX < maxDistanceBetweenTaps)) ||
-                            (yAxisTouched && (prevTapY - prevPanY < maxDistanceBetweenTaps)) ||
-                            (distance(prevTapX, prevTapY, prevPanX, prevPanY) < maxDistanceBetweenTaps)) {
+                        if ((xAxisTouched && prevAxisTouched === 'xaxis' && (Math.abs(prevTapX - prevPanX) < maxDistanceBetweenTaps)) ||
+                            (yAxisTouched && prevAxisTouched === 'yaxis' && (Math.abs(prevTapY - prevPanY) < maxDistanceBetweenTaps)) ||
+                            (!xAxisTouched && prevAxisTouched === 'none' && !yAxisTouched && distance(prevTapX, prevTapY, prevPanX, prevPanY) < maxDistanceBetweenTaps)) {
                             plot.recenter({ axes: axis });
                         }
                     }
+                    if (xAxisTouched) {
+                        prevAxisTouched = 'xaxis';
+                    } else if (yAxisTouched) {
+                        prevAxisTouched = 'yaxis';
+                    } else prevAxisTouched = 'none';
                     prevTapTime = currentTime;
                 }
             }
