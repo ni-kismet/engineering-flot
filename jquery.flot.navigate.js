@@ -548,7 +548,6 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (isNaN(delta.y)) delta.y = 0;
 
             var axes;
-
             if (panAxes) {
                 axes = panAxes;
             } else {

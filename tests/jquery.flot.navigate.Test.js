@@ -836,6 +836,68 @@ describe("flot navigate plugin", function () {
           expect(yaxis.max).toBe(10);
 
       });
+
+      it('should drag the plot on the yaxis only', function() {
+          plot = $.plot(placeholder, [
+              [
+                  [0, 0],
+                  [10, 10]
+              ]
+          ], options);
+
+          var canvasElement = placeholder[0].childNodes[2],
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              pointCoords = [
+                      { x: xaxis.box.left - 10, y: yaxis.p2c(4) },
+                      { x: xaxis.box.left - 20, y: yaxis.p2c(5) }
+              ];
+
+          simulate.touchstart(canvasElement, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(canvasElement, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(canvasElement, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(canvasElement, pointCoords[1].x, pointCoords[1].y);
+
+          expect(xaxis.min).toBe(0);
+          expect(xaxis.max).toBe(10);
+          expect(yaxis.min).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y)), 6);
+          expect(yaxis.max).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y)), 6);
+      });
+
+      it('should drag the plot on the xaxis only', function() {
+          plot = $.plot(placeholder, [
+              [
+                  [0, 0],
+                  [10, 10]
+              ]
+          ], options);
+
+          var canvasElement = placeholder[0].childNodes[2],
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              pointCoords = [
+                      { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
+                      { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top +  15 }
+              ];
+
+          simulate.touchstart(canvasElement, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(canvasElement, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(canvasElement, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(canvasElement, pointCoords[1].x, pointCoords[1].y);
+
+          expect(xaxis.min).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmin) + (pointCoords[0].x - pointCoords[1].x)), 6);
+          expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmax) + (pointCoords[0].x - pointCoords[1].x)), 6);
+          expect(yaxis.min).toBe(0);
+          expect(yaxis.max).toBe(10);
+      });
     });
 
     describe('plotRecenter', function() {
