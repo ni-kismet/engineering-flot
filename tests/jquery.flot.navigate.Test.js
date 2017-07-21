@@ -31,6 +31,18 @@ describe("flot navigate plugin", function () {
         expect(typeof plot.zoomOut).toBe('function');
         expect(typeof plot.pan).toBe('function');
         expect(typeof plot.smartPan).toBe('function');
+
+        plot.shutdown();
+    });
+
+    it('shuts down the plots after use', function() {
+        plot = $.plot(placeholder, [
+            []
+        ], options);
+
+        plot.shutdown();
+
+        expect(plot.placeholder).toBe(undefined);
     });
 
     it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
@@ -729,6 +741,7 @@ describe("flot navigate plugin", function () {
           expect(yaxis.min).toBeCloseTo((yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y))), 6);
           expect(yaxis.max).toBeCloseTo((yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y))), 6);
 
+          plot.shutdown();
       });
 
       it('should drag the point in the same way for many sequential moves as for one long move',function() {
@@ -866,6 +879,8 @@ describe("flot navigate plugin", function () {
           expect(xaxis.max).toBe(10);
           expect(yaxis.min).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y)), 6);
           expect(yaxis.max).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y)), 6);
+
+          plot.shutdown();
       });
 
       it('should drag the plot on the xaxis only', function() {
@@ -881,11 +896,9 @@ describe("flot navigate plugin", function () {
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
               initialXmax = xaxis.max,
-              initialYmin = yaxis.min,
-              initialYmax = yaxis.max,
               pointCoords = [
                       { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
-                      { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top +  15 }
+                      { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 15 }
               ];
 
           simulate.touchstart(canvasElement, pointCoords[0].x, pointCoords[0].y);
@@ -897,6 +910,8 @@ describe("flot navigate plugin", function () {
           expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmax) + (pointCoords[0].x - pointCoords[1].x)), 6);
           expect(yaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
+
+          plot.shutdown();
       });
     });
 
