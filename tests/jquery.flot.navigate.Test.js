@@ -33,32 +33,13 @@ describe("flot navigate plugin", function () {
         expect(typeof plot.smartPan).toBe('function');
     });
 
-    it('shuts down the plots after use', function() {
-        plot = $.plot(placeholder, [
-            [
-                [0, 0],
-                [10, 10]
-            ]
-        ], options);
-        var canvasElement = placeholder[0].childNodes[2];
+    it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
+        plot = $.plot(placeholder, [[]], options);
 
-        var spy = spyOn(canvasElement, 'removeEventListener').and.callThrough();
+        var eventPlaceholder = placeholder[0].getElementsByClassName("flot-overlay")[0];
+            spy = spyOn(eventPlaceholder, 'removeEventListener').and.callThrough();
 
-        plot = $.plot(placeholder, [
-            [
-                [0, 0],
-                [10, 10]
-            ]
-        ], options);
-
-        var touchCount = 0;
-        for(var i = 0; i < spy.calls.count(); i++){
-            if(spy.calls.argsFor(i)[0] === 'touchstart' || spy.calls.argsFor(i)[0] === 'touchmove' || spy.calls.argsFor(i)[0] === 'touchend' ) {
-                touchCount++;
-            }
-        }
-
-        expect(touchCount).toEqual(3);
+        plot = $.plot(placeholder, [[]], options);
 
         expect(spy).toHaveBeenCalledWith('touchstart', jasmine.any(Function))
         expect(spy).toHaveBeenCalledWith('touchmove', jasmine.any(Function));
