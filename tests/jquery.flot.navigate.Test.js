@@ -31,18 +31,38 @@ describe("flot navigate plugin", function () {
         expect(typeof plot.zoomOut).toBe('function');
         expect(typeof plot.pan).toBe('function');
         expect(typeof plot.smartPan).toBe('function');
-
-        plot.shutdown();
     });
 
     it('shuts down the plots after use', function() {
         plot = $.plot(placeholder, [
-            []
+            [
+                [0, 0],
+                [10, 10]
+            ]
+        ], options);
+        var canvasElement = placeholder[0].childNodes[2];
+
+        var spy = spyOn(canvasElement, 'removeEventListener').and.callThrough();
+
+        plot = $.plot(placeholder, [
+            [
+                [0, 0],
+                [10, 10]
+            ]
         ], options);
 
-        plot.shutdown();
+        var touchCount = 0;
+        for(var i = 0; i < spy.calls.count(); i++){
+            if(spy.calls.argsFor(i)[0] === 'touchstart' || spy.calls.argsFor(i)[0] === 'touchmove' || spy.calls.argsFor(i)[0] === 'touchend' ) {
+                touchCount++;
+            }
+        }
 
-        expect(plot.placeholder).toBe(undefined);
+        expect(touchCount).toEqual(3);
+
+        expect(spy).toHaveBeenCalledWith('touchstart', jasmine.any(Function))
+        expect(spy).toHaveBeenCalledWith('touchmove', jasmine.any(Function));
+        expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
     });
 
     describe('zoom', function () {
@@ -68,7 +88,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBeCloseTo(2.5, 7);
             expect(yaxis.max).toBeCloseTo(7.5, 7);
 
-            plot.shutdown();
         });
 
         it('uses the amount configured in the plot if none is provided', function () {
@@ -91,7 +110,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBeCloseTo(4.5, 7);
             expect(yaxis.max).toBeCloseTo(5.5, 7);
 
-            plot.shutdown();
         });
 
         it('uses the provided center', function () {
@@ -121,7 +139,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(5);
 
-            plot.shutdown();
         });
 
         it('uses the provided axes', function () {
@@ -152,7 +169,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(10);
 
-            plot.shutdown();
         });
 
         it ('doesn\'t got to Infinity and beyond', function () {
@@ -174,7 +190,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).not.toBe(-Infinity);
             expect(yaxis.max).not.toBe(Infinity);
 
-            plot.shutdown();
         });
     });
 
@@ -201,7 +216,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBeCloseTo(2.5, 7);
             expect(yaxis.max).toBeCloseTo(7.5, 7);
 
-            plot.shutdown();
         });
 
         it('uses the amount configured in the plot if none is provided', function () {
@@ -224,7 +238,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBeCloseTo(4.5, 7);
             expect(yaxis.max).toBeCloseTo(5.5, 7);
 
-            plot.shutdown();
         });
 
         it('uses the provided center', function () {
@@ -254,7 +267,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(5);
 
-            plot.shutdown();
         });
 
         it ('doesn\'t got to Infinity and beyond', function () {
@@ -276,7 +288,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).not.toBe(-Infinity);
             expect(yaxis.max).not.toBe(Infinity);
 
-            plot.shutdown();
         });
 
         it ('can be disabled per axis', function () {
@@ -303,7 +314,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBeCloseTo(2.5, 7);
             expect(yaxis.max).toBeCloseTo(7.5, 7);
 
-            plot.shutdown();
         });
     });
 
@@ -331,7 +341,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(10);
 
-            plot.shutdown();
         });
 
         it('uses the provided y delta', function () {
@@ -357,7 +366,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
 
-            plot.shutdown();
         });
 
         it('snaps to the x direction when delta y is small', function () {
@@ -383,7 +391,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(10);
 
-            plot.shutdown();
         });
 
         it('snaps to the y direction when delta x is small', function () {
@@ -409,7 +416,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
 
-            plot.shutdown();
         });
 
         it ('can be disabled per axis', function () {
@@ -437,7 +443,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
 
-            plot.shutdown();
         });
     });
 
@@ -470,7 +475,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(10);
 
-            plot.shutdown();
         });
 
         it ('pans on yaxis only', function () {
@@ -501,7 +505,6 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y)), 0);
             expect(yaxis.max).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y)), 0);
 
-            plot.shutdown();
         });
     });
 
@@ -625,7 +628,6 @@ describe("flot navigate plugin", function () {
           expect(yaxis.min).toBeCloseTo(initialYmin, 6);
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
 
-          plot.shutdown();
         });
 
         it('should zoom the plot on axis y',function() {
@@ -666,7 +668,6 @@ describe("flot navigate plugin", function () {
             expect(Math.abs(yaxis.min - ((midPointCoords.y - initialYmin) * (1 - 1/amount) + initialYmin))).toBeLessThan(1);
             expect(Math.abs(yaxis.max - (initialYmax - (initialYmax - midPointCoords.x) * (1 - 1/amount)))).toBeLessThan(1);
 
-            plot.shutdown();
           });
 
         function getDistance(coords) {
@@ -706,7 +707,6 @@ describe("flot navigate plugin", function () {
         expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
         expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
 
-        plot.shutdown();
       });
 
       it('should drag the logarithmic plot', function() {
@@ -748,7 +748,6 @@ describe("flot navigate plugin", function () {
           expect(yaxis.min).toBeCloseTo((yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y))), 6);
           expect(yaxis.max).toBeCloseTo((yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y))), 6);
 
-          plot.shutdown();
       });
 
       it('should drag the point in the same way for many sequential moves as for one long move',function() {
@@ -793,7 +792,6 @@ describe("flot navigate plugin", function () {
         expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[1].y - canvasCoords[limit].y), 0);
         expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[1].y - canvasCoords[limit].y), 0);
 
-        plot.shutdown();
       });
 
       it('should drag the plot on the yaxis only', function() {
@@ -826,7 +824,6 @@ describe("flot navigate plugin", function () {
           expect(yaxis.min).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y)), 6);
           expect(yaxis.max).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y)), 6);
 
-          plot.shutdown();
       });
 
       it('should drag the plot on the xaxis only', function() {
@@ -857,7 +854,6 @@ describe("flot navigate plugin", function () {
           expect(yaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
 
-          plot.shutdown();
       });
     });
 
@@ -906,7 +902,6 @@ describe("flot navigate plugin", function () {
           expect(yaxis.min).toBeCloseTo(initialYmin, 6);
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
 
-          plot.shutdown();
         });
 
         it('should recenter the plot on axis x',function() {
@@ -953,7 +948,6 @@ describe("flot navigate plugin", function () {
           expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
           expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
 
-          plot.shutdown();
         });
 
         it('should recenter the plot on axis y',function() {
@@ -1000,7 +994,6 @@ describe("flot navigate plugin", function () {
           expect(yaxis.min).toBeCloseTo(initialYmin, 6);
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
 
-          plot.shutdown();
         });
     });
 });
