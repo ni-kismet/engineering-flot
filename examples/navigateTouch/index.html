@@ -120,7 +120,8 @@
         }
 
         var placeholder2 = $("#placeholder2"),
-            plot2 = $.plot(placeholder2, [d1, d2, d3, d4], {
+            plot2 = $.plot(placeholder2, [ { data: d1, label: "a", xaxis: 1, yaxis: 1 },
+                                            { data: d2, label: "b", xaxis: 2, yaxis: 2 } ], {
             series: {
               lines: {
                 show: true
@@ -129,14 +130,9 @@
                 show: true
               }
             },
-            xaxis: {
-                autoscale: 'exact'
-            },
-            yaxis: {
-                mode: 'log',
-                showTickLabels: 'all',
-                autoscale: 'exact'
-            },
+            xaxes: [ {autoscale: 'exact'}, {autoscale: 'exact'} ],
+            yaxes: [ { mode: 'log', showTickLabels: 'all', autoscale: 'exact'},
+                    {mode: 'log', showTickLabels: 'all', autoscale: 'exact'} ],
             zoom: {
                 interactive: true
             },

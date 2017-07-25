@@ -218,6 +218,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
     };
 
     function init(plot) {
+        var panAxes = null;
+
         function onZoomClick(e, zoomOut) {
             var c = plot.offset();
             c.left = e.pageX - c.left;
@@ -285,6 +287,20 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 return false;
             }
 
+            var ec = plot.getPlaceholder().offset();
+            ec.left = e.pageX - ec.left;
+            ec.top = e.pageY - ec.top;
+
+            panAxes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+                var box = axis.box;
+                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                    (ec.top > box.top) && (ec.top < box.top + box.height);
+            });
+
+            if (panAxes.length === 0) {
+                panAxes = undefined;
+            }
+
             var c = plot.getPlaceholder().css('cursor');
             if (c) {
                 prevCursor = c;
@@ -303,7 +319,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 plot.smartPan({
                     x: startPageX - e.pageX,
                     y: startPageY - e.pageY
-                }, plotState);
+                }, plotState, panAxes);
 
                 return;
             }
@@ -314,7 +330,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 plot.smartPan({
                     x: startPageX - e.pageX,
                     y: startPageY - e.pageY
-                }, plotState);
+                }, plotState, panAxes);
 
                 panTimeout = null;
             }, 1 / frameRate * 1000);
@@ -330,7 +346,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.smartPan({
                 x: startPageX - e.pageX,
                 y: startPageY - e.pageY
-            }, plotState);
+            }, plotState, panAxes);
             panHint = null;
         }
 
@@ -445,7 +461,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (isNaN(delta.x)) delta.x = 0;
             if (isNaN(delta.y)) delta.y = 0;
 
-            $.each(plot.getAxes(), function(_, axis) {
+            $.each(args.axes || plot.getAxes(), function(_, axis) {
                 var opts = axis.options,
                     d = delta[axis.direction];
 
@@ -467,9 +483,17 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
         };
 
-        plot.recenter = function() {
-            $.each(plot.getAxes(), function(_, axis) {
-                axis.options.offset = { below: 0, above: 0 };
+        plot.recenter = function(args) {
+            $.each(args.axes || plot.getAxes(), function(_, axis) {
+                if (args.axes) {
+                    if (this.direction === 'x') {
+                        axis.options.offset = { below: 0 };
+                    } else if (this.direction === 'y') {
+                        axis.options.offset = { above: 0 };
+                    }
+                } else {
+                    axis.options.offset = { below: 0, above: 0 };
+                }
             });
             plot.setupGrid();
             plot.draw();
@@ -494,7 +518,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             return delta;
         }
 
-        plot.smartPan = function(delta, initialState, preventEvent) {
+        plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
             var snap = shouldSnap(delta);
             delta = adjustDeltaToSnap(delta);
 
@@ -522,9 +546,19 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (isNaN(delta.x)) delta.x = 0;
             if (isNaN(delta.y)) delta.y = 0;
 
-            var axes = plot.getAxes();
+            var axes;
+
+            if (panAxes) {
+                axes = panAxes;
+            } else {
+                axes = plot.getAxes();
+            }
+
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
+                if (panAxes) {
+                    axisName = (axis.direction === 'x') ? 'xaxis' : 'yaxis';
+                }
                 var initialNavigation = initialState[axisName].navigationOffset;
                 var opts = axis.options,
                     d = delta[axis.direction];
@@ -565,8 +599,20 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 ctx.lineJoin = "round";
                 var startx = Math.round(panHint.start.x),
                     starty = Math.round(panHint.start.y),
-                    endx = Math.round(panHint.end.x),
+                    endx, endy;
+
+                if (panAxes) {
+                    if (panAxes[0].direction === 'x') {
+                        endy = Math.round(panHint.start.y);
+                        endx = Math.round(panHint.end.x);
+                    } else if (panAxes[0].direction === 'y') {
+                        endx = Math.round(panHint.start.x);
+                        endy = Math.round(panHint.end.y);
+                    }
+                } else {
+                    endx = Math.round(panHint.end.x);
                     endy = Math.round(panHint.end.y);
+                }
 
                 ctx.beginPath();
 
