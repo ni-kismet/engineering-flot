@@ -14,91 +14,87 @@
     }
 
     function initTouchNavigation(plot, options) {
-        var prevPanX = 0,
-            prevPanY = 0,
-            prevTapX = 0,
-            prevTapY = 0,
-            prevDist = null,
+        var prevDist = null,
             twoTouches = false,
             prevTapTime = 0,
             axis = null,
             prevAxisTouched = 'none',
             xAxisTouched = false,
-            yAxisTouched = false;
+            yAxisTouched = false,
+            prevPan = { x: 0, y: 0 },
+            prevTap = { x: 0, y: 0 };
+
+        function getTouchedAxis(touchPointX, touchPointY) {
+            var ec = plot.getPlaceholder().offset();
+            ec.left = touchPointX - ec.left;
+            ec.top = touchPointY - ec.top;
+
+            axis = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+                var box = axis.box;
+                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                    (ec.top > box.top) && (ec.top < box.top + box.height);
+            });
+
+            return axis;
+        }
+
+        function getMidpoint(e) {
+            return {
+                x: (e.touches[0].pageX + e.touches[1].pageX) / 2,
+                y: (e.touches[0].pageY + e.touches[1].pageY) / 2
+            }
+        }
+
+        function getPoint(e) {
+            return {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            }
+        }
+
+        function noAxisTouched() {
+            return (axis.length === 0);
+        }
 
         function isPinchEvent(e) {
             return e.touches && e.touches.length === 2;
+        }
+
+        function setAxisTouch(e) {
+            axis = getTouchedAxis(getRequiredPoint(e).x, getRequiredPoint(e).y);
+        }
+
+        function setPrevDist(e) {
+            if (isPinchEvent(e)) prevDist = pinchDistance(e);
+        }
+
+        function getRequiredPoint(e) {
+            if (isPinchEvent(e)) return getMidpoint(e);
+            else return getPoint(e);
+        }
+
+        function updateData(e) {
+            axis = undefined;
+            prevTap = { x: prevPan.x, y: prevPan.y };
+            prevPan = { x: getRequiredPoint(e).x, y: getRequiredPoint(e).y };
+        }
+
+        function updateAxisData(e) {
+            xAxisTouched = (axis[0].direction === 'x');
+            yAxisTouched = (axis[0].direction === 'y');
+            prevTap[axis[0].direction] = prevPan[axis[0].direction];
+            prevPan[axis[0].direction] = getRequiredPoint(e)[axis[0].direction];
         }
 
         function onDragStart(e) {
             e.stopPropagation();
             e.preventDefault();
 
-            twoTouches = isPinchEvent(e);
-            if (!twoTouches) {
-                // get the axis which one finger touches
-                var ec = plot.getPlaceholder().offset();
-                ec.left = e.touches[0].pageX - ec.left;
-                ec.top = e.touches[0].pageY - ec.top;
+            setAxisTouch(e);
+            setPrevDist(e);
 
-                axis = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
-                    var box = axis.box;
-                    return (ec.left > box.left) && (ec.left < box.left + box.width) &&
-                        (ec.top > box.top) && (ec.top < box.top + box.height);
-                });
-
-                // if no axis is touched, behave normally
-                if (axis.length === 0) {
-                    axis = undefined;
-                    prevTapX = prevPanX;
-                    prevTapY = prevPanY;
-                    prevPanX = e.touches[0].pageX;
-                    prevPanY = e.touches[0].pageY;
-                } else {
-                    // compute values only for the touched axis direction
-                    if (axis[0].direction === 'x') {
-                        xAxisTouched = true;
-                        yAxisTouched = false;
-                        prevTapX = prevPanX;
-                        prevPanX = e.touches[0].pageX;
-                    } else if (axis[0].direction === 'y') {
-                        yAxisTouched = true;
-                        xAxisTouched = false;
-                        prevTapY = prevPanY;
-                        prevPanY = e.touches[0].pageY;
-                    }
-                }
-            } else {
-                // get the axis which two fingers touch
-                ec = plot.getPlaceholder().offset();
-                ec.left = (e.touches[0].pageX + e.touches[1].pageX) / 2 - ec.left;
-                ec.top = (e.touches[0].pageY + e.touches[1].pageY) / 2 - ec.top;
-
-                axis = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
-                    var box = axis.box;
-                    return (ec.left > box.left) && (ec.left < box.left + box.width) &&
-                        (ec.top > box.top) && (ec.top < box.top + box.height);
-                });
-
-                prevDist = pinchDistance(e);
-                // if no axis is touched, behave normally
-                if (axis.length === 0) {
-                    axis = undefined;
-                    prevPanX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
-                    prevPanY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
-                } else {
-                    // compute values only for the touched axis direction
-                    if (axis[0].direction === 'x') {
-                        xAxisTouched = true;
-                        yAxisTouched = false;
-                        prevPanX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
-                    } else if (axis[0].direction === 'y') {
-                        yAxisTouched = true;
-                        xAxisTouched = false;
-                        prevPanY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
-                    }
-                }
-            }
+            if (noAxisTouched()) updateData(e);
+            else updateAxisData(e);
         }
 
         function onDrag(e) {
@@ -106,18 +102,18 @@
             if (twoTouches) {
                 // send the computed touched axis to the pan function so that it only pans on that one
                 plot.pan({
-                    left: (e.touches[0].pageX + e.touches[1].pageX) / 2 - prevPanX,
-                    top: (e.touches[0].pageY + e.touches[1].pageY) / 2 - prevPanY,
+                    left: getMidpoint(e).x - prevPan.x,
+                    top: getMidpoint(e).y - prevPan.y,
                     axes: axis
                 });
                 // update previous pans based on which axis was touched (none/x/y)
                 if (axis === undefined) {
-                    prevPanX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
-                    prevPanY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
+                    prevPan.x = getMidpoint(e).x;
+                    prevPan.y = getMidpoint(e).y;
                 } else if (xAxisTouched) {
-                    prevPanX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
+                    prevPan.x = getMidpoint(e).x;
                 } else if (yAxisTouched) {
-                    prevPanY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
+                    prevPan.y = getMidpoint(e).y;
                 }
 
                 var dist = pinchDistance(e);
@@ -126,18 +122,18 @@
             } else {
                 // send the computed touched axis to the pan function so that it only pans on that one
                 plot.pan({
-                    left: (e.touches[0].pageX - prevPanX),
-                    top: (e.touches[0].pageY - prevPanY),
+                    left: (getPoint(e).x - prevPan.x),
+                    top: (getPoint(e).y - prevPan.y),
                     axes: axis
                 });
                 // update previous pans based on which axis was touched (none/x/y)
                 if (axis === undefined) {
-                    prevPanX = e.touches[0].pageX;
-                    prevPanY = e.touches[0].pageY;
+                    prevPan.x = getPoint(e).x;
+                    prevPan.y = getPoint(e).y;
                 } else if (xAxisTouched) {
-                    prevPanX = e.touches[0].pageX;
+                    prevPan.x = getPoint(e).x;
                 } else if (yAxisTouched) {
-                    prevPanY = e.touches[0].pageY;
+                    prevPan.y = getPoint(e).y;
                 }
             }
         }
@@ -146,8 +142,8 @@
             if (!isPinchEvent(e)) {
                 prevDist = null;
                 if (twoTouches && e.touches.length === 1) {
-                    prevPanX = e.touches[0].pageX;
-                    prevPanY = e.touches[0].pageY;
+                    prevPan.x = getPoint(e).x;
+                    prevPan.y = getPoint(e).y;
                 } else if (!twoTouches) {
                     var currentTime = new Date().getTime(),
                         intervalBetweenTaps = currentTime - prevTapTime,
@@ -155,9 +151,9 @@
                         maxIntervalBetweenTaps = 500;
 
                     if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
-                        if ((xAxisTouched && prevAxisTouched === 'xaxis' && (Math.abs(prevTapX - prevPanX) < maxDistanceBetweenTaps)) ||
-                            (yAxisTouched && prevAxisTouched === 'yaxis' && (Math.abs(prevTapY - prevPanY) < maxDistanceBetweenTaps)) ||
-                            (!xAxisTouched && prevAxisTouched === 'none' && !yAxisTouched && distance(prevTapX, prevTapY, prevPanX, prevPanY) < maxDistanceBetweenTaps)) {
+                        if ((xAxisTouched && prevAxisTouched === 'xaxis' && (Math.abs(prevTap.x - prevPan.x) < maxDistanceBetweenTaps)) ||
+                            (yAxisTouched && prevAxisTouched === 'yaxis' && (Math.abs(prevTap.y - prevPan.y) < maxDistanceBetweenTaps)) ||
+                            (!xAxisTouched && prevAxisTouched === 'none' && !yAxisTouched && distance(prevTap.x, prevTap.y, prevPan.x, prevPan.y) < maxDistanceBetweenTaps)) {
                             plot.recenter({ axes: axis });
                         }
                     }
@@ -177,12 +173,10 @@
                     left: 0,
                     top: 0
                 },
-                midPointX = (e.touches[0].pageX + e.touches[1].pageX) / 2,
-                midPointY = (e.touches[0].pageY + e.touches[1].pageY) / 2,
                 zoomAmount = pinchDistance(e) / prevDist;
 
-            center.left = midPointX - offset.left;
-            center.top = midPointY - offset.top;
+            center.left = getMidpoint(e).x - offset.left;
+            center.top = getMidpoint(e).y - offset.top;
 
             // send the computed touched axis to the zoom function so that it only zooms on that one
             plot.zoom({
