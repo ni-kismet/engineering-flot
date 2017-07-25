@@ -1,3 +1,14 @@
+## engineering-flot 0.4.10 ##
+
+### Changes ###
+
+- basic touch support.
+
+### Bug fixes ###
+
+- include absRelTime file in the package.
+- fix for relative time.
+
 ## engineering-flot 0.4.8 ##
 
 ### Changes ###
