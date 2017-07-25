@@ -215,8 +215,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             cursor: "move",
             frameRate: 60
         }
-    },
-    panAxes = undefined;
+    };
 
     function init(plot) {
         var panAxes = null;
