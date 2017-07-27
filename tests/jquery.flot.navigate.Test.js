@@ -46,19 +46,6 @@ describe("flot navigate plugin", function () {
         expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
     });
 
-    it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
-        plot = $.plot(placeholder, [[]], options);
-
-        var eventPlaceholder = placeholder[0].getElementsByClassName("flot-overlay")[0];
-            spy = spyOn(eventPlaceholder, 'removeEventListener').and.callThrough();
-
-        plot = $.plot(placeholder, [[]], options);
-
-        expect(spy).toHaveBeenCalledWith('touchstart', jasmine.any(Function))
-        expect(spy).toHaveBeenCalledWith('touchmove', jasmine.any(Function));
-        expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
-    });
-
     describe('zoom', function () {
         it('uses the provided amount', function () {
             var xaxis, yaxis;
