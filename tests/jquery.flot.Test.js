@@ -525,6 +525,98 @@ describe('flot', function() {
         });
     });
 
+    describe('drawAxisLabels', function() {
+        var placeholder, sampledata = [[1.1e18, 0.1], [1.2e18, 5.1], [1.3e18, 10.1]];
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should draw no tick labels when showTickLabels = none', function () {
+            $.plot(placeholder, [sampledata], {
+                xaxis: {
+                    autoscale: 'loose',
+                    showTickLabels: 'none'
+                }
+            });
+
+            var tickLabels = xTickLabels(placeholder);
+
+            expect(tickLabels.length).toBe(0);
+        });
+
+        it('should draw two tick labels when showTickLabels = endpoints', function () {
+            $.plot(placeholder, [sampledata], {
+                xaxis: {
+                    autoscale: 'loose',
+                    showTickLabels: 'endpoints'
+                }
+            });
+
+            var tickLabels = xTickLabels(placeholder);
+
+            expect(tickLabels.length).toBe(2);
+        });
+
+        it('should draw multiple tick labels when showTickLabels = all', function () {
+            $.plot(placeholder, [sampledata], {
+                xaxis: {
+                    autoscale: 'loose',
+                    showTickLabels: 'all'
+                }
+            });
+
+            var tickLabels = xTickLabels(placeholder);
+
+            expect(tickLabels.length).toBeGreaterThan(2);
+        });
+
+        ['major', 'endpoints', 'all'].forEach(function(showTickLabels) {
+            it('should not overlap the tick labels when the values are large and showTickLabels = ' + showTickLabels, function () {
+                $.plot(placeholder, [sampledata], {
+                    xaxis: {
+                        autoscale: 'exact',
+                        showTickLabels: showTickLabels
+                    }
+                });
+
+                var tickLabelBoxes = xTickLabelBoxes(placeholder),
+                    overlaps = tickLabelBoxes.some(function(b1) {
+                        return tickLabelBoxes.some(function(b2) {
+                            return b1 !== b2 && overlapping(b1, b2);
+                        });
+                    });
+
+                expect(overlaps).toBe(false);
+            });
+        });
+
+        function xTickLabels(placeholder) {
+            var labels$ = placeholder.find('.flot-x-axis').find('.flot-tick-label'),
+                labels = labels$.map(function(i, label) {
+                    return label.innerText;
+                }).get();
+            return labels;
+        }
+
+        function xTickLabelBoxes(placeholder) {
+            var labels$ = placeholder.find('.flot-x-axis').find('.flot-tick-label'),
+                boxes = labels$.map(function(i, label) {
+                    var label$ = $(label),
+                        pos = label$.position();
+                    return {
+                        x1: pos.left, y1: pos.top, x2: label$.outerWidth() + pos.left, y2: label$.outerHeight() + pos.top
+                    };
+                }).get();
+            return boxes;
+        }
+
+        overlapping = function(b1, b2) {
+            return (b1.x1 <= b2.x1 && b2.x1 <= b1.x2) || (b2.x1 <= b1.x1 && b1.x1 <= b2.x2);
+        }
+    });
+
     describe('decimation', function () {
         var placeholder;
 

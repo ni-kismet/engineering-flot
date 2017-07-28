@@ -346,7 +346,7 @@
             var element = $("<div></div>").html(text)
                 .css({
                     position: "absolute",
-                    'max-width': width,
+                    //'max-width': width,
                     top: -9999
                 })
                 .appendTo(this.getTextLayer(layer));
