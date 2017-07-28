@@ -1747,7 +1747,7 @@ Licensed under the MIT license.
                     label = t.label.name;
                 }
 
-                var info = surface.getTextInfo(layer, label, font, null);
+                var info = surface.getTextInfo(layer, label, font);
 
                 labelWidth = Math.max(labelWidth, info.width);
                 labelHeight = Math.max(labelHeight, info.height);
@@ -2898,7 +2898,7 @@ Licensed under the MIT license.
                             return nullBox;
                         }
 
-                        info = surface.getTextInfo(layer, tick.label, font, null);
+                        info = surface.getTextInfo(layer, tick.label, font);
 
                         if (axis.direction === "x") {
                             halign = "center";
