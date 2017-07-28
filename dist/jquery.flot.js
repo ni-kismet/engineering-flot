@@ -546,7 +546,7 @@
             var element = $("<div></div>").html(text)
                 .css({
                     position: "absolute",
-                    //'max-width': width,
+                    'max-width': width,
                     top: -9999
                 })
                 .appendTo(this.getTextLayer(layer));
@@ -2882,7 +2882,6 @@ Licensed under the MIT license.
                     font = axis.options.font || "flot-tick-label tickLabel",
                     i, x, y, halign, valign, info,
                     nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, labelBoxes = [],
-                    labelWidth = axis.options.labelWidth || axis.labelWidth,
                     overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
                         return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
                                ((y11 <= y21 && y21 <= y12) || (y21 <= y11 && y11 <= y22));
