@@ -366,8 +366,8 @@ The "autoscale" option is used to automatically set the end-points of the axis. 
 are three options available: "none" will set the end-points to the "min"/"max" values,
 "exact" will set the end-points to minimum/maximum values in the visible area of the plot, and
 "loose" will add a margin to the "exact" mode based on the "autoscaleMargin" value. The "sliding-window"
-autoscale will always keep a "windowSize" range between axis.min and axis.max.
-The default value is "none" for the x axes, and "loose" for y axes.
+autoscale will always keep a "windowSize" range between axis.min and axis.max. The autoscaling behaviour is also affected by the growOnly flag, described below.
+The default autoscale value is "none" for the x axes, and "loose" for y axes.
 
 The "growOnly" option is useful when you want to have a smoother auto-scaling
 behavior. If true the scale range will grow to adapt to the data range but won't
