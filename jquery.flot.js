@@ -1003,7 +1003,6 @@ Licensed under the MIT license.
                 showEndpointsTickLabels = opts.showTickLabels === 'endpoints' || opts.showTickLabels === 'all',
                 labelWidth = opts.labelWidth || 0,
                 labelHeight = opts.labelHeight || 0,
-                maxWidth = labelWidth || (axis.direction === "x" ? Math.floor(surface.width / (axis.ticks ? axis.ticks.length : 1)) : null),
                 legacyStyles = axis.direction + "Axis " + axis.direction + axis.n + "Axis",
                 layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                 font = opts.font || "flot-tick-label tickLabel";
@@ -1022,7 +1021,7 @@ Licensed under the MIT license.
                     label = t.label.name;
                 }
 
-                var info = surface.getTextInfo(layer, label, font, null, maxWidth);
+                var info = surface.getTextInfo(layer, label, font);
 
                 labelWidth = Math.max(labelWidth, info.width);
                 labelHeight = Math.max(labelHeight, info.height);
@@ -2156,9 +2155,7 @@ Licensed under the MIT license.
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
                     i, x, y, halign, valign, info,
-                    nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, firstLabelBox, lastLabelBox, previousLabelBox = nullBox,
-                    labelWidth = axis.options.labelWidth || 0,
-                    maxWidth = labelWidth || (axis.direction === "x" ? Math.floor(surface.width / (axis.ticks ? axis.ticks.length : 1)) : null),
+                    nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, labelBoxes = [],
                     overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
                         return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
                                ((y11 <= y21 && y21 <= y12) || (y21 <= y11 && y11 <= y22));
@@ -2175,7 +2172,7 @@ Licensed under the MIT license.
                             return nullBox;
                         }
 
-                        info = surface.getTextInfo(layer, tick.label, font, null, maxWidth);
+                        info = surface.getTextInfo(layer, tick.label, font);
 
                         if (axis.direction === "x") {
                             halign = "center";
@@ -2224,21 +2221,21 @@ Licensed under the MIT license.
                     case 'none':
                         break;
                     case 'endpoints':
-                        firstLabelBox = drawAxisLabel(axis.ticks[0], []);
-                        lastLabelBox = drawAxisLabel(axis.ticks[axis.ticks.length - 1], [firstLabelBox]);
+                        labelBoxes.push(drawAxisLabel(axis.ticks[0], labelBoxes));
+                        labelBoxes.push(drawAxisLabel(axis.ticks[axis.ticks.length - 1], labelBoxes));
                         break;
                     case 'major':
-                        firstLabelBox = drawAxisLabel(axis.ticks[0], []);
-                        lastLabelBox = drawAxisLabel(axis.ticks[axis.ticks.length - 1], [firstLabelBox]);
+                        labelBoxes.push(drawAxisLabel(axis.ticks[0], labelBoxes));
+                        labelBoxes.push(drawAxisLabel(axis.ticks[axis.ticks.length - 1], labelBoxes));
                         for (i = 1; i < axis.ticks.length - 1; ++i) {
-                            previousLabelBox = drawAxisLabel(axis.ticks[i], [firstLabelBox, previousLabelBox, lastLabelBox]);
+                            labelBoxes.push(drawAxisLabel(axis.ticks[i], labelBoxes));
                         }
                         break;
                     case 'all':
-                        firstLabelBox = drawAxisLabel(axis.ticks[0], []);
-                        lastLabelBox = drawAxisLabel(axis.ticks[axis.ticks.length - 1], [firstLabelBox]);
+                        labelBoxes.push(drawAxisLabel(axis.ticks[0], []));
+                        labelBoxes.push(drawAxisLabel(axis.ticks[axis.ticks.length - 1], labelBoxes));
                         for (i = 1; i < axis.ticks.length - 1; ++i) {
-                            previousLabelBox = drawAxisLabel(axis.ticks[i], [firstLabelBox, previousLabelBox, lastLabelBox]);
+                            labelBoxes.push(drawAxisLabel(axis.ticks[i], labelBoxes));
                         }
                         break;
                 }
