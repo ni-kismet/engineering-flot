@@ -248,9 +248,9 @@ API.txt for details.
         [1, "year"]]);
 
     function updateAxisFirstData(plot, axis) {
-        if (plot.getData().length > 0) {
-            var plotData = plot.getData(),
-                i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
+        var plotData = plot.getData();
+        if (plotData.length > 0 && plotData[0].data.length > 0) {
+            var i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
 
             if (datapoints.points.length !== 0) {
                 if (plotData[0].xaxis === axis || plotData[0].yaxis === axis) {
