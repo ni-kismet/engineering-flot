@@ -148,7 +148,7 @@ describe('A Flot chart with relative time axes', function () {
 
         var xaxis = plot.getAxes().xaxis;
 
-        expect(xaxis.relativeFirstData).not.toBeDefined();
+        expect(xaxis.valueOfFirstData).not.toBeDefined();
         expect(xaxis.ticks[0].label).toEqual('00:00:00.000');
     });
 

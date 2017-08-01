@@ -96,7 +96,7 @@ API.txt for details.
             var result = '';
 
             var dateValue = date.valueOf(),
-                d = dateValue - (axis.relativeFirstData === undefined ? 0 : axis.relativeFirstData);
+                d = dateValue - (axis.valueOfFirstData === undefined ? 0 : axis.valueOfFirstData);
 
             if (d < 0) {
                 d = -d;
@@ -268,7 +268,7 @@ API.txt for details.
                 }
             }
 
-            axis.relativeFirstData = minFirstPlotData * 1000;
+            axis.valueOfFirstData = minFirstPlotData * 1000;
         }
     }
 
@@ -282,7 +282,7 @@ API.txt for details.
                             d = dateGenerator(axis.min, opts),
                             minSize = 0;
 
-                        if (axis.relativeFirstData === undefined) {
+                        if (axis.valueOfFirstData === undefined) {
                             updateAxisFirstData(plot, axis);
                         }
 
