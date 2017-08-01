@@ -77,6 +77,131 @@ describe('CanvasWrapper', function() {
         expect(info2.width).toBe(info1.width);
     });
 
+    it('should add text at the given layer, coords, and font CSS', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layer', 100, 200, '123', 'a');
+        canvas.render();
+
+        var elem = placeholder.find('.a')[0],
+            box = elem.getBoundingClientRect();
+        expect(box.left).toBe(100);
+        expect(box.top).toBe(200);
+        expect(elem.className).toBe('a');
+        expect(elem.parentNode.className).toBe('layer');
+    });
+
+    it('should add the same text with the same CSS at different coords', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 300, 400, '123', 'a');
+        canvas.render();
+
+        var elem1 = placeholder.find('.a')[0],
+            elem2 = placeholder.find('.a')[1],
+            box1 = elem1.getBoundingClientRect(),
+            box2 = elem2.getBoundingClientRect();
+        expect(elem2.innerText).toBe(elem2.innerText);
+        expect(box2.left).not.toBe(box1.left);
+        expect(box2.top).not.toBe(box1.top);
+    });
+
+    it('should add different text with the same CSS at different coords', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 300, 400, '456', 'a');
+        canvas.render();
+
+        var elem1 = placeholder.find('.a')[0],
+            elem2 = placeholder.find('.a')[1],
+            box1 = elem1.getBoundingClientRect(),
+            box2 = elem2.getBoundingClientRect();
+        expect(elem2.innerText).not.toBe(elem1.innerText);
+        expect(box2.left).not.toBe(box1.left);
+        expect(box2.top).not.toBe(box1.top);
+    });
+
+    it('should add different text with the same CSS and the same coords', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 100, 200, '456', 'a');
+        canvas.addText('layerA', 100, 200, '7890', 'a');
+        canvas.render();
+
+        var elems = placeholder.find('.a');
+        expect(elems.length).toBe(3);
+    });
+
+    it('should not add the same text with the same CSS and the same coords twice', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.render();
+
+        var elems = placeholder.find('.a');
+        expect(elems.length).toBe(1);
+    });
+
+    it('should remove all text from a given layer', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 300, 400, '123', 'a');
+        canvas.addText('layerA', 500, 600, '456', 'b');
+        canvas.addText('layerA', 700, 800, '456', 'b');
+        canvas.addText('layerB', 200, 100, '123', 'c');
+        canvas.addText('layerB', 400, 300, '456', 'c');
+        canvas.render();
+
+        canvas.removeText('layerA', NaN, NaN, null);
+        canvas.render();
+
+        var as = placeholder.find('.a'),
+            bs = placeholder.find('.b'),
+            cs = placeholder.find('.c');
+        expect(as.length).toBe(0);
+        expect(bs.length).toBe(0);
+        expect(cs.length).toBe(2);
+    });
+
+    it('should remove specific text from specific layer and coords', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 300, 400, '123', 'a');
+        canvas.addText('layerA', 500, 600, '123', 'b');
+        canvas.addText('layerA', 700, 800, '123', 'b');
+        canvas.addText('layerB', 200, 100, '123', 'c');
+        canvas.addText('layerB', 400, 300, '123', 'c');
+        canvas.render();
+
+        canvas.removeText('layerA', 300, 400, '123', 'a');
+        canvas.render();
+
+        var as = placeholder.find('.a'),
+            bs = placeholder.find('.b'),
+            cs = placeholder.find('.c');
+        expect(as.length).toBe(1);
+        expect(bs.length).toBe(2);
+        expect(cs.length).toBe(2);
+    });
+
+    it('should remove specific text from specific layer and coords when more texts overlaps', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 100, 200, '456', 'a');
+        canvas.addText('layerA', 100, 200, '7890', 'a');
+        canvas.render();
+        var initialTextElements = placeholder.find('.a');
+        expect(initialTextElements.length).toBe(3);
+
+        canvas.removeText('layerA', 100, 200, '456', 'a');
+        canvas.render();
+
+        var finalTextElements = placeholder.find('.a');
+        expect(finalTextElements.length).toBe(2);
+        var remainingTexts = [finalTextElements[0].innerText, finalTextElements[1].innerText];
+        expect(remainingTexts).toContain('123');
+        expect(remainingTexts).toContain('7890');
+    });
+
     function newCanvas(placeholder) {
         return new Flot.Canvas('myCanvas', placeholder);
     }

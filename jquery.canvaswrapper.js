@@ -338,7 +338,8 @@
             styleCache = layerCache[textStyle] = {};
         }
 
-        info = styleCache[text];
+        var key = generateKey(text);
+        info = styleCache[key];
 
         // If we can't find a matching element in our cache, create a new one
 
@@ -360,7 +361,7 @@
                 element.addClass(font);
             }
 
-            info = styleCache[text] = {
+            info = styleCache[key] = {
                 width: element.outerWidth(true),
                 height: element.outerHeight(true),
                 measured: true,
@@ -418,7 +419,7 @@
 
         for (var i = 0, position; positions[i]; i++) {
             position = positions[i];
-            if (position.x === x && position.y === y) {
+            if (position.x === x && position.y === y && position.text === text) {
                 position.active = true;
                 return;
             }
@@ -433,9 +434,11 @@
             active: true,
             rendered: false,
             element: positions.length ? info.element.clone() : info.element,
+            text: text,
             x: x,
             y: y
         };
+        position.element.text(text);
 
         positions.push(position);
 
@@ -492,7 +495,7 @@
             positions = this.getTextInfo(layer, text, font, angle).positions;
             for (i = 0; positions[i]; i++) {
                 position = positions[i];
-                if (position.x === x && position.y === y) {
+                if (position.x === x && position.y === y && position.text === text) {
                     position.active = false;
                 }
             }
@@ -516,6 +519,10 @@
 
         this._textCache = {};
     };
+
+    function generateKey(text) {
+        return text.replace(/0|1|2|3|4|5|6|7|8|9/g, '0');
+    }
 
     if (!window.Flot) {
         window.Flot = {};
