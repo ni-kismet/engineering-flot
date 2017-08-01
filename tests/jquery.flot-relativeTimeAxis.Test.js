@@ -140,12 +140,16 @@ describe('A Flot chart with relative time axes', function () {
         var plot = $.plot(placeholder, [[]], {
             xaxis: {
                 format: 'time',
-                timeformat: '%r'
+                timeformat: '%r',
+                min: 0
             },
             yaxis: {}
         });
 
-        expect(plot.getAxes().xaxis.ticks[0].label).toEqual('00:00:00.000');
+        var xaxis = plot.getAxes().xaxis;
+
+        expect(xaxis.valueOfFirstData).not.toBeDefined();
+        expect(xaxis.ticks[0].label).toEqual('00:00:00.000');
     });
 
     it('works with multiple dataseries', function () {
