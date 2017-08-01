@@ -202,6 +202,22 @@ describe('CanvasWrapper', function() {
         expect(remainingTexts).toContain('7890');
     });
 
+    it('should move&replace obsolete text', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.render();
+
+        var elem = placeholder.find('.a')[0];
+        elem._marker = '_marker';
+
+        canvas.removeText('layerA', NaN, NaN, null);
+        canvas.addText('layerA', 300, 400, '456', 'a');
+        canvas.render();
+
+        elem = placeholder.find('.a')[0];
+        expect(elem._marker).toBe('_marker');
+    });
+
     function newCanvas(placeholder) {
         return new Flot.Canvas('myCanvas', placeholder);
     }

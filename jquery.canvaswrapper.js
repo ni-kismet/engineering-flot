@@ -422,6 +422,15 @@
             if (position.x === x && position.y === y && position.text === text) {
                 position.active = true;
                 return;
+            } else if (position.active === false) {
+                position.active = true;
+                position.text = text;
+                position.x = x;
+                position.y = y;
+                position.element[0].innerHTML = text;
+                position.element[0].style.top = Math.round(y) + 'px';
+                position.element[0].style.left = Math.round(x) + 'px';
+                return;
             }
         }
 
@@ -438,17 +447,15 @@
             x: x,
             y: y
         };
-        position.element.text(text);
+        position.element[0].innerHTML = text;
 
         positions.push(position);
 
         // Move the element to its final position within the container
 
-        position.element.css({
-            top: Math.round(y),
-            left: Math.round(x),
-            'text-align': halign // In case the text wraps
-        });
+        position.element[0].style.top = Math.round(y) + 'px';
+        position.element[0].style.left = Math.round(x) + 'px';
+        position.element[0].style.textAlign = halign;
     };
 
     // Removes one or more text strings from the canvas text overlay.
