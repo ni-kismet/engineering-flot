@@ -286,6 +286,7 @@
     //     active: Flag indicating whether the text should be visible.
     //     rendered: Flag indicating whether the text is currently visible.
     //     element: The jQuery-wrapped HTML div containing the text.
+    //     text: The actual text and is identical with element[0].innerHTML.
     //     x: X coordinate at which to draw the text.
     //     y: Y coordinate at which to draw the text.
     // }

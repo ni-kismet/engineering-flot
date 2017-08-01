@@ -29,7 +29,7 @@ describe('CanvasWrapper', function() {
     it('should measure the width and height of a text', function() {
         var canvas = newCanvas(placeholder);
 
-        var info = canvas.getTextInfo('', 'text',);
+        var info = canvas.getTextInfo('', 'text');
 
         expect(info.width).toBeGreaterThan(0);
         expect(info.height).toBeGreaterThan(0);
