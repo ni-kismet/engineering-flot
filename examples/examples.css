@@ -2,7 +2,8 @@
 
 body {
 	background: url(background.png) repeat-x;
-	font: 18px/1.5em "proxima-nova", Helvetica, Arial, sans-serif;
+	font: 18px "proxima-nova", Helvetica, Arial, sans-serif;
+	line-height: 1.5;
 }
 
 a {	color: #069; }
@@ -127,4 +128,8 @@ legend {
 input[type="radio"] {
 		margin-top: -1px;
 		vertical-align: middle;
+}
+
+.tickLabel {
+	line-height: 1.1;
 }

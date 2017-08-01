@@ -66,6 +66,8 @@ $.plot($("#placeholder"), [ [[0, 0], [1, 1]] ], { yaxis: { max: 1 } });
 The plot function immediately draws the chart and then returns a plot
 object with a couple of methods.
 
-## Internationalization
+## Documentation and examples
 
-ToDo
+API Documentation is available here: [API reference](API.md)
+
+Examples are included in the examples folder of this repository.
