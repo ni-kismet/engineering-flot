@@ -135,6 +135,7 @@
                 var layer = this.getTextLayer(layerKey),
                     layerCache = cache[layerKey];
 
+                var display = layer.style.display;
                 layer.style.display = 'none';
 
                 for (var styleKey in layerCache) {
@@ -172,7 +173,7 @@
                     }
                 }
 
-                layer.style.display = '';
+                layer.style.display = display;
             }
         }
     };
