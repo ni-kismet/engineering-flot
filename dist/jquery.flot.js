@@ -208,32 +208,30 @@
 // Requiring a container is a little iffy, but unfortunately canvas
 // operations don't work unless the canvas is attached to the DOM.
 
-(function($) {
+(function() {
     var Canvas = function(cls, container) {
-        var element = container.children("." + cls)[0];
+        var element = container.getElementsByClassName(cls)[0];
 
-        if (element == null) {
-            element = document.createElement("canvas");
+        if (!element) {
+            element = document.createElement('canvas');
             element.className = cls;
+            element.style.direction = 'ltr';
+            element.style.position = 'absolute';
+            element.style.left = '0px';
+            element.style.top = '0px';
 
-            $(element).css({
-                direction: "ltr",
-                position: "absolute",
-                left: 0,
-                top: 0
-            })
-                .appendTo(container);
+            container.appendChild(element);
 
             // If HTML5 Canvas isn't available, throw
 
             if (!element.getContext) {
-                throw new Error("Canvas is not available.");
+                throw new Error('Canvas is not available.');
             }
         }
 
         this.element = element;
 
-        var context = this.context = element.getContext("2d");
+        var context = this.context = element.getContext('2d');
 
         // Determine the screen's ratio of physical to device-independent
         // pixels.  This is the ratio between the canvas width that the browser
@@ -255,7 +253,8 @@
 
         // Size the canvas to match the internal dimensions of its container
 
-        this.resize(container.width(), container.height());
+        var box = container.getBoundingClientRect();
+        this.resize(box.width, box.height);
 
         // Collection of HTML div layers for text overlaid onto the canvas
 
@@ -277,7 +276,7 @@
 
     Canvas.prototype.resize = function(width, height) {
         if (width <= 0 || height <= 0) {
-            throw new Error("Invalid dimensions for plot, width = " + width + ", height = " + height);
+            throw new Error('Invalid dimensions for plot, width = ' + width + ', height = ' + height);
         }
 
         var element = this.element,
@@ -293,13 +292,13 @@
 
         if (this.width !== width) {
             element.width = width * pixelRatio;
-            element.style.width = width + "px";
+            element.style.width = width + 'px';
             this.width = width;
         }
 
         if (this.height !== height) {
             element.height = height * pixelRatio;
-            element.style.height = height + "px";
+            element.style.height = height + 'px';
             this.height = height;
         }
 
@@ -336,35 +335,35 @@
                 var layer = this.getTextLayer(layerKey),
                     layerCache = cache[layerKey];
 
-                layer.hide();
+                layer.style.display = 'none';
 
                 for (var styleKey in layerCache) {
                     if (hasOwnProperty.call(layerCache, styleKey)) {
                         var styleCache = layerCache[styleKey];
                         for (var key in styleCache) {
                             if (hasOwnProperty.call(styleCache, key)) {
-                                var positions = styleCache[key].positions;
+                                var val = styleCache[key],
+                                    positions = val.positions;
 
                                 for (var i = 0, position; positions[i]; i++) {
                                     position = positions[i];
                                     if (position.active) {
                                         if (!position.rendered) {
-                                            layer.append(position.element);
+                                            layer.appendChild(position.element);
                                             position.rendered = true;
                                         }
                                     } else {
                                         positions.splice(i--, 1);
                                         if (position.rendered) {
-                                            position.element.detach();
+                                            position.element.parentNode.removeChild(position.element);
                                         }
                                     }
                                 }
 
                                 if (positions.length === 0) {
-                                    if (styleCache[key].measured) {
-                                        styleCache[key].measured = false;
+                                    if (val.measured) {
+                                        val.measured = false;
                                     } else {
-                                        styleCache[key].element.remove();
                                         delete styleCache[key];
                                     }
                                 }
@@ -373,7 +372,7 @@
                     }
                 }
 
-                layer.show();
+                layer.style.display = '';
             }
         }
     };
@@ -382,38 +381,36 @@
     //
     // @param {string} classes String of space-separated CSS classes used to
     //     uniquely identify the text layer.
-    // @return {object} The jQuery-wrapped text-layer div.
+    // @return {object} The text-layer div.
 
     Canvas.prototype.getTextLayer = function(classes) {
         var layer = this.text[classes];
 
         // Create the text layer if it doesn't exist
 
-        if (layer == null) {
+        if (!layer) {
             // Create the text layer container, if it doesn't exist
-            if (this.textContainer == null) {
-                this.textContainer = $("<div class='flot-text'></div>")
-                    .css({
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        right: 0,
-                        color: "inherit"
-                    })
-                    .insertAfter(this.element);
+            if (!this.textContainer) {
+                this.textContainer = document.createElement('div');
+                this.textContainer.className = 'flot-text';
+                this.textContainer.style.position = 'absolute';
+                this.textContainer.style.top = '0px';
+                this.textContainer.style.left = '0px';
+                this.textContainer.style.bottom = '0px';
+                this.textContainer.style.right = '0px';
+                this.textContainer.style.color = 'inherit';
+                this.element.parentNode.insertBefore(this.textContainer, this.element);
             }
 
-            layer = this.text[classes] = $("<div></div>")
-                .addClass(classes)
-                .css({
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0
-                })
-                .appendTo(this.textContainer);
+            layer = document.createElement('div');
+            layer.className = classes;
+            layer.style.position = 'absolute';
+            layer.style.top = '0px';
+            layer.style.left = '0px';
+            layer.style.bottom = '0px';
+            layer.style.right = '0px';
+            this.textContainer.appendChild(layer);
+            this.text[classes] = layer;
         }
 
         return layer;
@@ -423,47 +420,48 @@
     //
     // @param {string} classes String of space-separated CSS classes used to
     //     uniquely identify the text layer.
-    // @return {object} The jQuery-wrapped text-layer div.
+    // @return {object} The text-layer div.
 
     Canvas.prototype.getSVGLayer = function(classes) {
         var layer = this.SVG[classes];
 
         // Create the SVG layer if it doesn't exist
 
-        if (layer == null) {
+        if (!layer) {
             // Create the text layer container, if it doesn't exist
 
             var svgElement;
 
-            if (this.SVGContainer == null) {
-                this.SVGContainer = $("<div class='flot-svg'></div>")
-                    .css({
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        right: 0,
-                        'pointer-events': 'none'
-                    })
-                    .insertAfter(this.element);
-                svgElement = $(document.createElementNS("http://www.w3.org/2000/svg", "svg")).css({
-                    width: '100%',
-                    height: '100%'
-                });
-                svgElement.appendTo(this.SVGContainer);
+            if (!this.SVGContainer) {
+                this.SVGContainer = document.createElement('div');
+                this.SVGContainer.className = 'flot-svg';
+                this.SVGContainer.style.position = 'absolute';
+                this.SVGContainer.style.top = '0px';
+                this.SVGContainer.style.left = '0px';
+                this.SVGContainer.style.bottom = '0px';
+                this.SVGContainer.style.right = '0px';
+                this.SVGContainer.style.pointerEvents = 'none';
+                this.element.parentNode.insertAfter(this.SVGContainer, this.element);
+
+                svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svgElement.style.width = '100%';
+                svgElement.style.height = '100%';
+                this.SVGContainer.appendChild(svgElement);
+            } else {
+                svgElement = this.SVGContainer.getElementsByName('svg')[0];
             }
 
-            layer = this.SVG[classes] = $(document.createElementNS("http://www.w3.org/2000/svg", "g"))
-                .addClass(classes)
-                .css({
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                    'fill': '#aaaaaa'
-                })
-                .appendTo(svgElement);
+            layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            layer.className = 'classes';
+            layer.style.position = 'absolute';
+            layer.style.top = '0px';
+            layer.style.left = '0px';
+            layer.style.bottom = '0px';
+            layer.style.right = '0px';
+            layer.style.fill = '#aaaaaa';
+            svgElement.appendChild(layer, this.element);
+
+            this.SVG[classes] = layer;
         }
 
         return layer;
@@ -476,7 +474,7 @@
     // {
     //     width: Width of the text's wrapper div.
     //     height: Height of the text's wrapper div.
-    //     element: The jQuery-wrapped HTML div containing the text.
+    //     element: The HTML div containing the text.
     //     positions: Array of positions at which this text is drawn.
     // }
     //
@@ -485,7 +483,7 @@
     // {
     //     active: Flag indicating whether the text should be visible.
     //     rendered: Flag indicating whether the text is currently visible.
-    //     element: The jQuery-wrapped HTML div containing the text.
+    //     element: The HTML div containing the text.
     //     text: The actual text and is identical with element[0].innerHTML.
     //     x: X coordinate at which to draw the text.
     //     y: Y coordinate at which to draw the text.
@@ -515,12 +513,12 @@
 
         // Cast the value to a string, in case we were given a number or such
 
-        text = "" + text;
+        text = '' + text;
 
         // If the font is a font-spec object, generate a CSS font definition
 
-        if (typeof font === "object") {
-            textStyle = font.style + " " + font.variant + " " + font.weight + " " + font.size + "px/" + font.lineHeight + "px " + font.family;
+        if (typeof font === 'object') {
+            textStyle = font.style + ' ' + font.variant + ' ' + font.weight + ' ' + font.size + 'px/' + font.lineHeight + 'px ' + font.family;
         } else {
             textStyle = font;
         }
@@ -544,33 +542,31 @@
 
         // If we can't find a matching element in our cache, create a new one
 
-        if (info == null) {
-            var element = $("<div></div>").html(text)
-                .css({
-                    position: "absolute",
-                    'max-width': width,
-                    top: -9999
-                })
-                .appendTo(this.getTextLayer(layer));
+        if (!info) {
+            var element = document.createElement('div');
+            element.innerHTML = text;
+            element.style.position = 'absolute';
+            element.style.maxWidth = width;
+            element.style.top = '-9999px';
 
             if (typeof font === "object") {
-                element.css({
-                    font: textStyle,
-                    color: font.color
-                });
+                element.style.font = textStyle;
+                element.style.color = font.color;
             } else if (typeof font === "string") {
-                element.addClass(font);
+                element.className = font;
             }
 
+            this.getTextLayer(layer).appendChild(element);
+
             info = styleCache[key] = {
-                width: element.outerWidth(true),
-                height: element.outerHeight(true),
+                width: element.offsetWidth,
+                height: element.offsetHeight,
                 measured: true,
                 element: element,
                 positions: []
             };
 
-            element.detach();
+            element.parentNode.removeChild(element);
         }
 
         info.measured = true;
@@ -603,15 +599,15 @@
 
         // Tweak the div's position to match the text's alignment
 
-        if (halign === "center") {
+        if (halign === 'center') {
             x -= info.width / 2;
-        } else if (halign === "right") {
+        } else if (halign === 'right') {
             x -= info.width;
         }
 
-        if (valign === "middle") {
+        if (valign === 'middle') {
             y -= info.height / 2;
-        } else if (valign === "bottom") {
+        } else if (valign === 'bottom') {
             y -= info.height;
         }
 
@@ -628,9 +624,9 @@
                 position.text = text;
                 position.x = x;
                 position.y = y;
-                position.element[0].innerHTML = text;
-                position.element[0].style.top = Math.round(y) + 'px';
-                position.element[0].style.left = Math.round(x) + 'px';
+                position.element.style.top = Math.round(y) + 'px';
+                position.element.style.left = Math.round(x) + 'px';
+                position.element.innerHTML = text;
                 return;
             }
         }
@@ -643,20 +639,21 @@
         position = {
             active: true,
             rendered: false,
-            element: positions.length ? info.element.clone() : info.element,
+            element: positions.length ? info.element.cloneNode() : info.element,
             text: text,
             x: x,
             y: y
         };
-        position.element[0].innerHTML = text;
 
         positions.push(position);
 
         // Move the element to its final position within the container
 
-        position.element[0].style.top = Math.round(y) + 'px';
-        position.element[0].style.left = Math.round(x) + 'px';
-        position.element[0].style.textAlign = halign;
+        position.element.style.top = Math.round(y) + 'px';
+        position.element.style.left = Math.round(x) + 'px';
+        position.element.style.textAlign = halign;
+
+        position.element.innerHTML = text;
     };
 
     // Removes one or more text strings from the canvas text overlay.
@@ -721,7 +718,9 @@
         for (var layerKey in cache) {
             if (hasOwnProperty.call(cache, layerKey)) {
                 var layer = this.getTextLayer(layerKey);
-                layer.empty();
+                while (layer.firstChild) {
+                    layer.removeChild(layer.firstChild);
+                }
             }
         };
 
@@ -737,7 +736,7 @@
     }
 
     window.Flot.Canvas = Canvas;
-})(jQuery);
+})();
 
 /* Javascript plotting library for jQuery, version 0.8.3.
 
@@ -1636,8 +1635,8 @@ Licensed under the MIT license.
                 placeholder.css("position", "relative"); // for positioning labels and overlay
             }
 
-            surface = new Canvas("flot-base", placeholder);
-            overlay = new Canvas("flot-overlay", placeholder); // overlay canvas for interactive features
+            surface = new Canvas("flot-base", placeholder[0]);
+            overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
 
             ctx = surface.context;
             octx = overlay.context;

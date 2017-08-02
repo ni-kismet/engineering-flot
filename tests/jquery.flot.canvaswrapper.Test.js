@@ -9,17 +9,17 @@ describe('CanvasWrapper', function() {
     });
 
     it('should create a new canvas element', function() {
-        var canvas = new Flot.Canvas('myCanvas', placeholder);
+        var canvas = new Flot.Canvas('myCanvas', placeholder[0]);
 
         expect(canvas.element).toBeTruthy();
         expect(placeholder.find('.myCanvas')).toBeTruthy();
     });
 
     it('should reuse an existing canvas with the same class', function() {
-        var canvas1 = new Flot.Canvas('myCanvas', placeholder);
+        var canvas1 = new Flot.Canvas('myCanvas', placeholder[0]);
         var element1 = placeholder.find('.myCanvas')[0];
 
-        var canvas2 = new Flot.Canvas('myCanvas', placeholder);
+        var canvas2 = new Flot.Canvas('myCanvas', placeholder[0]);
         var element2 = placeholder.find('.myCanvas')[0];
 
         expect(element1).toBe(element2);
@@ -27,7 +27,7 @@ describe('CanvasWrapper', function() {
     });
 
     it('should resize the canvas to the given width and height', function() {
-        var canvas = new Flot.Canvas('myCanvas', placeholder);
+        var canvas = newCanvas(placeholder);
 
         canvas.resize(222, 333);
 
@@ -230,6 +230,6 @@ describe('CanvasWrapper', function() {
     });
 
     function newCanvas(placeholder) {
-        return new Flot.Canvas('myCanvas', placeholder);
+        return new Flot.Canvas('myCanvas', placeholder[0]);
     }
 });
