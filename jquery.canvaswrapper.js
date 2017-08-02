@@ -349,10 +349,10 @@
             element.style.maxWidth = width;
             element.style.top = '-9999px';
 
-            if (typeof font === "object") {
+            if (typeof font === 'object') {
                 element.style.font = textStyle;
                 element.style.color = font.color;
-            } else if (typeof font === "string") {
+            } else if (typeof font === 'string') {
                 element.className = font;
             }
 
@@ -507,7 +507,7 @@
         }
     };
 
-    // Clears the the cache used to speed up the text size measurements.
+    // Clears the cache used to speed up the text size measurements.
     // As an (unfortunate) side effect all text within the text Layer is removed.
     // Use this function before plot.setupGrid() and plot.draw() in one of these
     // cases:

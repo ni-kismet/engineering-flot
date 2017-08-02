@@ -213,6 +213,23 @@ describe('CanvasWrapper', function() {
         expect(remainingTexts).toContain('7890');
     });
 
+    it('should remove all text', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 300, 400, '456', 'b');
+        canvas.addText('layerB', 500, 600, '789', 'c');
+        canvas.render();
+
+        canvas.clearCache();
+
+        var as = placeholder.find('.a'),
+            bs = placeholder.find('.b'),
+            cs = placeholder.find('.c');
+        expect(as.length).toBe(0);
+        expect(bs.length).toBe(0);
+        expect(cs.length).toBe(0);
+    });
+
     it('should move&replace obsolete text', function() {
         var canvas = newCanvas(placeholder);
         canvas.addText('layerA', 100, 200, '123', 'a');
