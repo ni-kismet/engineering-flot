@@ -26,6 +26,17 @@ describe('CanvasWrapper', function() {
         expect(placeholder.find('.myCanvas').length).toBe(1);
     });
 
+    it('should resize the canvas to the given width and height', function() {
+        var canvas = new Flot.Canvas('myCanvas', placeholder);
+
+        canvas.resize(222, 333);
+
+        expect(canvas.element.width).toBe(222);
+        expect(canvas.element.height).toBe(333);
+        expect(canvas.element.style.width).toBe('222px');
+        expect(canvas.element.style.height).toBe('333px');
+    });
+
     it('should measure the width and height of a text', function() {
         var canvas = newCanvas(placeholder);
 
