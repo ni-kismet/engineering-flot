@@ -498,7 +498,7 @@ describe("flot navigate plugin", function () {
                 ]
             ], options);
 
-            var canvasElement = placeholder[0].childNodes[2],
+            var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -540,7 +540,7 @@ describe("flot navigate plugin", function () {
                   ]
               ], options);
 
-              var canvasElement = placeholder[0].childNodes[2],
+              var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
                   xaxis = plot.getXAxes()[0],
                   yaxis = plot.getYAxes()[0],
                   initialXmin = xaxis.min,
@@ -561,9 +561,9 @@ describe("flot navigate plugin", function () {
                   },
                   amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-              simulate.sendTouchEvents(initialCoords, placeholder[0].childNodes[2], 'touchstart');
-              simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], 'touchmove');
-              simulate.sendTouchEvents(finalCoords, placeholder[0].childNodes[2], 'touchend');
+              simulate.sendTouchEvents(initialCoords, placeholder[0].getElementsByClassName("flot-overlay")[0], 'touchstart');
+              simulate.sendTouchEvents(finalCoords, placeholder[0].getElementsByClassName("flot-overlay")[0], 'touchmove');
+              simulate.sendTouchEvents(finalCoords, placeholder[0].getElementsByClassName("flot-overlay")[0], 'touchend');
 
               expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
               expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
@@ -579,7 +579,7 @@ describe("flot navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].childNodes[2],
+          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -619,7 +619,7 @@ describe("flot navigate plugin", function () {
                 ]
             ], options);
 
-            var canvasElement = placeholder[0].childNodes[2],
+            var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -666,7 +666,7 @@ describe("flot navigate plugin", function () {
             ]
         ], options);
 
-        var canvasElement = placeholder[0].childNodes[2],
+        var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0],
             initialXmin = xaxis.min,
@@ -707,7 +707,7 @@ describe("flot navigate plugin", function () {
               pan: { interactive: true, enableTouch: true }
           });
 
-          var canvasElement = placeholder[0].childNodes[2],
+          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -744,7 +744,7 @@ describe("flot navigate plugin", function () {
             ]
         ], options);
 
-        var canvasElement = placeholder[0].childNodes[2],
+        var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0],
             initialXmin = xaxis.min,
@@ -783,7 +783,7 @@ describe("flot navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].childNodes[2],
+          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -815,7 +815,7 @@ describe("flot navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].childNodes[2],
+          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -848,7 +848,7 @@ describe("flot navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].childNodes[2],
+          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -894,7 +894,7 @@ describe("flot navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].childNodes[2],
+          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -940,7 +940,7 @@ describe("flot navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].childNodes[2],
+          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,

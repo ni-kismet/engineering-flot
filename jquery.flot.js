@@ -895,8 +895,8 @@ Licensed under the MIT license.
                 placeholder.css("position", "relative"); // for positioning labels and overlay
             }
 
-            surface = new Canvas("flot-base", placeholder);
-            overlay = new Canvas("flot-overlay", placeholder); // overlay canvas for interactive features
+            surface = new Canvas("flot-base", placeholder[0]);
+            overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
 
             ctx = surface.context;
             octx = overlay.context;
