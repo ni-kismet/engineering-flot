@@ -164,6 +164,7 @@ Licensed under the MIT license.
                 processOffset: [],
                 setupGrid: [],
                 adjustSeriesDataRange: [],
+                updateAxisRange: [],
                 drawBackground: [],
                 drawSeries: [],
                 drawAxis: [],
@@ -1233,6 +1234,9 @@ Licensed under the MIT license.
                 axis.show = axisOpts.show == null ? axis.used : axisOpts.show;
                 axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
                 setupTickFormatter(axis);
+                if (axis.direction === 'y' && axisOpts.autoscale !== "none") {
+                    executeHooks(hooks.updateAxisRange, [axis, plot.width()]);
+                }
                 setRange(axis);
             });
 
@@ -1323,21 +1327,21 @@ Licensed under the MIT license.
             var opts = axis.options,
                 min = opts.min,
                 max = opts.max,
-                datamin = axis.datamin,
-                datamax = axis.datamax,
+                datamin = axis.visibleMin ? axis.visibleMin : axis.datamin,
+                datamax = axis.visibleMax ? axis.visibleMax : axis.datamax,
                 delta;
 
             switch (opts.autoscale) {
                 case "none":
-                    min = +(opts.min != null ? opts.min : axis.datamin);
-                    max = +(opts.max != null ? opts.max : axis.datamax);
+                    min = +(opts.min != null ? opts.min : datamin);
+                    max = +(opts.max != null ? opts.max : datamax);
                     break;
                 case "loose":
                     if (datamin != null && datamax != null) {
                         min = datamin;
                         max = datamax;
                         delta = saturated.saturate(max - min);
-                        var margin = ((opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
+                        var margin = ((typeof opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
                         min -= delta * margin;
                         max += delta * margin;
                     } else {
@@ -1350,11 +1354,11 @@ Licensed under the MIT license.
                     max = (datamax != null ? datamax : opts.max);
                     break;
                 case "sliding-window":
-                    if (axis.datamax > max) {
+                    if (datamax > max) {
                         // move the window to fit the new data,
                         // keeping the axis range constant
-                        max = axis.datamax;
-                        min = Math.max(axis.datamax - (opts.windowSize || 100), min);
+                        max = datamax;
+                        min = Math.max(datamax - (opts.windowSize || 100), min);
                     }
                     break;
             }
@@ -1365,8 +1369,8 @@ Licensed under the MIT license.
 
             // grow loose or grow exact supported
             if (opts.growOnly === true && opts.autoscale !== "none" && opts.autoscale !== "sliding-window") {
-                min = (min < axis.datamin) ? min : (axis.datamin !== null ? axis.datamin : min);
-                max = (max > axis.datamax) ? max : (axis.datamax !== null ? axis.datamax : max);
+                min = (min < datamin) ? min : (datamin !== null ? datamin : min);
+                max = (max > datamax) ? max : (datamax !== null ? datamax : max);
             }
 
             axis.autoscaledMin = min;
