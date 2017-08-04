@@ -37,7 +37,7 @@
                     pinch[e.type](e)
                     break;
                 case 'doubleTap':
-                    doubleTap.recenterPlot(e);
+                    doubleTap.onDoubleTap(e);
                     break;
                 default:
                     break;
@@ -95,7 +95,7 @@
         };
 
         var doubleTap = {
-            recenterPlot: function(e) {
+            onDoubleTap: function(e) {
                 preventEventPropagation(e);
                 plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('doubletap', { detail: e }));
             }
