@@ -15,7 +15,7 @@
     }
 
     function initTouchNavigation(plot, options) {
-        var twoTouches = false;
+        var twoTouches = false, mainEventHolder;
 
         function interpretGestures(e) {
             if (isPinchEvent(e)) {
@@ -45,6 +45,7 @@
         }
 
         function bindEvents(plot, eventHolder) {
+            mainEventHolder = eventHolder[0];
             eventHolder[0].addEventListener('touchstart', interpretGestures, false);
             eventHolder[0].addEventListener('touchmove', interpretGestures, false);
             eventHolder[0].addEventListener('touchend', interpretGestures, false);
@@ -59,20 +60,20 @@
         var pan = {
             touchstart: function(e) {
                 preventEventPropagation(e);
-                plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('panstart', { detail: e }));
+                mainEventHolder.dispatchEvent(new CustomEvent('panstart', { detail: e }));
             },
 
             touchmove: function(e) {
-                plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('pandrag', { detail: e }));
+                mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
             },
 
             touchend: function(e) {
                 preventEventPropagation(e);
                 if (wasPinchEvent(e)) {
-                    plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('pinchend', { detail: e }));
-                    plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('panstart', { detail: e }));
+                    mainEventHolder.dispatchEvent(new CustomEvent('pinchend', { detail: e }));
+                    mainEventHolder.dispatchEvent(new CustomEvent('panstart', { detail: e }));
                 } else if (noTouchActive(e)) {
-                    plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('panend', { detail: e }));
+                    mainEventHolder.dispatchEvent(new CustomEvent('panend', { detail: e }));
                 }
             }
         };
@@ -80,13 +81,13 @@
         var pinch = {
             touchstart: function(e) {
                 preventEventPropagation(e);
-                plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('pinchstart', { detail: e }));
+                mainEventHolder.dispatchEvent(new CustomEvent('pinchstart', { detail: e }));
             },
 
             touchmove: function(e) {
                 preventEventPropagation(e);
                 twoTouches = isPinchEvent(e);
-                plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
+                mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
             },
 
             touchend: function(e) {
@@ -97,7 +98,7 @@
         var doubleTap = {
             onDoubleTap: function(e) {
                 preventEventPropagation(e);
-                plot.getPlaceholder()[0].childNodes[2].dispatchEvent(new CustomEvent('doubletap', { detail: e }));
+                mainEventHolder.dispatchEvent(new CustomEvent('doubletap', { detail: e }));
             }
 
         };
