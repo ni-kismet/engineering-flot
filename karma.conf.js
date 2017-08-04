@@ -18,6 +18,7 @@ module.exports = function(config) {
         'jquery.flot.drawSeries.js',
         'jquery.flot.navigate.js',
         'jquery.flot.touchNavigate.js',
+        'jquery.flot.touch.js',
         'jquery.flot.absRelTime.js',
         'jquery.flot.axislabels.js'
     ];

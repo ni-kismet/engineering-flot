@@ -29,63 +29,38 @@
             },
             pan, pinch, doubleTap;
 
-        function interpretGestures(e) {
-            if (isPinchEvent(e)) {
-                executeAction(e, 'pinch', gestureState)
-            } else {
-                if (!wasPinchEvent(e, gestureState)) {
-                    executeAction(e, 'doubleTap', gestureState)
-                }
-                executeAction(e, 'pan', gestureState);
-            }
-        }
-
-        function executeAction(e, gesture, gestureState) {
-            navigationState.touchedAxis = getAxis(plot, e, gesture, navigationState);
-            if (noAxisTouched(navigationState)) {
-                navigationState.navigationConstraint = 'unconstrained';
-            } else {
-                navigationState.navigationConstraint = 'axisConstrained';
-            }
-
-            switch (gesture) {
-                case 'pan':
-                    pan[e.type](e, gestureState);
-                    break;
-                case 'pinch':
-                    pinch[e.type](e, gestureState)
-                    break;
-                case 'doubleTap':
-                    doubleTap.recenterPlot(plot, e, gestureState);
-                    break;
-                default:
-                    break;
-            }
-        }
-
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
 
             if (o.pan.interactive) {
-                eventHolder[0].addEventListener("touchstart", interpretGestures, false);
-                eventHolder[0].addEventListener("touchmove", interpretGestures, false);
-                eventHolder[0].addEventListener("touchend", interpretGestures, false);
+                eventHolder[0].addEventListener('panstart', pan.start, false);
+                eventHolder[0].addEventListener('pandrag', pan.drag, false);
+                eventHolder[0].addEventListener('panend', pan.end, false);
+                eventHolder[0].addEventListener('pinchstart', pinch.start, false);
+                eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
+                eventHolder[0].addEventListener('pinchend', pinch.end, false);
+                eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
             }
         }
 
         function shutdown(plot, eventHolder) {
-            eventHolder[0].removeEventListener("touchstart", interpretGestures);
-            eventHolder[0].removeEventListener('touchmove', interpretGestures);
-            eventHolder[0].removeEventListener('touchend', interpretGestures);
+            eventHolder[0].removeEventListener('panstart', pan.start);
+            eventHolder[0].removeEventListener('pandrag', pan.drag);
+            eventHolder[0].removeEventListener('panend', pan.end);
+            eventHolder[0].removeEventListener('pinchstart', pinch.start);
+            eventHolder[0].removeEventListener('pinchdrag', pinch.drag);
+            eventHolder[0].removeEventListener('pinchend', pinch.end);
+            eventHolder[0].removeEventListener('doubletap', doubleTap.recenterPlot);
         }
 
         pan = {
-            touchstart: function(e, gestureState) {
-                preventEventPropagation(e);
+            start: function(e) {
+                presetNavigationState(e, 'pan', gestureState);
                 updateData(e, 'pan', gestureState, navigationState);
             },
 
-            touchmove: function(e, gestureState) {
+            drag: function(e) {
+                presetNavigationState(e, 'pan', gestureState);
                 plot.pan({
                     left: delta(e, 'pan', gestureState).x,
                     top: delta(e, 'pan', gestureState).y,
@@ -94,7 +69,8 @@
                 updatePrevPan(e, 'pan', gestureState, navigationState);
             },
 
-            touchend: function(e, gestureState) {
+            end: function(e) {
+                presetNavigationState(e, 'pan', gestureState);
                 if (wasPinchEvent(e, gestureState)) {
                     updatePrevPan(e, 'pan', gestureState, navigationState);
                 }
@@ -102,13 +78,14 @@
         };
 
         pinch = {
-            touchstart: function(e, gestureState) {
-                preventEventPropagation(e);
+            start: function(e) {
+                presetNavigationState(e, 'pinch', gestureState);
                 setPrevDistance(e, gestureState);
                 updateData(e, 'pinch', gestureState, navigationState);
             },
 
-            touchmove: function(e, gestureState) {
+            drag: function(e) {
+                presetNavigationState(e, 'pinch', gestureState);
                 gestureState.twoTouches = isPinchEvent(e);
                 plot.pan({
                     left: delta(e, 'pinch', gestureState).x,
@@ -120,13 +97,14 @@
                 zoomPlot(plot, e, gestureState, navigationState);
             },
 
-            touchend: function(e, gestureState) {
+            end: function(e) {
+                presetNavigationState(e, 'pinch', gestureState);
                 gestureState.prevDistance = null;
             }
         };
 
         doubleTap = {
-            recenterPlot: function(plot, e, gestureState) {
+            recenterPlot: function(e) {
                 recenterPlotOnDoubleTap(plot, e, gestureState, navigationState);
             }
         };
@@ -134,6 +112,15 @@
         if (options.pan.enableTouch === true) {
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
+        }
+
+        function presetNavigationState(e, gesture, gestureState) {
+            navigationState.touchedAxis = getAxis(plot, e, gesture, navigationState);
+            if (noAxisTouched(navigationState)) {
+                navigationState.navigationConstraint = 'unconstrained';
+            } else {
+                navigationState.navigationConstraint = 'axisConstrained';
+            }
         }
     }
 
@@ -183,11 +170,11 @@
     }
 
     function wasPinchEvent(e, gestureState) {
-        return (gestureState.twoTouches && e.touches.length === 1);
+        return (gestureState.twoTouches && e.detail.touches.length === 1);
     }
 
     function getAxis(plot, e, gesture, navigationState) {
-        if (e.type === 'touchstart') {
+        if (e.detail.type === 'touchstart') {
             var point = getPoint(e, gesture);
             return getTouchedAxis(plot, point.x, point.y);
         } else return navigationState.touchedAxis;
@@ -233,18 +220,13 @@
     }
 
     function pinchDistance(e) {
-        var t1 = e.touches[0],
-            t2 = e.touches[1];
+        var t1 = e.detail.touches[0],
+            t2 = e.detail.touches[1];
         return distance(t1.pageX, t1.pageY, t2.pageX, t2.pageY);
     }
 
     function isPinchEvent(e) {
-        return e.touches && e.touches.length === 2;
-    }
-
-    function preventEventPropagation(e) {
-        e.stopPropagation();
-        e.preventDefault();
+        return e.detail.touches && e.detail.touches.length === 2;
     }
 
     function getTouchedAxis(plot, touchPointX, touchPointY) {
@@ -290,13 +272,13 @@
     function getPoint(e, gesture) {
         if (gesture === 'pinch') {
             return {
-                x: (e.touches[0].pageX + e.touches[1].pageX) / 2,
-                y: (e.touches[0].pageY + e.touches[1].pageY) / 2
+                x: (e.detail.touches[0].pageX + e.detail.touches[1].pageX) / 2,
+                y: (e.detail.touches[0].pageY + e.detail.touches[1].pageY) / 2
             }
         } else {
             return {
-                x: e.touches[0].pageX,
-                y: e.touches[0].pageY
+                x: e.detail.touches[0].pageX,
+                y: e.detail.touches[0].pageY
             }
         }
     }
