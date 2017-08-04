@@ -106,25 +106,6 @@ describe('flot', function() {
             expect(axes.yaxis.max).toBe(100);
         });
 
-        it('should use the axis visibleMin and visibleMax when defined', function () {
-            options.xaxis = {autoscale: 'exact', min: 0, max: 50};
-            options.yaxis = {autoscale: 'loose', min: 0, max: 100, autoscaleMargin: 0};
-            plot = $.plot(placeholder, [[]], options);
-
-            var axes = plot.getAxes();
-            axes.xaxis.visibleMin = 10;
-            axes.xaxis.visibleMax = 60;
-            axes.yaxis.visibleMin = -20;
-            axes.yaxis.visibleMax = 80;
-
-            plot.setupGrid();
-
-            expect(axes.xaxis.min).toBe(10);
-            expect(axes.xaxis.max).toBe(60);
-            expect(axes.yaxis.min).toBe(-20);
-            expect(axes.yaxis.max).toBe(80);
-        });
-
         it('should not shift the axis min and max for window autoscaling if data is in window', function () {
             options.xaxis = {autoscale: 'sliding-window', min: 0, max: 10};
             options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10};

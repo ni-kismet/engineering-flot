@@ -164,7 +164,7 @@ Licensed under the MIT license.
                 processOffset: [],
                 setupGrid: [],
                 adjustSeriesDataRange: [],
-                updateAxisRange: [],
+                setRange: [],
                 drawBackground: [],
                 drawSeries: [],
                 drawAxis: [],
@@ -1234,7 +1234,7 @@ Licensed under the MIT license.
                 axis.show = axisOpts.show == null ? axis.used : axisOpts.show;
                 axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
                 setupTickFormatter(axis);
-                executeHooks(hooks.updateAxisRange, [axis]);
+                executeHooks(hooks.setRange, [axis]);
                 setRange(axis);
             });
 
@@ -1325,8 +1325,8 @@ Licensed under the MIT license.
             var opts = axis.options,
                 min = opts.min,
                 max = opts.max,
-                datamin = axis.visibleMin ? axis.visibleMin : axis.datamin,
-                datamax = axis.visibleMax ? axis.visibleMax : axis.datamax,
+                datamin = axis.datamin,
+                datamax = axis.datamax,
                 delta;
 
             switch (opts.autoscale) {
