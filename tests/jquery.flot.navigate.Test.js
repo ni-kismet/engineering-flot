@@ -41,9 +41,10 @@ describe("flot navigate plugin", function () {
 
         plot = $.plot(placeholder, [[]], options);
 
-        expect(spy).toHaveBeenCalledWith('touchstart', jasmine.any(Function))
-        expect(spy).toHaveBeenCalledWith('touchmove', jasmine.any(Function));
-        expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
+        expect(spy).toHaveBeenCalledWith('panstart', jasmine.any(Function))
+        expect(spy).toHaveBeenCalledWith('pandrag', jasmine.any(Function));
+        expect(spy).toHaveBeenCalledWith('panend', jasmine.any(Function));
+
     });
 
     describe('zoom', function () {
