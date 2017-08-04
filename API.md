@@ -1471,7 +1471,15 @@ hooks in the plugins bundled with Flot.
    ```function(series, range)```
 
    Called after the minimum and the maximum of a series were computed and
-   adjusted. This is an extra oportunity to do further adjustmets.
+   adjusted. This is an extra opportunity to do further adjustments.
+
+ - updateAxisRange [phase 4]
+
+   ```function(plot, axis)```
+
+   Called before computing the range for axis. This can be used to adjust
+   the axis minimum or maximum. 
+
 
  - drawBackground [phase 5]
 

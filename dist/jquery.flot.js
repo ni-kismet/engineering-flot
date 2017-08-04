@@ -1975,9 +1975,7 @@ Licensed under the MIT license.
                 axis.show = axisOpts.show == null ? axis.used : axisOpts.show;
                 axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
                 setupTickFormatter(axis);
-                if (axis.direction === 'y' && axisOpts.autoscale !== "none") {
-                    executeHooks(hooks.updateAxisRange, [axis, plot.width()]);
-                }
+                executeHooks(hooks.updateAxisRange, [axis]);
                 setRange(axis);
             });
 
