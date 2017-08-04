@@ -190,6 +190,9 @@ Licensed under the MIT license.
         plot.getCanvas = function() {
             return surface.element;
         };
+        plot.getSurface = function() {
+            return surface;
+        };
         plot.getPlotOffset = function() {
             return plotOffset;
         };

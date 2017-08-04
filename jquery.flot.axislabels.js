@@ -38,26 +38,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
-    function AxisLabel(axisName, position, padding, placeholder, axisLabel) {
+    function AxisLabel(axisName, position, padding, placeholder, axisLabel, surface) {
         this.axisName = axisName;
         this.position = position;
         this.padding = padding;
         this.placeholder = placeholder;
         this.axisLabel = axisLabel;
+        this.surface = surface;
         this.width = 0;
         this.height = 0;
         this.elem = null;
     }
 
     AxisLabel.prototype.calculateSize = function() {
-        var div = document.createElement('div'),
-            classNameId = this.axisName + 'Label';
-        div.className = classNameId + ' axisLabels';
+        /*var div = document.createElement('div'),*/
+        var axisId = this.axisName + 'Label',
+            layerId = axisId + 'Layer',
+            className = axisId + ' axisLabels';
+        /*div.className = className;
         div.style.position = 'absolute';
         div.textContent = this.axisLabel;
-        this.placeholder.appendChild(div);
+        this.placeholder.appendChild(div);*/
 
-        var box = div.getBoundingClientRect();
+        var info = this.surface.getTextInfo(layerId, this.axisLabel, className);
+        this.labelWidth = info.width;
+        this.labelHeight = info.height;
+
+        /*var box = div.getBoundingClientRect();
         this.labelWidth = box.width;
         this.labelHeight = box.height;
         this.placeholder.removeChild(div);
@@ -66,10 +73,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.width = this.labelWidth + this.padding;
         this.height = this.labelHeight + this.padding;
 
-        this.width = this.height = 0;
+        this.width = this.height = 0;*/
         if (this.position === 'left' || this.position === 'right') {
             this.width = this.labelHeight + this.padding;
+            this.height = this.labelWidth + this.padding;
         } else {
+            this.width = this.labelWidth + this.padding;
             this.height = this.labelHeight + this.padding;
         }
     };
@@ -135,27 +144,43 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     AxisLabel.prototype.cleanup = function() {
-        if (this.elem) {
-            this.elem.parentNode && this.elem.parentNode.removeChild(this.elem);
-            this.elem = null;
-        }
+        //if (this.elem) {
+        //    this.elem.parentNode && this.elem.parentNode.removeChild(this.elem);
+        //    this.elem = null;
+        //}
+        var axisId = this.axisName + 'Label',
+            layerId = axisId + 'Layer',
+            className = axisId + ' axisLabels';
+        this.surface.removeText(layerId, 0, 0, this.axisLabel, className);
     };
 
     AxisLabel.prototype.draw = function(box) {
-        var classNameId = this.axisName + 'Label',
-            div = document.createElement('div'),
+        var axisId = this.axisName + 'Label',
+            layerId = axisId + 'Layer',
+            className = axisId + ' axisLabels',
+            //div = document.createElement('div'),
             offsets = this.calculateOffsets(box),
             style = $.extend(
                 { position: 'absolute' },
                 this.transforms(offsets.degrees, offsets.x, offsets.y),
                 this.transformOrigin());
-        div.className = 'axisLabels ' + classNameId;
+        //div.className = className;
+        //Object.keys(style).forEach(function(key) {
+        //    div.style[key] = style[key];
+        //});
+        //div.textContent = this.axisLabel;
+        //this.placeholder.appendChild(div);
+        //this.elem = div;
+
+        var layer = this.surface.getTextLayer(layerId);
+        layer.style.bottom = '';
+        layer.style.right = '';
+        layer.style.display = 'inline-block';
+        layer.style.whiteSpace = 'nowrap';
         Object.keys(style).forEach(function(key) {
-            div.style[key] = style[key];
+            layer.style[key] = style[key];
         });
-        div.textContent = this.axisLabel;
-        this.placeholder.appendChild(div);
-        this.elem = div;
+        this.surface.addText(layerId, 0, 0, this.axisLabel, className);
     };
 
     function init(plot) {
@@ -171,7 +196,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 var opts = axis.options;
                 var axisName = axis.direction + axis.n;
 
-                if (!opts || !axis.show) {
+                if (!opts || !opts.axisLabel || !axis.show) {
                     return;
                 }
 
@@ -185,7 +210,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 }
                 axisLabel = new AxisLabel(axisName,
                     opts.position, padding,
-                    plot.getPlaceholder()[0], opts.axisLabel);
+                    plot.getPlaceholder()[0], opts.axisLabel, plot.getSurface());
                 axisLabels[axisName] = axisLabel;
 
                 axisLabel.calculateSize();
