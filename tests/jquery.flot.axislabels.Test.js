@@ -71,7 +71,7 @@ describe('flot axis labels plugin', function() {
 
         var box1 = $('.x1Label')[0].getBoundingClientRect(),
             box2 = $('.x2Label')[0].getBoundingClientRect();
-        expect(box1.left + box1.width / 2).toBeCloseTo(box2.left + box2.width / 2, 0);
+        expect((box1.left + box1.width / 2) - (box2.left + box2.width / 2)).toBeLessThan(1);
     });
 
     it('centers the labels of y axes vertically', function () {
