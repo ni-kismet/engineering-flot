@@ -51,34 +51,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }
 
     AxisLabel.prototype.calculateSize = function() {
-        /*var div = document.createElement('div'),*/
         var axisId = this.axisName + 'Label',
             layerId = axisId + 'Layer',
             className = axisId + ' axisLabels';
-        /*div.className = className;
-        div.style.position = 'absolute';
-        div.textContent = this.axisLabel;
-        this.placeholder.appendChild(div);*/
 
         var info = this.surface.getTextInfo(layerId, this.axisLabel, className);
         this.labelWidth = info.width;
         this.labelHeight = info.height;
 
-        /*var box = div.getBoundingClientRect();
-        this.labelWidth = box.width;
-        this.labelHeight = box.height;
-        this.placeholder.removeChild(div);
-
-        this.width = this.height = 0;
-        this.width = this.labelWidth + this.padding;
-        this.height = this.labelHeight + this.padding;
-
-        this.width = this.height = 0;*/
         if (this.position === 'left' || this.position === 'right') {
             this.width = this.labelHeight + this.padding;
-            this.height = this.labelWidth + this.padding;
+            this.height = 0;
         } else {
-            this.width = this.labelWidth + this.padding;
+            this.width = 0;
             this.height = this.labelHeight + this.padding;
         }
     };
@@ -111,8 +96,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     AxisLabel.prototype.transformOrigin = function() {
+        var centerX = Math.round(this.labelWidth / 2) + 'px ',
+            centerY = Math.round(this.labelHeight / 2) + 'px';
         return {
-            'transform-origin': Math.round(this.labelWidth / 2) + 'px ' + Math.round(this.labelHeight / 2) + 'px'
+            'transform-origin': centerX + centerY,
+            '-moz-transform-origin': centerX + centerY,
+            '-webkit-transform-origin': centerX + centerY,
+            '-o-transform-origin': centerX + centerY,
+            '-ms-transform-origin': centerX + centerY
         };
     };
 
@@ -144,10 +135,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     AxisLabel.prototype.cleanup = function() {
-        //if (this.elem) {
-        //    this.elem.parentNode && this.elem.parentNode.removeChild(this.elem);
-        //    this.elem = null;
-        //}
         var axisId = this.axisName + 'Label',
             layerId = axisId + 'Layer',
             className = axisId + ' axisLabels';
@@ -158,29 +145,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var axisId = this.axisName + 'Label',
             layerId = axisId + 'Layer',
             className = axisId + ' axisLabels',
-            //div = document.createElement('div'),
             offsets = this.calculateOffsets(box),
-            style = $.extend(
-                { position: 'absolute' },
-                this.transforms(offsets.degrees, offsets.x, offsets.y),
-                this.transformOrigin());
-        //div.className = className;
-        //Object.keys(style).forEach(function(key) {
-        //    div.style[key] = style[key];
-        //});
-        //div.textContent = this.axisLabel;
-        //this.placeholder.appendChild(div);
-        //this.elem = div;
+            style = $.extend({
+                position: 'absolute',
+                bottom: '',
+                right: '',
+                display: 'inline-block',
+                'white-space': 'nowrap'
+            },
+            this.transforms(offsets.degrees, offsets.x, offsets.y),
+            this.transformOrigin());
 
         var layer = this.surface.getTextLayer(layerId);
-        layer.style.bottom = '';
-        layer.style.right = '';
-        layer.style.display = 'inline-block';
-        layer.style.whiteSpace = 'nowrap';
+        this.surface.addText(layerId, 0, 0, this.axisLabel, className);
+        this.surface.render();
         Object.keys(style).forEach(function(key) {
             layer.style[key] = style[key];
         });
-        this.surface.addText(layerId, 0, 0, this.axisLabel, className);
     };
 
     function init(plot) {
