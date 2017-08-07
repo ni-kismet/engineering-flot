@@ -1292,6 +1292,11 @@ Flot to keep track of its state, so be careful.
     Returns the canvas used for drawing in case you need to hack on it
     yourself. You'll probably need to get the plot offset too.
 
+  - getSurface()
+
+    Returns a wrapper over a canvas element that offers additional support
+    for measuring and writing text. See the CanvasWrapper plugin.
+
   - getPlotOffset()
 
     Gets the offset that the grid has within the canvas as an object
