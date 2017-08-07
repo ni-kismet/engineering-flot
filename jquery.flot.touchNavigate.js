@@ -18,8 +18,8 @@
                 twoTouches: false,
                 prevDistance: null,
                 prevTapTime: 0,
-                prevPan: { x: 0, y: 0 },
-                prevTap: { x: 0, y: 0 }
+                prevPanPosition: { x: 0, y: 0 },
+                prevTapPosition: { x: 0, y: 0 }
             },
             navigationState = {
                 prevTouchedAxis: 'none',
@@ -66,13 +66,13 @@
                     top: delta(e, 'pan', gestureState).y,
                     axes: navigationState.touchedAxis
                 });
-                updatePrevPan(e, 'pan', gestureState, navigationState);
+                updatePrevPanPosition(e, 'pan', gestureState, navigationState);
             },
 
             end: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
                 if (wasPinchEvent(e, gestureState)) {
-                    updatePrevPan(e, 'pan', gestureState, navigationState);
+                    updateprevPanPosition(e, 'pan', gestureState, navigationState);
                 }
             }
         };
@@ -92,7 +92,7 @@
                     top: delta(e, 'pinch', gestureState).y,
                     axes: navigationState.touchedAxis
                 });
-                updatePrevPan(e, 'pinch', gestureState, navigationState);
+                updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
 
                 zoomPlot(plot, e, gestureState, navigationState);
             },
@@ -132,20 +132,31 @@
     });
 
     function recenterPlotOnDoubleTap(plot, e, gestureState, navigationState) {
-        var currentTime = new Date().getTime(),
-            intervalBetweenTaps = currentTime - gestureState.prevTapTime,
-            maxDistanceBetweenTaps = 20,
-            maxIntervalBetweenTaps = 500;
-
-        if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
-            if ((navigationState.currentTouchedAxis === 'x' && navigationState.prevTouchedAxis === 'x' && (Math.abs(gestureState.prevTap.x - gestureState.prevPan.x) < maxDistanceBetweenTaps)) ||
-                (navigationState.currentTouchedAxis === 'y' && navigationState.prevTouchedAxis === 'y' && (Math.abs(gestureState.prevTap.y - gestureState.prevPan.y) < maxDistanceBetweenTaps)) ||
-                (navigationState.currentTouchedAxis === 'none' && navigationState.prevTouchedAxis === 'none' && distance(gestureState.prevTap.x, gestureState.prevTap.y, gestureState.prevPan.x, gestureState.prevPan.y) < maxDistanceBetweenTaps)) {
-                plot.recenter({ axes: navigationState.touchedAxis });
-            }
+        checkAxesForDoubleTap(plot, e, navigationState);
+        if ((navigationState.currentTouchedAxis === 'x' && navigationState.prevTouchedAxis === 'x') ||
+            (navigationState.currentTouchedAxis === 'y' && navigationState.prevTouchedAxis === 'y') ||
+            (navigationState.currentTouchedAxis === 'none' && navigationState.prevTouchedAxis === 'none')) {
+            plot.recenter({ axes: navigationState.touchedAxis });
         }
-        navigationState.prevTouchedAxis = navigationState.currentTouchedAxis;
-        gestureState.prevTapTime = currentTime;
+    }
+
+    function checkAxesForDoubleTap(plot, e, navigationState) {
+        var axis = getTouchedAxis(plot, e.detail.firstTouch.x, e.detail.firstTouch.y);
+        if (axis[0] !== undefined) {
+            navigationState.prevTouchedAxis = axis[0].direction;
+        }
+
+        axis = getTouchedAxis(plot, e.detail.secondTouch.x, e.detail.secondTouch.y);
+        if (axis[0] !== undefined) {
+            navigationState.touchedAxis = axis;
+            navigationState.currentTouchedAxis = axis[0].direction;
+        }
+
+        if (noAxisTouched(navigationState)) {
+            navigationState.touchedAxis = null;
+            navigationState.prevTouchedAxis = 'none';
+            navigationState.currentTouchedAxis = 'none';
+        }
     }
 
     function zoomPlot(plot, e, gestureState, navigationState) {
@@ -195,11 +206,11 @@
         switch (navigationState.navigationConstraint) {
             case 'unconstrained':
                 navigationState.touchedAxis = null;
-                gestureState.prevTap = {
-                    x: gestureState.prevPan.x,
-                    y: gestureState.prevPan.y
+                gestureState.prevTapPosition = {
+                    x: gestureState.prevPanPosition.x,
+                    y: gestureState.prevPanPosition.y
                 };
-                gestureState.prevPan = {
+                gestureState.prevPanPosition = {
                     x: point.x,
                     y: point.y
                 };
@@ -207,8 +218,8 @@
             case 'axisConstrained':
                 axisDir = navigationState.touchedAxis[0].direction;
                 navigationState.currentTouchedAxis = axisDir;
-                gestureState.prevTap[axisDir] = gestureState.prevPan[axisDir];
-                gestureState.prevPan[axisDir] = point[axisDir];
+                gestureState.prevTapPosition[axisDir] = gestureState.prevPanPosition[axisDir];
+                gestureState.prevPanPosition[axisDir] = point[axisDir];
                 break;
             default:
                 break;
@@ -243,16 +254,16 @@
         return axis;
     }
 
-    function updatePrevPan(e, gesture, gestureState, navigationState) {
+    function updatePrevPanPosition(e, gesture, gestureState, navigationState) {
         var point = getPoint(e, gesture);
 
         switch (navigationState.navigationConstraint) {
             case 'unconstrained':
-                gestureState.prevPan.x = point.x;
-                gestureState.prevPan.y = point.y;
+                gestureState.prevPanPosition.x = point.x;
+                gestureState.prevPanPosition.y = point.y;
                 break;
             case 'axisConstrained':
-                gestureState.prevPan[navigationState.currentTouchedAxis] =
+                gestureState.prevPanPosition[navigationState.currentTouchedAxis] =
                 point[navigationState.currentTouchedAxis];
                 break;
             default:
@@ -264,8 +275,8 @@
         var point = getPoint(e, gesture);
 
         return {
-            x: point.x - gestureState.prevPan.x,
-            y: point.y - gestureState.prevPan.y
+            x: point.x - gestureState.prevPanPosition.x,
+            y: point.y - gestureState.prevPanPosition.y
         }
     }
 

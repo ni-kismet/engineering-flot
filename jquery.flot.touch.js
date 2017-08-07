@@ -15,16 +15,31 @@
     }
 
     function initTouchNavigation(plot, options) {
-        var twoTouches = false, mainEventHolder;
+        var gestureState = {
+                twoTouches: false,
+                currentTapStart: { x: 0, y: 0 },
+                currentTapEnd: { x: 0, y: 0 },
+                prevTap: { x: 0, y: 0 },
+                currentTap: { x: 0, y: 0 },
+                interceptedLongTap: false,
+                prevTapTime: null,
+                tapStartTime: null
+            },
+            mainEventHolder;
 
         function interpretGestures(e) {
             if (isPinchEvent(e)) {
-                executeAction(e, 'pinch')
+                executeAction(e, 'pinch');
             } else {
-                if (!wasPinchEvent(e)) {
-                    executeAction(e, 'doubleTap')
-                }
                 executeAction(e, 'pan');
+                if (!wasPinchEvent(e)) {
+                    if (isDoubleTap(e)) {
+                        executeAction(e, 'doubleTap');
+                    }
+                    if (isLongTap(e)) {
+                        executeAction(e, 'longTap');
+                    }
+                }
             }
         }
 
@@ -34,10 +49,13 @@
                     pan[e.type](e);
                     break;
                 case 'pinch':
-                    pinch[e.type](e)
+                    pinch[e.type](e);
                     break;
                 case 'doubleTap':
                     doubleTap.onDoubleTap(e);
+                    break;
+                case 'longTap':
+                    longTap.onLongTap(e);
                     break;
                 default:
                     break;
@@ -60,10 +78,18 @@
         var pan = {
             touchstart: function(e) {
                 preventEventPropagation(e);
+
+                updatePrevForDoubleTap();
+                updateCurrentForDoubleTap(e);
+                updateStateForLongTapStart(e);
+
                 mainEventHolder.dispatchEvent(new CustomEvent('panstart', { detail: e }));
             },
 
             touchmove: function(e) {
+                updateCurrentForDoubleTap(e);
+                updateStateForLongTapEnd(e);
+
                 mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
             },
 
@@ -86,7 +112,7 @@
 
             touchmove: function(e) {
                 preventEventPropagation(e);
-                twoTouches = isPinchEvent(e);
+                gestureState.twoTouches = isPinchEvent(e);
                 mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
             },
 
@@ -100,12 +126,79 @@
                 preventEventPropagation(e);
                 mainEventHolder.dispatchEvent(new CustomEvent('doubletap', { detail: e }));
             }
+        };
 
+        var longTap = {
+            onLongTap: function(e) {
+                preventEventPropagation(e);
+                mainEventHolder.dispatchEvent(new CustomEvent('longtap', { detail: e }));
+            }
         };
 
         if (options.pan.enableTouch === true) {
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
+        };
+
+        function updatePrevForDoubleTap() {
+            gestureState.prevTap = {
+                x: gestureState.currentTap.x,
+                y: gestureState.currentTap.y
+            };
+        };
+
+        function updateCurrentForDoubleTap(e) {
+            gestureState.currentTap = {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            };
+        }
+
+        function updateStateForLongTapStart(e) {
+            gestureState.tapStartTime = new Date().getTime();
+            gestureState.interceptedLongTap = false;
+            gestureState.currentTapStart = {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            };
+        };
+
+        function updateStateForLongTapEnd(e) {
+            gestureState.currentTapEnd = {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            };
+        };
+
+        function isLongTap(e) {
+            var currentTime = new Date().getTime(),
+                tapDuration = currentTime - gestureState.tapStartTime,
+                maxDistanceFromTapStart = 20,
+                minTapDuration = 1000;
+            if (tapDuration > minTapDuration && !gestureState.interceptedLongTap) {
+                if (distance(gestureState.currentTapStart.x, gestureState.currentTapStart.y, gestureState.currentTapEnd.x, gestureState.currentTapEnd.y) < maxDistanceFromTapStart) {
+                    gestureState.interceptedLongTap = true;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isDoubleTap(e) {
+            var currentTime = new Date().getTime(),
+                intervalBetweenTaps = currentTime - gestureState.prevTapTime,
+                maxDistanceBetweenTaps = 20,
+                maxIntervalBetweenTaps = 500;
+
+            if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
+                if (distance(gestureState.prevTap.x, gestureState.prevTap.y, gestureState.currentTap.x, gestureState.currentTap.y) < maxDistanceBetweenTaps) {
+                    e.firstTouch = gestureState.prevTap;
+                    e.secondTouch = gestureState.currentTap;
+                    return true;
+                }
+            }
+            gestureState.prevTapTime = currentTime;
+            return false;
         }
 
         function preventEventPropagation(e) {
@@ -113,12 +206,16 @@
             e.stopPropagation();
         }
 
+        function distance(x1, y1, x2, y2) {
+            return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        }
+
         function noTouchActive(e) {
             return (e.touches && e.touches.length === 0);
         }
 
         function wasPinchEvent(e) {
-            return (twoTouches && e.touches.length === 1);
+            return (gestureState.twoTouches && e.touches.length === 1);
         }
 
         function isPinchEvent(e) {
