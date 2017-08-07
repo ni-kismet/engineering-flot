@@ -6,6 +6,8 @@
 !jquery.flot.flatdata.js
 !jquery.flot.logaxis.js
 !jquery.flot.navigate.js
+!jquery.flot.touch.js
+!jquery.flot.touchNavigate.js
 !jquery.flot.selection.js
 !jquery.flot.symbol.js
 !jquery.flot.absRelTime.js
