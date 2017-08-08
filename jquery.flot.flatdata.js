@@ -29,7 +29,11 @@ You can use series.step to specify the interval between consecutive indexes of t
                 datapoints.points[j] = start + (i * step);
                 datapoints.points[j + 1] = data[i];
             }
-            datapoints.points.length = data.length * 2;
+            if (datapoints.points !== undefined) {
+                datapoints.points.length = data.length * 2;
+            } else {
+                datapoints.points = [];
+            }
         }
     }
 

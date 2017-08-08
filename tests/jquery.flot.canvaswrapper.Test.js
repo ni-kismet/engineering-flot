@@ -37,6 +37,17 @@ describe('CanvasWrapper', function() {
         expect(canvas.element.style.height).toBe('333px');
     });
 
+    it('should resize the canvas but not less than a minimum width and height', function() {
+        var canvas = newCanvas(placeholder);
+
+        canvas.resize(0, 0);
+
+        expect(canvas.element.width).toBe(10);
+        expect(canvas.element.height).toBe(10);
+        expect(canvas.element.style.width).toBe('10px');
+        expect(canvas.element.style.height).toBe('10px');
+    });
+
     it('should measure the width and height of a text', function() {
         var canvas = newCanvas(placeholder);
 

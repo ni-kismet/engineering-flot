@@ -75,9 +75,9 @@
     // @param {number} width New height of the canvas, in pixels.
 
     Canvas.prototype.resize = function(width, height) {
-        if (width <= 0 || height <= 0) {
-            throw new Error('Invalid dimensions for plot, width = ' + width + ', height = ' + height);
-        }
+        var minSize = 10;
+        width = width < minSize ? minSize : width;
+        height = height < minSize ? minSize : height;
 
         var element = this.element,
             context = this.context,

@@ -186,13 +186,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     : opts.axisLabelPadding;
 
                 var axisLabel = axisLabels[axisName];
-                if (axisLabel) {
-                    axisLabel.cleanup();
+                if (!axisLabel) {
+                    axisLabel = new AxisLabel(axisName,
+                        opts.position, padding,
+                        plot.getPlaceholder()[0], opts.axisLabel, plot.getSurface());
+                    axisLabels[axisName] = axisLabel;
                 }
-                axisLabel = new AxisLabel(axisName,
-                    opts.position, padding,
-                    plot.getPlaceholder()[0], opts.axisLabel, plot.getSurface());
-                axisLabels[axisName] = axisLabel;
 
                 axisLabel.calculateSize();
 
