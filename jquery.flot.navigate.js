@@ -523,7 +523,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             return delta;
         }
-        var prevDelta = 0;
+        var prevDelta = { x: 0, y: 0 };
         plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
             var snap = shouldSnap(delta);
             delta = adjustDeltaToSnap(delta);
