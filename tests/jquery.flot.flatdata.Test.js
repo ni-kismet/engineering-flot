@@ -35,4 +35,12 @@ describe("flatdata plugin", function() {
         expect(points[5]).toBe(30);
     });
 
+    it('works for empty data', function () {
+        options.series.flatdata = true;
+        plot = $.plot(placeholder, [[]], options);
+
+        var datapoints = plot.getData()[0].datapoints;
+        expect(datapoints.points.length).toBe(0);
+    });
+
 });
