@@ -113,34 +113,34 @@
             d4 = [];
 
         for (var i = 0; i < 14; i += 0.2) {
-              d1.push([i, (1.01 + Math.sin(i)) * 1000000]);
+              d1.push([i, (10 + Math.sin(i))]);
         }
 
         for (var i = 0; i < 14; i += 0.5) {
-              d4.push([i, 300 + Math.sin(i) * 200]);
+              d4.push([i, 1000 + 300 * Math.sin(i)]);
         }
 
         var placeholder2 = $("#placeholder2"),
-            plot2 = $.plot(placeholder2, [ { data: d1, label: "a", xaxis: 1, yaxis: 1 },
-                                            { data: d2, label: "b", xaxis: 2, yaxis: 2 } ], {
-            series: {
-              lines: {
-                show: true
-              },
-              points: {
-                show: true
-              }
-            },
-            xaxes: [ {autoscale: 'exact'}, {autoscale: 'exact'} ],
-            yaxes: [ { mode: 'log', showTickLabels: 'all', autoscale: 'exact'},
-                    {mode: 'log', showTickLabels: 'all', autoscale: 'exact'} ],
-            zoom: {
-                interactive: true
-            },
-            pan: {
-                interactive: true,
-                enableTouch: true
-            }
+            plot2 = $.plot(placeholder2, [ { data: d4, label: "a", xaxis: 1, yaxis: 1 },
+                                            { data: d1, label: "b", xaxis: 2, yaxis: 2 } ], {
+                series: {
+                  lines: {
+                    show: true
+                  },
+                  points: {
+                    show: true
+                  }
+                },
+                xaxes: [ {autoscale: 'exact'}, {autoscale: 'exact'} ],
+                yaxes: [ { mode: 'log', showTickLabels: 'all', autoscale: 'exact'},
+                        { mode: 'log', showTickLabels: 'all', autoscale: 'exact'} ],
+                zoom: {
+                    interactive: true
+                },
+                pan: {
+                    interactive: true,
+                    enableTouch: true
+                }
         });
 
         panMessage(placeholder);
