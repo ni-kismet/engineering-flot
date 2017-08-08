@@ -37,15 +37,15 @@ describe('CanvasWrapper', function() {
         expect(canvas.element.style.height).toBe('333px');
     });
 
-    it('should resize the canvas down to 0 width and 0 height', function() {
+    it('should resize the canvas but not less than a minimum width and height', function() {
         var canvas = newCanvas(placeholder);
 
         canvas.resize(0, 0);
 
-        expect(canvas.element.width).toBe(0);
-        expect(canvas.element.height).toBe(0);
-        expect(canvas.element.style.width).toBe('0px');
-        expect(canvas.element.style.height).toBe('0px');
+        expect(canvas.element.width).toBe(50);
+        expect(canvas.element.height).toBe(50);
+        expect(canvas.element.style.width).toBe('50px');
+        expect(canvas.element.style.height).toBe('50px');
     });
 
     it('should measure the width and height of a text', function() {
