@@ -275,7 +275,7 @@
     // @param {number} width New height of the canvas, in pixels.
 
     Canvas.prototype.resize = function(width, height) {
-        var minSize = 50;
+        var minSize = 10;
         width = width < minSize ? minSize : width;
         height = height < minSize ? minSize : height;
 

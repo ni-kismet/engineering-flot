@@ -42,10 +42,10 @@ describe('CanvasWrapper', function() {
 
         canvas.resize(0, 0);
 
-        expect(canvas.element.width).toBe(50);
-        expect(canvas.element.height).toBe(50);
-        expect(canvas.element.style.width).toBe('50px');
-        expect(canvas.element.style.height).toBe('50px');
+        expect(canvas.element.width).toBe(10);
+        expect(canvas.element.height).toBe(10);
+        expect(canvas.element.style.width).toBe('10px');
+        expect(canvas.element.style.height).toBe('10px');
     });
 
     it('should measure the width and height of a text', function() {
