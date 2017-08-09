@@ -107,4 +107,23 @@ describe("unit tests for the precision of axis", function() {
 
         });
     });
+
+    describe('tickFormatter', function(){
+        it('should handle negative precision of axis', function(){
+            var testVector = [[-12356285.9999, -10, '-12356286'],
+                              [3.215, -1, '3'],
+                              [3.215, -2, '3'],
+                              [3.215, -3, '3'],
+                              [3.215, -50, '3']];
+            testVector.forEach(function (t) {
+                plot = $.plot("#placeholder", [], {
+                    xaxes: [{
+                        showTickLabels : 'all',
+                        }]
+                    });
+                var axis = plot.getXAxes()[0];
+                expect(plot.defaultTickFormatter(t[0], axis, t[1])).toEqual(t[2]);
+            });
+        });
+    });
 });

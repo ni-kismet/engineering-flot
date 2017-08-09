@@ -1490,7 +1490,7 @@ Licensed under the MIT license.
         function defaultTickFormatter(value, axis, precision) {
             var oldTickDecimals = axis.tickDecimals;
 
-            if (precision) {
+            if (precision && precision > 0) {
                 axis.tickDecimals = precision;
             }
 
