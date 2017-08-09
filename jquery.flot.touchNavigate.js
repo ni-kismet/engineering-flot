@@ -247,8 +247,10 @@
 
         var axis = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
             var box = axis.box;
-            return (ec.left > box.left) && (ec.left < box.left + box.width) &&
-                (ec.top > box.top) && (ec.top < box.top + box.height);
+            if (box !== undefined) {
+                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                        (ec.top > box.top) && (ec.top < box.top + box.height);
+            }
         });
 
         return axis;

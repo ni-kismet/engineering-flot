@@ -231,8 +231,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             var axes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
                 var box = axis.box;
-                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
-                    (ec.top > box.top) && (ec.top < box.top + box.height);
+                if (box !== undefined) {
+                    return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                        (ec.top > box.top) && (ec.top < box.top + box.height);
+                }
             });
 
             if (axes.length === 0) {
@@ -274,7 +276,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
                 result[axisName] = {
-                    navigationOffset: axis.options.offset || {below: 0, above: 0}
+                    navigationOffset: axis.options.offset || {below: 0, above: 0},
+                    axisMin: axis.min,
+                    axisMax: axis.max
                 }
             });
 
@@ -293,8 +297,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             panAxes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
                 var box = axis.box;
-                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
-                    (ec.top > box.top) && (ec.top < box.top + box.height);
+                if (box !== undefined) {
+                    return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                        (ec.top > box.top) && (ec.top < box.top + box.height);
+                }
             });
 
             if (panAxes.length === 0) {
@@ -517,7 +523,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             return delta;
         }
-
+        var prevDelta = { x: 0, y: 0 };
         plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
             var snap = shouldSnap(delta);
             delta = adjustDeltaToSnap(delta);
@@ -554,25 +560,33 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
 
             Object.keys(axes).forEach(function(axisName) {
-                var axis = axes[axisName];
+                var axis, axisMin, axisMax;
                 if (panAxes) {
-                    axisName = (axis.direction === 'x') ? 'xaxis' : 'yaxis';
+                    axis = panAxes[0];
+                    axisMin = panAxes[0].min;
+                    axisMax = panAxes[0].max;
+                } else {
+                    axis = axes[axisName];
+                    axisMin = initialState[axisName].axisMin;
+                    axisMax = initialState[axisName].axisMax;
                 }
-                var initialNavigation = initialState[axisName].navigationOffset;
+
                 var opts = axis.options,
-                    d = delta[axis.direction];
+                    d = delta[axis.direction],
+                    p = prevDelta[axis.direction];
 
                 if (opts.disablePan === true) {
                     return;
                 }
 
                 if (d !== 0) {
-                    var offsetBelow = axis.c2p(axis.p2c(initialNavigation.below) + d),
-                        offsetAbove = axis.c2p(axis.p2c(initialNavigation.above) + d);
-                    opts.offset = { below: offsetBelow, above: offsetAbove };
+                    var navigationOffsetBelow = axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin)),
+                        navigationOffsetAbove = axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax));
+                    opts.offset = { below: navigationOffsetBelow + (opts.offset.below), above: navigationOffsetAbove + (opts.offset.above) };
                 }
             });
 
+            prevDelta = delta;
             plot.setupGrid();
             plot.draw();
 
