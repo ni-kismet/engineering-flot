@@ -109,8 +109,9 @@ describe("unit tests for the precision of axis", function() {
     });
 
     describe('tickFormatter', function(){
-        it('should handle negative precision of axis', function(){
+        it('should ignore the computed precision of axis if negative', function(){
             var testVector = [[-12356285.9999, -10, '-12356286'],
+                              [12356285.9999, -10, '12356286'],
                               [3.215, -1, '3'],
                               [3.215, -2, '3'],
                               [3.215, -3, '3'],
