@@ -936,7 +936,7 @@ Licensed under the MIT license.
             return surface;
         };
         plot.getEventHolder = function() {
-            return eventHolder;
+            return eventHolder[0];
         };
         plot.getPlotOffset = function() {
             return plotOffset;

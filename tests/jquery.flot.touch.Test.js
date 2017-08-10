@@ -86,8 +86,8 @@ describe("flot touch plugin", function () {
 
             simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
             jasmine.clock().tick(1400);
-            //simulate.sendTouchEvents(coords, eventHolder, 'touchend');
-            //jasmine.clock().tick(200);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchend');
+            jasmine.clock().tick(200);
 
             expect(spy).not.toHaveBeenCalled();
         });
