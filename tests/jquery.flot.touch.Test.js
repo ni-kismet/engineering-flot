@@ -26,7 +26,6 @@ describe("flot touch plugin", function () {
         expect(spy).toHaveBeenCalledWith('touchstart', jasmine.any(Function))
         expect(spy).toHaveBeenCalledWith('touchmove', jasmine.any(Function));
         expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
-
     });
 
     describe('long tap', function() {
@@ -40,7 +39,7 @@ describe("flot touch plugin", function () {
         });
 
         it('should trigger the long tap event',function() {
-            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+            plot = $.plot(placeholder, [[]], options);
 
             var eventHolder = plot.getEventHolder(),
                 spy = jasmine.createSpy('long tap handler'),
@@ -58,7 +57,7 @@ describe("flot touch plugin", function () {
         });
 
         it('should trigger the long tap event even when there is a small move of the touch point',function() {
-            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+            plot = $.plot(placeholder, [[]], options);
 
             var eventHolder = plot.getEventHolder(),
                 spy = jasmine.createSpy('long tap handler'),
@@ -76,7 +75,7 @@ describe("flot touch plugin", function () {
         });
 
         it('should not trigger the long tap event when there is a large move of the touch point',function() {
-            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+            plot = $.plot(placeholder, [[]], options);
 
             var eventHolder = plot.getEventHolder(),
                 spy = jasmine.createSpy('long tap handler'),
@@ -93,7 +92,7 @@ describe("flot touch plugin", function () {
         });
 
         it('should not trigger the long tap event when the touch ends too soon',function() {
-            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+            plot = $.plot(placeholder, [[]], options);
 
             var eventHolder = plot.getEventHolder(),
                 spy = jasmine.createSpy('long tap handler'),
@@ -109,8 +108,24 @@ describe("flot touch plugin", function () {
             expect(spy).not.toHaveBeenCalled();
         });
 
+        it('should not trigger the long tap event when the plot is replaced', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('long tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('longtap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            plot = $.plot(placeholder, [[]], options);
+            jasmine.clock().tick(1600);
+
+            expect(spy).not.toHaveBeenCalled();
+        });
+
         it('should trigger multiple long tap events',function() {
-            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+            plot = $.plot(placeholder, [[]], options);
 
             var eventHolder = plot.getEventHolder(),
                 spy = jasmine.createSpy('long tap handler'),

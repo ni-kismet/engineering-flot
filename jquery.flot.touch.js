@@ -76,6 +76,10 @@
             eventHolder[0].removeEventListener('touchstart', interpretGestures);
             eventHolder[0].removeEventListener('touchmove', interpretGestures);
             eventHolder[0].removeEventListener('touchend', interpretGestures);
+            if (gestureState.longTapTriggerId) {
+                clearTimeout(gestureState.longTapTriggerId);
+                gestureState.longTapTriggerId = null;
+            }
         }
 
         var pan = {
