@@ -18,7 +18,7 @@ describe("flot touch navigate plugin", function () {
     it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
         plot = $.plot(placeholder, [[]], options);
 
-        var eventPlaceholder = placeholder[0].getElementsByClassName("flot-overlay")[0];
+        var eventPlaceholder = plot.getEventHolder();
             spy = spyOn(eventPlaceholder, 'removeEventListener').and.callThrough();
 
         plot = $.plot(placeholder, [[]], options);
@@ -38,7 +38,7 @@ describe("flot touch navigate plugin", function () {
                 ]
             ], options);
 
-            var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+            var canvasElement = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -80,7 +80,7 @@ describe("flot touch navigate plugin", function () {
                   ]
               ], options);
 
-              var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+              var canvasElement = plot.getEventHolder(),
                   xaxis = plot.getXAxes()[0],
                   yaxis = plot.getYAxes()[0],
                   initialXmin = xaxis.min,
@@ -101,9 +101,9 @@ describe("flot touch navigate plugin", function () {
                   },
                   amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-              simulate.sendTouchEvents(initialCoords, placeholder[0].getElementsByClassName("flot-overlay")[0], 'touchstart');
-              simulate.sendTouchEvents(finalCoords, placeholder[0].getElementsByClassName("flot-overlay")[0], 'touchmove');
-              simulate.sendTouchEvents(finalCoords, placeholder[0].getElementsByClassName("flot-overlay")[0], 'touchend');
+              simulate.sendTouchEvents(initialCoords, plot.getEventHolder(), 'touchstart');
+              simulate.sendTouchEvents(finalCoords, plot.getEventHolder(), 'touchmove');
+              simulate.sendTouchEvents(finalCoords, plot.getEventHolder(), 'touchend');
 
               expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
               expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
@@ -119,7 +119,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+          var canvasElement = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -159,7 +159,7 @@ describe("flot touch navigate plugin", function () {
                 ]
             ], options);
 
-            var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+            var canvasElement = plot.getEventHolder(),
                 xaxis = plot.getXAxes()[0],
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
@@ -206,7 +206,7 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+        var canvasElement = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0],
             initialXmin = xaxis.min,
@@ -247,7 +247,7 @@ describe("flot touch navigate plugin", function () {
               pan: { interactive: true, enableTouch: true }
           });
 
-          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+          var canvasElement = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -284,7 +284,7 @@ describe("flot touch navigate plugin", function () {
             ]
         ], options);
 
-        var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+        var canvasElement = plot.getEventHolder(),
             xaxis = plot.getXAxes()[0],
             yaxis = plot.getYAxes()[0],
             initialXmin = xaxis.min,
@@ -323,7 +323,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+          var canvasElement = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -355,7 +355,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+          var canvasElement = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -388,7 +388,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+          var canvasElement = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -434,7 +434,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+          var canvasElement = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,
@@ -480,7 +480,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], options);
 
-          var canvasElement = placeholder[0].getElementsByClassName("flot-overlay")[0],
+          var canvasElement = plot.getEventHolder(),
               xaxis = plot.getXAxes()[0],
               yaxis = plot.getYAxes()[0],
               initialXmin = xaxis.min,

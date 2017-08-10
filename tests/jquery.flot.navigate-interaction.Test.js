@@ -32,12 +32,12 @@ describe("flot navigate plugin interactions", function () {
             [10, 10]]
         ], options);
 
-        eventHolder = placeholder.find('.flot-overlay');
+        eventHolder = plot.getEventHolder();
 
-        simulate.mouseDown(eventHolder[0], 50, 70);
-        simulate.mouseMove(eventHolder[0], 50, 70);
-        simulate.mouseMove(eventHolder[0], 50 + plot.width(), 70);
-        simulate.mouseUp(eventHolder[0], 50 + plot.width(), 70);
+        simulate.mouseDown(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50, 70);
+        simulate.mouseMove(eventHolder, 50 + plot.width(), 70);
+        simulate.mouseUp(eventHolder, 50 + plot.width(), 70);
 
         var xaxis = plot.getXAxes()[0];
         var yaxis = plot.getYAxes()[0];
@@ -60,8 +60,8 @@ describe("flot navigate plugin interactions", function () {
         var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
         var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
 
-        eventHolder = placeholder.find('.flot-overlay');
-        simulate.mouseWheel(eventHolder[0], clientX, clientY, 3);
+        eventHolder = plot.getEventHolder();
+        simulate.mouseWheel(eventHolder, clientX, clientY, 3);
 
         /*
             I would really like better precission but:
@@ -90,8 +90,8 @@ describe("flot navigate plugin interactions", function () {
         var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
         var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
 
-        eventHolder = placeholder.find('.flot-overlay');
-        simulate.mouseWheel(eventHolder[0], clientX, clientY, -3);
+        eventHolder = plot.getEventHolder();
+        simulate.mouseWheel(eventHolder, clientX, clientY, -3);
 
         /*
             I would really like better precission but:
@@ -120,8 +120,8 @@ describe("flot navigate plugin interactions", function () {
         var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
         var clientY = xaxis.box.top + xaxis.box.height/2;
 
-        eventHolder = placeholder.find('.flot-overlay');
-        simulate.mouseWheel(eventHolder[0], clientX, clientY, -3);
+        eventHolder = plot.getEventHolder();
+        simulate.mouseWheel(eventHolder, clientX, clientY, -3);
 
         expect(xaxis.min).toBeCloseTo(0, 1);
         expect(xaxis.max).toBeCloseTo(1, 1);
@@ -156,13 +156,13 @@ describe("flot navigate plugin interactions", function () {
         var clientX = plot.getPlotOffset().left + xaxis.p2c(0);
         var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
 
-        eventHolder = placeholder.find('.flot-overlay');
-        var spy = spyOn(eventHolder[0], 'ondblclick').and.callThrough();
+        eventHolder = plot.getEventHolder();
+        var spy = spyOn(eventHolder, 'ondblclick').and.callThrough();
 
         var spyRecenter = jasmine.createSpy('spy');
         $(plot.getPlaceholder()).on('re-center', spyRecenter);
 
-        simulate.dblclick(eventHolder[0], 10, 20);
+        simulate.dblclick(eventHolder, 10, 20);
 
         expect(spy).toHaveBeenCalled();
         expect(spyRecenter).toHaveBeenCalled();

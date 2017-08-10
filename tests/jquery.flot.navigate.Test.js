@@ -420,16 +420,16 @@ describe("flot navigate plugin", function () {
                 yaxis = plot.getYAxes()[0],
                 initialXmin = xaxis.min,
                 initialXmax = xaxis.max,
-                eventHolder = placeholder.find('.flot-overlay'),
+                eventHolder = plot.getEventHolder(),
                 pointCoords = [
                         { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
                         { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 15 }
                 ];
 
-            simulate.mouseDown(eventHolder[0], pointCoords[0].x, pointCoords[0].y);
-            simulate.mouseMove(eventHolder[0], pointCoords[0].x, pointCoords[0].y);
-            simulate.mouseMove(eventHolder[0], pointCoords[1].x, pointCoords[1].y);
-            simulate.mouseUp(eventHolder[0], pointCoords[1].x, pointCoords[1].y);
+            simulate.mouseDown(eventHolder, pointCoords[0].x, pointCoords[0].y);
+            simulate.mouseMove(eventHolder, pointCoords[0].x, pointCoords[0].y);
+            simulate.mouseMove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+            simulate.mouseUp(eventHolder, pointCoords[1].x, pointCoords[1].y);
 
             expect(xaxis.min).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmin) + (pointCoords[0].x - pointCoords[1].x)), 0);
             expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmax) + (pointCoords[0].x - pointCoords[1].x)), 0);
@@ -450,16 +450,16 @@ describe("flot navigate plugin", function () {
                 yaxis = plot.getYAxes()[0],
                 initialYmin = yaxis.min,
                 initialYmax = yaxis.max,
-                eventHolder = placeholder.find('.flot-overlay'),
+                eventHolder = plot.getEventHolder(),
                 pointCoords = [
                         { x: xaxis.box.left - 10, y: yaxis.p2c(4) },
                         { x: yaxis.p2c(3), y: yaxis.p2c(8) }
                 ];
 
-            simulate.mouseDown(eventHolder[0], pointCoords[0].x, pointCoords[0].y);
-            simulate.mouseMove(eventHolder[0], pointCoords[0].x, pointCoords[0].y);
-            simulate.mouseMove(eventHolder[0], pointCoords[1].x, pointCoords[1].y);
-            simulate.mouseUp(eventHolder[0], pointCoords[1].x, pointCoords[1].y);
+            simulate.mouseDown(eventHolder, pointCoords[0].x, pointCoords[0].y);
+            simulate.mouseMove(eventHolder, pointCoords[0].x, pointCoords[0].y);
+            simulate.mouseMove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+            simulate.mouseUp(eventHolder, pointCoords[1].x, pointCoords[1].y);
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
