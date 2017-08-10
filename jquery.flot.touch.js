@@ -161,7 +161,6 @@
             waitForLongTap: function(e) {
                 var longTapTrigger = function() {
                     if (longTap.isLongTap(e)) {
-                        console.log('longtap');
                         mainEventHolder.dispatchEvent(new CustomEvent('longtap', { detail: e }));
                     }
                     gestureState.longTapTriggerId = null;
