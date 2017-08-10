@@ -1,0 +1,115 @@
+/* eslint-disable */
+/* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
+
+describe("flot touch plugin", function () {
+    var placeholder, plot, options;
+
+    beforeEach(function () {
+        placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+            .find('#test-container');
+        options = {
+            xaxes: [{ autoscale: 'exact' }],
+            yaxes: [{ autoscale: 'exact' }],
+            zoom: { interactive: true, amount: 10 },
+            pan: { interactive: true, frameRate: -1, enableTouch: true }
+        };
+    });
+
+    it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
+        plot = $.plot(placeholder, [[]], options);
+
+        var eventPlaceholder = plot.getEventHolder();
+            spy = spyOn(eventPlaceholder, 'removeEventListener').and.callThrough();
+
+        plot = $.plot(placeholder, [[]], options);
+
+        expect(spy).toHaveBeenCalledWith('touchstart', jasmine.any(Function))
+        expect(spy).toHaveBeenCalledWith('touchmove', jasmine.any(Function));
+        expect(spy).toHaveBeenCalledWith('touchend', jasmine.any(Function));
+
+    });
+
+    describe('long tap', function() {
+
+        beforeEach(function() {
+            jasmine.clock().install().mockDate();
+        });
+
+        afterEach(function() {
+            jasmine.clock().uninstall();
+        });
+
+        it('should trigger the long tap event',function() {
+            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('long tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('longtap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(1600);
+            jasmine.clock().tick(1600);
+            jasmine.clock().tick(1600);
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should trigger the long tap event even when there is a small move of the touch point',function() {
+            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('long tap handler'),
+                initialCoords = [{x: 10, y: 20}],
+                finalCoords = [{x: 11, y: 21}];
+
+            eventHolder.addEventListener('longtap', spy);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(1600);
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should not trigger the long tap event when the touch ends too soon',function() {
+            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('long tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('longtap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(1400);
+            //simulate.sendTouchEvents(coords, eventHolder, 'touchend');
+            //jasmine.clock().tick(200);
+
+            expect(spy).not.toHaveBeenCalled();
+        });
+
+        it('should trigger multiple long tap events',function() {
+            plot = $.plot(placeholder, [[[-1, 2], [11, 12]]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('long tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('longtap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(1600);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchend');
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(1600);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchend');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(2);
+        });
+    });
+});
