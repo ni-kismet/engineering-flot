@@ -23,8 +23,13 @@
                 currentTap: { x: 0, y: 0 },
                 interceptedLongTap: false,
                 prevTapTime: null,
-                tapStartTime: null
+                tapStartTime: null,
+                longTapTriggerId: null
             },
+            maxDistanceBetweenTaps = 20,
+            maxIntervalBetweenTaps = 500,
+            maxLongTapDistance = 20,
+            minLongTapDuration = 1500,
             mainEventHolder;
 
         function interpretGestures(e) {
@@ -36,9 +41,7 @@
                     if (isDoubleTap(e)) {
                         executeAction(e, 'doubleTap');
                     }
-                    if (isLongTap(e)) {
-                        executeAction(e, 'longTap');
-                    }
+                    executeAction(e, 'longTap');
                 }
             }
         }
@@ -55,7 +58,7 @@
                     doubleTap.onDoubleTap(e);
                     break;
                 case 'longTap':
-                    longTap.onLongTap(e);
+                    longTap[e.type](e);
                     break;
                 default:
                     break;
@@ -73,6 +76,10 @@
             eventHolder[0].removeEventListener('touchstart', interpretGestures);
             eventHolder[0].removeEventListener('touchmove', interpretGestures);
             eventHolder[0].removeEventListener('touchend', interpretGestures);
+            if (gestureState.longTapTriggerId) {
+                clearTimeout(gestureState.longTapTriggerId);
+                gestureState.longTapTriggerId = null;
+            }
         }
 
         var pan = {
@@ -129,9 +136,42 @@
         };
 
         var longTap = {
-            onLongTap: function(e) {
-                preventEventPropagation(e);
-                mainEventHolder.dispatchEvent(new CustomEvent('longtap', { detail: e }));
+            touchstart: function(e) {
+                longTap.waitForLongTap(e);
+            },
+
+            touchmove: function(e) {
+            },
+
+            touchend: function(e) {
+                if (gestureState.longTapTriggerId) {
+                    clearTimeout(gestureState.longTapTriggerId);
+                    gestureState.longTapTriggerId = null;
+                }
+            },
+
+            isLongTap: function(e) {
+                var currentTime = new Date().getTime(),
+                    tapDuration = currentTime - gestureState.tapStartTime;
+                if (tapDuration >= minLongTapDuration && !gestureState.interceptedLongTap) {
+                    if (distance(gestureState.currentTapStart.x, gestureState.currentTapStart.y, gestureState.currentTapEnd.x, gestureState.currentTapEnd.y) < maxLongTapDistance) {
+                        gestureState.interceptedLongTap = true;
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            waitForLongTap: function(e) {
+                var longTapTrigger = function() {
+                    if (longTap.isLongTap(e)) {
+                        mainEventHolder.dispatchEvent(new CustomEvent('longtap', { detail: e }));
+                    }
+                    gestureState.longTapTriggerId = null;
+                };
+                if (!gestureState.longTapTriggerId) {
+                    gestureState.longTapTriggerId = setTimeout(longTapTrigger, minLongTapDuration);
+                }
             }
         };
 
@@ -161,6 +201,10 @@
                 x: e.touches[0].pageX,
                 y: e.touches[0].pageY
             };
+            gestureState.currentTapEnd = {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            };
         };
 
         function updateStateForLongTapEnd(e) {
@@ -170,25 +214,9 @@
             };
         };
 
-        function isLongTap(e) {
-            var currentTime = new Date().getTime(),
-                tapDuration = currentTime - gestureState.tapStartTime,
-                maxDistanceFromTapStart = 20,
-                minTapDuration = 1000;
-            if (tapDuration > minTapDuration && !gestureState.interceptedLongTap) {
-                if (distance(gestureState.currentTapStart.x, gestureState.currentTapStart.y, gestureState.currentTapEnd.x, gestureState.currentTapEnd.y) < maxDistanceFromTapStart) {
-                    gestureState.interceptedLongTap = true;
-                    return true;
-                }
-            }
-            return false;
-        }
-
         function isDoubleTap(e) {
             var currentTime = new Date().getTime(),
-                intervalBetweenTaps = currentTime - gestureState.prevTapTime,
-                maxDistanceBetweenTaps = 20,
-                maxIntervalBetweenTaps = 500;
+                intervalBetweenTaps = currentTime - gestureState.prevTapTime;
 
             if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
                 if (distance(gestureState.prevTap.x, gestureState.prevTap.y, gestureState.currentTap.x, gestureState.currentTap.y) < maxDistanceBetweenTaps) {
