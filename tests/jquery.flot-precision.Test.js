@@ -69,7 +69,7 @@ describe("unit tests for the precision of axis", function() {
     it('should increase precision for endpoints', function() {
         var testVector = [
             [1, 10, 10, 'linear', '1.00', '10.00'],
-            [0, 100, 11, 'linear', '0.0', '100.0'],
+            [1, 100, 11, 'linear', '1.0', '100.0'],
             [-1, 1, 20, 'linear', '-1.000', '1.000'],
             [1, 1.01, 10, 'linear', '1.00000', '1.01000'],
             [99, 99.02, 10, 'linear', '99.00000', '99.02000'],
@@ -124,6 +124,25 @@ describe("unit tests for the precision of axis", function() {
                     });
                 var axis = plot.getXAxes()[0];
                 expect(plot.defaultTickFormatter(t[0], axis, t[1])).toEqual(t[2]);
+            });
+        });
+        it('should show small number of decimals for numbers with e representation', function(){
+            var testVector = [[0.12e-8, 1.2e-7, '1.2e-9', '1.2e-7'],
+                              [1.2e+21, 12e+21, '1.2e+21', '1.2e+22'],
+                              [1e-18, 2e-18, '1e-18', '2e-18'],
+                              [0.000000000000001, 0.0000000000002, '1e-15', '2e-13']];
+            testVector.forEach(function (t) {
+                plot = $.plot("#placeholder", [sampledata], {
+                    xaxes: [{
+                        showTickLabels : 'endpoints',
+                        min : t[0],
+                        max : t[1],
+                        autoscale : 'none'
+                        }]
+                    });
+                var axis = plot.getXAxes()[0];
+                expect(axis.ticks[0].label).toEqual(t[2]);
+                expect(axis.ticks[axis.ticks.length - 1].label).toEqual(t[3]);
             });
         });
     });

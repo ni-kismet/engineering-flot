@@ -1488,7 +1488,12 @@ Licensed under the MIT license.
         }
 
         function defaultTickFormatter(value, axis, precision) {
-            var oldTickDecimals = axis.tickDecimals;
+            var oldTickDecimals = axis.tickDecimals,
+                expPosition = ("" + value).indexOf("e");
+
+            if (value === 0) {
+                return "0";
+            }
 
             if (precision > 0) {
                 axis.tickDecimals = precision;
@@ -1501,10 +1506,12 @@ Licensed under the MIT license.
             // much precision; otherwise default to the value's own precision.
 
             if (axis.tickDecimals != null) {
-                var decimal = formatted.indexOf(".");
-                var decimalPrecision = decimal === -1 ? 0 : formatted.length - decimal - 1;
-                if (decimalPrecision < axis.tickDecimals) {
-                    formatted = (decimalPrecision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
+                var decimal = formatted.indexOf("."),
+                    decimalPrecision = decimal === -1 ? 0 : formatted.length - decimal - 1;
+                expPosition = formatted.indexOf("e");
+                if (decimalPrecision < axis.tickDecimals && expPosition === -1) {
+                    var decimals = ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
+                    formatted = (decimalPrecision ? formatted : formatted + ".") + decimals;
                 }
             }
 
