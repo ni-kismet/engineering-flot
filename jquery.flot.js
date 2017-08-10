@@ -194,6 +194,9 @@ Licensed under the MIT license.
         plot.getSurface = function() {
             return surface;
         };
+        plot.getEventHolder = function() {
+            return eventHolder;
+        };
         plot.getPlotOffset = function() {
             return plotOffset;
         };
