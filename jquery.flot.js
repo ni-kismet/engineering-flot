@@ -1527,14 +1527,17 @@ Licensed under the MIT license.
                 exponentValue = parseInt(("" + value).substr(expPosition + 1)),
                 tenExponent = expPosition !== -1 ? exponentValue : (value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0),
                 roundWith = Math.pow(10, tenExponent),
-                x = Math.round(value / roundWith);
+                x = value / roundWith;
 
             if (precision) {
                 var updatedPrecision = recomputePrecision(value, precision);
                 return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
             }
 
-            return x.toFixed(0) + 'e' + tenExponent;
+            if (axis.tickDecimals > 0) {
+                return x.toFixed(recomputePrecision(value, axis.tickDecimals)) + 'e' + tenExponent;
+            }
+            return x.toFixed() + 'e' + tenExponent;
         }
 
         function recomputePrecision(num, precision) {
