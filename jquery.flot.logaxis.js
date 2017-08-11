@@ -17,7 +17,7 @@ Set axis.mode to "log" to enable.
     };
 
     var defaultTickFormatter,
-        expRepValuesFormatter;
+        expRepTickFormatter;
 
     var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
         EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
@@ -148,7 +148,7 @@ Set axis.mode to "log" to enable.
             if ((tenExponent >= -4) && (tenExponent <= 7)) {
                 return defaultTickFormatter(value, axis, precision);
             } else {
-                return expRepValuesFormatter(value, axis, precision);
+                return expRepTickFormatter(value, axis, precision);
             }
         }
         if ((tenExponent >= -4) && (tenExponent <= 7)) {
@@ -216,7 +216,7 @@ Set axis.mode to "log" to enable.
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
             defaultTickFormatter = plot.defaultTickFormatter;
-            expRepValuesFormatter = plot.expRepValuesFormatter;
+            expRepTickFormatter = plot.expRepTickFormatter;
 
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;

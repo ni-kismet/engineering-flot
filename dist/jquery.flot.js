@@ -1018,7 +1018,7 @@ Licensed under the MIT license.
         plot.findNearbyItem = findNearbyItem;
         plot.computeValuePrecision = computeValuePrecision;
         plot.defaultTickFormatter = defaultTickFormatter;
-        plot.expRepValuesFormatter = expRepValuesFormatter;
+        plot.expRepTickFormatter = expRepTickFormatter;
         plot.computeTickSize = computeTickSize;
 
         // public attributes
@@ -2238,7 +2238,7 @@ Licensed under the MIT license.
             }
 
             if (expPosition !== -1) {
-                return expRepValuesFormatter(value, axis, precision);
+                return expRepTickFormatter(value, axis, precision);
             }
 
             if (precision > 0) {
@@ -2263,10 +2263,10 @@ Licensed under the MIT license.
             return formatted;
         };
 
-        function expRepValuesFormatter(value, axis, precision) {
+        function expRepTickFormatter(value, axis, precision) {
             var expPosition = ("" + value).indexOf("e"),
-                //expPosition = parseInt(("" + value).substr(("" + value).indexOf("e") + 1)),
-                tenExponent = expPosition !== -1 ? parseInt(("" + value).substr(expPosition + 1)) : (value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0),
+                exponentValue = parseInt(("" + value).substr(expPosition + 1)),
+                tenExponent = expPosition !== -1 ? exponentValue : (value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0),
                 roundWith = Math.pow(10, tenExponent),
                 x = Math.round(value / roundWith);
 
