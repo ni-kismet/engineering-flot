@@ -1305,6 +1305,10 @@ Flot to keep track of its state, so be careful.
     Returns a wrapper over a canvas element that offers additional support
     for measuring and writing text. See the CanvasWrapper plugin.
 
+  - getEventHolder()
+
+    Returns the event holder element.
+
   - getPlotOffset()
 
     Gets the offset that the grid has within the canvas as an object
