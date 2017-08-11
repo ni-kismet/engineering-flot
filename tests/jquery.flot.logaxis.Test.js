@@ -77,31 +77,34 @@ describe("unit tests for the log scale functions", function() {
     });
 
     it('should custom the specified precision of endpoints', function(){
-        var logFormatter = $.plot.logTickFormatter,
-        axis = [],
-        testVector = [
-            [1.7000000000000002, '1.700', 3],
-            [1.7000000000000002, '1.70', 2],
-            [17.000000000000002, '17.000', 3],
-            [172, '172.0', 1],
-            [1.000, '1.000', 3],
-            [1, '1.00', 2],
-            [0.00004, '4.0e-5', 3],
-            [4.13567003E-8, '4.1e-8', 9],
-            [413.567003E-8, '4.136e-6', 9],
-            [3.1623E-21, '3e-21', 21],
-            [4.13567003E+8, '4e8', -9],
-            [413.567003E+8, '4.1e10', -9],
-            [3.1623E+21, '3.2e21', -20],
-            [0, '0', -1]
-        ];
+        var plot = $.plot(placeholder, [], {
+              xaxes: [{mode: 'log'}]
+            }),
+            xaxis = plot.getXAxes()[0],
+            logFormatter = xaxis.tickFormatter,
+            testVector = [
+                [1.7000000000000002, '1.700', 3],
+                [1.7000000000000002, '1.70', 2],
+                [17.000000000000002, '17.000', 3],
+                [172, '172.0', 1],
+                [1.000, '1.000', 3],
+                [1, '1.00', 2],
+                [0.00004, '4.0e-5', 3],
+                [4.13567003E-8, '4.1e-8', 9],
+                [413.567003E-8, '4.136e-6', 9],
+                [3.1623E-21, '3e-21', 21],
+                [4.13567003E+8, '4e8', -9],
+                [413.567003E+8, '4.1e10', -9],
+                [3.1623E+21, '3.2e21', -20],
+                [0, '0', -1]
+            ];
 
         testVector.forEach(function (t) {
             var inputValue = t[0],
                 expectedValue = t[1],
                 precision = t[2];
 
-            expect(logFormatter(inputValue, axis, precision)).toBe(expectedValue);
+            expect(logFormatter(inputValue, xaxis, precision)).toBe(expectedValue);
         });
     });
 

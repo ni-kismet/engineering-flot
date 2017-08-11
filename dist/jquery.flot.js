@@ -2245,9 +2245,8 @@ Licensed under the MIT license.
                 axis.tickDecimals = precision;
             }
 
-            var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
-            var roundedVal = Math.round(value * factor);
-            var formatted = "" + roundedVal / factor;
+            var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1,
+                formatted = "" + Math.round(value * factor) / factor;
 
             // If tickDecimals was specified, ensure that we have exactly that
             // much precision; otherwise default to the value's own precision.
@@ -2265,7 +2264,9 @@ Licensed under the MIT license.
         };
 
         function expRepValuesFormatter(value, axis, precision) {
-            var tenExponent = parseInt(("" + value).substr(("" + value).indexOf("e") + 1)),
+            var expPosition = ("" + value).indexOf("e"),
+                //expPosition = parseInt(("" + value).substr(("" + value).indexOf("e") + 1)),
+                tenExponent = expPosition !== -1 ? parseInt(("" + value).substr(expPosition + 1)) : (value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0),
                 roundWith = Math.pow(10, tenExponent),
                 x = Math.round(value / roundWith);
 
