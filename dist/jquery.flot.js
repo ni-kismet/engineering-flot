@@ -1018,6 +1018,7 @@ Licensed under the MIT license.
         plot.findNearbyItem = findNearbyItem;
         plot.computeValuePrecision = computeValuePrecision;
         plot.defaultTickFormatter = defaultTickFormatter;
+        plot.expRepValuesFormatter = expRepValuesFormatter;
         plot.computeTickSize = computeTickSize;
 
         // public attributes
@@ -2236,21 +2237,24 @@ Licensed under the MIT license.
                 return "0";
             }
 
+            if (expPosition !== -1) {
+                return expRepValuesFormatter(value, axis, precision);
+            }
+
             if (precision > 0) {
                 axis.tickDecimals = precision;
             }
 
             var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
-            var formatted = "" + Math.round(value * factor) / factor;
+            var roundedVal = Math.round(value * factor);
+            var formatted = "" + roundedVal / factor;
 
             // If tickDecimals was specified, ensure that we have exactly that
             // much precision; otherwise default to the value's own precision.
-
             if (axis.tickDecimals != null) {
                 var decimal = formatted.indexOf("."),
                     decimalPrecision = decimal === -1 ? 0 : formatted.length - decimal - 1;
-                expPosition = formatted.indexOf("e");
-                if (decimalPrecision < axis.tickDecimals && expPosition === -1) {
+                if (decimalPrecision < axis.tickDecimals) {
                     var decimals = ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
                     formatted = (decimalPrecision ? formatted : formatted + ".") + decimals;
                 }
@@ -2259,6 +2263,28 @@ Licensed under the MIT license.
             axis.tickDecimals = oldTickDecimals;
             return formatted;
         };
+
+        function expRepValuesFormatter(value, axis, precision) {
+            var tenExponent = parseInt(("" + value).substr(("" + value).indexOf("e") + 1)),
+                roundWith = Math.pow(10, tenExponent),
+                x = Math.round(value / roundWith);
+
+            if (precision) {
+                var updatedPrecision = recomputePrecision(value, precision);
+                return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
+            }
+
+            return x.toFixed(0) + 'e' + tenExponent;
+        }
+
+        function recomputePrecision(num, precision) {
+            //for numbers close to zero, the precision from flot will be a big number
+            //while for big numbers, the precision will be negative
+            var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
+                newPrecision = Math.abs(log10Value + precision);
+
+            return newPrecision <= 20 ? Math.floor(newPrecision) : 20;
+        }
 
         function fixupNumberOfTicks(direction, surface, ticksOption) {
             var noTicks;
