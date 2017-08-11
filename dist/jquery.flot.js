@@ -2431,7 +2431,7 @@ Licensed under the MIT license.
                     case 'max':
                         //improving the precision of endpoints
                         var precision = getEndpointPrecision(v, axis);
-                        label = axis.tickFormatter(v, axis, precision);
+                        label = isFinite(precision) ? axis.tickFormatter(v, axis, precision) : axis.tickFormatter(v, axis, precision);
                         break;
                     case 'major':
                         label = axis.tickFormatter(v, axis)
