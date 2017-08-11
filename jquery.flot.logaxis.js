@@ -140,9 +140,7 @@ Set axis.mode to "log" to enable.
     };
 
     var logTickFormatter = function (value, axis, precision) {
-        var tenExponent = value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0,
-            roundWith = Math.pow(10, tenExponent),
-            x = Math.round(value / roundWith);
+        var tenExponent = value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0;
 
         if (precision) {
             if ((tenExponent >= -4) && (tenExponent <= 7)) {
@@ -169,7 +167,7 @@ Set axis.mode to "log" to enable.
             }
             return formattedValue;
         } else {
-            return x.toFixed(0) + 'e' + tenExponent;
+            return expRepTickFormatter(value, axis);
         }
     };
 
