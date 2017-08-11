@@ -16,7 +16,8 @@ Set axis.mode to "log" to enable.
         xaxis: {}
     };
 
-    var defaultTickFormatter;
+    var defaultTickFormatter,
+        expRepTickFormatter;
 
     var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
         EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
@@ -139,16 +140,13 @@ Set axis.mode to "log" to enable.
     };
 
     var logTickFormatter = function (value, axis, precision) {
-        var tenExponent = value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0,
-            roundWith = Math.pow(10, tenExponent),
-            x = Math.round(value / roundWith);
+        var tenExponent = value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0;
 
         if (precision) {
             if ((tenExponent >= -4) && (tenExponent <= 7)) {
                 return defaultTickFormatter(value, axis, precision);
             } else {
-                var updatedPrecision = recomputePrecision(value, precision);
-                return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
+                return expRepTickFormatter(value, axis, precision);
             }
         }
         if ((tenExponent >= -4) && (tenExponent <= 7)) {
@@ -169,19 +167,9 @@ Set axis.mode to "log" to enable.
             }
             return formattedValue;
         } else {
-            return x.toFixed(0) + 'e' + tenExponent;
+            return expRepTickFormatter(value, axis);
         }
     };
-
-    // update the axis precision for logaxis format
-    var recomputePrecision = function(num, precision) {
-        //for numbers close to zero, the precision from flot will be a big number
-        //while for big numbers, the precision will be negative
-        var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
-            newPrecision = Math.abs(log10Value + precision);
-
-        return newPrecision <= 20 ? Math.floor(newPrecision) : 20;
-    }
 
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
@@ -226,6 +214,7 @@ Set axis.mode to "log" to enable.
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
             defaultTickFormatter = plot.defaultTickFormatter;
+            expRepTickFormatter = plot.expRepTickFormatter;
 
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;

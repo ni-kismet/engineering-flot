@@ -1021,6 +1021,7 @@ Licensed under the MIT license.
         plot.findNearbyItem = findNearbyItem;
         plot.computeValuePrecision = computeValuePrecision;
         plot.defaultTickFormatter = defaultTickFormatter;
+        plot.expRepTickFormatter = expRepTickFormatter;
         plot.computeTickSize = computeTickSize;
 
         // public attributes
@@ -2232,29 +2233,65 @@ Licensed under the MIT license.
         }
 
         function defaultTickFormatter(value, axis, precision) {
-            var oldTickDecimals = axis.tickDecimals;
+            var oldTickDecimals = axis.tickDecimals,
+                expPosition = ("" + value).indexOf("e");
 
-            if (precision) {
+            if (value === 0) {
+                return "0";
+            }
+
+            if (expPosition !== -1) {
+                return expRepTickFormatter(value, axis, precision);
+            }
+
+            if (precision > 0) {
                 axis.tickDecimals = precision;
             }
 
-            var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
-            var formatted = "" + Math.round(value * factor) / factor;
+            var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1,
+                formatted = "" + Math.round(value * factor) / factor;
 
             // If tickDecimals was specified, ensure that we have exactly that
             // much precision; otherwise default to the value's own precision.
-
             if (axis.tickDecimals != null) {
-                var decimal = formatted.indexOf(".");
-                var decimalPrecision = decimal === -1 ? 0 : formatted.length - decimal - 1;
+                var decimal = formatted.indexOf("."),
+                    decimalPrecision = decimal === -1 ? 0 : formatted.length - decimal - 1;
                 if (decimalPrecision < axis.tickDecimals) {
-                    formatted = (decimalPrecision ? formatted : formatted + ".") + ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
+                    var decimals = ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
+                    formatted = (decimalPrecision ? formatted : formatted + ".") + decimals;
                 }
             }
 
             axis.tickDecimals = oldTickDecimals;
             return formatted;
         };
+
+        function expRepTickFormatter(value, axis, precision) {
+            var expPosition = ("" + value).indexOf("e"),
+                exponentValue = parseInt(("" + value).substr(expPosition + 1)),
+                tenExponent = expPosition !== -1 ? exponentValue : (value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0),
+                roundWith = Math.pow(10, tenExponent),
+                x = value / roundWith;
+
+            if (precision) {
+                var updatedPrecision = recomputePrecision(value, precision);
+                return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
+            }
+
+            if (axis.tickDecimals > 0) {
+                return x.toFixed(recomputePrecision(value, axis.tickDecimals)) + 'e' + tenExponent;
+            }
+            return x.toFixed() + 'e' + tenExponent;
+        }
+
+        function recomputePrecision(num, precision) {
+            //for numbers close to zero, the precision from flot will be a big number
+            //while for big numbers, the precision will be negative
+            var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
+                newPrecision = Math.abs(log10Value + precision);
+
+            return newPrecision <= 20 ? Math.floor(newPrecision) : 20;
+        }
 
         function fixupNumberOfTicks(direction, surface, ticksOption) {
             var noTicks;
@@ -2394,7 +2431,7 @@ Licensed under the MIT license.
                     case 'max':
                         //improving the precision of endpoints
                         var precision = getEndpointPrecision(v, axis);
-                        label = axis.tickFormatter(v, axis, precision);
+                        label = isFinite(precision) ? axis.tickFormatter(v, axis, precision) : axis.tickFormatter(v, axis, precision);
                         break;
                     case 'major':
                         label = axis.tickFormatter(v, axis)
