@@ -1,3 +1,11 @@
+## engineering-flot 0.4.14 ##
+
+### Bug fixes ###
+
+- long tap.
+- mouse pan.
+- improved precision used by the tick formatter.
+
 ## engineering-flot 0.4.10 ##
 
 ### Changes ###
