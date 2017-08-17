@@ -26,7 +26,9 @@ module.exports = function(config) {
     var sources = [
         'jquery.js',
         'lib/globalize.js',
-        'lib/globalize.culture.en-US.js'
+        'lib/globalize.culture.en-US.js',
+        'lib/jquery.event.drag.js',
+        'lib/jquery.mousewheel.js'
     ].concat(coverage_sources);
 
     var settings = {
