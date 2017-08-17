@@ -376,6 +376,20 @@ describe('flot', function() {
             expect(limits.xmin).toBe(10 - 6 / 2);
             expect(limits.xmax).toBe(12 + 6 / 2);
         });
+
+        it('should change the limits of x to reserve only the needed space given by width of the bars', function () {
+            var series = {
+                    lines: { show: false },
+                    bars: { show: true, align: 'center', barWidth: 6 },
+                    datapoints: {points: [0.1, 1, 0.2, 10], pointsize: 2}
+                },
+                limits = {xmin: 10, ymin: 11, xmax: 12, ymax: 13};
+
+            limits = plot.adjustSeriesDataRange(series, limits);
+
+            expect(limits.xmin).toBe(10 - 0.08 / 2);
+            expect(limits.xmax).toBe(12 + 0.08 / 2);
+        });
     });
 
     describe('setupTickFormatter', function() {
