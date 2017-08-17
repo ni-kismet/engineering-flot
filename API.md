@@ -1236,15 +1236,15 @@ can call:
 
  - defaultTickFormatter (value, axis, precision)
 
-    Returs the default formatted value for a given axis.
+    Returns the default formatted value for a given axis.
 
  - expRepTickFormatter (value, axis, precision)
 
-    Returs the formatted value for a representation with exponent.
+    Returns the formatted value for a representation with exponent.
 
  - computeTickSize (min, max, noTicks, tickDecimals)
 
-    Returs the size used for axis ticks. This is used internally.
+    Returns the size used for axis ticks. This is used internally.
 
 
 There are also some members that let you peek inside the internal
