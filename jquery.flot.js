@@ -2365,6 +2365,11 @@ Licensed under the MIT license.
                 // make sure we got room for the bar on the dancing floor
                 var delta;
 
+                //update bar width if needed
+                if (series.datapoints && series.datapoints.points) {
+                    computeBarWidth(series);
+                }
+
                 switch (series.bars.align) {
                     case "left":
                         delta = 0;
@@ -2393,6 +2398,18 @@ Licensed under the MIT license.
 
             return range;
         };
+
+        function computeBarWidth(series) {
+            var pointsize = series.datapoints.pointsize, distance,
+                minDistance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+            for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
+                distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                }
+            }
+            series.bars.barWidth = 0.8 * minDistance;
+        }
 
         // returns the data item the mouse is over, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance) {

@@ -488,8 +488,6 @@
             ctx.lineWidth = series.bars.lineWidth;
             ctx.strokeStyle = series.color;
 
-            computeBarWidth(series);
-
             var barLeft;
 
             switch (series.bars.align) {
@@ -509,18 +507,6 @@
 
             plotBars(datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
-        }
-
-        function computeBarWidth(series) {
-            var pointsize = series.datapoints.pointsize, distance,
-                minDistance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
-            for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
-                distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                }
-            }
-            series.bars.barWidth = 0.8 * minDistance;
         }
 
         function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
