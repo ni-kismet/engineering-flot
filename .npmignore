@@ -1,5 +1,7 @@
 *
 
+!lib/jquery.event.drag.js
+!lib/jquery.mousewheel.js
 !dist/jquery.flot.js
 !jquery.flot.axislabels.js
 !jquery.flot.cursors.js
