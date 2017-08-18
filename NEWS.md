@@ -1,3 +1,9 @@
+## engineering-flot 0.4.15 ##
+
+### Bug fixes ###
+
+- bars width.
+
 ## engineering-flot 0.4.14 ##
 
 ### Bug fixes ###
