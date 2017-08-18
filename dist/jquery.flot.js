@@ -2311,7 +2311,7 @@ Licensed under the MIT license.
                 if (typeof opts.tickFormatter === 'function') {
                     axis.tickFormatter = function() {
                         var args = Array.prototype.slice.call(arguments);
-                        return "" + opts.tickFormatter.apply(this, args);
+                        return "" + opts.tickFormatter.apply(null, args);
                     };
                 } else {
                     axis.tickFormatter = defaultTickFormatter;
