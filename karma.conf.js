@@ -26,7 +26,9 @@ module.exports = function(config) {
     var sources = [
         'jquery.js',
         'lib/globalize.js',
-        'lib/globalize.culture.en-US.js'
+        'lib/globalize.culture.en-US.js',
+        'lib/jquery.event.drag.js',
+        'lib/jquery.mousewheel.js'
     ].concat(coverage_sources);
 
     var settings = {
@@ -41,7 +43,7 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: sources.concat([
             'node_modules/phantomjs-polyfill-find/find-polyfill.js',
-            'tests/utils/*.js',
+            'node_modules/webcharts-development-settings/tests/utils/*.js',
             'tests/*.Test.js'
         ]),
 
