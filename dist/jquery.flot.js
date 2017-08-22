@@ -2309,8 +2309,9 @@ Licensed under the MIT license.
             var opts = axis.options;
             if (!axis.tickFormatter) {
                 if (typeof opts.tickFormatter === 'function') {
-                    axis.tickFormatter = function(v, axis, precision) {
-                        return "" + opts.tickFormatter(v, axis, precision);
+                    axis.tickFormatter = function() {
+                        var args = Array.prototype.slice.call(arguments);
+                        return "" + opts.tickFormatter.apply(null, args);
                     };
                 } else {
                     axis.tickFormatter = defaultTickFormatter;
@@ -2431,10 +2432,10 @@ Licensed under the MIT license.
                     case 'max':
                         //improving the precision of endpoints
                         var precision = getEndpointPrecision(v, axis);
-                        label = isFinite(precision) ? axis.tickFormatter(v, axis, precision) : axis.tickFormatter(v, axis, precision);
+                        label = isFinite(precision) ? axis.tickFormatter(v, axis, precision, plot) : axis.tickFormatter(v, axis, precision, plot);
                         break;
                     case 'major':
-                        label = axis.tickFormatter(v, axis)
+                        label = axis.tickFormatter(v, axis, undefined, plot);
                 }
             }
             return {
