@@ -151,7 +151,7 @@ describe("flot navigate plugin", function () {
 
         });
 
-        it('generates subunitary ticks for axis', function () {
+        it('generates subunitary ticks for X axis', function () {
             var xaxis, ticks, middle;
 
             plot = $.plot(placeholder, [
