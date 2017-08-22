@@ -152,6 +152,38 @@ describe("flot navigate plugin", function () {
             expect(yaxis.max).not.toBe(Infinity);
 
         });
+
+        it('generates subunitary ticks for axis', function () {
+            var xaxis, ticks, middle;
+
+            plot = $.plot(placeholder, [
+                [
+                    [3, 0],
+                    [9, 10]
+                ]
+            ], options);
+
+
+            plot.zoom({
+                amount: 4,
+                center: {
+                    left: 0,
+                    top: plot.height()
+                }
+            });
+
+            xaxis = plot.getXAxes()[0];
+            expect(xaxis.min).toBe(3);
+            expect(xaxis.max).toBe(4.5);
+
+            ticks = xaxis.ticks;
+            middle = Math.floor(ticks.length / 2);
+            expect(ticks[middle- 1].v).toBe(3.6);
+            expect(ticks[middle].v).toBe(3.8);
+            expect(ticks[middle + 1].v).toBe(4);
+
+        });
+
     });
 
     describe('zoomOut', function () {
