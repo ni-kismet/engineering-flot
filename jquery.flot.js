@@ -1429,7 +1429,7 @@ Licensed under the MIT license.
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
-            if (dec > tickDecimals) {
+            if (tickDecimals && dec > tickDecimals) {
                 dec = tickDecimals;
             }
 
