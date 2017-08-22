@@ -251,7 +251,7 @@ API.txt for details.
         var plotData = plot.getData();
         if (plotData.length > 0 && (plotData[0].data.length > 0 || plotData[0].datapoints.points.length > 0)) {
             if (plotData[0].decimate) {
-                plotData[0].datapoints.points = plotData[0].decimate(plotData[0], plotData[0].xaxis.min, plotData[0].xaxis.max, plot.width());
+                plotData[0].datapoints.points = plotData[0].decimate(plotData[0], plotData[0].datapoints.points[0], plotData[0].datapoints.points[2], plot.width());
             }
             var i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
 
@@ -263,7 +263,7 @@ API.txt for details.
 
             for (i = 1; i < plotData.length; i++) {
                 if (plotData[i].decimate) {
-                    plotData[i].datapoints.points = plotData[i].decimate(series, plotData[i].xaxis.min, plotData[i].xaxis.max, plot.width());
+                    plotData[i].datapoints.points = plotData[i].decimate(series, plotData[i].datapoints.points[0], plotData[i].datapoints.points[2], plot.width());
                 }
                 datapoints = plotData[i].datapoints;
                 if (plotData[i].xaxis === axis || plotData[i].yaxis === axis) {
