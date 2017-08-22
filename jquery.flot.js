@@ -2731,7 +2731,10 @@ Licensed under the MIT license.
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = highlightColor;
 
-            $.plot.drawSeries.drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
+            var fillTowards = series.bars.fillTowards || 0,
+                bottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
+
+            $.plot.drawSeries.drawBar(point[0], point[1], point[2] || bottom, barLeft, barLeft + series.bars.barWidth,
                 function() {
                     return fillStyle;
                 }, series.xaxis, series.yaxis, octx, series.bars.lineWidth);

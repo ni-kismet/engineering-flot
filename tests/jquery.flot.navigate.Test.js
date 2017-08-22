@@ -83,7 +83,6 @@ describe("flot navigate plugin", function () {
                 ]
             ], options);
 
-
             plot.zoom({
                 amount: 2,
                 center: {
@@ -111,7 +110,6 @@ describe("flot navigate plugin", function () {
                     [10, 10]
                 ]
             ], options);
-
 
             plot.zoom({
                 amount: 2,
@@ -162,7 +160,6 @@ describe("flot navigate plugin", function () {
                     [9, 10]
                 ]
             ], options);
-
 
             plot.zoom({
                 amount: 4,
