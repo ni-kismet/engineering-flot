@@ -27,6 +27,19 @@ Licensed under the MIT license.
         },
         multiply: function (a, b) {
             return saturated.saturate(a * b);
+        },
+        multiplyAdd: function (a, bInt, c) {
+            if (isFinite(a * bInt)) {
+                return a * bInt + c;
+            } else {
+                var result = c;
+
+                for (var i = 0; i < bInt; i++) {
+                    result += a;
+                }
+
+                return result;
+            }
         }
     };
 
@@ -967,10 +980,18 @@ Licensed under the MIT license.
             // precompute how much the axis is scaling a point
             // in canvas space
             if (axis.direction === "x") {
-                s = axis.scale = plotWidth / Math.abs(t(axis.max) - t(axis.min));
+                if (isFinite(t(axis.max) - t(axis.min))) {
+                    s = axis.scale = plotWidth / Math.abs(t(axis.max) - t(axis.min));
+                } else {
+                    s = axis.scale = 1 / Math.abs(saturated.delta(t(axis.min), t(axis.max), plotWidth));
+                }
                 m = Math.min(t(axis.max), t(axis.min));
             } else {
-                s = axis.scale = plotHeight / Math.abs(t(axis.max) - t(axis.min));
+                if (isFinite(t(axis.max) - t(axis.min))) {
+                    s = axis.scale = plotHeight / Math.abs(t(axis.max) - t(axis.min));
+                } else {
+                    s = axis.scale = 1 / Math.abs(saturated.delta(t(axis.min), t(axis.max), plotHeight));
+                }
                 s = -s;
                 m = Math.max(t(axis.max), t(axis.min));
             }
@@ -979,11 +1000,21 @@ Licensed under the MIT license.
             if (t === identity) {
                 // slight optimization
                 axis.p2c = function(p) {
-                    return (p - m) * s;
+                    if (isFinite(p - m)) {
+                        return (p - m) * s;
+                    } else {
+                        return (p / 4 - m / 4) * s * 4;
+                    }
                 };
             } else {
                 axis.p2c = function(p) {
-                    return (t(p) - m) * s;
+                    var tp = t(p);
+
+                    if (isFinite(tp - m)) {
+                        return (tp - m) * s;
+                    } else {
+                        return (tp / 4 - m / 4) * s * 4;
+                    }
                 };
             }
 
@@ -1342,8 +1373,8 @@ Licensed under the MIT license.
                         max = datamax;
                         delta = saturated.saturate(max - min);
                         var margin = ((typeof opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
-                        min -= delta * margin;
-                        max += delta * margin;
+                        min = saturated.saturate(min + delta * margin);
+                        max = saturated.saturate(max + delta * margin);
                     } else {
                         min = opts.min;
                         max = opts.max;
@@ -1400,7 +1431,7 @@ Licensed under the MIT license.
         function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
             var noTicks = fixupNumberOfTicks(direction, surface, ticks);
 
-            var delta =  saturated.delta(min, max, noTicks),
+            var delta = saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
@@ -1478,7 +1509,8 @@ Licensed under the MIT license.
 
             do {
                 prev = v;
-                v = start + i * axis.tickSize;
+                //v = start + i * axis.tickSize;
+                v = saturated.multiplyAdd(axis.tickSize, i, start);
                 ticks.push(v);
                 ++i;
             } while (v < axis.max && v !== prev);
