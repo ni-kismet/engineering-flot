@@ -1429,7 +1429,7 @@ Licensed under the MIT license.
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
-            if (dec > tickDecimals) {
+            if (tickDecimals && dec > tickDecimals) {
                 dec = tickDecimals;
             }
 
@@ -2727,7 +2727,10 @@ Licensed under the MIT license.
             octx.lineWidth = series.bars.lineWidth;
             octx.strokeStyle = highlightColor;
 
-            $.plot.drawSeries.drawBar(point[0], point[1], point[2] || 0, barLeft, barLeft + series.bars.barWidth,
+            var fillTowards = series.bars.fillTowards || 0,
+                bottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
+
+            $.plot.drawSeries.drawBar(point[0], point[1], point[2] || bottom, barLeft, barLeft + series.bars.barWidth,
                 function() {
                     return fillStyle;
                 }, series.xaxis, series.yaxis, octx, series.bars.lineWidth);

@@ -249,9 +249,8 @@ API.txt for details.
 
     function updateAxisFirstData(plot, axis) {
         var plotData = plot.getData();
-        if (plotData.length > 0 && plotData[0].data.length > 0) {
+        if (plotData.length > 0 && (plotData[0].data.length > 0 || plotData[0].datapoints.points.length > 0)) {
             var i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
-
             if (datapoints.points.length !== 0) {
                 if (plotData[0].xaxis === axis || plotData[0].yaxis === axis) {
                     minFirstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
