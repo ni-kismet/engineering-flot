@@ -1414,17 +1414,16 @@ Licensed under the MIT license.
         function processData(prevSeries) {
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
-                fakeInfinity = Number.MAX_VALUE,
                 i, j, k, m,
                 s, points, ps, val, f, p,
                 data, format;
 
             function updateAxis(axis, min, max) {
-                if (min < axis.datamin && min !== -fakeInfinity) {
+                if (min < axis.datamin && min !== -Infinity) {
                     axis.datamin = min;
                 }
 
-                if (max > axis.datamax && max !== fakeInfinity) {
+                if (max > axis.datamax && max !== Infinity) {
                     axis.datamax = max;
                 }
             }
@@ -1535,10 +1534,6 @@ Licensed under the MIT license.
                                     val = +val; // convert to number
                                     if (isNaN(val)) {
                                         val = null;
-                                    } else if (val === Infinity) {
-                                        val = fakeInfinity;
-                                    } else if (val === -Infinity) {
-                                        val = -fakeInfinity;
                                     }
                                 }
 
@@ -2146,7 +2141,7 @@ Licensed under the MIT license.
         function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
             var noTicks = fixupNumberOfTicks(direction, surface, ticks);
 
-            var delta = (max - min) / noTicks,
+            var delta =  saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
@@ -3049,7 +3044,6 @@ Licensed under the MIT license.
                 format = series.datapoints.format,
                 topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
-                fakeInfinity = Number.MAX_VALUE,
                 range = {
                     xmin: topSentry,
                     ymin: topSentry,
@@ -3073,7 +3067,7 @@ Licensed under the MIT license.
                         continue
                     }
 
-                    if ((!force && !f.computeRange) || val === fakeInfinity || val === -fakeInfinity) {
+                    if ((!force && !f.computeRange) || val === Infinity || val === -Infinity) {
                         continue;
                     }
 
