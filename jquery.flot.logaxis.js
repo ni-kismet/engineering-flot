@@ -71,6 +71,10 @@ Set axis.mode to "log" to enable.
             } else {
                 min = processAxisOffset(plot, axis);
             }
+
+            if (max < min) {
+                max = axis.max = axis.datamax;
+            }
         }
 
         PREFERRED_LOG_TICK_VALUES.some(function (val, i) {

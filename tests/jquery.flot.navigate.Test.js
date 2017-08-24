@@ -324,7 +324,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: -plot.width(),
                 y: 0
-            }, plot.navigationState());
+            });
 
             expect(xaxis.min).toBe(-10);
             expect(xaxis.max).toBe(0);
@@ -349,7 +349,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: 0,
                 y: plot.height(),
-            }, plot.navigationState());
+            });
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
@@ -374,7 +374,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: -plot.width(),
                 y: 1
-            }, plot.navigationState());
+            });
 
             expect(xaxis.min).toBe(-10);
             expect(xaxis.max).toBe(0);
@@ -399,7 +399,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: 1,
                 y: plot.height(),
-            }, plot.navigationState());
+            });
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
@@ -426,7 +426,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: plot.width(),
                 y: plot.height(),
-            }, plot.navigationState());
+            });
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
