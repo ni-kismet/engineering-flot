@@ -324,7 +324,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: -plot.width(),
                 y: 0
-            });
+            }, plot.navigationState());
 
             expect(xaxis.min).toBe(-10);
             expect(xaxis.max).toBe(0);
@@ -349,7 +349,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: 0,
                 y: plot.height(),
-            });
+            }, plot.navigationState());
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
@@ -374,7 +374,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: -plot.width(),
                 y: 1
-            });
+            }, plot.navigationState());
 
             expect(xaxis.min).toBe(-10);
             expect(xaxis.max).toBe(0);
@@ -399,7 +399,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: 1,
                 y: plot.height(),
-            });
+            }, plot.navigationState());
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
@@ -426,13 +426,12 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: plot.width(),
                 y: plot.height(),
-            });
+            }, plot.navigationState());
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
-
         });
 
         it('can pan close to 0 for logaxis', function () {
@@ -459,7 +458,7 @@ describe("flot navigate plugin", function () {
             plot.smartPan({
                 x: -plot.width(),
                 y: 0
-            });
+            }, plot.navigationState());
 
             expect(xaxis.min).toBeCloseTo(0.001, 4);
             expect(xaxis.max).toBeCloseTo(0.1, 4);

@@ -74,6 +74,8 @@ Set axis.mode to "log" to enable.
 
             if (max < min) {
                 max = axis.max = axis.datamax | axis.options.max;
+                axis.options.offset.below = 0;
+                axis.options.offset.above = 0;
             }
         }
 

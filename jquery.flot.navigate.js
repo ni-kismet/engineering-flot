@@ -128,7 +128,8 @@ can set the default in the options.
             startPageX = 0,
             startPageY = 0,
             panHint = null,
-            panTimeout = null;
+            panTimeout = null,
+            plotState;
 
         plot.navigationState = function() {
             var axes = this.getAxes();
@@ -175,6 +176,7 @@ can set the default in the options.
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
             startPageX = e.pageX;
             startPageY = e.pageY;
+            plotState = plot.navigationState();
         }
 
         function onDrag(e) {
@@ -184,7 +186,7 @@ can set the default in the options.
                 plot.smartPan({
                     x: startPageX - e.pageX,
                     y: startPageY - e.pageY
-                }, panAxes);
+                }, plotState, panAxes);
 
                 return;
             }
@@ -195,7 +197,7 @@ can set the default in the options.
                 plot.smartPan({
                     x: startPageX - e.pageX,
                     y: startPageY - e.pageY
-                }, panAxes);
+                }, plotState, panAxes);
 
                 panTimeout = null;
             }, 1 / frameRate * 1000);
@@ -211,7 +213,7 @@ can set the default in the options.
             plot.smartPan({
                 x: startPageX - e.pageX,
                 y: startPageY - e.pageY
-            }, panAxes);
+            }, plotState, panAxes);
             panHint = null;
         }
 
@@ -383,7 +385,7 @@ can set the default in the options.
             return delta;
         }
         var prevDelta = { x: 0, y: 0 };
-        plot.smartPan = function(delta, panAxes, preventEvent) {
+        plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
             var snap = shouldSnap(delta);
             delta = adjustDeltaToSnap(delta);
 
@@ -426,8 +428,8 @@ can set the default in the options.
                     axisMax = panAxes[0].max;
                 } else {
                     axis = axes[axisName];
-                    axisMin = axis.min;
-                    axisMax = axis.max;
+                    axisMin = initialState[axisName].axisMin;
+                    axisMax = initialState[axisName].axisMax;
                 }
 
                 var opts = axis.options,
