@@ -34,6 +34,7 @@ Set axis.mode to "log" to enable.
         return Math.exp(v);
     };
 
+    /*TODO Cipix: test and fix it to work for maximum double range, similar with the engineering-flot linear tick generator */
     var linearTickGenerator = function (plot, min, max, noTicks) {
         var size = plot.computeTickSize(min, max, noTicks);
         var ticks = [],

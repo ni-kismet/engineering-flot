@@ -29,4 +29,21 @@ describe('engineering-flot with large numbers', function() {
             expect(isFinite(tick.v)).toBe(true);
         });
     });
+
+    it('should work with large numbers and large navigation offsets', function () {
+        plot = $.plot(placeholder, [[[0, 1e308], [1, -1e308]]], {
+            yaxes: [{
+                offset: {below: -1e308, above: 1e308}
+            }]
+        });
+
+        var yaxis = plot.getAxes().yaxis;
+
+        expect(yaxis.max).toBeGreaterThan(1e308);
+        expect(yaxis.min).toBeLessThan(-1e308);
+        expect(yaxis.ticks.length).toBeGreaterThan(2);
+        yaxis.ticks.forEach(function(tick) {
+            expect(isFinite(tick.v)).toBe(true);
+        });
+    });
 });
