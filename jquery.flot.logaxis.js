@@ -73,7 +73,7 @@ Set axis.mode to "log" to enable.
             }
 
             if (max < min) {
-                max = axis.max = axis.datamax;
+                max = axis.max = axis.datamax | axis.options.max;
             }
         }
 
