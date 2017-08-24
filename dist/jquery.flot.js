@@ -784,6 +784,29 @@ Licensed under the MIT license.
         }
     };
 
+    function defaultTickGenerator(axis) {
+        var ticks = [],
+            start = saturated.saturate(floorInBase(axis.min, axis.tickSize)),
+            i = 0,
+            v = Number.NaN,
+            prev;
+
+        if (start === -Number.MAX_VALUE) {
+            ticks.push(start);
+            start = floorInBase(axis.min + axis.tickSize, axis.tickSize);
+        }
+
+        do {
+            prev = v;
+            //v = start + i * axis.tickSize;
+            v = saturated.multiplyAdd(axis.tickSize, i, start);
+            ticks.push(v);
+            ++i;
+        } while (v < axis.max && v !== prev);
+
+        return ticks;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // The top-level container for the entire plot.
     function Plot(placeholder, data_, options_, plugins) {
@@ -2241,29 +2264,6 @@ Licensed under the MIT license.
             return options.tickSize || size;
         };
 
-        function defaultTickGenerator(axis) {
-            var ticks = [],
-                start = saturated.saturate(floorInBase(axis.min, axis.tickSize)),
-                i = 0,
-                v = Number.NaN,
-                prev;
-
-            if (start === -Number.MAX_VALUE) {
-                ticks.push(start);
-                start = floorInBase(axis.min + axis.tickSize, axis.tickSize);
-            }
-
-            do {
-                prev = v;
-                //v = start + i * axis.tickSize;
-                v = saturated.multiplyAdd(axis.tickSize, i, start);
-                ticks.push(v);
-                ++i;
-            } while (v < axis.max && v !== prev);
-
-            return ticks;
-        }
-
         function defaultTickFormatter(value, axis, precision) {
             var oldTickDecimals = axis.tickDecimals,
                 expPosition = ("" + value).indexOf("e");
@@ -3563,6 +3563,7 @@ Licensed under the MIT license.
     };
 
     $.plot.saturated = saturated;
+    $.plot.linearTickGenerator = defaultTickGenerator;
 
     // round to nearby lower multiple of base
     function floorInBase(n, base) {
