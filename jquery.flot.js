@@ -30,7 +30,7 @@ Licensed under the MIT license.
         },
         multiplyAdd: function (a, bInt, c) {
             if (isFinite(a * bInt)) {
-                return a * bInt + c;
+                return saturated.saturate(a * bInt + c);
             } else {
                 var result = c;
 
@@ -38,7 +38,7 @@ Licensed under the MIT license.
                     result += a;
                 }
 
-                return result;
+                return saturated.saturate(result);
             }
         }
     };
@@ -1373,7 +1373,7 @@ Licensed under the MIT license.
                         max = datamax;
                         delta = saturated.saturate(max - min);
                         var margin = ((typeof opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
-                        min = saturated.saturate(min + delta * margin);
+                        min = saturated.saturate(min - delta * margin);
                         max = saturated.saturate(max + delta * margin);
                     } else {
                         min = opts.min;
@@ -1502,10 +1502,15 @@ Licensed under the MIT license.
 
         function defaultTickGenerator(axis) {
             var ticks = [],
-                start = floorInBase(axis.min, axis.tickSize),
+                start = saturated.saturate(floorInBase(axis.min, axis.tickSize)),
                 i = 0,
                 v = Number.NaN,
                 prev;
+
+            if (start === -Number.MAX_VALUE) {
+                ticks.push(start);
+                start = floorInBase(axis.min + axis.tickSize, axis.tickSize);
+            }
 
             do {
                 prev = v;
