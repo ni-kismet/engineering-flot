@@ -1,3 +1,15 @@
+## engineering-flot 0.5.1 ##
+
+### Bug fixes ###
+
+- patching the pan jquery plugin to work with any jquery version.
+
+## engineering-flot 0.5.0 ##
+
+### Changes ###
+
+- the pan and mouse wheel jquery plugin were moved in their own files.
+
 ## engineering-flot 0.4.15 ##
 
 ### Bug fixes ###
