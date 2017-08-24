@@ -28,6 +28,8 @@ Licensed under the MIT license.
         multiply: function (a, b) {
             return saturated.saturate(a * b);
         },
+        // returns c * bInt * a. Beahves properly in the case where c is negative
+        // and bInt * a is bigger that Number.MAX_VALUE (Infinity)
         multiplyAdd: function (a, bInt, c) {
             if (isFinite(a * bInt)) {
                 return saturated.saturate(a * bInt + c);
