@@ -215,10 +215,10 @@ Set axis.mode to "log" to enable.
         return base * Math.floor(n / base);
     }
 
-    function setLogxisRange(plot, axis) {
+    function setLogxisDataminRange(plot, axis) {
         if (axis.options.mode === 'log' && axis.datamin <= 0) {
             if (axis.datamin === null) {
-                axis.min = axis.datamin = 0.1;
+                axis.datamin = 0.1;
             } else {
                 axis.datamin = processAxisOffset(plot, axis);
             }
@@ -243,7 +243,7 @@ Set axis.mode to "log" to enable.
                     axis.options.transform = logTransform;
                     axis.options.inverseTransform = logInverseTransform;
                     axis.options.autoscaleMargin = 0;
-                    plot.hooks.setRange.push(setLogxisRange);
+                    plot.hooks.setRange.push(setLogxisDataminRange);
                 }
             });
         });

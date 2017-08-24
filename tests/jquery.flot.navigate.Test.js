@@ -434,6 +434,39 @@ describe("flot navigate plugin", function () {
             expect(yaxis.max).toBe(0);
 
         });
+
+        it('can pan close to 0 for logaxis', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], {
+                xaxes: [{ autoscale: 'exact', mode : 'log'}],
+                yaxes: [{ autoscale: 'exact' }],
+                zoom: { interactive: true, amount: 10 },
+                pan: { interactive: true, frameRate: -1 }
+            });
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            expect(xaxis.min).toBe(0.1);
+            expect(xaxis.max).toBe(10);
+
+            plot.smartPan({
+                x: -plot.width(),
+                y: 0
+            });
+
+            expect(xaxis.min).toBeCloseTo(0.001, 4);
+            expect(xaxis.max).toBeCloseTo(0.1, 4);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
+
+        });
     });
 
     describe('mousePan', function() {
