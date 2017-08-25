@@ -125,8 +125,6 @@ can set the default in the options.
         }
 
         var prevCursor = 'default',
-            startPageX = 0,
-            startPageY = 0,
             panHint = null,
             panTimeout = null,
             plotState;
@@ -139,7 +137,9 @@ can set the default in the options.
                 result[axisName] = {
                     navigationOffset: axis.options.offset || {below: 0, above: 0},
                     axisMin: axis.min,
-                    axisMax: axis.max
+                    axisMax: axis.max,
+                    startPageX: 0,
+                    startPageY: 0
                 }
             });
 
@@ -174,9 +174,9 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            startPageX = e.pageX;
-            startPageY = e.pageY;
             plotState = plot.navigationState();
+            plotState.startPageX = e.pageX;
+            plotState.startPageY = e.pageY;
         }
 
         function onDrag(e) {
@@ -184,8 +184,8 @@ can set the default in the options.
 
             if (frameRate === -1) {
                 plot.smartPan({
-                    x: startPageX - e.pageX,
-                    y: startPageY - e.pageY
+                    x: plotState.startPageX - e.pageX,
+                    y: plotState.startPageY - e.pageY
                 }, plotState, panAxes);
 
                 return;
@@ -195,8 +195,8 @@ can set the default in the options.
 
             panTimeout = setTimeout(function() {
                 plot.smartPan({
-                    x: startPageX - e.pageX,
-                    y: startPageY - e.pageY
+                    x: plotState.startPageX - e.pageX,
+                    y: plotState.startPageY - e.pageY
                 }, plotState, panAxes);
 
                 panTimeout = null;
@@ -211,8 +211,8 @@ can set the default in the options.
 
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.smartPan({
-                x: startPageX - e.pageX,
-                y: startPageY - e.pageY
+                x: plotState.startPageX - e.pageX,
+                y: plotState.startPageY - e.pageY
             }, plotState, panAxes);
             panHint = null;
         }
@@ -392,19 +392,19 @@ can set the default in the options.
             if (snap) {
                 panHint = {
                     start: {
-                        x: startPageX - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: {
-                        x: startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
                     }
                 }
             } else {
                 panHint = {
                     start: {
-                        x: startPageX - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: false
                 }
