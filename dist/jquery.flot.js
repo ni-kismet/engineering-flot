@@ -2134,13 +2134,16 @@ Licensed under the MIT license.
             max = (max != null ? max : 1) + (plotOffset.above || 0);
 
             if (min > max) {
-                var tmp = max;
-                max = min;
-                min = tmp;
+                axis.options.min = saturated.saturate(max);
+                axis.options.max = saturated.saturate(min);
+                autoscaleAxis(axis);
+                axis.options.offset = { above: 0, below: 0 };
+                axis.min = saturated.saturate(axis.autoscaledMin);
+                axis.max = saturated.saturate(axis.autoscaledMax);
+            } else {
+                axis.min = saturated.saturate(min);
+                axis.max = saturated.saturate(max);
             }
-
-            axis.min = saturated.saturate(min);
-            axis.max = saturated.saturate(max);
         }
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
