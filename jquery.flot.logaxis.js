@@ -64,6 +64,7 @@ Set axis.mode to "log" to enable.
             noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
         }
 
+        //TODO: move this
         if (min <= 0) {
             //for empty graph if axis.min is not strictly positive make it 0.1
             if (axis.datamin === null) {
@@ -73,7 +74,7 @@ Set axis.mode to "log" to enable.
             }
 
             if (max < min) {
-                max = axis.max = axis.datamax | axis.options.max;
+                max = axis.max = axis.datamax !== null ? axis.datamax : axis.options.max;
                 axis.options.offset.below = 0;
                 axis.options.offset.above = 0;
             }
@@ -217,7 +218,7 @@ Set axis.mode to "log" to enable.
         return base * Math.floor(n / base);
     }
 
-    function setLogxisDataminRange(plot, axis) {
+    function setDataminRange(plot, axis) {
         if (axis.options.mode === 'log' && axis.datamin <= 0) {
             if (axis.datamin === null) {
                 axis.datamin = 0.1;
@@ -245,7 +246,7 @@ Set axis.mode to "log" to enable.
                     axis.options.transform = logTransform;
                     axis.options.inverseTransform = logInverseTransform;
                     axis.options.autoscaleMargin = 0;
-                    plot.hooks.setRange.push(setLogxisDataminRange);
+                    plot.hooks.setRange.push(setDataminRange);
                 }
             });
         });

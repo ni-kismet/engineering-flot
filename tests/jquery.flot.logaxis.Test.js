@@ -142,11 +142,26 @@ describe("unit tests for the log scale functions", function() {
             });
     });
 
-    it('should set axis.max to not be less then axis.min', function() {
+    it('should set axis.min to be less than axis.max', function() {
         var plot = $.plot(placeholder, [[0, 1, 2, 3]], {
                 xaxes: [{
                     mode: 'log',
                     offset : { below: -1, above: -1 },
+                    max: 1
+                }]
+            }),
+            axis, ticks,
+
+        axis = plot.getAxes().xaxis;
+
+        expect(axis.min).toBeLessThan(axis.max);
+    });
+
+    it('should set axis.max to default max if less then axis.min', function() {
+        var plot = $.plot(placeholder, [[0, 1, 2, 3]], {
+                xaxes: [{
+                    mode: 'log',
+                    offset : { below: -5, above: -5 },
                     max: 1
                 }]
             }),
