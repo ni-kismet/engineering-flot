@@ -373,7 +373,7 @@ describe("flot navigate plugin", function () {
 
             plot.smartPan({
                 x: -plot.width(),
-                y: 1
+                y: 0.5
             }, plot.navigationState());
 
             expect(xaxis.min).toBe(-10);
@@ -397,7 +397,7 @@ describe("flot navigate plugin", function () {
             yaxis = plot.getYAxes()[0];
 
             plot.smartPan({
-                x: 1,
+                x: 0.5,
                 y: plot.height(),
             }, plot.navigationState());
 
@@ -484,7 +484,7 @@ describe("flot navigate plugin", function () {
                 eventHolder = plot.getEventHolder(),
                 pointCoords = [
                         { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
-                        { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 15 }
+                        { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 10.5 }
                 ];
 
             simulate.mouseDown(eventHolder, pointCoords[0].x, pointCoords[0].y);

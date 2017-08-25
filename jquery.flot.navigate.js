@@ -420,8 +420,8 @@ can set the default in the options.
                 axes = plot.getAxes();
             }
 
+            var axis, axisMin, axisMax, p, d;
             Object.keys(axes).forEach(function(axisName) {
-                var axis, axisMin, axisMax;
                 if (panAxes) {
                     axis = panAxes[0];
                     axisMin = panAxes[0].min;
@@ -432,18 +432,18 @@ can set the default in the options.
                     axisMax = initialState[axisName].axisMax;
                 }
 
-                var opts = axis.options,
-                    d = delta[axis.direction],
-                    p = prevDelta[axis.direction];
+                d = delta[axis.direction];
+                p = prevDelta[axis.direction];
 
-                if (opts.disablePan === true) {
+                if (axis.options.disablePan === true) {
                     return;
                 }
 
                 if (d !== 0) {
                     var navigationOffsetBelow = axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin)),
                         navigationOffsetAbove = axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax));
-                    opts.offset = { below: navigationOffsetBelow + (opts.offset.below), above: navigationOffsetAbove + (opts.offset.above) };
+                    axis.options.offset.below += navigationOffsetBelow;
+                    axis.options.offset.above += navigationOffsetAbove;
                 }
             });
 

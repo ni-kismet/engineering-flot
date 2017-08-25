@@ -4074,7 +4074,7 @@ Licensed under the MIT license.
 (function ($) {
     'use strict';
     $.plot.uiConstants = {
-        SNAPPING_CONSTANT: 20,
+        SNAPPING_CONSTANT: 1,
         PANHINT_LENGTH_CONSTANT: 10,
         MINOR_TICKS_COUNT_CONSTANT: 4,
         TICK_LENGTH_CONSTANT: 10
