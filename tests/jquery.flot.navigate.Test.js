@@ -408,6 +408,42 @@ describe("flot navigate plugin", function () {
 
         });
 
+        it('restore xaxis offset on snap on y direction if returns from diagonal snap', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            plot.smartPan({
+                x: plot.width(),
+                y: plot.height(),
+            }, plot.navigationState());
+
+            expect(xaxis.min).toBe(10);
+            expect(xaxis.max).toBe(20);
+            expect(yaxis.min).toBe(-10);
+            expect(yaxis.max).toBe(0);
+
+            var initialState = plot.navigationState();
+            initialState.diagMode = true;
+
+            plot.smartPan({
+                x: 2,
+                y: - plot.height() + 2,
+            }, initialState);
+
+
+            expect(xaxis.min).toBe(10);
+            expect(xaxis.max).toBe(20);
+        });
+
         it ('can be disabled per axis', function () {
             var xaxis, yaxis;
 

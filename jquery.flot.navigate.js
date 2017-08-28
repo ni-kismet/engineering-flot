@@ -135,11 +135,13 @@ can set the default in the options.
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
                 result[axisName] = {
-                    navigationOffset: axis.options.offset || {below: 0, above: 0},
+                    navigationOffset: { below: axis.options.offset.below || 0,
+                        above: axis.options.offset.above || 0},
                     axisMin: axis.min,
                     axisMax: axis.max,
                     startPageX: 0,
-                    startPageY: 0
+                    startPageY: 0,
+                    diagMode: false
                 }
             });
 
@@ -384,10 +386,39 @@ can set the default in the options.
 
             return delta;
         }
+
+        var isDiagonalMode = function(delta) {
+            if (Math.abs(delta.x) > 0 && Math.abs(delta.y) > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        var restoreAxisOffset = function(axes, initialState, delta) {
+            var axis;
+            Object.keys(axes).forEach(function(axisName) {
+                axis = axes[axisName];
+                if (delta[axis.direction] === 0) {
+                    axis.options.offset.below = initialState[axisName].navigationOffset.below;
+                    axis.options.offset.above = initialState[axisName].navigationOffset.above;
+                }
+            });
+        }
+
         var prevDelta = { x: 0, y: 0 };
         plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
-            var snap = shouldSnap(delta);
+            var snap = shouldSnap(delta),
+                axes = plot.getAxes();
             delta = adjustDeltaToSnap(delta);
+
+            if (isDiagonalMode(delta)) {
+                initialState.diagMode = true;
+            }
+
+            if (snap && initialState.diagMode === true) {
+                initialState.diagMode = false;
+                restoreAxisOffset(axes, initialState, delta);
+            }
 
             if (snap) {
                 panHint = {
@@ -413,11 +444,8 @@ can set the default in the options.
             if (isNaN(delta.x)) delta.x = 0;
             if (isNaN(delta.y)) delta.y = 0;
 
-            var axes;
             if (panAxes) {
                 axes = panAxes;
-            } else {
-                axes = plot.getAxes();
             }
 
             var axis, axisMin, axisMax, p, d;
