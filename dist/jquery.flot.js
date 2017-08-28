@@ -1418,6 +1418,7 @@ Licensed under the MIT license.
         function processData(prevSeries) {
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
+                fakeInfinity = Number.MAX_VALUE,
                 i, j, k, m,
                 s, points, ps, val, f, p,
                 data, format;
@@ -2183,7 +2184,7 @@ Licensed under the MIT license.
                 ++dec;
             }
 
-            return dec;
+            return isFinite(dec) ? dec : 0;
         };
 
         function computeTickSize (min, max, noTicks, tickDecimals) {
@@ -3069,7 +3070,11 @@ Licensed under the MIT license.
                     var val = points[j + m],
                         f = format[m];
                     if (f === null || f === undefined) {
-                        continue
+                        continue;
+                    }
+
+                    if (typeof (isValid) === 'function' && !isValid(val)) {
+                        continue;
                     }
 
                     if ((!force && !f.computeRange) || val === Infinity || val === -Infinity) {

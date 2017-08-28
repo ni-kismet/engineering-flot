@@ -34,7 +34,6 @@ Set axis.mode to "log" to enable.
         return Math.exp(v);
     };
 
-    /*TODO Cipix: test and fix it to work for maximum double range, similar with the engineering-flot linear tick generator */
     var linearTickGenerator = function (plot, min, max, noTicks) {
         var size = plot.computeTickSize(min, max, noTicks);
         var ticks = [],
@@ -88,6 +87,10 @@ Set axis.mode to "log" to enable.
             }
         });
 
+        if (maxIdx === -1) {
+            maxIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
+        }
+
         if (maxIdx - minIdx <= noTicks / 4 && logTickValues.length !== EXTENDED_LOG_TICK_VALUES.length) {
             //try with multiple of 5 for tick values
             logTickValues = EXTENDED_LOG_TICK_VALUES;
@@ -104,7 +107,7 @@ Set axis.mode to "log" to enable.
         if (maxIdx - minIdx >= noTicks / 4) {
             for (var idx = maxIdx; idx >= minIdx; idx--) {
                 tickValue = logTickValues[idx];
-                pixelCoord = Math.log(tickValue / min) / Math.log(max / min);
+                pixelCoord = (Math.log(tickValue) - Math.log(min)) / (Math.log(max) - Math.log(min));
                 tick = tickValue;
 
                 if (lastDisplayed === null) {
