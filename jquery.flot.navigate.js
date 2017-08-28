@@ -129,7 +129,7 @@ can set the default in the options.
             panTimeout = null,
             plotState;
 
-        plot.navigationState = function() {
+        plot.navigationState = function(startPageX, startPageY) {
             var axes = this.getAxes();
             var result = {};
             Object.keys(axes).forEach(function(axisName) {
@@ -139,12 +139,12 @@ can set the default in the options.
                         above: axis.options.offset.above || 0},
                     axisMin: axis.min,
                     axisMax: axis.max,
-                    startPageX: 0,
-                    startPageY: 0,
                     diagMode: false
                 }
             });
 
+            result.startPageX = startPageX || 0;
+            result.startPageY = startPageY || 0;
             return result;
         }
 
@@ -176,9 +176,7 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            plotState = plot.navigationState();
-            plotState.startPageX = e.pageX;
-            plotState.startPageY = e.pageY;
+            plotState = plot.navigationState(e.pageX, e.pageY);
         }
 
         function onDrag(e) {

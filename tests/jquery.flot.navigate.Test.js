@@ -421,27 +421,26 @@ describe("flot navigate plugin", function () {
             xaxis = plot.getXAxes()[0];
             yaxis = plot.getYAxes()[0];
 
+            var initialState = plot.navigationState(0, 0);
+
             plot.smartPan({
                 x: plot.width(),
                 y: plot.height(),
-            }, plot.navigationState());
+            }, initialState);
 
             expect(xaxis.min).toBe(10);
             expect(xaxis.max).toBe(20);
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
 
-            var initialState = plot.navigationState();
-            initialState.diagMode = true;
-
             plot.smartPan({
-                x: 2,
-                y: - plot.height() + 2,
+                x: plot.width(),
+                y: 2,
             }, initialState);
 
 
-            expect(xaxis.min).toBe(10);
-            expect(xaxis.max).toBe(20);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
         });
 
         it ('can be disabled per axis', function () {
