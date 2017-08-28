@@ -308,8 +308,8 @@ can set the default in the options.
                     max = tmp;
                 }
 
-                var offsetBelow = navigationOffset.below - (axis.min - min);
-                var offsetAbove = navigationOffset.above - (axis.max - max);
+                var offsetBelow = $.plot.saturated.saturate(navigationOffset.below - (axis.min - min));
+                var offsetAbove = $.plot.saturated.saturate(navigationOffset.above - (axis.max - max));
                 opts.offset = { below: offsetBelow, above: offsetAbove };
             };
 
