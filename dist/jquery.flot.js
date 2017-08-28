@@ -751,42 +751,10 @@ Licensed under the MIT license.
     "use strict";
 
     var Canvas = window.Flot.Canvas;
-    var saturated = {
-        saturate: function (a) {
-            if (a === Infinity) {
-                return Number.MAX_VALUE;
-            }
-
-            if (a === -Infinity) {
-                return -Number.MAX_VALUE;
-            }
-
-            return a;
-        },
-        delta: function(min, max, noTicks) {
-            return ((max - min) / noTicks) === Infinity ? (max / noTicks - min / noTicks) : (max - min) / noTicks
-        },
-        multiply: function (a, b) {
-            return saturated.saturate(a * b);
-        },
-        multiplyAdd: function (a, bInt, c) {
-            if (isFinite(a * bInt)) {
-                return saturated.saturate(a * bInt + c);
-            } else {
-                var result = c;
-
-                for (var i = 0; i < bInt; i++) {
-                    result += a;
-                }
-
-                return saturated.saturate(result);
-            }
-        }
-    };
 
     function defaultTickGenerator(axis) {
         var ticks = [],
-            start = saturated.saturate(floorInBase(axis.min, axis.tickSize)),
+            start = $.plot.saturated.saturate(floorInBase(axis.min, axis.tickSize)),
             i = 0,
             v = Number.NaN,
             prev;
@@ -799,7 +767,7 @@ Licensed under the MIT license.
         do {
             prev = v;
             //v = start + i * axis.tickSize;
-            v = saturated.multiplyAdd(axis.tickSize, i, start);
+            v = $.plot.saturated.multiplyAdd(axis.tickSize, i, start);
             ticks.push(v);
             ++i;
         } while (v < axis.max && v !== prev);
@@ -1570,6 +1538,10 @@ Licensed under the MIT license.
                                     val = +val; // convert to number
                                     if (isNaN(val)) {
                                         val = null;
+                                    } else if (val === Infinity) {
+                                        val = fakeInfinity;
+                                    } else if (val === -Infinity) {
+                                        val = -fakeInfinity;
                                     }
                                 }
 
@@ -1747,14 +1719,14 @@ Licensed under the MIT license.
                 if (isFinite(t(axis.max) - t(axis.min))) {
                     s = axis.scale = plotWidth / Math.abs(t(axis.max) - t(axis.min));
                 } else {
-                    s = axis.scale = 1 / Math.abs(saturated.delta(t(axis.min), t(axis.max), plotWidth));
+                    s = axis.scale = 1 / Math.abs($.plot.saturated.delta(t(axis.min), t(axis.max), plotWidth));
                 }
                 m = Math.min(t(axis.max), t(axis.min));
             } else {
                 if (isFinite(t(axis.max) - t(axis.min))) {
                     s = axis.scale = plotHeight / Math.abs(t(axis.max) - t(axis.min));
                 } else {
-                    s = axis.scale = 1 / Math.abs(saturated.delta(t(axis.min), t(axis.max), plotHeight));
+                    s = axis.scale = 1 / Math.abs($.plot.saturated.delta(t(axis.min), t(axis.max), plotHeight));
                 }
                 s = -s;
                 m = Math.max(t(axis.max), t(axis.min));
@@ -2135,10 +2107,10 @@ Licensed under the MIT license.
                     if (datamin != null && datamax != null) {
                         min = datamin;
                         max = datamax;
-                        delta = saturated.saturate(max - min);
+                        delta = $.plot.saturated.saturate(max - min);
                         var margin = ((typeof opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
-                        min = saturated.saturate(min - delta * margin);
-                        max = saturated.saturate(max + delta * margin);
+                        min = $.plot.saturated.saturate(min - delta * margin);
+                        max = $.plot.saturated.saturate(max + delta * margin);
                     } else {
                         min = opts.min;
                         max = opts.max;
@@ -2188,14 +2160,14 @@ Licensed under the MIT license.
                 min = tmp;
             }
 
-            axis.min = saturated.saturate(min);
-            axis.max = saturated.saturate(max);
+            axis.min = $.plot.saturated.saturate(min);
+            axis.max = $.plot.saturated.saturate(max);
         }
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
             var noTicks = fixupNumberOfTicks(direction, surface, ticks);
 
-            var delta = saturated.delta(min, max, noTicks),
+            var delta = $.plot.saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
@@ -2215,7 +2187,7 @@ Licensed under the MIT license.
         };
 
         function computeTickSize (min, max, noTicks, tickDecimals) {
-            var delta = saturated.delta(min, max, noTicks),
+            var delta = $.plot.saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
@@ -2353,7 +2325,7 @@ Licensed under the MIT license.
 
             noTicks = fixupNumberOfTicks(axis.direction, surface, opts.ticks);
 
-            axis.delta = saturated.delta(axis.min, axis.max, noTicks);
+            axis.delta = $.plot.saturated.delta(axis.min, axis.max, noTicks);
             var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, noTicks, opts.tickDecimals);
 
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
@@ -3558,13 +3530,52 @@ Licensed under the MIT license.
         });
     };
 
-    $.plot.saturated = saturated;
     $.plot.linearTickGenerator = defaultTickGenerator;
 
     // round to nearby lower multiple of base
     function floorInBase(n, base) {
         return base * Math.floor(n / base);
     }
+})(jQuery);
+
+(function ($) {
+    'use strict';
+    var saturated = {
+        saturate: function (a) {
+            if (a === Infinity) {
+                return Number.MAX_VALUE;
+            }
+
+            if (a === -Infinity) {
+                return -Number.MAX_VALUE;
+            }
+
+            return a;
+        },
+        delta: function(min, max, noTicks) {
+            return ((max - min) / noTicks) === Infinity ? (max / noTicks - min / noTicks) : (max - min) / noTicks
+        },
+        multiply: function (a, b) {
+            return saturated.saturate(a * b);
+        },
+        // returns c * bInt * a. Beahves properly in the case where c is negative
+        // and bInt * a is bigger that Number.MAX_VALUE (Infinity)
+        multiplyAdd: function (a, bInt, c) {
+            if (isFinite(a * bInt)) {
+                return saturated.saturate(a * bInt + c);
+            } else {
+                var result = c;
+
+                for (var i = 0; i < bInt; i++) {
+                    result += a;
+                }
+
+                return saturated.saturate(result);
+            }
+        }
+    };
+
+    $.plot.saturated = saturated;
 })(jQuery);
 
 (function($) {
