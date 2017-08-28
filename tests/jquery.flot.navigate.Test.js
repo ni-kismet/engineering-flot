@@ -408,6 +408,41 @@ describe("flot navigate plugin", function () {
 
         });
 
+        it('restore xaxis offset on snap on y direction if returns from diagonal snap', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            var initialState = plot.navigationState(0, 0);
+
+            plot.smartPan({
+                x: plot.width(),
+                y: plot.height(),
+            }, initialState);
+
+            expect(xaxis.min).toBe(10);
+            expect(xaxis.max).toBe(20);
+            expect(yaxis.min).toBe(-10);
+            expect(yaxis.max).toBe(0);
+
+            plot.smartPan({
+                x: plot.width(),
+                y: 2,
+            }, initialState);
+
+
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
+        });
+
         it ('can be disabled per axis', function () {
             var xaxis, yaxis;
 
@@ -432,6 +467,38 @@ describe("flot navigate plugin", function () {
             expect(xaxis.max).toBe(10);
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
+        });
+
+        it('can pan close to 0 for logaxis', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], {
+                xaxes: [{ autoscale: 'exact', mode : 'log'}],
+                yaxes: [{ autoscale: 'exact' }],
+                zoom: { interactive: true, amount: 10 },
+                pan: { interactive: true, frameRate: -1 }
+            });
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            expect(xaxis.min).toBe(0.1);
+            expect(xaxis.max).toBe(10);
+
+            plot.smartPan({
+                x: -plot.width(),
+                y: 0
+            }, plot.navigationState());
+
+            expect(xaxis.min).toBeCloseTo(0.001, 4);
+            expect(xaxis.max).toBeCloseTo(0.1, 4);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
         });
 
         describe('with large numbers', function() {

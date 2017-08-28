@@ -2268,10 +2268,6 @@ Licensed under the MIT license.
             var oldTickDecimals = axis.tickDecimals,
                 expPosition = ("" + value).indexOf("e");
 
-            if (value === 0) {
-                return "0";
-            }
-
             if (expPosition !== -1) {
                 return expRepTickFormatter(value, axis, precision);
             }

@@ -127,24 +127,26 @@ can set the default in the options.
         }
 
         var prevCursor = 'default',
-            startPageX = 0,
-            startPageY = 0,
             panHint = null,
             panTimeout = null,
             plotState;
 
-        plot.navigationState = function() {
+        plot.navigationState = function(startPageX, startPageY) {
             var axes = this.getAxes();
             var result = {};
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
                 result[axisName] = {
-                    navigationOffset: axis.options.offset || {below: 0, above: 0},
+                    navigationOffset: { below: axis.options.offset.below || 0,
+                        above: axis.options.offset.above || 0},
                     axisMin: axis.min,
-                    axisMax: axis.max
+                    axisMax: axis.max,
+                    diagMode: false
                 }
             });
 
+            result.startPageX = startPageX || 0;
+            result.startPageY = startPageY || 0;
             return result;
         }
 
@@ -176,9 +178,7 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            startPageX = e.pageX;
-            startPageY = e.pageY;
-            plotState = plot.navigationState();
+            plotState = plot.navigationState(e.pageX, e.pageY);
         }
 
         function onDrag(e) {
@@ -186,8 +186,8 @@ can set the default in the options.
 
             if (frameRate === -1) {
                 plot.smartPan({
-                    x: startPageX - e.pageX,
-                    y: startPageY - e.pageY
+                    x: plotState.startPageX - e.pageX,
+                    y: plotState.startPageY - e.pageY
                 }, plotState, panAxes);
 
                 return;
@@ -197,8 +197,8 @@ can set the default in the options.
 
             panTimeout = setTimeout(function() {
                 plot.smartPan({
-                    x: startPageX - e.pageX,
-                    y: startPageY - e.pageY
+                    x: plotState.startPageX - e.pageX,
+                    y: plotState.startPageY - e.pageY
                 }, plotState, panAxes);
 
                 panTimeout = null;
@@ -213,8 +213,8 @@ can set the default in the options.
 
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.smartPan({
-                x: startPageX - e.pageX,
-                y: startPageY - e.pageY
+                x: plotState.startPageX - e.pageX,
+                y: plotState.startPageY - e.pageY
             }, plotState, panAxes);
             panHint = null;
         }
@@ -398,27 +398,56 @@ can set the default in the options.
 
             return delta;
         }
+
+        var isDiagonalMode = function(delta) {
+            if (Math.abs(delta.x) > 0 && Math.abs(delta.y) > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        var restoreAxisOffset = function(axes, initialState, delta) {
+            var axis;
+            Object.keys(axes).forEach(function(axisName) {
+                axis = axes[axisName];
+                if (delta[axis.direction] === 0) {
+                    axis.options.offset.below = initialState[axisName].navigationOffset.below;
+                    axis.options.offset.above = initialState[axisName].navigationOffset.above;
+                }
+            });
+        }
+
         var prevDelta = { x: 0, y: 0 };
         plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
-            var snap = shouldSnap(delta);
+            var snap = shouldSnap(delta),
+                axes = plot.getAxes();
             delta = adjustDeltaToSnap(delta);
+
+            if (isDiagonalMode(delta)) {
+                initialState.diagMode = true;
+            }
+
+            if (snap && initialState.diagMode === true) {
+                initialState.diagMode = false;
+                restoreAxisOffset(axes, initialState, delta);
+            }
 
             if (snap) {
                 panHint = {
                     start: {
-                        x: startPageX - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: {
-                        x: startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
                     }
                 }
             } else {
                 panHint = {
                     start: {
-                        x: startPageX - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: false
                 }
@@ -427,15 +456,12 @@ can set the default in the options.
             if (isNaN(delta.x)) delta.x = 0;
             if (isNaN(delta.y)) delta.y = 0;
 
-            var axes;
             if (panAxes) {
                 axes = panAxes;
-            } else {
-                axes = plot.getAxes();
             }
 
+            var axis, axisMin, axisMax, p, d;
             Object.keys(axes).forEach(function(axisName) {
-                var axis, axisMin, axisMax;
                 if (panAxes) {
                     axis = panAxes[0];
                     axisMin = panAxes[0].min;
@@ -446,11 +472,10 @@ can set the default in the options.
                     axisMax = initialState[axisName].axisMax;
                 }
 
-                var opts = axis.options,
-                    d = delta[axis.direction],
-                    p = prevDelta[axis.direction];
+                d = delta[axis.direction];
+                p = prevDelta[axis.direction];
 
-                if (opts.disablePan === true) {
+                if (axis.options.disablePan === true) {
                     return;
                 }
 
@@ -466,10 +491,8 @@ can set the default in the options.
                         navigationOffsetAbove = 0;
                     }
 
-                    opts.offset = {
-                        below: saturated.saturate(navigationOffsetBelow + (opts.offset.below || 0)),
-                        above: saturated.saturate(navigationOffsetAbove + (opts.offset.above || 0))
-                    };
+                    axis.options.offset.below = saturated.saturate(navigationOffsetBelow + (axis.options.offset.below || 0));
+                    axis.options.offset.above = saturated.saturate(navigationOffsetAbove + (axis.options.offset.above || 0));
                 }
             });
 
