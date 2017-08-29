@@ -2151,9 +2151,10 @@ Licensed under the MIT license.
             max = (max != null ? max : 1) + (plotOffset.above || 0);
 
             if (min > max) {
-                var tmp = max;
-                max = min;
-                min = tmp;
+                var tmp = min;
+                min = max;
+                max = tmp;
+                axis.options.offset = { above: 0, below: 0 };
             }
 
             axis.min = $.plot.saturated.saturate(min);

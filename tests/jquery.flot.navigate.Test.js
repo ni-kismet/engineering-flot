@@ -51,6 +51,53 @@ describe("flot navigate plugin", function () {
 
         });
 
+        it('works with autoscale', function () {
+            var xaxis, yaxis, 
+                opts = {
+                    xaxes: [{ autoscale: 'sliding-window' , min: 0, max: 100}],
+                    yaxes: [{ autoscale: 'loose' }],
+                    zoom: { interactive: true, amount: 10 },
+                    pan: { interactive: true, frameRate: -1 }
+                };
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], opts);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            plot.zoom({
+                amount: 4,
+                center: {
+                    left: 0,
+                    top: plot.height()/2
+                }
+            });
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(25);
+            expect(yaxis.min).toBeCloseTo(4.94, 7);
+            expect(yaxis.max).toBeCloseTo(5.06, 7);
+
+            plot.zoom({
+                amount: -2,
+                center: {
+                    left: plot.width()/2,
+                    top: plot.height()/2
+                }
+            });
+
+            expect(xaxis.min).toBeCloseTo(6.25, 2);
+            expect(xaxis.max).toBe(18.75);
+            expect(yaxis.min).toBe(-2);
+            expect(yaxis.max).toBe(12);
+
+        });
+
         it('uses the amount configured in the plot if none is provided', function () {
             var xaxis, yaxis;
 
