@@ -76,11 +76,17 @@ API.txt for details.
         }
 
         function toAbsoluteTimeStr(date, showMilliseconds) {
-            var unixToAbsoluteEpochDiff = 62135596800000;
-            var d = date.valueOf();
-            var ms = Math.floor(d % 1000);
+            var unixToAbsoluteEpochDiff = 62135596800000,
+                minDateValue = -8640000000000000,
+                d = date.valueOf(),
+                ms = Math.floor(d % 1000);
+
             if (ms < 0) {
                 ms = 1000 + ms;
+            }
+
+            if (date < minDateValue + unixToAbsoluteEpochDiff) {
+                date = minDateValue + unixToAbsoluteEpochDiff;
             }
 
             var gregorianDate = makeUtcWrapper(new Date(date - unixToAbsoluteEpochDiff)).date;
@@ -193,7 +199,16 @@ API.txt for details.
     // select time zone strategy.  This returns a date-like object tied to the
     // desired timezone
     function dateGenerator(ts, opts) {
+        var maxDateValue = 8640000000000000;
+
         ts *= 1000;
+
+        if (ts > maxDateValue) {
+            ts = maxDateValue;
+        } else if (ts < -maxDateValue) {
+            ts = -maxDateValue;
+        }
+
         if (opts.timezone === "browser") {
             return new Date(ts);
         } else if (!opts.timezone || opts.timezone === "utc") {

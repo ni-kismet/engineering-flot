@@ -677,7 +677,6 @@ Licensed under the MIT license.
         function processData(prevSeries) {
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
-                fakeInfinity = Number.MAX_VALUE,
                 i, j, k, m,
                 s, points, ps, val, f, p,
                 data, format;
@@ -798,10 +797,6 @@ Licensed under the MIT license.
                                     val = +val; // convert to number
                                     if (isNaN(val)) {
                                         val = null;
-                                    } else if (val === Infinity) {
-                                        val = fakeInfinity;
-                                    } else if (val === -Infinity) {
-                                        val = -fakeInfinity;
                                     }
                                 }
 
@@ -2405,11 +2400,15 @@ Licensed under the MIT license.
         };
 
         function computeBarWidth(series) {
-            var pointsize = series.datapoints.pointsize, distance,
-                minDistance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+            var pointsize = series.datapoints.pointsize, minDistance = Number.MAX_VALUE,
+                distance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+
+            if (isFinite(distance)) {
+                minDistance = distance;
+            }
             for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
                 distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
-                if (distance < minDistance) {
+                if (distance < minDistance && isFinite(distance)) {
                     minDistance = distance;
                 }
             }

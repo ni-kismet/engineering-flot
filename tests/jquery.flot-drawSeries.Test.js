@@ -292,6 +292,16 @@ describe('drawSeries', function() {
             expect(ctx.lineTo).not.toHaveBeenCalled();
         });
 
+        it('should work with NaN, Infinity and -Infinity values', function () {
+            spyOn(ctx, 'lineTo').and.callThrough();
+
+            series.datapoints.points = [Infinity, 0, NaN, NaN, 0, Infinity, 10, -Infinity, -Infinity, 10, 3, 5, 8, 2];
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            expect(ctx.lineTo).toHaveBeenCalled();
+        });
+
         it('should draw bars for values', function () {
             series.datapoints.points = [0, 0, 150, 25, 50, 75, 200, 100];
 
@@ -410,6 +420,18 @@ describe('drawSeries', function() {
 
                 expect(plot.getData()[0].bars.barWidth).toBeCloseTo(testVector[i][1], 4);
             }
+        });
+
+        it('should be able to compute barWidth for NaN, Infinity and -Infinity values', function () {
+            var fixture = setFixtures('<div id="test-container" style="width: 600px;height: 400px"><canvas id="theCanvas" style="width: 100%; height: 100%" /></div>'),
+                placeholder = fixture.find('#test-container');
+            placeholder.appendTo(fixture);
+
+            var plot = $.plot(placeholder, [[[Infinity, 0], [0, Infinity], [10, -Infinity], [-Infinity, 10], [3, 5], [8, 2], [NaN, NaN]]], {series: series});
+
+            var axes = plot.getAxes();
+
+            expect(plot.getData()[0].bars.barWidth).toEqual(4);
         });
     });
 });

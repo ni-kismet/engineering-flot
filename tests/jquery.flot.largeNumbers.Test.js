@@ -51,7 +51,7 @@ describe('engineering-flot with large numbers', function() {
 
     describe('on logaritmic axis', function() {
         it('should work with large positive numbers', function () {
-            plot = $.plot(placeholder, [[[0, 2e308], [1, 0]]], {
+            plot = $.plot(placeholder, [[[0, 1.1e308], [1, 0]]], {
                 yaxis: {mode: 'log'}});
 
             var yaxis = plot.getAxes().yaxis;
