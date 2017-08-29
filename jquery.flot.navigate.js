@@ -78,6 +78,8 @@ can set the default in the options.
         }
     };
 
+    var saturated = $.plot.saturated;
+
     function init(plot) {
         var panAxes = null;
 
@@ -306,8 +308,8 @@ can set the default in the options.
                     max = tmp;
                 }
 
-                var offsetBelow = navigationOffset.below - (axis.min - min);
-                var offsetAbove = navigationOffset.above - (axis.max - max);
+                var offsetBelow = $.plot.saturated.saturate(navigationOffset.below - (axis.min - min));
+                var offsetAbove = $.plot.saturated.saturate(navigationOffset.above - (axis.max - max));
                 opts.offset = { below: offsetBelow, above: offsetAbove };
             };
 
@@ -337,9 +339,21 @@ can set the default in the options.
                 }
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = axis.c2p(axis.p2c(axis.min) - d) - axis.c2p(axis.p2c(axis.min)),
-                        navigationOffsetAbove = axis.c2p(axis.p2c(axis.max) - d) - axis.c2p(axis.p2c(axis.max));
-                    opts.offset = { below: navigationOffsetBelow + (opts.offset.below || 0), above: navigationOffsetAbove + (opts.offset.above || 0) };
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) - d) - axis.c2p(axis.p2c(axis.min))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) - d) - axis.c2p(axis.p2c(axis.max)));
+
+                    if (!isFinite(navigationOffsetBelow)) {
+                        navigationOffsetBelow = 0;
+                    }
+
+                    if (!isFinite(navigationOffsetAbove)) {
+                        navigationOffsetAbove = 0;
+                    }
+
+                    opts.offset = {
+                        below: saturated.saturate(navigationOffsetBelow + (opts.offset.below || 0)),
+                        above: saturated.saturate(navigationOffsetAbove + (opts.offset.above || 0))
+                    };
                 }
             });
 
@@ -466,10 +480,19 @@ can set the default in the options.
                 }
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin)),
-                        navigationOffsetAbove = axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax));
-                    axis.options.offset.below += navigationOffsetBelow;
-                    axis.options.offset.above += navigationOffsetAbove;
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax)));
+
+                    if (!isFinite(navigationOffsetBelow)) {
+                        navigationOffsetBelow = 0;
+                    }
+
+                    if (!isFinite(navigationOffsetAbove)) {
+                        navigationOffsetAbove = 0;
+                    }
+
+                    axis.options.offset.below = saturated.saturate(navigationOffsetBelow + (axis.options.offset.below || 0));
+                    axis.options.offset.above = saturated.saturate(navigationOffsetAbove + (axis.options.offset.above || 0));
                 }
             });
 

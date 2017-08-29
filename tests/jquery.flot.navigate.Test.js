@@ -181,6 +181,30 @@ describe("flot navigate plugin", function () {
 
         });
 
+        describe('with large numbers', function() {
+            it ('limits the navigation offsets', function () {
+                var yaxis;
+
+                plot = $.plot(placeholder, [
+                    [
+                        [0, -1e308],
+                        [1000, 1e308]
+                    ]
+                ], options);
+
+                yaxis = plot.getYAxes()[0];
+
+                plot.zoom({
+                    amount: 10e-20
+                });
+
+                expect(yaxis.min).toBe(-Number.MAX_VALUE);
+                expect(yaxis.max).toBe(Number.MAX_VALUE);
+                expect(isFinite(plot.navigationState().yaxis.navigationOffset.below)).toBe(true);
+                expect(isFinite(plot.navigationState().yaxis.navigationOffset.above)).toBe(true);
+            });
+        })
+
     });
 
     describe('zoomOut', function () {
@@ -499,8 +523,32 @@ describe("flot navigate plugin", function () {
             expect(xaxis.max).toBeCloseTo(0.1, 4);
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(10);
-
         });
+
+        describe('with large numbers', function() {
+            it ('limits the navigation offsets', function () {
+                var yaxis;
+
+                plot = $.plot(placeholder, [
+                    [
+                        [0, -1e308],
+                        [1000, 1e308]
+                    ]
+                ], options);
+
+                yaxis = plot.getYAxes()[0];
+
+                plot.smartPan({
+                    x: 0,
+                    y: plot.height(),
+                }, plot.navigationState());
+
+                expect(yaxis.min).toBe(-1e308);
+                expect(yaxis.max).toBeLessThan(0);
+                expect(isFinite(plot.navigationState().yaxis.navigationOffset.below)).toBe(true);
+                expect(isFinite(plot.navigationState().yaxis.navigationOffset.above)).toBe(true);
+            });
+        })
     });
 
     describe('mousePan', function() {
