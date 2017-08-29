@@ -144,4 +144,15 @@ describe('A Flot chart with absolute time axes', function () {
             {v: 2 + tzDiff, label: '12:00:02.000&nbsp;AM<br>1/1/0001'}
         ]);
     });
+
+    describe('date generator', function () {
+        it('clamps values greater than Date() range to the limit of Date()', function () {
+            var dateGenerator = $.plot.dateGenerator;
+
+            expect(dateGenerator(8640000000000001, {}).date).toEqual(new Date(8640000000000000));
+            expect(dateGenerator(8640000000000002, {}).date).toEqual(new Date(8640000000000000));
+            expect(dateGenerator(-8640000000000001, {}).date).toEqual(new Date(-8640000000000000));
+            expect(dateGenerator(-9640000000000000, {}).date).toEqual(new Date(-8640000000000000));
+        });
+    });
 });

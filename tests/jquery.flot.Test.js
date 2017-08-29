@@ -224,6 +224,19 @@ describe('flot', function() {
             expect(axes.yaxis.min).toBe(-20);
             expect(axes.yaxis.max).toBe(120);
         });
+
+        it('should ignore NaN, Infinity and -Infinity values', function () {
+            options.xaxis = {autoscale: 'exact'};
+            options.yaxis = {autoscale: 'exact'};
+            plot = $.plot(placeholder, [[[Infinity, 0], [NaN, NaN], [0, Infinity], [10, -Infinity], [-Infinity, 10], [3, 5], [8, 2]]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(10);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(10);
+        });
     });
 
     describe('computeRangeForDataSeries', function() {

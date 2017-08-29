@@ -751,25 +751,29 @@ Licensed under the MIT license.
     "use strict";
 
     var Canvas = window.Flot.Canvas;
-    var saturated = {
-        saturate: function (a) {
-            if (a === Infinity) {
-                return Number.MAX_VALUE;
-            }
 
-            if (a === -Infinity) {
-                return -Number.MAX_VALUE;
-            }
+    function defaultTickGenerator(axis) {
+        var ticks = [],
+            start = $.plot.saturated.saturate(floorInBase(axis.min, axis.tickSize)),
+            i = 0,
+            v = Number.NaN,
+            prev;
 
-            return a;
-        },
-        delta: function(min, max, noTicks) {
-            return ((max - min) / noTicks) === Infinity ? (max / noTicks - min / noTicks) : (max - min) / noTicks
-        },
-        multiply: function (a, b) {
-            return saturated.saturate(a * b);
+        if (start === -Number.MAX_VALUE) {
+            ticks.push(start);
+            start = floorInBase(axis.min + axis.tickSize, axis.tickSize);
         }
-    };
+
+        do {
+            prev = v;
+            //v = start + i * axis.tickSize;
+            v = $.plot.saturated.multiplyAdd(axis.tickSize, i, start);
+            ticks.push(v);
+            ++i;
+        } while (v < axis.max && v !== prev);
+
+        return ticks;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // The top-level container for the entire plot.
@@ -1414,17 +1418,16 @@ Licensed under the MIT license.
         function processData(prevSeries) {
             var topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
-                fakeInfinity = Number.MAX_VALUE,
                 i, j, k, m,
                 s, points, ps, val, f, p,
                 data, format;
 
             function updateAxis(axis, min, max) {
-                if (min < axis.datamin && min !== -fakeInfinity) {
+                if (min < axis.datamin && min !== -Infinity) {
                     axis.datamin = min;
                 }
 
-                if (max > axis.datamax && max !== fakeInfinity) {
+                if (max > axis.datamax && max !== Infinity) {
                     axis.datamax = max;
                 }
             }
@@ -1535,10 +1538,6 @@ Licensed under the MIT license.
                                     val = +val; // convert to number
                                     if (isNaN(val)) {
                                         val = null;
-                                    } else if (val === Infinity) {
-                                        val = fakeInfinity;
-                                    } else if (val === -Infinity) {
-                                        val = -fakeInfinity;
                                     }
                                 }
 
@@ -1713,10 +1712,18 @@ Licensed under the MIT license.
             // precompute how much the axis is scaling a point
             // in canvas space
             if (axis.direction === "x") {
-                s = axis.scale = plotWidth / Math.abs(t(axis.max) - t(axis.min));
+                if (isFinite(t(axis.max) - t(axis.min))) {
+                    s = axis.scale = plotWidth / Math.abs(t(axis.max) - t(axis.min));
+                } else {
+                    s = axis.scale = 1 / Math.abs($.plot.saturated.delta(t(axis.min), t(axis.max), plotWidth));
+                }
                 m = Math.min(t(axis.max), t(axis.min));
             } else {
-                s = axis.scale = plotHeight / Math.abs(t(axis.max) - t(axis.min));
+                if (isFinite(t(axis.max) - t(axis.min))) {
+                    s = axis.scale = plotHeight / Math.abs(t(axis.max) - t(axis.min));
+                } else {
+                    s = axis.scale = 1 / Math.abs($.plot.saturated.delta(t(axis.min), t(axis.max), plotHeight));
+                }
                 s = -s;
                 m = Math.max(t(axis.max), t(axis.min));
             }
@@ -1725,11 +1732,21 @@ Licensed under the MIT license.
             if (t === identity) {
                 // slight optimization
                 axis.p2c = function(p) {
-                    return (p - m) * s;
+                    if (isFinite(p - m)) {
+                        return (p - m) * s;
+                    } else {
+                        return (p / 4 - m / 4) * s * 4;
+                    }
                 };
             } else {
                 axis.p2c = function(p) {
-                    return (t(p) - m) * s;
+                    var tp = t(p);
+
+                    if (isFinite(tp - m)) {
+                        return (tp - m) * s;
+                    } else {
+                        return (tp / 4 - m / 4) * s * 4;
+                    }
                 };
             }
 
@@ -2086,10 +2103,10 @@ Licensed under the MIT license.
                     if (datamin != null && datamax != null) {
                         min = datamin;
                         max = datamax;
-                        delta = saturated.saturate(max - min);
+                        delta = $.plot.saturated.saturate(max - min);
                         var margin = ((typeof opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
-                        min -= delta * margin;
-                        max += delta * margin;
+                        min = $.plot.saturated.saturate(min - delta * margin);
+                        max = $.plot.saturated.saturate(max + delta * margin);
                     } else {
                         min = opts.min;
                         max = opts.max;
@@ -2134,19 +2151,20 @@ Licensed under the MIT license.
             max = (max != null ? max : 1) + (plotOffset.above || 0);
 
             if (min > max) {
-                axis.min = saturated.saturate(max);
-                axis.max = saturated.saturate(min);
+                var tmp = min;
+                min = max;
+                max = tmp;
                 axis.options.offset = { above: 0, below: 0 };
-            } else {
-                axis.min = saturated.saturate(min);
-                axis.max = saturated.saturate(max);
             }
+
+            axis.min = $.plot.saturated.saturate(min);
+            axis.max = $.plot.saturated.saturate(max);
         }
 
         function computeValuePrecision (min, max, direction, ticks, tickDecimals) {
             var noTicks = fixupNumberOfTicks(direction, surface, ticks);
 
-            var delta = (max - min) / noTicks,
+            var delta = $.plot.saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
@@ -2162,11 +2180,11 @@ Licensed under the MIT license.
                 ++dec;
             }
 
-            return dec;
+            return isFinite(dec) ? dec : 0;
         };
 
         function computeTickSize (min, max, noTicks, tickDecimals) {
-            var delta = saturated.delta(min, max, noTicks),
+            var delta = $.plot.saturated.delta(min, max, noTicks),
                 dec = -Math.floor(Math.log(delta) / Math.LN10);
 
             //if it is called with tickDecimals, then the precision should not be greather then that
@@ -2214,23 +2232,6 @@ Licensed under the MIT license.
 
             return options.tickSize || size;
         };
-
-        function defaultTickGenerator(axis) {
-            var ticks = [],
-                start = floorInBase(axis.min, axis.tickSize),
-                i = 0,
-                v = Number.NaN,
-                prev;
-
-            do {
-                prev = v;
-                v = start + i * axis.tickSize;
-                ticks.push(v);
-                ++i;
-            } while (v < axis.max && v !== prev);
-
-            return ticks;
-        }
 
         function defaultTickFormatter(value, axis, precision) {
             var oldTickDecimals = axis.tickDecimals,
@@ -2321,7 +2322,7 @@ Licensed under the MIT license.
 
             noTicks = fixupNumberOfTicks(axis.direction, surface, opts.ticks);
 
-            axis.delta = saturated.delta(axis.min, axis.max, noTicks);
+            axis.delta = $.plot.saturated.delta(axis.min, axis.max, noTicks);
             var precision = plot.computeValuePrecision(axis.min, axis.max, axis.direction, noTicks, opts.tickDecimals);
 
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
@@ -3045,7 +3046,6 @@ Licensed under the MIT license.
                 format = series.datapoints.format,
                 topSentry = Number.POSITIVE_INFINITY,
                 bottomSentry = Number.NEGATIVE_INFINITY,
-                fakeInfinity = Number.MAX_VALUE,
                 range = {
                     xmin: topSentry,
                     ymin: topSentry,
@@ -3066,10 +3066,14 @@ Licensed under the MIT license.
                     var val = points[j + m],
                         f = format[m];
                     if (f === null || f === undefined) {
-                        continue
+                        continue;
                     }
 
-                    if ((!force && !f.computeRange) || val === fakeInfinity || val === -fakeInfinity) {
+                    if (typeof (isValid) === 'function' && !isValid(val)) {
+                        continue;
+                    }
+
+                    if ((!force && !f.computeRange) || val === Infinity || val === -Infinity) {
                         continue;
                     }
 
@@ -3138,11 +3142,15 @@ Licensed under the MIT license.
         };
 
         function computeBarWidth(series) {
-            var pointsize = series.datapoints.pointsize, distance,
-                minDistance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+            var pointsize = series.datapoints.pointsize, minDistance = Number.MAX_VALUE,
+                distance = series.datapoints.points[pointsize] - series.datapoints.points[0] || 1;
+
+            if (isFinite(distance)) {
+                minDistance = distance;
+            }
             for (var j = pointsize; j < series.datapoints.points.length - pointsize; j += pointsize) {
                 distance = Math.abs(series.datapoints.points[pointsize + j] - series.datapoints.points[j]);
-                if (distance < minDistance) {
+                if (distance < minDistance && isFinite(distance)) {
                     minDistance = distance;
                 }
             }
@@ -3527,12 +3535,52 @@ Licensed under the MIT license.
         });
     };
 
-    $.plot.saturated = saturated;
+    $.plot.linearTickGenerator = defaultTickGenerator;
 
     // round to nearby lower multiple of base
     function floorInBase(n, base) {
         return base * Math.floor(n / base);
     }
+})(jQuery);
+
+(function ($) {
+    'use strict';
+    var saturated = {
+        saturate: function (a) {
+            if (a === Infinity) {
+                return Number.MAX_VALUE;
+            }
+
+            if (a === -Infinity) {
+                return -Number.MAX_VALUE;
+            }
+
+            return a;
+        },
+        delta: function(min, max, noTicks) {
+            return ((max - min) / noTicks) === Infinity ? (max / noTicks - min / noTicks) : (max - min) / noTicks
+        },
+        multiply: function (a, b) {
+            return saturated.saturate(a * b);
+        },
+        // returns c * bInt * a. Beahves properly in the case where c is negative
+        // and bInt * a is bigger that Number.MAX_VALUE (Infinity)
+        multiplyAdd: function (a, bInt, c) {
+            if (isFinite(a * bInt)) {
+                return saturated.saturate(a * bInt + c);
+            } else {
+                var result = c;
+
+                for (var i = 0; i < bInt; i++) {
+                    result += a;
+                }
+
+                return saturated.saturate(result);
+            }
+        }
+    };
+
+    $.plot.saturated = saturated;
 })(jQuery);
 
 (function($) {
