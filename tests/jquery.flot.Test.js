@@ -642,6 +642,52 @@ describe('flot', function() {
         overlapping = function(b1, b2) {
             return (b1.x1 <= b2.x1 && b2.x1 <= b1.x2) || (b2.x1 <= b1.x1 && b1.x1 <= b2.x2);
         }
+
+        describe('for bars', function() {
+            it('should not show endpoints for bars with showTickLabels = all', function() {
+                var plot = $.plot(placeholder, [[[-3, 1], [30, 15], [20, 7], [5, 2]]], {
+                    xaxis: {
+                        autoscale: 'exact',
+                        showTickLabels: 'all'
+                    },
+                    series: {
+                        bars: {
+                            lineWidth: 1,
+                            show: true,
+                            fillColor: 'blue',
+                            barWidth: 0.8
+                        }
+                    }
+                });
+
+                var xaxis = plot.getXAxes()[0],
+                    ticks = xaxis.ticks;
+                expect(xaxis.min).not.toEqual(ticks[0].v);
+                expect(xaxis.max).not.toEqual(ticks[ticks.length - 1].v);
+            });
+
+            it('should show endpoints for multiple series type where showTickLabels = all', function() {
+                var plot = $.plot(placeholder, [{
+                    data: [[-3, 2], [20, 15], [4, 5]],
+                    lines: { show: true, fill: true }
+                }, {
+                    data: [[-3, 1], [30, 15], [20, 7], [5, 2]],
+                    bars: { show: true }
+                }, {
+                    data: [[-1, 1], [30, 10], [20, 7], [6, 3]],
+                    points: { show: true }
+                }], {
+                    xaxis: {
+                        autoscale: 'exact',
+                        showTickLabels: 'all'
+                    }});
+
+                var xaxis = plot.getXAxes()[0],
+                    ticks = xaxis.ticks;
+                expect(xaxis.min).toEqual(ticks[0].v);
+                expect(xaxis.max).toEqual(ticks[ticks.length - 1].v);
+            });
+        });
     });
 
     describe('decimation', function () {
