@@ -1,3 +1,11 @@
+## engineering-flot 0.5.2 ##
+
+### Bug fixes ###
+
+- zoom out instead of zoom in after excesive scroll.
+- loosing precition when panning on x and y in the same time.
+- navigation close to 0 for log axis.
+
 ## engineering-flot 0.5.1 ##
 
 ### Bug fixes ###
