@@ -1,3 +1,10 @@
+## engineering-flot 0.5.3 ##
+
+### Bug fixes ###
+
+- panning log axes on x and y in the same time.
+- endpoint tick labels for bars.
+
 ## engineering-flot 0.5.2 ##
 
 ### Bug fixes ###
