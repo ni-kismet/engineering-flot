@@ -2469,20 +2469,18 @@ Licensed under the MIT license.
             if (axis.options.showTickLabels === 'endpoints') {
                 return true;
             }
+            var notBarSeries = false;
             if (axis.options.showTickLabels === 'all') {
-                var axisSeries = series.filter(function(series) {
+                series.filter(function(series) {
                     return series.xaxis === axis || series.yaxis === axis;
-                });
-
-                //if only bars, do not put endpoint ticks
-                for (var i = 0; i < axisSeries.length; i++) {
-                    if (!axisSeries[i].bars.show) {
-                        return true;
+                }).every(function(item, index, array) {
+                    if (!item.bars.show) {
+                        notBarSeries = true;
                     }
-                }
+                });
             }
 
-            return false;
+            return notBarSeries;
         }
 
         function draw() {
