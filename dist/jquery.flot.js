@@ -2019,7 +2019,7 @@ Licensed under the MIT license.
 
                     //for computing the endpoints precision, transformationHelpers are needed
                     setTransformationHelpers(axis);
-                    setEndpointTicks(axis);
+                    setEndpointTicks(axis, series);
 
                     // find labelWidth/Height for axis
                     measureTickLabels(axis);
@@ -2459,11 +2459,29 @@ Licensed under the MIT license.
             return precision;
         }
 
-        function setEndpointTicks(axis) {
-            if (axis.options.showTickLabels === 'all' || axis.options.showTickLabels === 'endpoints') {
+        function setEndpointTicks(axis, series) {
+            if (isValidEndpointTick(axis, series)) {
                 axis.ticks.unshift(newTick(axis.min, null, axis, 'min'));
                 axis.ticks.push(newTick(axis.max, null, axis, 'max'));
             }
+        }
+
+        function isValidEndpointTick(axis, series) {
+            if (axis.options.showTickLabels === 'endpoints') {
+                return true;
+            }
+            var notBarSeries = false;
+            if (axis.options.showTickLabels === 'all') {
+                series.filter(function(series) {
+                    return series.xaxis === axis || series.yaxis === axis;
+                }).every(function(item, index, array) {
+                    if (!item.bars.show) {
+                        notBarSeries = true;
+                    }
+                });
+            }
+
+            return notBarSeries;
         }
 
         function draw() {

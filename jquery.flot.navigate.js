@@ -462,15 +462,9 @@ can set the default in the options.
 
             var axis, axisMin, axisMax, p, d;
             Object.keys(axes).forEach(function(axisName) {
-                if (panAxes) {
-                    axis = panAxes[0];
-                    axisMin = panAxes[0].min;
-                    axisMax = panAxes[0].max;
-                } else {
-                    axis = axes[axisName];
-                    axisMin = initialState[axisName].axisMin;
-                    axisMax = initialState[axisName].axisMax;
-                }
+                axis = axes[axisName];
+                axisMin = axis.min;
+                axisMax = axis.max;
 
                 d = delta[axis.direction];
                 p = prevDelta[axis.direction];
