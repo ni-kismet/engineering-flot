@@ -644,9 +644,13 @@ describe('flot', function() {
         }
 
         describe('for bars', function() {
-            it('should not show endpoints for bars with showTickLabels = all', function() {
+            it('should not show x axis endpoints for bars with showTickLabels = all', function() {
                 var plot = $.plot(placeholder, [[[-3, 1], [30, 15], [20, 7], [5, 2]]], {
                     xaxis: {
+                        autoscale: 'exact',
+                        showTickLabels: 'all'
+                    },
+                    yaxis: {
                         autoscale: 'exact',
                         showTickLabels: 'all'
                     },
@@ -661,9 +665,13 @@ describe('flot', function() {
                 });
 
                 var xaxis = plot.getXAxes()[0],
+                    yaxis = plot.getYAxes()[0],
                     ticks = xaxis.ticks;
                 expect(xaxis.min).not.toEqual(ticks[0].v);
                 expect(xaxis.max).not.toEqual(ticks[ticks.length - 1].v);
+                ticks = yaxis.ticks;
+                expect(yaxis.min).toEqual(ticks[0].v);
+                expect(yaxis.max).toEqual(ticks[ticks.length - 1].v);
             });
 
             it('should show endpoints for multiple series type where showTickLabels = all', function() {
