@@ -2470,18 +2470,18 @@ Licensed under the MIT license.
             if (axis.options.showTickLabels === 'endpoints') {
                 return true;
             }
-            var notBarSeries = false;
             if (axis.options.showTickLabels === 'all') {
-                series.filter(function(series) {
-                    return series.xaxis === axis || series.yaxis === axis;
-                }).every(function(item, index, array) {
-                    if (!item.bars.show) {
-                        notBarSeries = true;
-                    }
-                });
+                var associatedSeries = series.filter(function(s) {
+                        return s.xaxis === axis || s.yaxis === axis;
+                    }),
+                    notAllBarSeries = associatedSeries.some(function(s) {
+                        return !s.bars.show;
+                    });
+                return associatedSeries.length === 0 || notAllBarSeries;
             }
-
-            return notBarSeries;
+            if (axis.options.showTickLabels === 'major' || axis.options.showTickLabels === 'none') {
+                return false;
+            }
         }
 
         function draw() {
