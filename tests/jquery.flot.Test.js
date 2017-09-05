@@ -784,4 +784,38 @@ describe('flot', function() {
             expect(plot.getData()[0].datapoints.points.length).toBe(4);
         });
     });
+
+    describe('draw axis', function() {
+        var placeholder;
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should draw y axis next to plot', function() {
+            var testVector = [
+                [200000000000, 4000000000000],
+                [200000000000000, 400000000000000],
+                [20000000000000000, 40000000000000000],
+                [200000000000000000, 400000000000000000],
+                [2000000000000000000, 4000000000000000000],
+                [200000000000000000000, 400000000000000000000],
+                [20000000000000000000000, 40000000000000000000000]];
+
+            testVector.forEach(function (testValue) {
+                var plot = $.plot(placeholder, [[1, 2, 3]], {
+                    xaxis: {
+                        autoscale: 'none',
+                        min: testValue[0],
+                        max: testValue[1],
+                        showTickLabels: 'all'
+                    }});
+
+                var yaxis = plot.getYAxes()[0];
+
+                expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+            });
+        });
+    });
 });

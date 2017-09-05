@@ -1224,10 +1224,21 @@ Licensed under the MIT license.
                 }
             });
 
-            plotOffset.left = Math.ceil(Math.max(margins.left, plotOffset.left));
+            if (margins.left > plotOffset.left) {
+                $.each(yaxes, function(_, axis) {
+                    readjustAxisBox(axis, margins);
+                });
+                plotOffset.left = Math.ceil(margins.left)
+            }
             plotOffset.right = Math.ceil(Math.max(margins.right, plotOffset.right));
             plotOffset.top = Math.ceil(Math.max(margins.top, plotOffset.top));
             plotOffset.bottom = Math.ceil(Math.max(margins.bottom, plotOffset.bottom));
+        }
+
+        function readjustAxisBox(axis, margins) {
+            if (axis.position === "left") {
+                axis.box.left += margins.left - plotOffset.left;
+            }
         }
 
         function setupGrid() {
