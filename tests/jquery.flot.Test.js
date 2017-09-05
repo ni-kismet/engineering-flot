@@ -793,7 +793,7 @@ describe('flot', function() {
                 .find('#test-container');
         });
 
-        it('should draw y axis next to plot', function() {
+        it('should draw left y axis next to plot', function() {
             var testVector = [
                 [200000000000, 4000000000000],
                 [200000000000000, 400000000000000],
@@ -815,6 +815,34 @@ describe('flot', function() {
                 var yaxis = plot.getYAxes()[0];
 
                 expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+            });
+        });
+
+        it('should draw right y axis next to plot', function() {
+            var testVector = [
+                [200000000000, 4000000000000],
+                [200000000000000, 400000000000000],
+                [20000000000000000, 40000000000000000],
+                [200000000000000000, 400000000000000000],
+                [2000000000000000000, 4000000000000000000],
+                [200000000000000000000, 400000000000000000000],
+                [20000000000000000000000, 40000000000000000000000]];
+
+            testVector.forEach(function (testValue) {
+                var plot = $.plot(placeholder, [[1, 2, 3]], {
+                    xaxis: {
+                        autoscale: 'none',
+                        min: testValue[0],
+                        max: testValue[1],
+                        showTickLabels: 'all'
+                    },
+                    yaxis: {
+                        position: 'right'
+                    }});
+
+                var yaxis = plot.getYAxes()[0];
+
+                expect(yaxis.box.left).toEqual(plot.getPlotOffset().left + plot.width());
             });
         });
     });
