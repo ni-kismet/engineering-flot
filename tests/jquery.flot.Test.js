@@ -793,98 +793,63 @@ describe('flot', function() {
                 .find('#test-container');
         });
 
-        it('should draw left y axis next to plot', function() {
-            var testVector = [
-                [200000000000, 4000000000000],
-                [200000000000000, 400000000000000],
-                [20000000000000000, 40000000000000000],
-                [200000000000000000, 400000000000000000],
-                [2000000000000000000, 4000000000000000000],
-                [200000000000000000000, 400000000000000000000],
-                [20000000000000000000000, 40000000000000000000000]];
+        ['left', 'right'].forEach(function(axisPosition) {
+            it('should draw ' + axisPosition + ' y axis next to plot', function() {
+                var testVector = [
+                    [200000000000, 4000000000000],
+                    [200000000000000, 400000000000000],
+                    [20000000000000000, 40000000000000000],
+                    [200000000000000000, 400000000000000000],
+                    [2000000000000000000, 4000000000000000000],
+                    [200000000000000000000, 400000000000000000000],
+                    [20000000000000000000000, 40000000000000000000000]];
 
-            testVector.forEach(function (testValue) {
-                var plot = $.plot(placeholder, [[1, 2, 3]], {
-                    xaxis: {
-                        autoscale: 'none',
-                        min: testValue[0],
-                        max: testValue[1],
-                        showTickLabels: 'all'
-                    },
-                    yaxis: {
-                        position: 'left'
-                    }});
+                testVector.forEach(function (testValue) {
+                    var plot = $.plot(placeholder, [[1, 2, 3]], {
+                        xaxis: {
+                            autoscale: 'none',
+                            min: testValue[0],
+                            max: testValue[1],
+                            showTickLabels: 'all'
+                        },
+                        yaxis: {
+                            position: axisPosition
+                        }});
 
-                var yaxis = plot.getYAxes()[0];
+                    var yaxis = plot.getYAxes()[0];
 
-                expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+                    if (axisPosition === 'left') {
+                        expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+                    } else {
+                        expect(yaxis.box.left).toEqual(plot.getPlotOffset().left + plot.width());
+                    }
+                });
             });
         });
 
-        it('should draw right y axis next to plot', function() {
-            var testVector = [
-                [200000000000, 4000000000000],
-                [200000000000000, 400000000000000],
-                [20000000000000000, 40000000000000000],
-                [200000000000000000, 400000000000000000],
-                [2000000000000000000, 4000000000000000000],
-                [200000000000000000000, 400000000000000000000],
-                [20000000000000000000000, 40000000000000000000000]];
+        ['top', 'bottom'].forEach(function(axisPosition) {
+            it('should draw ' + axisPosition + ' x axis next to plot', function() {
+                var testVector = [20, 28, 36, 44, 52, 60, 68, 76, 84];
 
-            testVector.forEach(function (testValue) {
-                var plot = $.plot(placeholder, [[1, 2, 3]], {
-                    xaxis: {
-                        autoscale: 'none',
-                        min: testValue[0],
-                        max: testValue[1],
-                        showTickLabels: 'all'
-                    },
-                    yaxis: {
-                        position: 'right'
-                    }});
+                testVector.forEach(function (fontSize) {
+                    var plot = $.plot(placeholder, [[1, 2, 3]], {
+                        xaxis: {
+                            position: axisPosition
+                        },
+                        yaxis: {
+                            font: {
+                                size: fontSize
+                            }
+                        }});
 
-                var yaxis = plot.getYAxes()[0];
+                    var xaxis = plot.getXAxes()[0];
 
-                expect(yaxis.box.left).toEqual(plot.getPlotOffset().left + plot.width());
-            });
-        });
-
-        it('should draw top x axis next to plot', function() {
-            var testVector = [20, 28, 36, 44, 52, 60, 68, 76, 84];
-
-            testVector.forEach(function (fontSize) {
-                var plot = $.plot(placeholder, [[1, 2, 3]], {
-                    xaxis: {
-                        position: 'top'
-                    },
-                    yaxis: {
-                        font: { size: fontSize
-                        }
-                    }});
-
-                var xaxis = plot.getXAxes()[0];
-
-                expect(xaxis.box.top + xaxis.box.height).toEqual(plot.getPlotOffset().top);
-            });
-        });
-
-        it('should draw bottom x axis next to plot', function() {
-            var testVector = [20, 28, 36, 44, 52, 60, 68, 76, 84];
-
-            testVector.forEach(function (fontSize) {
-                var plot = $.plot(placeholder, [[1, 2, 3]], {
-                    xaxis: {
-                        position: 'bottom'
-                    },
-                    yaxis: {
-                        font: { size: fontSize
-                        }
-                    }});
-
-                var xaxis = plot.getXAxes()[0],
-                    plotOffset = plot.getPlotOffset();
-
-                expect(xaxis.box.top).toEqual(plotOffset.top + plot.height());
+                    if (axisPosition === 'top') {
+                        expect(xaxis.box.top + xaxis.box.height).toEqual(plot.getPlotOffset().top);
+                    } else {
+                        expect(xaxis.box.top).toEqual(plot.getPlotOffset().top + plot.height());
+                    }
+                });
             });
         });
     });
