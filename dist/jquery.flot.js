@@ -1965,10 +1965,32 @@ Licensed under the MIT license.
                 }
             });
 
+            $.each(xaxes.concat(yaxes), function(_, axis) {
+                readjustAxisBox(axis, margins);
+            });
+
             plotOffset.left = Math.ceil(Math.max(margins.left, plotOffset.left));
             plotOffset.right = Math.ceil(Math.max(margins.right, plotOffset.right));
             plotOffset.top = Math.ceil(Math.max(margins.top, plotOffset.top));
             plotOffset.bottom = Math.ceil(Math.max(margins.bottom, plotOffset.bottom));
+        }
+
+        function readjustAxisBox(axis, margins) {
+            if (axis.direction === "x") {
+                if (axis.position === "bottom" && margins.bottom > plotOffset.bottom) {
+                    axis.box.top -= Math.ceil(margins.bottom - plotOffset.bottom);
+                }
+                if (axis.position === "top" && margins.top > plotOffset.top) {
+                    axis.box.top += Math.ceil(margins.top - plotOffset.top);
+                }
+            } else {
+                if (axis.position === "left" && margins.left > plotOffset.left) {
+                    axis.box.left += Math.ceil(margins.left - plotOffset.left);
+                }
+                if (axis.position === "right" && margins.right > plotOffset.right) {
+                    axis.box.left -= Math.ceil(margins.right - plotOffset.right);
+                }
+            }
         }
 
         function setupGrid() {
