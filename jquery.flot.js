@@ -1237,7 +1237,7 @@ Licensed under the MIT license.
         function readjustAxisBox(axis, margins) {
             if (axis.direction === "x") {
                 if (axis.position === "bottom" && margins.bottom > plotOffset.bottom) {
-                    axis.box.top -= Math.ceil(margins.right - plotOffset.bottom);
+                    axis.box.top -= Math.ceil(margins.bottom - plotOffset.bottom);
                 }
                 if (axis.position === "top" && margins.top > plotOffset.top) {
                     axis.box.top += Math.ceil(margins.top - plotOffset.top);

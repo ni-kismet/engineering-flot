@@ -810,6 +810,9 @@ describe('flot', function() {
                         min: testValue[0],
                         max: testValue[1],
                         showTickLabels: 'all'
+                    },
+                    yaxis: {
+                        position: 'left'
                     }});
 
                 var yaxis = plot.getYAxes()[0];
@@ -843,6 +846,45 @@ describe('flot', function() {
                 var yaxis = plot.getYAxes()[0];
 
                 expect(yaxis.box.left).toEqual(plot.getPlotOffset().left + plot.width());
+            });
+        });
+
+        it('should draw top x axis next to plot', function() {
+            var testVector = [20, 28, 36, 44, 52, 60, 68, 76, 84];
+
+            testVector.forEach(function (fontSize) {
+                var plot = $.plot(placeholder, [[1, 2, 3]], {
+                    xaxis: {
+                        position: 'top'
+                    },
+                    yaxis: {
+                        font: { size: fontSize
+                        }
+                    }});
+
+                var xaxis = plot.getXAxes()[0];
+
+                expect(xaxis.box.top + xaxis.box.height).toEqual(plot.getPlotOffset().top);
+            });
+        });
+
+        it('should draw bottom x axis next to plot', function() {
+            var testVector = [20, 28, 36, 44, 52, 60, 68, 76, 84];
+
+            testVector.forEach(function (fontSize) {
+                var plot = $.plot(placeholder, [[1, 2, 3]], {
+                    xaxis: {
+                        position: 'bottom'
+                    },
+                    yaxis: {
+                        font: { size: fontSize
+                        }
+                    }});
+
+                var xaxis = plot.getXAxes()[0],
+                    plotOffset = plot.getPlotOffset();
+
+                expect(xaxis.box.top).toEqual(plotOffset.top + plot.height());
             });
         });
     });
