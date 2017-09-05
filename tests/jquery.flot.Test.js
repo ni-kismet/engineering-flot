@@ -852,5 +852,43 @@ describe('flot', function() {
                 });
             });
         });
+
+        it('should draw y axis next to plot for multiple axis on the same side', function() {
+            var testVector = [
+                [200000000000, 4000000000000],
+                [200000000000000, 400000000000000],
+                [20000000000000000, 40000000000000000],
+                [200000000000000000, 400000000000000000],
+                [2000000000000000000, 4000000000000000000],
+                [200000000000000000000, 400000000000000000000],
+                [20000000000000000000000, 40000000000000000000000]];
+
+            testVector.forEach(function (testValue) {
+                var plot = $.plot(placeholder, [[1, 2, 3]], {
+                    xaxis: {
+                        autoscale: 'none',
+                        min: testValue[0],
+                        max: testValue[1],
+                        showTickLabels: 'all',
+                        font: {
+                            size: 48
+                        }
+                    },
+                    yaxes: [{
+                        position: 'left',
+                        show: true
+                    }, {
+                        position: 'left',
+                        show: true
+                    }, {
+                        position: 'left',
+                        show: true
+                    }]});
+
+                var yaxis = plot.getYAxes()[0];
+
+                expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+            });
+        });
     });
 });
