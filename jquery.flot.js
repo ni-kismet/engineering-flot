@@ -1237,7 +1237,7 @@ Licensed under the MIT license.
 
         function readjustAxisBox(axis, margins) {
             if (axis.position === "left") {
-                axis.box.left += margins.left - plotOffset.left;
+                axis.box.left += Math.ceil(margins.left - plotOffset.left);
             }
         }
 
