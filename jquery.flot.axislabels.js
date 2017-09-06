@@ -177,6 +177,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 var opts = axis.options;
                 var axisName = axis.direction + axis.n;
 
+                axis.labelHeight += axis.boxPosition.centerY;
+                axis.labelWidth += axis.boxPosition.centerX;
+
                 if (!opts || !opts.axisLabel || !axis.show) {
                     return;
                 }
@@ -196,8 +199,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 axisLabel.calculateSize();
 
                 // Incrementing the sizes of the tick labels.
-                axis.labelHeight += axisLabel.height + axis.boxPosition.centerY;
-                axis.labelWidth += axisLabel.width + axis.boxPosition.centerX;
+                axis.labelHeight += axisLabel.height;
+                axis.labelWidth += axisLabel.width;
             });
 
             // TODO - use the drawAxis hook
