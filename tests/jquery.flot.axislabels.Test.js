@@ -137,4 +137,18 @@ describe('flot axis labels plugin', function() {
         expect(axes[0].labelWidth).toBe(axes[1].labelWidth + size);
     });
 
+    it('should reserve the specified space by axis.boxPosition even if axisLabel not visible', function () {
+        var size = 20,
+            options = {
+                yaxes: [
+                    { position: 'right', boxPosition: {centerX: size, centerY: size} },
+                    { position: 'right', show: true }
+                ]
+            };
+        plot = $.plot(placeholder, [[1, 2, 3]], options);
+
+        var axes = plot.getYAxes();
+        expect(axes[0].labelHeight).toBe(axes[1].labelHeight + size);
+        expect(axes[0].labelWidth).toBe(axes[1].labelWidth + size);
+      });
 });
