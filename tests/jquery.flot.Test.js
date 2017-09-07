@@ -215,7 +215,7 @@ describe('flot', function() {
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
-            plot.setData([[[0, 0], [10, 100]]]);
+            plot.setData([[[-0.2, -15], [10, 100]]]);
             plot.setupGrid();
             plot.draw();
 
@@ -223,6 +223,20 @@ describe('flot', function() {
             expect(axes.xaxis.max).toBe(11);
             expect(axes.yaxis.min).toBe(-20);
             expect(axes.yaxis.max).toBe(120);
+        });
+
+        it('should keep the axis min 0 for loose autoscaling if all values are positive', function () {
+            options.xaxis = {autoscale: 'loose', min: 0, max: 50};
+            options.yaxis = {autoscale: 'loose', min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+            plot.setData([[[0, 0.1], [10, 100]]]);
+            plot.setupGrid();
+            plot.draw();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.yaxis.min).toBe(0);
         });
 
         it('should ignore NaN, Infinity and -Infinity values', function () {

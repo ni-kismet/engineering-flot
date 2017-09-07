@@ -52,7 +52,7 @@ describe("flot navigate plugin", function () {
         });
 
         it('works with autoscale', function () {
-            var xaxis, yaxis, 
+            var xaxis, yaxis,
                 opts = {
                     xaxes: [{ autoscale: 'sliding-window' , min: 0, max: 100}],
                     yaxes: [{ autoscale: 'loose' }],
@@ -80,8 +80,8 @@ describe("flot navigate plugin", function () {
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(25);
-            expect(yaxis.min).toBeCloseTo(4.94, 7);
-            expect(yaxis.max).toBeCloseTo(5.06, 7);
+            expect(yaxis.min).toBeCloseTo(4.4, 7);
+            expect(yaxis.max).toBeCloseTo(5.8, 7);
 
             plot.zoom({
                 amount: -2,
@@ -93,8 +93,8 @@ describe("flot navigate plugin", function () {
 
             expect(xaxis.min).toBeCloseTo(6.25, 2);
             expect(xaxis.max).toBe(18.75);
-            expect(yaxis.min).toBe(-2);
-            expect(yaxis.max).toBe(12);
+            expect(yaxis.min).toBeCloseTo(4.8, 7);
+            expect(yaxis.max).toBe(5.4);
 
         });
 

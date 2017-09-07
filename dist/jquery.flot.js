@@ -2129,6 +2129,11 @@ Licensed under the MIT license.
                         var margin = ((typeof opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
                         min = $.plot.saturated.saturate(min - delta * margin);
                         max = $.plot.saturated.saturate(max + delta * margin);
+
+                        // make sure we don't go below zero if all values are positive
+                        if (min < 0 && datamin >= 0) {
+                            min = 0;
+                        }
                     } else {
                         min = opts.min;
                         max = opts.max;
