@@ -257,6 +257,34 @@ describe('CanvasWrapper', function() {
         expect(elem._marker).toBe('_marker');
     });
 
+    it('should work with an object instead of class name', function() {
+        var canvas = newCanvas(placeholder)
+            settings = {
+                style: 'normal',
+                variant: 'normal',
+                weight: '400',
+                size: '40',
+                lineHeight: '23',
+                family: '"Times New Roman"',
+                color: 'rgb(100, 200, 0)'
+            };
+        var info = canvas.getTextInfo('layerA', '123', settings);
+        expect(info.width).toBeGreaterThan(10);
+
+        canvas.addText('layerA', 100, 200, '123', settings);
+        canvas.render();
+        var as = placeholder.find('.layerA div'),
+            style = window.getComputedStyle(as[0]);
+        expect(as.length).toBe(1);
+        expect(style.fontFamily).toBe(settings.family);
+        expect(style.color).toBe(settings.color);
+
+        canvas.removeText('layerA', 100, 200, '123', settings);
+        canvas.render();
+        as = placeholder.find('.a');
+        expect(as.length).toBe(0);
+    });
+
     function newCanvas(placeholder) {
         return new Flot.Canvas('myCanvas', placeholder[0]);
     }
