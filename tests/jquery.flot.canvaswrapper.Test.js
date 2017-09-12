@@ -257,7 +257,7 @@ describe('CanvasWrapper', function() {
         expect(elem._marker).toBe('_marker');
     });
 
-    it('should work with an object instead of class name', function() {
+    it('should work with an object instead of a class name', function() {
         var canvas = newCanvas(placeholder)
             settings = {
                 style: 'normal',
@@ -276,7 +276,7 @@ describe('CanvasWrapper', function() {
         var as = placeholder.find('.layerA div'),
             style = window.getComputedStyle(as[0]);
         expect(as.length).toBe(1);
-        expect(style.fontFamily).toBe(settings.family);
+        expect(style.fontFamily).toContain(settings.family.slice(1, -1));
         expect(style.color).toBe(settings.color);
 
         canvas.removeText('layerA', 100, 200, '123', settings);
