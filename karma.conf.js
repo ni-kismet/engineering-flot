@@ -11,6 +11,7 @@ module.exports = function(config) {
         'jquery.canvaswrapper.js',
         'jquery.colorhelpers.js',
         'jquery.flot.js',
+        'jquery.flot.saturated.js',
         'jquery.flot.uiConstants.js',
         'jquery.flot.logaxis.js',
         'jquery.flot.symbol.js',

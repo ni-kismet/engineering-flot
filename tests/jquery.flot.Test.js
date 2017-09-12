@@ -215,7 +215,7 @@ describe('flot', function() {
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
-            plot.setData([[[0, 0], [10, 100]]]);
+            plot.setData([[[-0.2, -15], [10, 100]]]);
             plot.setupGrid();
             plot.draw();
 
@@ -223,6 +223,33 @@ describe('flot', function() {
             expect(axes.xaxis.max).toBe(11);
             expect(axes.yaxis.min).toBe(-20);
             expect(axes.yaxis.max).toBe(120);
+        });
+
+        it('should keep the axis min 0 for loose autoscaling if all values are positive', function () {
+            options.xaxis = {autoscale: 'loose', min: 0, max: 50};
+            options.yaxis = {autoscale: 'loose', min: 0, max: 100};
+            plot = $.plot(placeholder, [[]], options);
+
+            var axes = plot.getAxes();
+            plot.setData([[[0, 0.1], [10, 100]]]);
+            plot.setupGrid();
+            plot.draw();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.yaxis.min).toBe(0);
+        });
+
+        it('should ignore NaN, Infinity and -Infinity values', function () {
+            options.xaxis = {autoscale: 'exact'};
+            options.yaxis = {autoscale: 'exact'};
+            plot = $.plot(placeholder, [[[Infinity, 0], [NaN, NaN], [0, Infinity], [10, -Infinity], [-Infinity, 10], [3, 5], [8, 2]]], options);
+
+            var axes = plot.getAxes();
+
+            expect(axes.xaxis.min).toBe(0);
+            expect(axes.xaxis.max).toBe(10);
+            expect(axes.yaxis.min).toBe(0);
+            expect(axes.yaxis.max).toBe(10);
         });
     });
 
@@ -629,6 +656,60 @@ describe('flot', function() {
         overlapping = function(b1, b2) {
             return (b1.x1 <= b2.x1 && b2.x1 <= b1.x2) || (b2.x1 <= b1.x1 && b1.x1 <= b2.x2);
         }
+
+        describe('for bars', function() {
+            it('should not show x axis endpoints for bars with showTickLabels = all', function() {
+                var plot = $.plot(placeholder, [[[-3, 1], [30, 15], [20, 7], [5, 2]]], {
+                    xaxis: {
+                        autoscale: 'exact',
+                        showTickLabels: 'all'
+                    },
+                    yaxis: {
+                        autoscale: 'exact',
+                        showTickLabels: 'all'
+                    },
+                    series: {
+                        bars: {
+                            lineWidth: 1,
+                            show: true,
+                            fillColor: 'blue',
+                            barWidth: 0.8
+                        }
+                    }
+                });
+
+                var xaxis = plot.getXAxes()[0],
+                    yaxis = plot.getYAxes()[0],
+                    ticks = xaxis.ticks;
+                expect(xaxis.min).not.toEqual(ticks[0].v);
+                expect(xaxis.max).not.toEqual(ticks[ticks.length - 1].v);
+                ticks = yaxis.ticks;
+                expect(yaxis.min).toEqual(ticks[0].v);
+                expect(yaxis.max).toEqual(ticks[ticks.length - 1].v);
+            });
+
+            it('should show endpoints for multiple series type where showTickLabels = all', function() {
+                var plot = $.plot(placeholder, [{
+                    data: [[-3, 2], [20, 15], [4, 5]],
+                    lines: { show: true, fill: true }
+                }, {
+                    data: [[-3, 1], [30, 15], [20, 7], [5, 2]],
+                    bars: { show: true }
+                }, {
+                    data: [[-1, 1], [30, 10], [20, 7], [6, 3]],
+                    points: { show: true }
+                }], {
+                    xaxis: {
+                        autoscale: 'exact',
+                        showTickLabels: 'all'
+                    }});
+
+                var xaxis = plot.getXAxes()[0],
+                    ticks = xaxis.ticks;
+                expect(xaxis.min).toEqual(ticks[0].v);
+                expect(xaxis.max).toEqual(ticks[ticks.length - 1].v);
+            });
+        });
     });
 
     describe('decimation', function () {
@@ -715,6 +796,113 @@ describe('flot', function() {
 
             plot.setData(data);
             expect(plot.getData()[0].datapoints.points.length).toBe(4);
+        });
+    });
+
+    describe('draw axis', function() {
+        var placeholder;
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        ['left', 'right'].forEach(function(axisPosition) {
+            it('should draw ' + axisPosition + ' y axis next to plot', function() {
+                var testVector = [
+                    [200000000000, 4000000000000],
+                    [200000000000000, 400000000000000],
+                    [20000000000000000, 40000000000000000],
+                    [200000000000000000, 400000000000000000],
+                    [2000000000000000000, 4000000000000000000],
+                    [200000000000000000000, 400000000000000000000],
+                    [20000000000000000000000, 40000000000000000000000]];
+
+                testVector.forEach(function (testValue) {
+                    var plot = $.plot(placeholder, [[1, 2, 3]], {
+                        xaxis: {
+                            autoscale: 'none',
+                            min: testValue[0],
+                            max: testValue[1],
+                            showTickLabels: 'all'
+                        },
+                        yaxis: {
+                            position: axisPosition
+                        }});
+
+                    var yaxis = plot.getYAxes()[0];
+
+                    if (axisPosition === 'left') {
+                        expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+                    } else {
+                        expect(yaxis.box.left).toEqual(plot.getPlotOffset().left + plot.width());
+                    }
+                });
+            });
+        });
+
+        ['top', 'bottom'].forEach(function(axisPosition) {
+            it('should draw ' + axisPosition + ' x axis next to plot', function() {
+                var testVector = [20, 28, 36, 44, 52, 60, 68, 76, 84];
+
+                testVector.forEach(function (fontSize) {
+                    var plot = $.plot(placeholder, [[1, 2, 3]], {
+                        xaxis: {
+                            position: axisPosition
+                        },
+                        yaxis: {
+                            font: {
+                                size: fontSize
+                            }
+                        }});
+
+                    var xaxis = plot.getXAxes()[0];
+
+                    if (axisPosition === 'top') {
+                        expect(xaxis.box.top + xaxis.box.height).toEqual(plot.getPlotOffset().top);
+                    } else {
+                        expect(xaxis.box.top).toEqual(plot.getPlotOffset().top + plot.height());
+                    }
+                });
+            });
+        });
+
+        it('should draw y axis next to plot for multiple axis on the same side', function() {
+            var testVector = [
+                [200000000000, 4000000000000],
+                [200000000000000, 400000000000000],
+                [20000000000000000, 40000000000000000],
+                [200000000000000000, 400000000000000000],
+                [2000000000000000000, 4000000000000000000],
+                [200000000000000000000, 400000000000000000000],
+                [20000000000000000000000, 40000000000000000000000]];
+
+            testVector.forEach(function (testValue) {
+                var plot = $.plot(placeholder, [[1, 2, 3]], {
+                    xaxis: {
+                        autoscale: 'none',
+                        min: testValue[0],
+                        max: testValue[1],
+                        showTickLabels: 'all',
+                        font: {
+                            size: 48
+                        }
+                    },
+                    yaxes: [{
+                        position: 'left',
+                        show: true
+                    }, {
+                        position: 'left',
+                        show: true
+                    }, {
+                        position: 'left',
+                        show: true
+                    }]});
+
+                var yaxis = plot.getYAxes()[0];
+
+                expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+            });
         });
     });
 });

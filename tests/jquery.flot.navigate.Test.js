@@ -51,6 +51,53 @@ describe("flot navigate plugin", function () {
 
         });
 
+        it('works with autoscale', function () {
+            var xaxis, yaxis,
+                opts = {
+                    xaxes: [{ autoscale: 'sliding-window' , min: 0, max: 100}],
+                    yaxes: [{ autoscale: 'loose' }],
+                    zoom: { interactive: true, amount: 10 },
+                    pan: { interactive: true, frameRate: -1 }
+                };
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], opts);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            plot.zoom({
+                amount: 4,
+                center: {
+                    left: 0,
+                    top: plot.height()/2
+                }
+            });
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(25);
+            expect(yaxis.min).toBeCloseTo(4.4, 7);
+            expect(yaxis.max).toBeCloseTo(5.8, 7);
+
+            plot.zoom({
+                amount: -2,
+                center: {
+                    left: plot.width()/2,
+                    top: plot.height()/2
+                }
+            });
+
+            expect(xaxis.min).toBeCloseTo(6.25, 2);
+            expect(xaxis.max).toBe(18.75);
+            expect(yaxis.min).toBeCloseTo(4.8, 7);
+            expect(yaxis.max).toBe(5.4);
+
+        });
+
         it('uses the amount configured in the plot if none is provided', function () {
             var xaxis, yaxis;
 
@@ -180,6 +227,30 @@ describe("flot navigate plugin", function () {
             expect(ticks[middle + 1].v).toBe(4);
 
         });
+
+        describe('with large numbers', function() {
+            it ('limits the navigation offsets', function () {
+                var yaxis;
+
+                plot = $.plot(placeholder, [
+                    [
+                        [0, -1e308],
+                        [1000, 1e308]
+                    ]
+                ], options);
+
+                yaxis = plot.getYAxes()[0];
+
+                plot.zoom({
+                    amount: 10e-20
+                });
+
+                expect(yaxis.min).toBe(-Number.MAX_VALUE);
+                expect(yaxis.max).toBe(Number.MAX_VALUE);
+                expect(isFinite(plot.navigationState().yaxis.navigationOffset.below)).toBe(true);
+                expect(isFinite(plot.navigationState().yaxis.navigationOffset.above)).toBe(true);
+            });
+        })
 
     });
 
@@ -408,6 +479,41 @@ describe("flot navigate plugin", function () {
 
         });
 
+        it('restore xaxis offset on snap on y direction if returns from diagonal snap', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            var initialState = plot.navigationState(0, 0);
+
+            plot.smartPan({
+                x: plot.width(),
+                y: plot.height(),
+            }, initialState);
+
+            expect(xaxis.min).toBe(10);
+            expect(xaxis.max).toBe(20);
+            expect(yaxis.min).toBe(-10);
+            expect(yaxis.max).toBe(0);
+
+            plot.smartPan({
+                x: plot.width(),
+                y: 2,
+            }, initialState);
+
+
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
+        });
+
         it ('can be disabled per axis', function () {
             var xaxis, yaxis;
 
@@ -432,8 +538,64 @@ describe("flot navigate plugin", function () {
             expect(xaxis.max).toBe(10);
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
-
         });
+
+        it('can pan close to 0 for logaxis', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], {
+                xaxes: [{ autoscale: 'exact', mode : 'log'}],
+                yaxes: [{ autoscale: 'exact' }],
+                zoom: { interactive: true, amount: 10 },
+                pan: { interactive: true, frameRate: -1 }
+            });
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            expect(xaxis.min).toBe(0.1);
+            expect(xaxis.max).toBe(10);
+
+            plot.smartPan({
+                x: -plot.width(),
+                y: 0
+            }, plot.navigationState());
+
+            expect(xaxis.min).toBeCloseTo(0.001, 4);
+            expect(xaxis.max).toBeCloseTo(0.1, 4);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
+        });
+
+        describe('with large numbers', function() {
+            it ('limits the navigation offsets', function () {
+                var yaxis;
+
+                plot = $.plot(placeholder, [
+                    [
+                        [0, -1e308],
+                        [1000, 1e308]
+                    ]
+                ], options);
+
+                yaxis = plot.getYAxes()[0];
+
+                plot.smartPan({
+                    x: 0,
+                    y: plot.height(),
+                }, plot.navigationState());
+
+                expect(yaxis.min).toBe(-1e308);
+                expect(yaxis.max).toBeLessThan(0);
+                expect(isFinite(plot.navigationState().yaxis.navigationOffset.below)).toBe(true);
+                expect(isFinite(plot.navigationState().yaxis.navigationOffset.above)).toBe(true);
+            });
+        })
     });
 
     describe('mousePan', function() {

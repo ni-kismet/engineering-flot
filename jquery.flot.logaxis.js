@@ -37,14 +37,19 @@ Set axis.mode to "log" to enable.
     var linearTickGenerator = function (plot, min, max, noTicks) {
         var size = plot.computeTickSize(min, max, noTicks);
         var ticks = [],
-            start = floorInBase(min, size),
+            start = $.plot.saturated.saturate(floorInBase(min, size)),
             i = 0,
             v = Number.NaN,
             prev;
 
+        if (start === -Number.MAX_VALUE) {
+            ticks.push(start);
+            start = floorInBase(min + size, size);
+        }
+
         do {
             prev = v;
-            v = start + i * size;
+            v = $.plot.saturated.multiplyAdd(size, i, start);
             ticks.push(v);
             ++i;
         } while (v < max && v !== prev);
@@ -55,22 +60,13 @@ Set axis.mode to "log" to enable.
         var ticks = [],
             minIdx = -1,
             maxIdx = -1,
-            min = axis.min,
-            max = axis.max,
             surface = plot.getCanvas(),
-            logTickValues = PREFERRED_LOG_TICK_VALUES;
+            logTickValues = PREFERRED_LOG_TICK_VALUES,
+            min = clampAxis(axis, plot),
+            max = axis.max;
 
         if (!noTicks) {
             noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
-        }
-
-        if (min <= 0) {
-            //for empty graph if axis.min is not strictly positive make it 0.1
-            if (axis.datamin === null) {
-                min = axis.min = 0.1;
-            } else {
-                min = processAxisOffset(plot, axis);
-            }
         }
 
         PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
@@ -91,6 +87,10 @@ Set axis.mode to "log" to enable.
             }
         });
 
+        if (maxIdx === -1) {
+            maxIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
+        }
+
         if (maxIdx - minIdx <= noTicks / 4 && logTickValues.length !== EXTENDED_LOG_TICK_VALUES.length) {
             //try with multiple of 5 for tick values
             logTickValues = EXTENDED_LOG_TICK_VALUES;
@@ -107,7 +107,7 @@ Set axis.mode to "log" to enable.
         if (maxIdx - minIdx >= noTicks / 4) {
             for (var idx = maxIdx; idx >= minIdx; idx--) {
                 tickValue = logTickValues[idx];
-                pixelCoord = Math.log(tickValue / min) / Math.log(max / min);
+                pixelCoord = (Math.log(tickValue) - Math.log(min)) / (Math.log(max) - Math.log(min));
                 tick = tickValue;
 
                 if (lastDisplayed === null) {
@@ -138,6 +138,28 @@ Set axis.mode to "log" to enable.
 
         return ticks;
     };
+
+    var clampAxis = function (axis, plot) {
+        var min = axis.min,
+            max = axis.max;
+
+        if (min <= 0) {
+            //for empty graph if axis.min is not strictly positive make it 0.1
+            if (axis.datamin === null) {
+                min = axis.min = 0.1;
+            } else {
+                min = processAxisOffset(plot, axis);
+            }
+
+            if (max < min) {
+                axis.max = axis.datamax !== null ? axis.datamax : axis.options.max;
+                axis.options.offset.below = 0;
+                axis.options.offset.above = 0;
+            }
+        }
+
+        return min;
+    }
 
     var logTickFormatter = function (value, axis, precision) {
         var tenExponent = value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0;
@@ -211,6 +233,16 @@ Set axis.mode to "log" to enable.
         return base * Math.floor(n / base);
     }
 
+    function setDataminRange(plot, axis) {
+        if (axis.options.mode === 'log' && axis.datamin <= 0) {
+            if (axis.datamin === null) {
+                axis.datamin = 0.1;
+            } else {
+                axis.datamin = processAxisOffset(plot, axis);
+            }
+        }
+    }
+
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
             defaultTickFormatter = plot.defaultTickFormatter;
@@ -229,6 +261,7 @@ Set axis.mode to "log" to enable.
                     axis.options.transform = logTransform;
                     axis.options.inverseTransform = logInverseTransform;
                     axis.options.autoscaleMargin = 0;
+                    plot.hooks.setRange.push(setDataminRange);
                 }
             });
         });

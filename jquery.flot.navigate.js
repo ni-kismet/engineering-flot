@@ -78,6 +78,8 @@ can set the default in the options.
         }
     };
 
+    var saturated = $.plot.saturated;
+
     function init(plot) {
         var panAxes = null;
 
@@ -125,24 +127,26 @@ can set the default in the options.
         }
 
         var prevCursor = 'default',
-            startPageX = 0,
-            startPageY = 0,
             panHint = null,
             panTimeout = null,
             plotState;
 
-        plot.navigationState = function() {
+        plot.navigationState = function(startPageX, startPageY) {
             var axes = this.getAxes();
             var result = {};
             Object.keys(axes).forEach(function(axisName) {
                 var axis = axes[axisName];
                 result[axisName] = {
-                    navigationOffset: axis.options.offset || {below: 0, above: 0},
+                    navigationOffset: { below: axis.options.offset.below || 0,
+                        above: axis.options.offset.above || 0},
                     axisMin: axis.min,
-                    axisMax: axis.max
+                    axisMax: axis.max,
+                    diagMode: false
                 }
             });
 
+            result.startPageX = startPageX || 0;
+            result.startPageY = startPageY || 0;
             return result;
         }
 
@@ -174,9 +178,7 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            startPageX = e.pageX;
-            startPageY = e.pageY;
-            plotState = plot.navigationState();
+            plotState = plot.navigationState(e.pageX, e.pageY);
         }
 
         function onDrag(e) {
@@ -184,8 +186,8 @@ can set the default in the options.
 
             if (frameRate === -1) {
                 plot.smartPan({
-                    x: startPageX - e.pageX,
-                    y: startPageY - e.pageY
+                    x: plotState.startPageX - e.pageX,
+                    y: plotState.startPageY - e.pageY
                 }, plotState, panAxes);
 
                 return;
@@ -195,8 +197,8 @@ can set the default in the options.
 
             panTimeout = setTimeout(function() {
                 plot.smartPan({
-                    x: startPageX - e.pageX,
-                    y: startPageY - e.pageY
+                    x: plotState.startPageX - e.pageX,
+                    y: plotState.startPageY - e.pageY
                 }, plotState, panAxes);
 
                 panTimeout = null;
@@ -211,8 +213,8 @@ can set the default in the options.
 
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.smartPan({
-                x: startPageX - e.pageX,
-                y: startPageY - e.pageY
+                x: plotState.startPageX - e.pageX,
+                y: plotState.startPageY - e.pageY
             }, plotState, panAxes);
             panHint = null;
         }
@@ -306,8 +308,8 @@ can set the default in the options.
                     max = tmp;
                 }
 
-                var offsetBelow = navigationOffset.below - (axis.min - min);
-                var offsetAbove = navigationOffset.above - (axis.max - max);
+                var offsetBelow = $.plot.saturated.saturate(navigationOffset.below - (axis.min - min));
+                var offsetAbove = $.plot.saturated.saturate(navigationOffset.above - (axis.max - max));
                 opts.offset = { below: offsetBelow, above: offsetAbove };
             };
 
@@ -337,9 +339,21 @@ can set the default in the options.
                 }
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = axis.c2p(axis.p2c(axis.min) - d) - axis.c2p(axis.p2c(axis.min)),
-                        navigationOffsetAbove = axis.c2p(axis.p2c(axis.max) - d) - axis.c2p(axis.p2c(axis.max));
-                    opts.offset = { below: navigationOffsetBelow + (opts.offset.below || 0), above: navigationOffsetAbove + (opts.offset.above || 0) };
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) - d) - axis.c2p(axis.p2c(axis.min))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) - d) - axis.c2p(axis.p2c(axis.max)));
+
+                    if (!isFinite(navigationOffsetBelow)) {
+                        navigationOffsetBelow = 0;
+                    }
+
+                    if (!isFinite(navigationOffsetAbove)) {
+                        navigationOffsetAbove = 0;
+                    }
+
+                    opts.offset = {
+                        below: saturated.saturate(navigationOffsetBelow + (opts.offset.below || 0)),
+                        above: saturated.saturate(navigationOffsetAbove + (opts.offset.above || 0))
+                    };
                 }
             });
 
@@ -384,27 +398,56 @@ can set the default in the options.
 
             return delta;
         }
+
+        var isDiagonalMode = function(delta) {
+            if (Math.abs(delta.x) > 0 && Math.abs(delta.y) > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        var restoreAxisOffset = function(axes, initialState, delta) {
+            var axis;
+            Object.keys(axes).forEach(function(axisName) {
+                axis = axes[axisName];
+                if (delta[axis.direction] === 0) {
+                    axis.options.offset.below = initialState[axisName].navigationOffset.below;
+                    axis.options.offset.above = initialState[axisName].navigationOffset.above;
+                }
+            });
+        }
+
         var prevDelta = { x: 0, y: 0 };
         plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
-            var snap = shouldSnap(delta);
+            var snap = shouldSnap(delta),
+                axes = plot.getAxes();
             delta = adjustDeltaToSnap(delta);
+
+            if (isDiagonalMode(delta)) {
+                initialState.diagMode = true;
+            }
+
+            if (snap && initialState.diagMode === true) {
+                initialState.diagMode = false;
+                restoreAxisOffset(axes, initialState, delta);
+            }
 
             if (snap) {
                 panHint = {
                     start: {
-                        x: startPageX - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: {
-                        x: startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
                     }
                 }
             } else {
                 panHint = {
                     start: {
-                        x: startPageX - plot.offset().left + plot.getPlotOffset().left,
-                        y: startPageY - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: false
                 }
@@ -413,37 +456,37 @@ can set the default in the options.
             if (isNaN(delta.x)) delta.x = 0;
             if (isNaN(delta.y)) delta.y = 0;
 
-            var axes;
             if (panAxes) {
                 axes = panAxes;
-            } else {
-                axes = plot.getAxes();
             }
 
+            var axis, axisMin, axisMax, p, d;
             Object.keys(axes).forEach(function(axisName) {
-                var axis, axisMin, axisMax;
-                if (panAxes) {
-                    axis = panAxes[0];
-                    axisMin = panAxes[0].min;
-                    axisMax = panAxes[0].max;
-                } else {
-                    axis = axes[axisName];
-                    axisMin = initialState[axisName].axisMin;
-                    axisMax = initialState[axisName].axisMax;
-                }
+                axis = axes[axisName];
+                axisMin = axis.min;
+                axisMax = axis.max;
 
-                var opts = axis.options,
-                    d = delta[axis.direction],
-                    p = prevDelta[axis.direction];
+                d = delta[axis.direction];
+                p = prevDelta[axis.direction];
 
-                if (opts.disablePan === true) {
+                if (axis.options.disablePan === true) {
                     return;
                 }
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin)),
-                        navigationOffsetAbove = axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax));
-                    opts.offset = { below: navigationOffsetBelow + (opts.offset.below), above: navigationOffsetAbove + (opts.offset.above) };
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax)));
+
+                    if (!isFinite(navigationOffsetBelow)) {
+                        navigationOffsetBelow = 0;
+                    }
+
+                    if (!isFinite(navigationOffsetAbove)) {
+                        navigationOffsetAbove = 0;
+                    }
+
+                    axis.options.offset.below = saturated.saturate(navigationOffsetBelow + (axis.options.offset.below || 0));
+                    axis.options.offset.above = saturated.saturate(navigationOffsetAbove + (axis.options.offset.above || 0));
                 }
             });
 
