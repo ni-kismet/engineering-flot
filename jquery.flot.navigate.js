@@ -227,7 +227,6 @@ can set the default in the options.
             var o = plot.getOptions();
             if (o.zoom.interactive) {
                 eventHolder.mousewheel(onMouseWheel);
-                eventHolder.dblclick(onDblClick);
             }
 
             if (o.pan.interactive) {
@@ -236,6 +235,9 @@ can set the default in the options.
                 }, onDragStart);
                 eventHolder.bind("drag", onDrag);
                 eventHolder.bind("dragend", onDragEnd);
+            }
+
+            if (o.zoom.interactive || o.pan.interactive) {
                 eventHolder.dblclick(onDblClick);
             }
         }
@@ -500,11 +502,11 @@ can set the default in the options.
         };
 
         function shutdown(plot, eventHolder) {
-            eventHolder.unbind(plot.getOptions().zoom.trigger, onZoomClick);
             eventHolder.unbind("mousewheel", onMouseWheel);
             eventHolder.unbind("dragstart", onDragStart);
             eventHolder.unbind("drag", onDrag);
             eventHolder.unbind("dragend", onDragEnd);
+            eventHolder.unbind("dblclick", onDblClick);
 
             if (panTimeout) clearTimeout(panTimeout);
         }
