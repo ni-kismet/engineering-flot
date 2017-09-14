@@ -168,4 +168,16 @@ describe("flot navigate plugin interactions", function () {
         expect(spyRecenter).toHaveBeenCalled();
     });
 
+    it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
+        plot = $.plot(placeholder, [[]], options);
+
+        var eventHolder = plot.getEventHolder(),
+            spy = spyOn(eventHolder, 'removeEventListener').and.callThrough();
+
+        plot = $.plot(placeholder, [[]], options);
+
+        expect(spy).toHaveBeenCalledWith('mousewheel', jasmine.any(Function), jasmine.any(Boolean))
+        expect(spy).toHaveBeenCalledWith('dblclick', jasmine.any(Function), jasmine.any(Boolean));
+    });
+
 });
