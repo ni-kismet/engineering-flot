@@ -1229,7 +1229,7 @@ Licensed under the MIT license.
                 offset[a] = margins[a] - plotOffset[a];
             }
             $.each(xaxes.concat(yaxes), function(_, axis) {
-                allignAxisWithGrid(axis, offset, function (offset) {
+                alignAxisWithGrid(axis, offset, function (offset) {
                     return offset > 0;
                 });
             });
@@ -1240,7 +1240,7 @@ Licensed under the MIT license.
             plotOffset.bottom = Math.ceil(Math.max(margins.bottom, plotOffset.bottom));
         }
 
-        function allignAxisWithGrid(axis, offset, isValid) {
+        function alignAxisWithGrid(axis, offset, isValid) {
             if (axis.direction === "x") {
                 if (axis.position === "bottom" && isValid(offset.bottom)) {
                     axis.box.top -= Math.ceil(offset.bottom);
@@ -1334,7 +1334,7 @@ Licensed under the MIT license.
                 }
                 $.each(xaxes.concat(yaxes), function(_, axis) {
                     //move to axis box acording to the grid.margins
-                    allignAxisWithGrid(axis, options.grid.margin, function(offset) {
+                    alignAxisWithGrid(axis, options.grid.margin, function(offset) {
                         return offset !== undefined && offset !== null;
                     });
                 });
