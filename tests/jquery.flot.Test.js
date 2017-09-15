@@ -436,6 +436,30 @@ describe('flot', function() {
             expect(item.datapoint[1]).toEqual(sampledata[0][1]);
             expect(item.dataIndex).toEqual(0);
         });
+
+        it('should be able to search in a certain radius', function() {
+            plot = $.plot(placeholder, [sampledata], {});
+            var item = plot.findNearbyItem(0, 0, function() {
+                return true;
+            }, 1);
+            expect(item).toEqual(null);
+
+            item = plot.findNearbyItem(0, 0, function() {
+                return true;
+            }, 1000);
+            expect(item).not.toEqual(null);
+        });
+
+        it('should work for bars', function() {
+            plot = $.plot(placeholder, [sampledata], {
+                bars: {show: true}
+            });
+
+            item = plot.findNearbyItem(0, 0, function() {
+                return true;
+            }, 1000);
+            expect(item).not.toEqual(null);
+        });
     });
 
     describe('setupTickFormatter', function() {

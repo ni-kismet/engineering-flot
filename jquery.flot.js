@@ -2461,7 +2461,7 @@ Licensed under the MIT license.
             series.bars.barWidth = 0.8 * minDistance;
         }
 
-        // returns the data item the mouse is over, or null if none is found
+        // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
         function findNearbyItem(mouseX, mouseY, seriesFilter, radius, computeDistance) {
             var maxDistance = radius,
                 smallestDistance = maxDistance * maxDistance + 1,
@@ -2497,8 +2497,6 @@ Licensed under the MIT license.
                     y = points[j + 1];
                     if (x == null) continue;
 
-                    // For points and lines, the cursor must be within a
-                    // certain distance to the data point
                     if (x - mx > maxx || x - mx < -maxx ||
                         y - my > maxy || y - my < -maxy) {
                         continue;
