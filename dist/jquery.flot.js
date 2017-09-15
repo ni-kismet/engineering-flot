@@ -442,7 +442,7 @@
                 this.SVGContainer.style.bottom = '0px';
                 this.SVGContainer.style.right = '0px';
                 this.SVGContainer.style.pointerEvents = 'none';
-                this.element.parentNode.insertAfter(this.SVGContainer, this.element);
+                this.element.parentNode.insertBefore(this.SVGContainer, this.element.nextSibling);
 
                 svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svgElement.style.width = '100%';
