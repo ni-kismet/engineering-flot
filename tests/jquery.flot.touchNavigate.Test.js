@@ -18,7 +18,7 @@ describe("flot touch navigate plugin", function () {
     it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
         plot = $.plot(placeholder, [[]], options);
 
-        var eventPlaceholder = plot.getEventHolder();
+        var eventPlaceholder = plot.getEventHolder(),
             spy = spyOn(eventPlaceholder, 'removeEventListener').and.callThrough();
 
         plot = $.plot(placeholder, [[]], options);
