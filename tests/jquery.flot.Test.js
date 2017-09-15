@@ -905,4 +905,121 @@ describe('flot', function() {
             });
         });
     });
+
+    describe('Grid margin', function() {
+        var placeholder;
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should change plot dimensions', function() {
+            var testVector = [
+                [-20, 0, 0, 0],
+                [20, 0, 0, 0],
+                [20, -20, 0, 0],
+                [-20, -20, 0, 0],
+                [-20, 20, 0, 0],
+                [20, 20, 0, 0],
+                [0, 0, -20, 0],
+                [0, 0, 20, 0],
+                [0, 0, -20, 20],
+                [0, 0, -20, -20],
+                [0, 0, 20, 20],
+                [0, 0, 20, -20],
+                [20, 20, 20, 20],
+                [-20, -20, -20, -20]
+            ];
+
+            testVector.forEach(function (testValue) {
+                var plot1 = $.plot(placeholder, [[]], {}),
+                    plot2 = $.plot(placeholder, [[]], {
+                        grid: { margin: {
+                            left: testValue[0],
+                            right: testValue[1],
+                            top: testValue[2],
+                            bottom: testValue[3]
+                        }}});
+
+                expect(plot2.width()).toBe(plot1.width() - testValue[0] - testValue[1]);
+                expect(plot2.height()).toBe(plot1.height() - testValue[2] - testValue[3]);
+            });
+        });
+
+        it('should move the axis according to grid margin', function() {
+            var testVector = [
+                [-20, 0, 0, 0],
+                [20, 0, 0, 0],
+                [20, -20, 0, 0],
+                [-20, -20, 0, 0],
+                [-20, 20, 0, 0],
+                [20, 20, 0, 0],
+                [0, 0, -20, 0],
+                [0, 0, 20, 0],
+                [0, 0, -20, 20],
+                [0, 0, -20, -20],
+                [0, 0, 20, 20],
+                [0, 0, 20, -20],
+                [20, 20, 20, 20],
+                [-20, -20, -20, -20]
+            ];
+
+            testVector.forEach(function (testValue) {
+                var plot1 = $.plot(placeholder, [[]], {
+                        xaxes: [{
+                            position: 'bottom',
+                            show: true
+                        }, {
+                            position: 'top',
+                            show: true
+                        }],
+                        yaxes: [{
+                            position: 'left',
+                            show: true
+                        }, {
+                            position: 'right',
+                            show: true
+                        }]
+                    }),
+                    plot2 = $.plot(placeholder, [[]], {
+                        xaxes: [{
+                            position: 'bottom',
+                            show: true
+                        }, {
+                            position: 'top',
+                            show: true
+                        }],
+                        yaxes: [{
+                            position: 'left',
+                            show: true
+                        }, {
+                            position: 'right',
+                            show: true
+                        }],
+                        grid: { margin: {
+                            left: testValue[0],
+                            right: testValue[1],
+                            top: testValue[2],
+                            bottom: testValue[3]
+                        }}});
+
+                var yaxis1 = plot1.getYAxes()[0],
+                    yaxis2 = plot2.getYAxes()[0];
+                expect(yaxis1.box.left + testValue[0]).toEqual(yaxis2.box.left);
+
+                yaxis1 = plot1.getYAxes()[1];
+                yaxis2 = plot2.getYAxes()[1];
+                expect(yaxis1.box.left - testValue[1]).toEqual(yaxis2.box.left);
+
+                var xaxis1 = plot1.getXAxes()[0],
+                    xaxis2 = plot2.getXAxes()[0];
+                expect(xaxis1.box.top - testValue[3]).toEqual(xaxis2.box.top);
+
+                xaxis1 = plot1.getXAxes()[1];
+                xaxis2 = plot2.getXAxes()[1];
+                expect(xaxis1.box.top + testValue[2]).toEqual(xaxis2.box.top);
+            });
+        });
+    })
 });

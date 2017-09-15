@@ -1943,12 +1943,13 @@ Licensed under the MIT license.
                 }
             }
 
-            var margins = {
-                left: minMargin,
-                right: minMargin,
-                top: minMargin,
-                bottom: minMargin
-            };
+            var a, offset = {},
+                margins = {
+                    left: minMargin,
+                    right: minMargin,
+                    top: minMargin,
+                    bottom: minMargin
+                };
 
             // check axis labels, note we don't check the actual
             // labels but instead use the overall width/height to not
@@ -1965,8 +1966,13 @@ Licensed under the MIT license.
                 }
             });
 
+            for (a in margins) {
+                offset[a] = margins[a] - plotOffset[a];
+            }
             $.each(xaxes.concat(yaxes), function(_, axis) {
-                readjustAxisBox(axis, margins);
+                allignAxisWithGrid(axis, offset, function (offset) {
+                    return offset > 0;
+                });
             });
 
             plotOffset.left = Math.ceil(Math.max(margins.left, plotOffset.left));
@@ -1975,20 +1981,20 @@ Licensed under the MIT license.
             plotOffset.bottom = Math.ceil(Math.max(margins.bottom, plotOffset.bottom));
         }
 
-        function readjustAxisBox(axis, margins) {
+        function allignAxisWithGrid(axis, offset, isValid) {
             if (axis.direction === "x") {
-                if (axis.position === "bottom" && margins.bottom > plotOffset.bottom) {
-                    axis.box.top -= Math.ceil(margins.bottom - plotOffset.bottom);
+                if (axis.position === "bottom" && isValid(offset.bottom)) {
+                    axis.box.top -= Math.ceil(offset.bottom);
                 }
-                if (axis.position === "top" && margins.top > plotOffset.top) {
-                    axis.box.top += Math.ceil(margins.top - plotOffset.top);
+                if (axis.position === "top" && isValid(offset.top)) {
+                    axis.box.top += Math.ceil(offset.top);
                 }
             } else {
-                if (axis.position === "left" && margins.left > plotOffset.left) {
-                    axis.box.left += Math.ceil(margins.left - plotOffset.left);
+                if (axis.position === "left" && isValid(offset.left)) {
+                    axis.box.left += Math.ceil(offset.left);
                 }
-                if (axis.position === "right" && margins.right > plotOffset.right) {
-                    axis.box.left -= Math.ceil(margins.right - plotOffset.right);
+                if (axis.position === "right" && isValid(offset.right)) {
+                    axis.box.left -= Math.ceil(offset.right);
                 }
             }
         }
@@ -2000,14 +2006,12 @@ Licensed under the MIT license.
             // Initialize the plot's offset from the edge of the canvas
 
             for (a in plotOffset) {
-                var margin = options.grid.margin || 0;
-                plotOffset[a] = typeof margin === "number" ? margin : margin[a] || 0;
+                plotOffset[a] = 0;
             }
 
             executeHooks(hooks.processOffset, [plotOffset]);
 
             // If the grid is visible, add its border width to the offset
-
             for (a in plotOffset) {
                 if (typeof (options.grid.borderWidth) === "object") {
                     plotOffset[a] += showGrid ? options.grid.borderWidth[a] : 0;
@@ -2060,6 +2064,20 @@ Licensed under the MIT license.
 
                 $.each(allocatedAxes, function(_, axis) {
                     allocateAxisBoxSecondPhase(axis);
+                });
+            }
+
+            //adjust axis and plotOffset according to grid.margins
+            if (options.grid.margin) {
+                for (a in plotOffset) {
+                    var margin = options.grid.margin || 0;
+                    plotOffset[a] += typeof margin === "number" ? margin : margin[a] || 0;
+                }
+                $.each(xaxes.concat(yaxes), function(_, axis) {
+                    //move to axis box acording to the grid.margins
+                    allignAxisWithGrid(axis, options.grid.margin, function(offset) {
+                        return offset !== undefined && offset !== null;
+                    });
                 });
             }
 
