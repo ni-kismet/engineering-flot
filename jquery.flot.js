@@ -2492,62 +2492,29 @@ Licensed under the MIT license.
                     maxy = Number.MAX_VALUE;
                 }
 
-                if (s.lines.show || s.points.show) {
-                    for (j = 0; j < points.length; j += ps) {
-                        x = points[j];
-                        y = points[j + 1];
-                        if (x == null) continue;
+                for (j = 0; j < points.length; j += ps) {
+                    x = points[j];
+                    y = points[j + 1];
+                    if (x == null) continue;
 
-                        // For points and lines, the cursor must be within a
-                        // certain distance to the data point
-                        if (x - mx > maxx || x - mx < -maxx ||
-                            y - my > maxy || y - my < -maxy) {
-                            continue;
-                        }
-
-                        // We have to calculate distances in pixels, not in
-                        // data units, because the scales of the axes may be different
-                        var dx = Math.abs(axisx.p2c(x) - mouseX),
-                            dy = Math.abs(axisy.p2c(y) - mouseY),
-                            dist = computeDistance ? computeDistance(dx, dy) : dx * dx + dy * dy;
-
-                        // use <= to ensure last point takes precedence
-                        // (last generally means on top of)
-                        if (dist < smallestDistance) {
-                            smallestDistance = dist;
-                            item = [i, j / ps];
-                        }
-                    }
-                }
-
-                if (s.bars.show && !item) {
-                    // no other point can be nearby
-                    var barLeft, barRight;
-
-                    switch (s.bars.align) {
-                        case "left":
-                            barLeft = 0;
-                            break;
-                        case "right":
-                            barLeft = -s.bars.barWidth;
-                            break;
-                        default:
-                            barLeft = -s.bars.barWidth / 2;
+                    // For points and lines, the cursor must be within a
+                    // certain distance to the data point
+                    if (x - mx > maxx || x - mx < -maxx ||
+                        y - my > maxy || y - my < -maxy) {
+                        continue;
                     }
 
-                    barRight = barLeft + s.bars.barWidth;
+                    // We have to calculate distances in pixels, not in
+                    // data units, because the scales of the axes may be different
+                    var dx = Math.abs(axisx.p2c(x) - mouseX),
+                        dy = Math.abs(axisy.p2c(y) - mouseY),
+                        dist = computeDistance ? computeDistance(dx, dy) : dx * dx + dy * dy;
 
-                    for (j = 0; j < points.length; j += ps) {
-                        x = points[j];
-                        y = points[j + 1];
-                        var b = points[j + 2];
-                        if (x == null) continue;
-
-                        // for a bar graph, the cursor must be inside the bar
-                        if (mx >= x + barLeft && mx <= x + barRight &&
-                                my >= Math.min(b, y) && my <= Math.max(b, y)) {
-                            item = [i, j / ps];
-                        }
+                    // use <= to ensure last point takes precedence
+                    // (last generally means on top of)
+                    if (dist < smallestDistance) {
+                        smallestDistance = dist;
+                        item = [i, j / ps];
                     }
                 }
             }
