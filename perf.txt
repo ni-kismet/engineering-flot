@@ -1,0 +1,6 @@
+PhantomJS 2.1.1 (Windows 8 0.0.0): '30 seconds'
+
+Firefox 55.0.0 (Windows 10 0.0.0): '30 seconds'
+
+Chrome 60.0.3112 (Windows 7 0.0.0): '30 seconds'
+

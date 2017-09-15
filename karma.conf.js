@@ -34,6 +34,15 @@ module.exports = function(config) {
 
     var settings = {
 
+        logLevel: 'debug',
+        client: { captureConsole: true },
+        browserConsoleLogOptions: {
+          level:  'debug',
+          format: '"%b": "%m"',
+          path:   'perf.txt',
+          terminal: true
+        },
+
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: '',
 

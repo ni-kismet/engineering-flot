@@ -26,6 +26,8 @@ describe('flot', function() {
             expect(axes.xaxis.max).toBe(50);
             expect(axes.yaxis.min).toBe(0);
             expect(axes.yaxis.max).toBe(100);
+
+            console.log("30 seconds");
         });
 
         it('should swap the axis min and max for min > max', function () {
