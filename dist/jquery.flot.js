@@ -2074,7 +2074,6 @@ Licensed under the MIT license.
                     plotOffset[a] += typeof margin === "number" ? margin : margin[a] || 0;
                 }
                 $.each(xaxes.concat(yaxes), function(_, axis) {
-                    //move to axis box acording to the grid.margins
                     alignAxisWithGrid(axis, options.grid.margin, function(offset) {
                         return offset !== undefined && offset !== null;
                     });
