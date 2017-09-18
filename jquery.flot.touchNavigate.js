@@ -86,7 +86,6 @@
 
             drag: function(e) {
                 presetNavigationState(e, 'pinch', gestureState);
-                gestureState.twoTouches = isPinchEvent(e);
                 plot.pan({
                     left: delta(e, 'pinch', gestureState).x,
                     top: delta(e, 'pinch', gestureState).y,
@@ -168,16 +167,21 @@
             zoomAmount = pinchDistance(e) / gestureState.prevDistance,
             dist = pinchDistance(e);
 
-        center.left = getPoint(e, 'pinch').x - offset.left;
-        center.top = getPoint(e, 'pinch').y - offset.top;
+        if (gestureState.twoTouches || Math.abs(dist - gestureState.prevDistance) > 25) {
+            center.left = getPoint(e, 'pinch').x - offset.left;
+            center.top = getPoint(e, 'pinch').y - offset.top;
 
-        // send the computed touched axis to the zoom function so that it only zooms on that one
-        plot.zoom({
-            center: center,
-            amount: zoomAmount,
-            axes: navigationState.touchedAxis
-        });
-        gestureState.prevDistance = dist;
+            // send the computed touched axis to the zoom function so that it only zooms on that one
+            plot.zoom({
+                center: center,
+                amount: zoomAmount,
+                axes: navigationState.touchedAxis
+            });
+            gestureState.prevDistance = dist;
+
+            //activate zomm mode
+            gestureState.twoTouches = true;
+        }
     }
 
     function wasPinchEvent(e, gestureState) {
