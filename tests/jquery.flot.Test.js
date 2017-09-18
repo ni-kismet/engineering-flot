@@ -907,11 +907,13 @@ describe('flot', function() {
     });
 
     describe('Grid margin', function() {
-        var placeholder;
+        var placeholder, placeholder2, fixtures;
 
         beforeEach(function() {
-            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
-                .find('#test-container');
+            fixtures = setFixtures('<div id="test-container" style="width: 600px;height: 400px"/>' +
+                '<div id="test-container2" style="width: 600px;height: 400px"/>');
+            placeholder = fixtures.find('#test-container');
+            placeholder2 = fixtures.find('#test-container2');
         });
 
         it('should change plot dimensions', function() {
@@ -934,7 +936,7 @@ describe('flot', function() {
 
             testVector.forEach(function (testValue) {
                 var plot1 = $.plot(placeholder, [[]], {}),
-                    plot2 = $.plot(placeholder, [[]], {
+                    plot2 = $.plot(placeholder2, [[]], {
                         grid: { margin: {
                             left: testValue[0],
                             right: testValue[1],
@@ -982,7 +984,7 @@ describe('flot', function() {
                             show: true
                         }]
                     }),
-                    plot2 = $.plot(placeholder, [[]], {
+                    plot2 = $.plot(placeholder2, [[]], {
                         xaxes: [{
                             position: 'bottom',
                             show: true
@@ -1020,6 +1022,16 @@ describe('flot', function() {
                 xaxis2 = plot2.getXAxes()[1];
                 expect(xaxis1.box.top + testValue[2]).toEqual(xaxis2.box.top);
             });
+        });
+
+        it('should work for margin: number', function() {
+            var plot1 = $.plot(placeholder, [[]], {}),
+                plot2 = $.plot(placeholder2, [[]], {
+                    grid: { margin: 20 }
+                });
+
+            expect(plot2.width()).toBe(plot1.width() - 20 - 20);
+            expect(plot2.height()).toBe(plot1.height() - 20 - 20);
         });
     })
 });

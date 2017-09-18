@@ -1330,7 +1330,7 @@ Licensed under the MIT license.
             if (options.grid.margin) {
                 for (a in plotOffset) {
                     var margin = options.grid.margin || 0;
-                    plotOffset[a] += typeof margin === "number" ? margin : margin[a] || 0;
+                    plotOffset[a] += typeof margin === "number" ? margin : (margin[a] || 0);
                 }
                 $.each(xaxes.concat(yaxes), function(_, axis) {
                     alignAxisWithGrid(axis, options.grid.margin, function(offset) {
