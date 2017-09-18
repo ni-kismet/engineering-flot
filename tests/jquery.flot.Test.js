@@ -419,6 +419,49 @@ describe('flot', function() {
         });
     });
 
+    describe('findNearbyItem', function() {
+        var placeholder, plot, sampledata = [[0, 1], [1, 1.1], [2, 1.2]];
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should be able to find the nearest point to the given coordinates', function() {
+            plot = $.plot(placeholder, [sampledata], {});
+            var item = plot.findNearbyItem(0, 0, function() {
+                return true;
+            }, Number.MAX_VALUE);
+            expect(item.datapoint[0]).toEqual(sampledata[0][0]);
+            expect(item.datapoint[1]).toEqual(sampledata[0][1]);
+            expect(item.dataIndex).toEqual(0);
+        });
+
+        it('should be able to search in a certain radius', function() {
+            plot = $.plot(placeholder, [sampledata], {});
+            var item = plot.findNearbyItem(0, 0, function() {
+                return true;
+            }, 1);
+            expect(item).toEqual(null);
+
+            item = plot.findNearbyItem(0, 0, function() {
+                return true;
+            }, 1000);
+            expect(item).not.toEqual(null);
+        });
+
+        it('should work for bars', function() {
+            plot = $.plot(placeholder, [sampledata], {
+                bars: {show: true}
+            });
+
+            item = plot.findNearbyItem(0, 0, function() {
+                return true;
+            }, 1000);
+            expect(item).not.toEqual(null);
+        });
+    });
+
     describe('setupTickFormatter', function() {
         var placeholder, plot, sampledata = [[0, 1], [1, 1.1], [2, 1.2]];
 
