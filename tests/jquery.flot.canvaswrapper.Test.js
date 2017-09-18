@@ -31,8 +31,8 @@ describe('CanvasWrapper', function() {
 
         canvas.resize(222, 333);
 
-        expect(canvas.element.width).toBe(222);
-        expect(canvas.element.height).toBe(333);
+        expect(canvas.width).toBe(222);
+        expect(canvas.height).toBe(333);
         expect(canvas.element.style.width).toBe('222px');
         expect(canvas.element.style.height).toBe('333px');
     });
@@ -42,8 +42,8 @@ describe('CanvasWrapper', function() {
 
         canvas.resize(0, 0);
 
-        expect(canvas.element.width).toBe(10);
-        expect(canvas.element.height).toBe(10);
+        expect(canvas.width).toBe(10);
+        expect(canvas.height).toBe(10);
         expect(canvas.element.style.width).toBe('10px');
         expect(canvas.element.style.height).toBe('10px');
     });
