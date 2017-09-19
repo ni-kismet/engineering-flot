@@ -240,10 +240,6 @@
         return distance(t1.pageX, t1.pageY, t2.pageX, t2.pageY);
     }
 
-    function isPinchEvent(e) {
-        return e.detail.touches && e.detail.touches.length === 2;
-    }
-
     function getTouchedAxis(plot, touchPointX, touchPointY) {
         var ec = plot.getPlaceholder().offset();
         ec.left = touchPointX - ec.left;
