@@ -4154,6 +4154,6 @@ Licensed under the MIT license.
         PANHINT_LENGTH_CONSTANT: 10,
         MINOR_TICKS_COUNT_CONSTANT: 4,
         TICK_LENGTH_CONSTANT: 10,
-        DISTANCE_MARGIN: 25
+        ZOOM_DISTANCE_MARGIN: 25
     };
 })(jQuery);

@@ -9,7 +9,7 @@
         }
     };
 
-    var DISTANCE_MARGIN = $.plot.uiConstants.DISTANCE_MARGIN;
+    var ZOOM_DISTANCE_MARGIN = $.plot.uiConstants.ZOOM_DISTANCE_MARGIN;
 
     function init(plot) {
         plot.hooks.processOptions.push(initTouchNavigation);
@@ -17,7 +17,7 @@
 
     function initTouchNavigation(plot, options) {
         var gestureState = {
-                twoTouches: false,
+                zoomEnable: false,
                 prevDistance: null,
                 prevTapTime: 0,
                 prevPanPosition: { x: 0, y: 0 },
@@ -169,7 +169,7 @@
             zoomAmount = pinchDistance(e) / gestureState.prevDistance,
             dist = pinchDistance(e);
 
-        if (gestureState.twoTouches || Math.abs(dist - gestureState.prevDistance) > DISTANCE_MARGIN) {
+        if (gestureState.zoomEnable || Math.abs(dist - gestureState.prevDistance) > ZOOM_DISTANCE_MARGIN) {
             center.left = getPoint(e, 'pinch').x - offset.left;
             center.top = getPoint(e, 'pinch').y - offset.top;
 
@@ -181,13 +181,13 @@
             });
             gestureState.prevDistance = dist;
 
-            //activate zomm mode
-            gestureState.twoTouches = true;
+            //activate zoom mode
+            gestureState.zoomEnable = true;
         }
     }
 
     function wasPinchEvent(e, gestureState) {
-        return (gestureState.twoTouches && e.detail.touches.length === 1);
+        return (gestureState.zoomEnable && e.detail.touches.length === 1);
     }
 
     function getAxis(plot, e, gesture, navigationState) {
