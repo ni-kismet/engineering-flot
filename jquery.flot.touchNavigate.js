@@ -95,7 +95,14 @@
                 });
                 updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
 
-                zoomPlot(plot, e, gestureState, navigationState);
+                var dist = pinchDistance(e);
+
+                if (gestureState.zoomEnable || Math.abs(dist - gestureState.prevDistance) > ZOOM_DISTANCE_MARGIN) {
+                    zoomPlot(plot, e, gestureState, navigationState);
+
+                    //activate zoom mode
+                    gestureState.zoomEnable = true;
+                }
             },
 
             end: function(e) {
@@ -169,21 +176,16 @@
             zoomAmount = pinchDistance(e) / gestureState.prevDistance,
             dist = pinchDistance(e);
 
-        if (gestureState.zoomEnable || Math.abs(dist - gestureState.prevDistance) > ZOOM_DISTANCE_MARGIN) {
-            center.left = getPoint(e, 'pinch').x - offset.left;
-            center.top = getPoint(e, 'pinch').y - offset.top;
+        center.left = getPoint(e, 'pinch').x - offset.left;
+        center.top = getPoint(e, 'pinch').y - offset.top;
 
-            // send the computed touched axis to the zoom function so that it only zooms on that one
-            plot.zoom({
-                center: center,
-                amount: zoomAmount,
-                axes: navigationState.touchedAxis
-            });
-            gestureState.prevDistance = dist;
-
-            //activate zoom mode
-            gestureState.zoomEnable = true;
-        }
+        // send the computed touched axis to the zoom function so that it only zooms on that one
+        plot.zoom({
+            center: center,
+            amount: zoomAmount,
+            axes: navigationState.touchedAxis
+        });
+        gestureState.prevDistance = dist;
     }
 
     function wasPinchEvent(e, gestureState) {
