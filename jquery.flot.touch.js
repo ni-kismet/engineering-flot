@@ -248,14 +248,8 @@
 
         function isPinchEvent(e) {
             if (e.touches && e.touches.length >= 2) {
-                var counter = 0, i;
-                for (i = 0; i < e.touches.length; i++) {
-                    if (e.touches[i].target.tagName && e.touches[i].target.tagName.indexOf('CANVAS') !== -1) {
-                        counter++;
-                    }
-                }
-
-                if (counter >= 2) {
+                if (e.touches[0].target.tagName && e.touches[0].target.tagName.indexOf('CANVAS') !== -1 &&
+                    e.touches[1].target.tagName && e.touches[1].target.tagName.indexOf('CANVAS') !== -1) {
                     return true;
                 }
             }
