@@ -3,13 +3,13 @@
 (function($) {
     'use strict';
 
-    var DISTANCE_MARGIN = $.plot.uiConstants.DISTANCE_MARGIN;
-
     var options = {
         pan: {
             enableTouch: false
         }
     };
+
+    var DISTANCE_MARGIN = $.plot.uiConstants.DISTANCE_MARGIN;
 
     function init(plot) {
         plot.hooks.processOptions.push(initTouchNavigation);
