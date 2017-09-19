@@ -248,8 +248,8 @@
 
         function isPinchEvent(e) {
             if (e.touches && e.touches.length >= 2) {
-                if (e.touches[0].target.tagName && e.touches[0].target === plot.getEventHolder() &&
-                    e.touches[1].target.tagName && e.touches[1].target === plot.getEventHolder()) {
+                if (e.touches[0].target === plot.getEventHolder() &&
+                    e.touches[1].target === plot.getEventHolder()) {
                     return true;
                 }
             }

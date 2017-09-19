@@ -144,4 +144,63 @@ describe("flot touch plugin", function () {
             expect(spy.calls.count()).toBe(2);
         });
     });
+
+    describe('pinch', function() {
+
+        beforeEach(function() {
+            jasmine.clock().install().mockDate();
+        });
+
+        afterEach(function() {
+            jasmine.clock().uninstall();
+        });
+
+        it('should be able to trigger pinchstart event',function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('pinch handler'),
+                coords = [{x: 10, y: 20}, {x: 15, y: 20}];
+
+            eventHolder.addEventListener('pinchstart', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should not trigger pinch event for only one touch',function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('pinch handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('pinchstart', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+
+        it('should not trigger pinch event for touch outside plot',function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                mockEventHolder = {},
+                spy = jasmine.createSpy('pinch handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('pinchstart', spy);
+
+            mockEventHolder.dispatchEvent = function() {};
+
+            simulate.sendTouchEvents(coords, mockEventHolder, 'touchstart');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+    });
 });
