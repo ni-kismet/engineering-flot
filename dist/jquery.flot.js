@@ -1348,10 +1348,11 @@ Licensed under the MIT license.
             var c, colors = [],
                 colorPool = options.colors,
                 colorPoolSize = colorPool.length,
-                variation = 0;
+                variation = 0,
+                definedColors = series.length - neededColors;
 
             for (i = 0; i < neededColors; i++) {
-                c = $.color.parse(colorPool[i % colorPoolSize] || "#666");
+                c = $.color.parse(colorPool[(definedColors + i) % colorPoolSize] || "#666");
 
                 // Each time we exhaust the colors in the pool we adjust
                 // a scaling factor used to produce more variations on
