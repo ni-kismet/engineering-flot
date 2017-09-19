@@ -315,6 +315,108 @@ describe("flot touch navigate plugin", function () {
 
       });
 
+      it('should pan the plot for two fingers with constant distance',function() {
+          plot = $.plot(placeholder, [
+              [
+                  [-1, 2],
+                  [11, 12]
+              ]
+          ], options);
+
+          var eventHolder = plot.getEventHolder(),
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              canvasCoords = [ { x : 3, y : 5 }, { x : 7, y : 9 }, { x : 2, y : 4 }, { x : 6, y : 8 }],
+              initialCoords = [
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                  getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+              ],
+              finalCoords = [
+                getPairOfCoords(xaxis, yaxis, canvasCoords[2].x, canvasCoords[2].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[3].x, canvasCoords[3].y)
+              ];
+
+          simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+          simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+          simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+
+          expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[2].x), 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[2].x), 6);
+          expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[2].y), 6);
+          expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[2].y), 6);
+
+      });
+
+      it('should not pan the plot for a finger outside canvas',function() {
+          plot = $.plot(placeholder, [
+              [
+                  [-10, 120],
+                  [-10, 120]
+              ]
+          ], options);
+
+          var eventHolder = plot.getEventHolder(),
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              canvasCoords = [ { x : 20, y : 20 }, { x : 120, y : 120 }],
+              plotRight = plot.width() + plot.offset().left + plot.offset().right,
+              plotBottom = plot.height() + plot.offset().top + plot.offset().bottom,
+              pointCoords = [
+                  {x: plotRight + canvasCoords[0].x, y: plotBottom + canvasCoords[0].y},
+                  {x: plotRight + canvasCoords[1].x, y: plotBottom + canvasCoords[1].y}
+              ];
+
+          simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+          expect(xaxis.min).toBeCloseTo(initialXmin, 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax, 6);
+          expect(yaxis.min).toBeCloseTo(initialYmin, 6);
+          expect(yaxis.max).toBeCloseTo(initialYmax, 6);
+      });
+
+      it('should not pan the plot for a finger which comes from outside canvas',function() {
+          plot = $.plot(placeholder, [
+              [
+                  [-10, 120],
+                  [-10, 120]
+              ]
+          ], options);
+
+          var eventHolder = plot.getEventHolder(),
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              canvasCoords = [ { x : 20, y : 20 }, { x : 120, y : 120 }],
+              plotRight = plot.width() + plot.offset().left + plot.offset().right,
+              plotBottom = plot.height() + plot.offset().top + plot.offset().bottom,
+              pointCoords = [
+                  {x: plotRight + canvasCoords[0].x, y: plotBottom + canvasCoords[0].y},
+                  {x: canvasCoords[1].x, y: canvasCoords[1].y}
+              ];
+
+          simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+          expect(xaxis.min).toBeCloseTo(initialXmin, 6);
+          expect(xaxis.max).toBeCloseTo(initialXmax, 6);
+          expect(yaxis.min).toBeCloseTo(initialYmin, 6);
+          expect(yaxis.max).toBeCloseTo(initialYmax, 6);
+      });
+
       it('should drag the plot on the yaxis only', function() {
           plot = $.plot(placeholder, [
               [
