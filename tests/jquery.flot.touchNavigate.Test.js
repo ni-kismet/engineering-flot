@@ -492,7 +492,7 @@ describe("flot touch navigate plugin", function () {
 
       });
 
-      it('for multiple touches should take into account just the first two of them',function() {
+      it('for multiple touches should take into account just the first two of them and pan',function() {
           plot = $.plot(placeholder, [
               [
                   [-1, 2],

@@ -3,6 +3,8 @@
 (function($) {
     'use strict';
 
+    var DISTANCE_MARGIN = $.plot.uiConstants.DISTANCE_MARGIN;
+
     var options = {
         pan: {
             enableTouch: false
@@ -167,7 +169,7 @@
             zoomAmount = pinchDistance(e) / gestureState.prevDistance,
             dist = pinchDistance(e);
 
-        if (gestureState.twoTouches || Math.abs(dist - gestureState.prevDistance) > 25) {
+        if (gestureState.twoTouches || Math.abs(dist - gestureState.prevDistance) > DISTANCE_MARGIN) {
             center.left = getPoint(e, 'pinch').x - offset.left;
             center.top = getPoint(e, 'pinch').y - offset.top;
 
