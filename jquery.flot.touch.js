@@ -247,7 +247,13 @@
         }
 
         function isPinchEvent(e) {
-            return e.touches && e.touches.length === 2;
+            if (e.touches && e.touches.length >= 2) {
+                if (e.touches[0].target === plot.getEventHolder() &&
+                    e.touches[1].target === plot.getEventHolder()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

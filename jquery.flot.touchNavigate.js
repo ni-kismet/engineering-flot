@@ -9,13 +9,15 @@
         }
     };
 
+    var ZOOM_DISTANCE_MARGIN = $.plot.uiConstants.ZOOM_DISTANCE_MARGIN;
+
     function init(plot) {
         plot.hooks.processOptions.push(initTouchNavigation);
     }
 
     function initTouchNavigation(plot, options) {
         var gestureState = {
-                twoTouches: false,
+                zoomEnable: false,
                 prevDistance: null,
                 prevTapTime: 0,
                 prevPanPosition: { x: 0, y: 0 },
@@ -86,7 +88,6 @@
 
             drag: function(e) {
                 presetNavigationState(e, 'pinch', gestureState);
-                gestureState.twoTouches = isPinchEvent(e);
                 plot.pan({
                     left: delta(e, 'pinch', gestureState).x,
                     top: delta(e, 'pinch', gestureState).y,
@@ -94,7 +95,14 @@
                 });
                 updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
 
-                zoomPlot(plot, e, gestureState, navigationState);
+                var dist = pinchDistance(e);
+
+                if (gestureState.zoomEnable || Math.abs(dist - gestureState.prevDistance) > ZOOM_DISTANCE_MARGIN) {
+                    zoomPlot(plot, e, gestureState, navigationState);
+
+                    //activate zoom mode
+                    gestureState.zoomEnable = true;
+                }
             },
 
             end: function(e) {
@@ -181,7 +189,7 @@
     }
 
     function wasPinchEvent(e, gestureState) {
-        return (gestureState.twoTouches && e.detail.touches.length === 1);
+        return (gestureState.zoomEnable && e.detail.touches.length === 1);
     }
 
     function getAxis(plot, e, gesture, navigationState) {
@@ -234,10 +242,6 @@
         var t1 = e.detail.touches[0],
             t2 = e.detail.touches[1];
         return distance(t1.pageX, t1.pageY, t2.pageX, t2.pageY);
-    }
-
-    function isPinchEvent(e) {
-        return e.detail.touches && e.detail.touches.length === 2;
     }
 
     function getTouchedAxis(plot, touchPointX, touchPointY) {
