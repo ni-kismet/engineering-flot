@@ -87,8 +87,11 @@ can set the default in the options.
 
     var saturated = $.plot.saturated;
 
+    var existingPlots = [];
+
     function init(plot) {
         var panAxes = null;
+        existingPlots.push(plot);
 
         function onZoomClick(e, zoomOut) {
             var c = plot.offset();
@@ -597,6 +600,14 @@ can set the default in the options.
         plot.hooks.bindEvents.push(bindEvents);
         plot.hooks.shutdown.push(shutdown);
     }
+
+    $(document).on('click touch', function(event) {
+        existingPlots.forEach(function(plot) {
+            var options = plot.getOptions();
+            options.zoom.highlighted = false;
+            options.pan.highlighted = false;
+        });
+    });
 
     $.plot.plugins.push({
         init: init,

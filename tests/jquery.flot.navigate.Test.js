@@ -754,5 +754,30 @@ describe("flot navigate plugin", function () {
               expect(plot.getOptions().pan.highlighted).toBe(true);
               expect(plot.getOptions().zoom.highlighted).toBe(true);
         });
+
+        xit('outside plot deactivates plot\'s zoom and pan highlighted propriety', function() {
+            var pointCoords = { x: 0, y: 10 },
+                outsideContainer = setFixtures('<div id="container" style="width: 10px;height: 20px">')
+                    .find('#container');
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+              ], {
+                  zoom: { interactive: true, highlighted: true, amount: 10 },
+                  pan: { interactive: true, highlighted: true}
+              });
+
+              outsideContainer.getBoundingClientRect = function() {
+                  return {left: 0, top: 0};
+              };
+              simulate.click(outsideContainer, pointCoords.x, pointCoords.y);
+
+
+              expect(plot.getOptions().pan.highlighted).toBe(false);
+              expect(plot.getOptions().zoom.highlighted).toBe(false);
+        });
     });
 });
