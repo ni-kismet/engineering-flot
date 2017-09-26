@@ -33,6 +33,11 @@
             mainEventHolder;
 
         function interpretGestures(e) {
+            var o = plot.getOptions();
+            if (!o.pan.highlighted || !o.zoom.highlighted) {
+                return;
+            }
+
             if (isPinchEvent(e)) {
                 executeAction(e, 'pinch');
             } else {

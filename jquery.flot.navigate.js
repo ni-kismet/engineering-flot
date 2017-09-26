@@ -12,20 +12,25 @@ plot.pan( offset ) so you easily can add custom controls. It also fires
 The plugin supports these options:
 
     zoom: {
-        interactive: false
+        interactive: false,
+        highlighted: false,
         amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
     }
 
     pan: {
-        interactive: false
-        cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-        frameRate: 20
+        interactive: false,
+        highlighted: false,
+        cursor: "move",     // CSS mouse cursor value used when dragging, e.g. "pointer"
+        frameRate: 20,
         mode: "smart"       // enable smart pan mode
     }
 
 "interactive" enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
 around; the same for zoom.
+
+"highlighted" is activated on mouse click or touch tap on plot. This enables
+pan and zoom.
 
 "amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
 the current viewport.
@@ -69,10 +74,12 @@ can set the default in the options.
     var options = {
         zoom: {
             interactive: false,
+            highlighted: false,
             amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
         },
         pan: {
             interactive: false,
+            highlighted: false,
             cursor: "move",
             frameRate: 60
         }
@@ -121,9 +128,11 @@ can set the default in the options.
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
-            e.preventDefault();
-            onZoomClick(e, delta < 0);
-            return false;
+            if (plot.getOptions().zoom.highlighted) {
+                e.preventDefault();
+                onZoomClick(e, delta < 0);
+                return false;
+            }
         }
 
         var prevCursor = 'default',
@@ -151,6 +160,10 @@ can set the default in the options.
         }
 
         function onDragStart(e) {
+            if (!plot.getOptions().pan.highlighted) {
+                return;
+            }
+
             if (e.which !== 1) {
                 // only accept left-click
                 return false;
@@ -182,6 +195,9 @@ can set the default in the options.
         }
 
         function onDrag(e) {
+            if (!plot.getOptions().pan.highlighted) {
+                return;
+            }
             var frameRate = plot.getOptions().pan.frameRate;
 
             if (frameRate === -1) {
@@ -206,6 +222,10 @@ can set the default in the options.
         }
 
         function onDragEnd(e) {
+            if (!plot.getOptions().pan.highlighted) {
+                return;
+            }
+
             if (panTimeout) {
                 clearTimeout(panTimeout);
                 panTimeout = null;
@@ -220,7 +240,19 @@ can set the default in the options.
         }
 
         function onDblClick(e) {
-            plot.getPlaceholder().trigger("re-center", e);
+            var o = plot.getOptions();
+            if (o.pan.highlighted && o.zoom.highlighted) {
+                plot.getPlaceholder().trigger("re-center", e);
+            }
+        }
+
+        function onClick(e) {
+            var o = plot.getOptions();
+            if (!o.pan.highlighted || !o.zoom.highlighted) {
+                o.pan.highlighted = true;
+                o.zoom.highlighted = true;
+            }
+            return false;
         }
 
         function bindEvents(plot, eventHolder) {
@@ -240,6 +272,8 @@ can set the default in the options.
             if (o.zoom.interactive || o.pan.interactive) {
                 eventHolder.dblclick(onDblClick);
             }
+
+            eventHolder.click(onClick);
         }
 
         plot.zoomOut = function(args) {
@@ -507,6 +541,7 @@ can set the default in the options.
             eventHolder.unbind("drag", onDrag);
             eventHolder.unbind("dragend", onDragEnd);
             eventHolder.unbind("dblclick", onDblClick);
+            eventHolder.unbind("click", onClick);
 
             if (panTimeout) clearTimeout(panTimeout);
         }

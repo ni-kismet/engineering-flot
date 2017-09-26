@@ -10,8 +10,8 @@ describe("flot touch navigate plugin", function () {
         options = {
             xaxes: [{ autoscale: 'exact' }],
             yaxes: [{ autoscale: 'exact' }],
-            zoom: { interactive: true, amount: 10 },
-            pan: { interactive: true, frameRate: -1, enableTouch: true }
+            zoom: { interactive: true, highlighted: true, amount: 10 },
+            pan: { interactive: true, highlighted: true, frameRate: -1, enableTouch: true }
         };
     });
 
@@ -402,8 +402,8 @@ describe("flot touch navigate plugin", function () {
               },
               xaxis: { autoscale: 'exact' },
               yaxis: { mode: 'log', showTickLabels: "all", autoscale: 'exact' },
-              zoom: { interactive: true },
-              pan: { interactive: true, enableTouch: true }
+              zoom: { interactive: true, highlighted: true },
+              pan: { interactive: true, highlighted: true, enableTouch: true }
           });
 
           var eventHolder = plot.getEventHolder(),
