@@ -30,7 +30,7 @@ interactive for pan, then you'll have a basic plot that supports moving
 around; the same for zoom.
 
 "highlighted" is activated on mouse click or touch tap on plot. This enables
-pan and zoom.
+plot navigation.
 
 "amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
 the current viewport.

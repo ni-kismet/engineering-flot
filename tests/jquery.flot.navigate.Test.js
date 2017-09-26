@@ -735,7 +735,7 @@ describe("flot navigate plugin", function () {
     });
 
     describe('mouse click', function(){
-        it('on plot enables zoom and pan highlighted', function() {
+        it('on plot activates plot\'s zoom and pan highlighted propriety', function() {
             plot = $.plot(placeholder, [
                 [
                     [0, 0],
