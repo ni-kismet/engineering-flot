@@ -780,6 +780,51 @@ describe("flot touch navigate plugin", function () {
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
 
         });
+
+        it('should not recenter the plot for one touch inside axis box and one inside plot area', function(){
+            plot = $.plot(placeholder, [
+                [
+                    [-10, -10],
+                    [120, 120]
+                ]
+            ], options);
+
+            var eventHolder = plot.getEventHolder(),
+                xaxis = plot.getXAxes()[0],
+                yaxis = plot.getYAxes()[0],
+                initialXmin = xaxis.min,
+                initialXmax = xaxis.max,
+                initialYmin = yaxis.min,
+                initialYmax = yaxis.max,
+                canvasCoords = [ { x : 1, y : 2 }, { x : 3, y : 5 }],
+                pointCoords = [
+                    getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                    getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+                ];
+
+            simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+            simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+            simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+            //check if the drag modified the plot correctly
+            expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+            expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+            expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+            expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+            //simulate double tap
+            simulate.touchstart(eventHolder, xaxis.box.left - 20, yaxis.p2c(5));
+            simulate.touchend(eventHolder,  xaxis.box.left - 20, yaxis.p2c(5));
+            simulate.touchstart(eventHolder, 10, 20);
+            simulate.touchend(eventHolder, 10, 20);
+
+            //check if axis values remained the same
+            expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+            expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+            expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+            expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+        });
     });
 
     function getPairOfCoords(xaxis, yaxis, x, y) {

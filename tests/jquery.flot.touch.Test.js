@@ -297,4 +297,87 @@ describe("flot touch plugin", function () {
             expect(spy.calls.count()).toBe(0);
         });
     });
+
+    describe('doubletap', function() {
+
+        beforeEach(function() {
+            jasmine.clock().install().mockDate();
+        });
+
+        afterEach(function() {
+            jasmine.clock().uninstall();
+        });
+
+        it('should trigger the double tap event', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('double tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('doubletap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(200);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should trigger the double tap event even when there is a different touch point', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('double tap handler'),
+                initialCoords = [{x: 10, y: 20}],
+                finalCoords = [{x: 11, y: 21}];
+
+            eventHolder.addEventListener('doubletap', spy);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(300);
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchstart');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should not trigger the double tap event for a big interval between taps', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('double tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('doubletap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(1000);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+
+        it('should not trigger the double tap event for one of the touches outside plot area', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                mockEventHolder = {},
+                spy = jasmine.createSpy('double tap handler'),
+                initialCoords = [{x: 10, y: 20}],
+                finalCoords = [{x: 100, y: 200}];
+
+            mockEventHolder.dispatchEvent = function() {};
+
+            eventHolder.addEventListener('doubletap', spy);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(100);
+            simulate.sendTouchEvents(finalCoords, mockEventHolder, 'touchmove');
+
+            expect(spy).not.toHaveBeenCalled();
+        });
+    });
 });
