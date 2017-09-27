@@ -755,7 +755,7 @@ describe("flot navigate plugin", function () {
               expect(plot.getOptions().zoom.highlighted).toBe(true);
         });
 
-        xit('outside plot deactivates plot\'s zoom and pan highlighted propriety', function() {
+        it('outside plot deactivates plot\'s zoom and pan highlighted propriety', function() {
             var pointCoords = { x: 0, y: 10 },
                 outsideContainer = setFixtures('<div id="container" style="width: 10px;height: 20px">')
                     .find('#container');
@@ -772,6 +772,9 @@ describe("flot navigate plugin", function () {
 
               outsideContainer.getBoundingClientRect = function() {
                   return {left: 0, top: 0};
+              };
+              outsideContainer.dispatchEvent = function(evt) {
+                  document.dispatchEvent(evt);
               };
               simulate.click(outsideContainer, pointCoords.x, pointCoords.y);
 

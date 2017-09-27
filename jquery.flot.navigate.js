@@ -274,9 +274,8 @@ can set the default in the options.
 
             if (o.zoom.interactive || o.pan.interactive) {
                 eventHolder.dblclick(onDblClick);
+                eventHolder.click(onClick);
             }
-
-            eventHolder.click(onClick);
         }
 
         plot.zoomOut = function(args) {
