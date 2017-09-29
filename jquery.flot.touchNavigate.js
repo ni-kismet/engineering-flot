@@ -29,7 +29,7 @@
                 touchedAxis: null,
                 navigationConstraint: 'unconstrained'
             },
-            pan, pinch, doubleTap;
+            pan, pinch, doubleTap, longTap;
 
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
@@ -42,6 +42,7 @@
                 eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
                 eventHolder[0].addEventListener('pinchend', pinch.end, false);
                 eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
+                eventHolder[0].addEventListener('longtap', longTap.resizeWindow, false);
             }
         }
 
@@ -53,6 +54,7 @@
             eventHolder[0].removeEventListener('pinchdrag', pinch.drag);
             eventHolder[0].removeEventListener('pinchend', pinch.end);
             eventHolder[0].removeEventListener('doubletap', doubleTap.recenterPlot);
+            eventHolder[0].removeEventListener('longtap', longTap.resizeWindow);
         }
 
         pan = {
@@ -117,6 +119,12 @@
             }
         };
 
+        longTap = {
+            resizeWindow: function(e) {
+                resizeWindowOnLongTap();
+            }
+        };
+
         if (options.pan.enableTouch === true) {
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
@@ -138,6 +146,10 @@
         name: 'navigateTouch',
         version: '0.3'
     });
+
+    function resizeWindowOnLongTap() {
+  
+    }
 
     function recenterPlotOnDoubleTap(plot, e, gestureState, navigationState) {
         checkAxesForDoubleTap(plot, e, navigationState);
