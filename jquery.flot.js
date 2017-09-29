@@ -10,6 +10,7 @@ Licensed under the MIT license.
     "use strict";
 
     var Canvas = window.Flot.Canvas;
+    var WebGlCanvas = window.Flot.WebGlCanvas;
 
     function defaultTickGenerator(axis) {
         var ticks = [],
@@ -148,7 +149,9 @@ Licensed under the MIT license.
             },
             surface = null, // the canvas for the plot itself
             overlay = null, // canvas for interactive stuff on top of plot
+            webglsurface = null, // the canvas for webgl rendering
             eventHolder = null, // jQuery object that events should be bound to
+            gl = null, // the webgl context
             ctx = null,
             octx = null,
             xaxes = [],
@@ -191,6 +194,12 @@ Licensed under the MIT license.
         plot.draw = draw;
         plot.getPlaceholder = function() {
             return placeholder;
+        };
+        plot.getWebGlSurface = function() {
+            return webglsurface;
+        };
+        plot.getWebGlCanvas = function() {
+            return webglsurface.element;
         };
         plot.getCanvas = function() {
             return surface.element;
@@ -256,8 +265,10 @@ Licensed under the MIT license.
             series = [];
             options = null;
             surface = null;
+            webglsurface = null;
             overlay = null;
             eventHolder = null;
+            gl = null;
             ctx = null;
             octx = null;
             xaxes = [];
@@ -312,7 +323,8 @@ Licensed under the MIT license.
             // References to key classes, allowing plugins to modify them
 
             var classes = {
-                Canvas: Canvas
+                Canvas: Canvas,
+                WebGlCanvas: WebGlCanvas
             };
 
             for (var i = 0; i < plugins.length; ++i) {
@@ -903,11 +915,17 @@ Licensed under the MIT license.
                 placeholder.css("position", "relative"); // for positioning labels and overlay
             }
 
+            
             surface = new Canvas("flot-base", placeholder[0]);
             overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
-
+            webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
+            gl = webglsurface.context;
             ctx = surface.context;
             octx = overlay.context;
+            if (gl) {
+                gl.clearColor(0.0, 0.0, 0.0, 0.8);
+                gl.enable(gl.DEPTH_TEST);
+            }
 
             // define which element we're listening for events on
             eventHolder = $(overlay.element).unbind();
@@ -1805,7 +1823,7 @@ Licensed under the MIT license.
             }
 
             for (var i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i]]);
+                executeHooks(hooks.drawSeries, [ctx, series[i], gl]);
                 drawSeries(series[i]);
             }
 
@@ -1816,6 +1834,7 @@ Licensed under the MIT license.
             }
 
             surface.render();
+            webglsurface.render();
 
             // A draw implies that either the axes or data have changed, so we
             // should probably update the overlay highlights as well.

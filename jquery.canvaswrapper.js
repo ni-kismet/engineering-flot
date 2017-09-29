@@ -528,6 +528,68 @@
         this._textCache = {};
     };
 
+    var WebGlCanvas = function(cls, container) {
+        var element = container.getElementsByClassName(cls)[0];
+
+        if (!element) {
+            element = document.createElement('canvas');
+            element.className = cls;
+            element.style.direction = 'ltr';
+            element.style.position = 'absolute';
+            element.style.left = '0px';
+            element.style.top = '0px';
+
+            container.appendChild(element);
+
+            // If HTML5 Canvas isn't available, throw
+
+            if (!element.getContext) {
+                throw new Error('Canvas is not available.');
+            }
+        }
+
+        this.element = element;
+
+        var gl = this.context = element.getContext('webgl') ||
+                                    element.getContext('experimental-webgl');
+
+        // Determine the screen's ratio of physical to device-independent
+        // pixels.  This is the ratio between the canvas width that the browser
+        // advertises and the number of pixels actually present in that space.
+
+        // The iPhone 4, for example, has a device-independent width of 320px,
+        // but its screen is actually 640px wide.  It therefore has a pixel
+        // ratio of 2, while most normal devices have a ratio of 1.
+
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio = 1,
+            box = container.getBoundingClientRect();
+
+        // Size the canvas to match the internal dimensions of its container
+        this.width = box.width;
+        this.height = box.height;
+
+        if (gl !== null) {
+            backingStoreRatio =
+            gl.webkitBackingStorePixelRatio ||
+            gl.mozBackingStorePixelRatio ||
+            gl.msBackingStorePixelRatio ||
+            gl.oBackingStorePixelRatio ||
+            gl.backingStorePixelRatio || 1;
+
+            gl.viewportWidth = box.width;
+            gl.viewportHeight = box.height;
+            gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        }
+        this.pixelRatio = devicePixelRatio / backingStoreRatio;
+    };
+
+    WebGlCanvas.prototype.render = function() {
+        var gl = this.context;
+        //gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    };
+
     function generateKey(text) {
         return text.replace(/0|1|2|3|4|5|6|7|8|9/g, '0');
     }
@@ -537,4 +599,5 @@
     }
 
     window.Flot.Canvas = Canvas;
+    window.Flot.WebGlCanvas = WebGlCanvas;
 })();

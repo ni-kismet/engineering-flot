@@ -728,6 +728,67 @@
         this._textCache = {};
     };
 
+    var WebGlCanvas = function(cls, container) {
+        var element = container.getElementsByClassName(cls)[0];
+
+        if (!element) {
+            element = document.createElement('canvas');
+            element.className = cls;
+            element.style.direction = 'ltr';
+            element.style.position = 'absolute';
+            element.style.left = '0px';
+            element.style.top = '0px';
+
+            container.appendChild(element);
+
+            // If HTML5 Canvas isn't available, throw
+
+            if (!element.getContext) {
+                throw new Error('Canvas is not available.');
+            }
+        }
+
+        this.element = element;
+
+        var gl = this.context = element.getContext('webgl') ||
+                                    element.getContext('experimental-webgl');
+
+        // Determine the screen's ratio of physical to device-independent
+        // pixels.  This is the ratio between the canvas width that the browser
+        // advertises and the number of pixels actually present in that space.
+
+        // The iPhone 4, for example, has a device-independent width of 320px,
+        // but its screen is actually 640px wide.  It therefore has a pixel
+        // ratio of 2, while most normal devices have a ratio of 1.
+
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio = 1,
+            box = container.getBoundingClientRect();
+
+        // Size the canvas to match the internal dimensions of its container
+        this.width = box.width;
+        this.height = box.height;
+
+        if (gl !== null) {
+            backingStoreRatio =
+            gl.webkitBackingStorePixelRatio ||
+            gl.mozBackingStorePixelRatio ||
+            gl.msBackingStorePixelRatio ||
+            gl.oBackingStorePixelRatio ||
+            gl.backingStorePixelRatio || 1;
+
+            gl.viewportWidth = box.width;
+            gl.viewportHeight = box.height;
+        }
+        this.pixelRatio = devicePixelRatio / backingStoreRatio;
+    };
+
+    WebGlCanvas.prototype.render = function() {
+        var gl = this.context;
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    };
+
     function generateKey(text) {
         return text.replace(/0|1|2|3|4|5|6|7|8|9/g, '0');
     }
@@ -737,6 +798,7 @@
     }
 
     window.Flot.Canvas = Canvas;
+    window.Flot.WebGlCanvas = WebGlCanvas;
 })();
 
 /* Javascript plotting library for jQuery, version 0.8.3.
@@ -751,6 +813,7 @@ Licensed under the MIT license.
     "use strict";
 
     var Canvas = window.Flot.Canvas;
+    var WebGlCanvas = window.Flot.WebGlCanvas;
 
     function defaultTickGenerator(axis) {
         var ticks = [],
@@ -889,7 +952,9 @@ Licensed under the MIT license.
             },
             surface = null, // the canvas for the plot itself
             overlay = null, // canvas for interactive stuff on top of plot
+            webglsurface = null, // the canvas for webgl rendering
             eventHolder = null, // jQuery object that events should be bound to
+            gl = null, // the webgl context
             ctx = null,
             octx = null,
             xaxes = [],
@@ -932,6 +997,12 @@ Licensed under the MIT license.
         plot.draw = draw;
         plot.getPlaceholder = function() {
             return placeholder;
+        };
+        plot.getWebGlSurface = function() {
+            return webglsurface;
+        };
+        plot.getWebGlCanvas = function() {
+            return webglsurface.element;
         };
         plot.getCanvas = function() {
             return surface.element;
@@ -997,8 +1068,10 @@ Licensed under the MIT license.
             series = [];
             options = null;
             surface = null;
+            webglsurface = null;
             overlay = null;
             eventHolder = null;
+            gl = null;
             ctx = null;
             octx = null;
             xaxes = [];
@@ -1053,7 +1126,8 @@ Licensed under the MIT license.
             // References to key classes, allowing plugins to modify them
 
             var classes = {
-                Canvas: Canvas
+                Canvas: Canvas,
+                WebGlCanvas: WebGlCanvas
             };
 
             for (var i = 0; i < plugins.length; ++i) {
@@ -1644,11 +1718,17 @@ Licensed under the MIT license.
                 placeholder.css("position", "relative"); // for positioning labels and overlay
             }
 
+            
             surface = new Canvas("flot-base", placeholder[0]);
             overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
-
+            webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
+            gl = webglsurface.context;
             ctx = surface.context;
             octx = overlay.context;
+            if (gl) {
+                gl.clearColor(0.0, 0.0, 0.0, 0.8);
+                gl.enable(gl.DEPTH_TEST);
+            }
 
             // define which element we're listening for events on
             eventHolder = $(overlay.element).unbind();
@@ -2546,7 +2626,7 @@ Licensed under the MIT license.
             }
 
             for (var i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i]]);
+                executeHooks(hooks.drawSeries, [ctx, series[i], gl]);
                 drawSeries(series[i]);
             }
 
@@ -2557,6 +2637,7 @@ Licensed under the MIT license.
             }
 
             surface.render();
+            webglsurface.render();
 
             // A draw implies that either the axes or data have changed, so we
             // should probably update the overlay highlights as well.
