@@ -779,14 +779,17 @@
 
             gl.viewportWidth = box.width;
             gl.viewportHeight = box.height;
+            gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         }
         this.pixelRatio = devicePixelRatio / backingStoreRatio;
     };
 
     WebGlCanvas.prototype.render = function() {
         var gl = this.context;
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        if (gl) {
+            //gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        }
     };
 
     function generateKey(text) {
@@ -1718,7 +1721,6 @@ Licensed under the MIT license.
                 placeholder.css("position", "relative"); // for positioning labels and overlay
             }
 
-            
             surface = new Canvas("flot-base", placeholder[0]);
             overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
             webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing

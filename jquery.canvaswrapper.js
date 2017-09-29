@@ -586,8 +586,10 @@
 
     WebGlCanvas.prototype.render = function() {
         var gl = this.context;
-        //gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        if (gl) {
+            //gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        }
     };
 
     function generateKey(text) {
