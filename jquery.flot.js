@@ -923,7 +923,7 @@ Licensed under the MIT license.
             ctx = surface.context;
             octx = overlay.context;
             if (gl) {
-                gl.clearColor(0.0, 0.0, 0.0, 0.8);
+                gl.clearColor(0.0, 0.0, 0.0, 0.2);
                 gl.enable(gl.DEPTH_TEST);
             }
 
@@ -2377,7 +2377,11 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                if(!gl) {
+                    $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                } else {
+                    $.plot.drawSeries.webgl.drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                }
             }
         }
 

@@ -657,26 +657,28 @@
         position.element.innerHTML = text;
     };
 
-    // Removes one or more text strings from the canvas text overlay.
-    //
-    // If no parameters are given, all text within the layer is removed.
-    //
-    // Note that the text is not immediately removed; it is simply marked as
-    // inactive, which will result in its removal on the next render pass.
-    // This avoids the performance penalty for 'clear and redraw' behavior,
-    // where we potentially get rid of all text on a layer, but will likely
-    // add back most or all of it later, as when redrawing axes, for example.
-    //
-    // @param {string} layer A string of space-separated CSS classes uniquely
-    //     identifying the layer containing this text.
-    // @param {number=} x X coordinate of the text.
-    // @param {number=} y Y coordinate of the text.
-    // @param {string=} text Text string to remove.
-    // @param {(string|object)=} font Either a string of space-separated CSS
-    //     classes or a font-spec object, defining the text's font and style.
-    // @param {number=} angle Angle at which the text is rotated, in degrees.
-    //     Angle is currently unused, it will be implemented in the future.
-
+    /**
+     * 
+     * Removes one or more text strings from the canvas text overlay.
+     *
+     * If no parameters are given, all text within the layer is removed.
+     *
+     * Note that the text is not immediately removed; it is simply marked as
+     * inactive, which will result in its removal on the next render pass.
+     * This avoids the performance penalty for 'clear and redraw' behavior,
+     * where we potentially get rid of all text on a layer, but will likely
+     * add back most or all of it later, as when redrawing axes, for example.
+     *
+     * @param {string} layer A string of space-separated CSS classes uniquely
+     * identifying the layer containing this text.
+     * @param {number=} x X coordinate of the text.
+     * @param {number=} y Y coordinate of the text.
+     * @param {string=} text Text string to remove.
+     * @param {(string|object)=} font Either a string of space-separated CSS
+     * classes or a font-spec object, defining the text's font and style.
+     * @param {number=} angle Angle at which the text is rotated, in degrees.
+     * Angle is currently unused, it will be implemented in the future.
+     */
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
         var position, i;
         if (text == null) {
@@ -728,6 +730,13 @@
         this._textCache = {};
     };
 
+    /**
+     * The WebGlCanvas object is a wrapper around an HTML5 <canvas> tag with a webgl context.
+     * 
+     * @constructor
+     * @param {string} cls The class name of the element
+     * @param {element} container Element onto which to append the canvas.
+     */
     var WebGlCanvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
 
@@ -751,7 +760,7 @@
         this.element = element;
 
         var gl = element.getContext('webgl') ||
-                                    element.getContext('experimental-webgl');
+                 element.getContext('experimental-webgl');
 
         // Determine the screen's ratio of physical to device-independent
         // pixels.  This is the ratio between the canvas width that the browser
@@ -782,10 +791,19 @@
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
             this.context = gl;
+        } else {
+            throw new Error('WebGL not supported on this device.');
         }
+
         this.pixelRatio = devicePixelRatio / backingStoreRatio;
     };
 
+    /**
+     * Resizes the canvas to the given dimensions.
+     * 
+     * @param {number} width The desired width of the canvas
+     * @param {number} heigh The desired height of the canvas
+     */
     WebGlCanvas.prototype.resize = function(width, height) {
         var gl = this.context;
         if (gl.canvas.width != width ||
@@ -795,10 +813,13 @@
         }
     };
 
+    /**
+     * Render the 
+     * 
+     */
     WebGlCanvas.prototype.render = function() {
         var gl = this.context;
         if (gl) {
-            //gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         }
     };
@@ -806,6 +827,63 @@
     function generateKey(text) {
         return text.replace(/0|1|2|3|4|5|6|7|8|9/g, '0');
     }
+
+    /**
+     * Creates and compiles a shader.
+     *
+     * @param {!WebGLRenderingContext} gl The WebGL Context.
+     * @param {string} shaderSource The GLSL source code for the shader.
+     * @param {number} shaderType The type of shader, VERTEX_SHADER or FRAGMENT_SHADER.
+     * @return {!WebGLShader} The shader.
+     */
+    function compileShader(gl, shaderSource, shaderType) {
+        // Create the shader object
+        var shader = gl.createShader(shaderType);
+    
+        // Set the shader source code.
+        gl.shaderSource(shader, shaderSource);
+    
+        // Compile the shader
+        gl.compileShader(shader);
+    
+        // Check if it compiled
+        var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (!success) {
+            // Something went wrong during compilation; get the error
+            throw "could not compile shader:" + gl.getShaderInfoLog(shader);
+        }
+    
+        return shader;
+    };
+
+    /**
+     * Creates a program from 2 shaders.
+     *
+     * @param {!WebGLRenderingContext} gl The WebGL context.
+     * @param {!WebGLShader} vertexShader A vertex shader.
+     * @param {!WebGLShader} fragmentShader A fragment shader.
+     * @return {!WebGLProgram} A program.
+     */
+    function createProgram(gl, vertexShader, fragmentShader) {
+        // create a program.
+        var program = gl.createProgram();
+    
+        // attach the shaders.
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+    
+        // link the program.
+        gl.linkProgram(program);
+    
+        // Check if it linked.
+        var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (!success) {
+            // something went wrong with the link
+            throw ("program failed to link:" + gl.getProgramInfoLog (program));
+        }
+    
+        return program;
+    };
 
     if (!window.Flot) {
         window.Flot = {};
@@ -1740,7 +1818,7 @@ Licensed under the MIT license.
             ctx = surface.context;
             octx = overlay.context;
             if (gl) {
-                gl.clearColor(0.0, 0.0, 0.0, 0.8);
+                gl.clearColor(0.0, 0.0, 0.0, 0.2);
                 gl.enable(gl.DEPTH_TEST);
             }
 
@@ -3194,7 +3272,11 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                if(!gl) {
+                    $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                } else {
+                    $.plot.drawSeries.webgl.drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                }
             }
         }
 
@@ -4004,6 +4086,10 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
+        function drawSeriesGlPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+
+        }
+
         function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function drawCircle(ctx, x, y, radius, shadow, fill) {
                 ctx.moveTo(x + radius, y);
@@ -4233,10 +4319,19 @@ Licensed under the MIT license.
             return c.toString();
         }
 
+        function WebGl() {
+            function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+
+            }
+
+            this.drawSeriesPoints = drawSeriesPoints;
+        };
+
         this.drawSeriesLines = drawSeriesLines;
         this.drawSeriesPoints = drawSeriesPoints;
         this.drawSeriesBars = drawSeriesBars;
         this.drawBar = drawBar;
+        this.webgl = new WebGl();
     };
 
     $.plot.drawSeries = new DrawSeries();
