@@ -296,10 +296,6 @@
             ctx.restore();
         }
 
-        function drawSeriesGlPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-
-        }
-
         function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function drawCircle(ctx, x, y, radius, shadow, fill) {
                 ctx.moveTo(x + radius, y);

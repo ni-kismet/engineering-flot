@@ -2377,7 +2377,7 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                if(!gl) {
+                if (!gl) {
                     $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
                 } else {
                     $.plot.drawSeries.webgl.drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
