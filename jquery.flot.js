@@ -282,6 +282,7 @@ Licensed under the MIT license.
             var width = placeholder.width(),
                 height = placeholder.height();
             surface.resize(width, height);
+            webglsurface.resize(width, height);
             overlay.resize(width, height);
         };
 
@@ -908,7 +909,7 @@ Licensed under the MIT license.
 
             placeholder.css("padding", 0) // padding messes up the positioning
                 .children().filter(function() {
-                    return !$(this).hasClass("flot-overlay") && !$(this).hasClass('flot-base');
+                    return !$(this).hasClass("flot-overlay") && !$(this).hasClass('flot-base') && !$(this).hasClass('flot-gl');
                 }).remove();
 
             if (placeholder.css("position") === 'static') {

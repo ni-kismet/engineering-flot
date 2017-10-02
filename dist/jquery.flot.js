@@ -750,7 +750,7 @@
 
         this.element = element;
 
-        var gl = this.context = element.getContext('webgl') ||
+        var gl = element.getContext('webgl') ||
                                     element.getContext('experimental-webgl');
 
         // Determine the screen's ratio of physical to device-independent
@@ -777,11 +777,22 @@
             gl.oBackingStorePixelRatio ||
             gl.backingStorePixelRatio || 1;
 
-            gl.viewportWidth = box.width;
-            gl.viewportHeight = box.height;
-            gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+            gl.canvas.width = box.width;
+            gl.canvas.height = box.height;
+            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+            this.context = gl;
         }
         this.pixelRatio = devicePixelRatio / backingStoreRatio;
+    };
+
+    WebGlCanvas.prototype.resize = function(width, height) {
+        var gl = this.context;
+        if (gl.canvas.width != width ||
+            gl.canvas.height != height) {
+           gl.canvas.width = width;
+           gl.canvas.height = height;
+        }
     };
 
     WebGlCanvas.prototype.render = function() {
@@ -1088,6 +1099,7 @@ Licensed under the MIT license.
             var width = placeholder.width(),
                 height = placeholder.height();
             surface.resize(width, height);
+            webglsurface.resize(width, height);
             overlay.resize(width, height);
         };
 
@@ -1714,7 +1726,7 @@ Licensed under the MIT license.
 
             placeholder.css("padding", 0) // padding messes up the positioning
                 .children().filter(function() {
-                    return !$(this).hasClass("flot-overlay") && !$(this).hasClass('flot-base');
+                    return !$(this).hasClass("flot-overlay") && !$(this).hasClass('flot-base') && !$(this).hasClass('flot-gl');
                 }).remove();
 
             if (placeholder.css("position") === 'static') {
