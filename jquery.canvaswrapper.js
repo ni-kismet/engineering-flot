@@ -578,6 +578,97 @@
         this.width = box.width;
         this.height = box.height;
 
+        var vertexShaderCode = `
+            attribute vec2 a_position;
+
+            uniform vec2 u_resolution;
+            uniform float u_pointSize;
+            
+            void main() {
+                // convert the position from pixels coords to (0.0 -> 1.0)
+                vec2 zeroToOne = a_position / u_resolution;
+        
+                // convert from 0->1 to 0->2
+                vec2 zeroToTwo = zeroToOne * 2.0;
+        
+                // convert from 0->2 to -1->+1 (clipspace)
+                vec2 clipSpace = zeroToTwo - 1.0;
+        
+                gl_Position = vec4(clipSpace * vec2(1., -1.), 0., 1.);
+                gl_PointSize = u_pointSize;
+            }`;
+
+        var fragmentShaderCode = `
+            // fragment shaders don't have a default precision so we need
+            // to pick one. mediump is a good default. It means "medium precision"
+            precision mediump float;
+            
+            void main() {
+                // gl_FragColor is a special variable a fragment shader
+                // is responsible for setting
+                gl_FragColor = vec4(1, 0, 0.5, 1); // return redish-purple
+            }`;
+
+        /**
+         * Creates a program from 2 shaders.
+         *
+         * @param {!WebGLRenderingContext} gl The WebGL context.
+         * @param {!WebGLShader} vertexShader A vertex shader.
+         * @param {!WebGLShader} fragmentShader A fragment shader.
+         * @return {!WebGLProgram} A program.
+         */
+        function createProgram(gl, vertexShaderCode, fragmentShaderCode) {
+            // create a program.
+            var vertexShader = compileShader(gl, vertexShaderCode, gl.VERTEX_SHADER),
+                fragmentShader = compileShader(gl, fragmentShaderCode, gl.FRAGMENT_SHADER),
+                program = gl.createProgram();
+            
+            // attach the shaders.
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+        
+            // link the program.
+            gl.linkProgram(program);
+        
+            // Check if it linked.
+            var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+            if (!success) {
+                // something went wrong with the link
+                throw ("program failed to link:" + gl.getProgramInfoLog (program));
+            }
+        
+            return program;
+        };
+
+        /**
+         * Creates and compiles a shader.
+         *
+         * @param {!WebGLRenderingContext} gl The WebGL Context.
+         * @param {string} shaderSource The GLSL source code for the shader.
+         * @param {number} shaderType The type of shader, VERTEX_SHADER or FRAGMENT_SHADER.
+         * @return {!WebGLShader} The shader.
+         */
+        function compileShader(gl, shaderSource, shaderType) {
+            // Create the shader object
+            var shader = gl.createShader(shaderType);
+        
+            // Set the shader source code.
+            gl.shaderSource(shader, shaderSource);
+        
+            // Compile the shader
+            gl.compileShader(shader);
+        
+            // Check if it compiled
+            var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+            if (!success) {
+                // Something went wrong during compilation; get the error
+                throw "could not compile shader:" + gl.getShaderInfoLog(shader);
+            }
+        
+            return shader;
+        };
+
+        var program, positionBuffer, positionAttributeLocation, resolutionUniformLocation, pointSizeUniformLocation
         if (gl !== null) {
             backingStoreRatio =
             gl.webkitBackingStorePixelRatio ||
@@ -588,7 +679,40 @@
 
             gl.canvas.width = box.width;
             gl.canvas.height = box.height;
-            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+            ////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////
+            program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
+            positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+            resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+            pointSizeUniformLocation = gl.getUniformLocation(program, "u_pointSize");
+
+            positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.useProgram(program);
+            // Turn on the attribute
+            gl.enableVertexAttribArray(positionAttributeLocation);
+
+            // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+            var size = 2;          // 2 components per iteration
+            var type = gl.FLOAT;   // the data is 32bit floats
+            var normalize = false; // don't normalize the data
+            var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+            var offset = 0;        // start at the beginning of the buffer
+            gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
+            
+            // set the resolution
+            gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+            // set the point size
+            gl.uniform1f(pointSizeUniformLocation, 10.);
+    
+            // Clear the canvas
+            gl.clearColor(0., 0., 0., 0.5);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.viewport(0., 0., gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+            positionBuffer.itemSize = size;
+            gl.positionBuffer = positionBuffer;
 
             this.context = gl;
         } else {
@@ -620,9 +744,10 @@
     WebGlCanvas.prototype.render = function() {
         var gl = this.context;
         if (gl) {
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.viewport(0., 0., gl.drawingBufferWidth, gl.drawingBufferHeight);
+            gl.drawArrays(gl.POINTS, 0, gl.positionBuffer.numItems);
         }
-    };
+    };  
 
     function generateKey(text) {
         return text.replace(/0|1|2|3|4|5|6|7|8|9/g, '0');

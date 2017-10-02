@@ -296,37 +296,26 @@
             ctx.restore();
         }
 
-        function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-            function drawCircle(ctx, x, y, radius, shadow, fill) {
-                ctx.moveTo(x + radius, y);
-                ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
-            }
-            drawCircle.fill = true;
+        function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+            var positions = [];
             function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy, drawSymbolFn) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize;
 
-                ctx.beginPath();
                 for (var i = 0; i < points.length; i += ps) {
-                    var x = points[i],
-                        y = points[i + 1];
-                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
+                    if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
                         continue;
                     }
 
-                    x = axisx.p2c(x);
-                    y = axisy.p2c(y) + offset;
+                    positions[i] = axisx.p2c(points[i]);
+                    positions[i+1] = axisy.p2c(points[i + 1]) + offset;
+                }
 
-                    drawSymbolFn(ctx, x, y, radius, shadow, fill);
-                }
-                if (drawSymbolFn.fill && !shadow) {
-                    ctx.fill();
-                }
-                ctx.stroke();
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.DYNAMIC_DRAW);
+                gl.positionBuffer.numItems = positions.length / 2;
             }
 
-            ctx.save();
-            ctx.translate(plotOffset.left, plotOffset.top);
+            //gl.translate(plotOffset.left, plotOffset.top);
 
             var datapoints = {
                 format: series.datapoints.format,
@@ -343,14 +332,6 @@
                 symbol = series.points.symbol,
                 drawSymbolFn;
 
-            if (symbol === 'circle') {
-                drawSymbolFn = drawCircle;
-            } else if (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
-                drawSymbolFn = drawSymbol[symbol];
-            } else if (typeof drawSymbol === 'function') {
-                drawSymbolFn = drawSymbol;
-            }
-
             // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
 
@@ -358,13 +339,9 @@
                 lw = 0.0001;
             }
 
-            ctx.lineWidth = lw;
-            ctx.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient);
-            ctx.strokeStyle = series.color;
             plotPoints(datapoints, radius,
                 true, 0, false,
                 series.xaxis, series.yaxis, drawSymbolFn);
-            ctx.restore();
         }
 
         function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, lineWidth) {
@@ -525,62 +502,10 @@
             return c.toString();
         }
 
-        function WebGl(context) {
-            var gl = context,
-                vertexShader = compileShader(gl, vertexShaderCode, gl.VERTEX_SHADER), 
-                fragmentShader = compileShader(gl, fragmentShaderCode, gl.FRAGMENT_SHADER), 
-                program = createProgram(gl, vertexShader, fragmentShader);
-
-            var vertexShaderCode = `
-                attribute vec2 a_position;
-
-                uniform vec2 u_resolution;
-                
-                void main() {
-                    // convert the position from pixels coords to (0.0 -> 1.0)
-                    vec2 zeroToOne = a_position / u_resolution;
-               
-                    // convert from 0->1 to 0->2
-                    vec2 zeroToTwo = zeroToOne * 2.0;
-               
-                    // convert from 0->2 to -1->+1 (clipspace)
-                    vec2 clipSpace = zeroToTwo - 1.0;
-               
-                    gl_Position = vec4(clipSpace * vec2(1., -1.), 0., 1.);
-                }`;
-
-            var fragmentShaderCode = `
-                // fragment shaders don't have a default precision so we need
-                // to pick one. mediump is a good default. It means "medium precision"
-                precision mediump float;
-                
-                void main() {
-                // gl_FragColor is a special variable a fragment shader
-                // is responsible for setting
-                gl_FragColor = vec4(1, 0, 0.5, 1); // return redish-purple
-                }`;
-
-            function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-                 // look up where the vertex data needs to go.
-                var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-
-                // Create a buffer and put three 2d clip space points in it
-                var positionBuffer = gl.createBuffer();
-
-                // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
-                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-            }
-
-            this.drawSeriesPoints = drawSeriesPoints;
-        };
-
         this.drawSeriesLines = drawSeriesLines;
         this.drawSeriesPoints = drawSeriesPoints;
         this.drawSeriesBars = drawSeriesBars;
         this.drawBar = drawBar;
-        this.webgl = new WebGl();
     };
 
     $.plot.drawSeries = new DrawSeries();
