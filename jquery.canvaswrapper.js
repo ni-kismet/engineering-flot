@@ -457,26 +457,28 @@
         position.element.innerHTML = text;
     };
 
-    // Removes one or more text strings from the canvas text overlay.
-    //
-    // If no parameters are given, all text within the layer is removed.
-    //
-    // Note that the text is not immediately removed; it is simply marked as
-    // inactive, which will result in its removal on the next render pass.
-    // This avoids the performance penalty for 'clear and redraw' behavior,
-    // where we potentially get rid of all text on a layer, but will likely
-    // add back most or all of it later, as when redrawing axes, for example.
-    //
-    // @param {string} layer A string of space-separated CSS classes uniquely
-    //     identifying the layer containing this text.
-    // @param {number=} x X coordinate of the text.
-    // @param {number=} y Y coordinate of the text.
-    // @param {string=} text Text string to remove.
-    // @param {(string|object)=} font Either a string of space-separated CSS
-    //     classes or a font-spec object, defining the text's font and style.
-    // @param {number=} angle Angle at which the text is rotated, in degrees.
-    //     Angle is currently unused, it will be implemented in the future.
-
+    /**
+     * 
+     * Removes one or more text strings from the canvas text overlay.
+     *
+     * If no parameters are given, all text within the layer is removed.
+     *
+     * Note that the text is not immediately removed; it is simply marked as
+     * inactive, which will result in its removal on the next render pass.
+     * This avoids the performance penalty for 'clear and redraw' behavior,
+     * where we potentially get rid of all text on a layer, but will likely
+     * add back most or all of it later, as when redrawing axes, for example.
+     *
+     * @param {string} layer A string of space-separated CSS classes uniquely
+     * identifying the layer containing this text.
+     * @param {number=} x X coordinate of the text.
+     * @param {number=} y Y coordinate of the text.
+     * @param {string=} text Text string to remove.
+     * @param {(string|object)=} font Either a string of space-separated CSS
+     * classes or a font-spec object, defining the text's font and style.
+     * @param {number=} angle Angle at which the text is rotated, in degrees.
+     * Angle is currently unused, it will be implemented in the future.
+     */
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
         var position, i;
         if (text == null) {
@@ -528,6 +530,13 @@
         this._textCache = {};
     };
 
+    /**
+     * The WebGlCanvas object is a wrapper around an HTML5 <canvas> tag with a webgl context.
+     * 
+     * @constructor
+     * @param {string} cls The class name of the element
+     * @param {element} container Element onto which to append the canvas.
+     */
     var WebGlCanvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
 
@@ -551,7 +560,7 @@
         this.element = element;
 
         var gl = element.getContext('webgl') ||
-                                    element.getContext('experimental-webgl');
+                 element.getContext('experimental-webgl');
 
         // Determine the screen's ratio of physical to device-independent
         // pixels.  This is the ratio between the canvas width that the browser
@@ -582,10 +591,19 @@
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
             this.context = gl;
+        } else {
+            throw new Error('WebGL not supported on this device.');
         }
+
         this.pixelRatio = devicePixelRatio / backingStoreRatio;
     };
 
+    /**
+     * Resizes the canvas to the given dimensions.
+     * 
+     * @param {number} width The desired width of the canvas
+     * @param {number} heigh The desired height of the canvas
+     */
     WebGlCanvas.prototype.resize = function(width, height) {
         var gl = this.context;
         if (gl.canvas.width != width ||
@@ -595,10 +613,13 @@
         }
     };
 
+    /**
+     * Render the 
+     * 
+     */
     WebGlCanvas.prototype.render = function() {
         var gl = this.context;
         if (gl) {
-            //gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         }
     };
