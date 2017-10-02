@@ -525,8 +525,51 @@
             return c.toString();
         }
 
-        function WebGl() {
+        function WebGl(context) {
+            var gl = context,
+                vertexShader = compileShader(gl, vertexShaderCode, gl.VERTEX_SHADER), 
+                fragmentShader = compileShader(gl, fragmentShaderCode, gl.FRAGMENT_SHADER), 
+                program = createProgram(gl, vertexShader, fragmentShader);
+
+            var vertexShaderCode = `
+                attribute vec2 a_position;
+
+                uniform vec2 u_resolution;
+                
+                void main() {
+                    // convert the position from pixels coords to (0.0 -> 1.0)
+                    vec2 zeroToOne = a_position / u_resolution;
+               
+                    // convert from 0->1 to 0->2
+                    vec2 zeroToTwo = zeroToOne * 2.0;
+               
+                    // convert from 0->2 to -1->+1 (clipspace)
+                    vec2 clipSpace = zeroToTwo - 1.0;
+               
+                    gl_Position = vec4(clipSpace * vec2(1., -1.), 0., 1.);
+                }`;
+
+            var fragmentShaderCode = `
+                // fragment shaders don't have a default precision so we need
+                // to pick one. mediump is a good default. It means "medium precision"
+                precision mediump float;
+                
+                void main() {
+                // gl_FragColor is a special variable a fragment shader
+                // is responsible for setting
+                gl_FragColor = vec4(1, 0, 0.5, 1); // return redish-purple
+                }`;
+
             function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+                 // look up where the vertex data needs to go.
+                var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+
+                // Create a buffer and put three 2d clip space points in it
+                var positionBuffer = gl.createBuffer();
+
+                // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
             }
 
