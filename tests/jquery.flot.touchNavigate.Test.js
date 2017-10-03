@@ -270,6 +270,46 @@ describe("flot touch navigate plugin", function () {
               expect(yaxis.max).toBeCloseTo(initialYmax - (initialYmax - midPointCoords.y) * (1 - 1/amount), 6);
           });
 
+          it('should zoom the entire plot for touches not on the same axis',function() {
+            plot = $.plot(placeholder, [
+                [
+                    [-1, 2],
+                    [11, 12]
+                ]
+            ], options);
+
+            var eventHolder = plot.getEventHolder(),
+                xaxis = plot.getXAxes()[0],
+                yaxis = plot.getYAxes()[0],
+                initialXmin = xaxis.min,
+                initialXmax = xaxis.max,
+                initialYmin = yaxis.min,
+                initialYmax = yaxis.max,
+                initialCoords = [
+                    { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
+                    { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top - 10 }
+                ],
+                finalCoords = [
+                    getPairOfCoords(xaxis, yaxis, 2, 4),
+                    getPairOfCoords(xaxis, yaxis, 6, 6)
+                ],
+                midPointCoords = {
+                        x: (xaxis.c2p(finalCoords[0].x - plot.offset().left) + xaxis.c2p(finalCoords[1].x - plot.offset().left)) / 2,
+                        y: (yaxis.c2p(finalCoords[0].y - plot.offset().top) + yaxis.c2p(finalCoords[1].y - plot.offset().top)) / 2
+                },
+                amount = getDistance(finalCoords) / getDistance(initialCoords);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+
+            expect(xaxis.min).not.toBeCloseTo(initialYmin, 6);
+            expect(xaxis.max).not.toBeCloseTo(initialYmax, 6);
+            expect(yaxis.min).not.toBeCloseTo(initialYmin, 6);
+            expect(yaxis.max).not.toBeCloseTo(initialYmax, 6);
+
+        });
+
         it('should zoom the plot on axis x',function() {
           plot = $.plot(placeholder, [
               [
