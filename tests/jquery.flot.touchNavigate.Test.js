@@ -327,7 +327,7 @@ describe("flot touch navigate plugin", function () {
                 initialYmax = yaxis.max,
                 initialCoords = [
                     { x: xaxis.box.left - 10, y: yaxis.p2c(4) + plot.offset().top},
-                    { x: xaxis.box.left - 20, y: yaxis.p2c(5) + plot.offset().top}
+                    { x: xaxis.box.left - 11, y: yaxis.p2c(5) + plot.offset().top}
                 ],
                 finalCoords = [
                     getPairOfCoords(xaxis, yaxis, 2, 4),
@@ -638,8 +638,64 @@ describe("flot touch navigate plugin", function () {
           expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmax) + (pointCoords[0].x - pointCoords[1].x)), 6);
           expect(yaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
-
       });
+
+      it('should recompute the axis to drag after a pinch event ended',function() {
+          plot = $.plot(placeholder, [
+              [
+                  [-1, 2],
+                  [11, 12]
+              ]
+          ], options);
+
+          var eventHolder = plot.getEventHolder(),
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              initialYmin = yaxis.min,
+              initialYmax = yaxis.max,
+              previousXmin, previousXmax, previousYmin, previousYmax,
+              initialCoords = [
+                  getPairOfCoords(xaxis, yaxis, 1, 3),
+                  getPairOfCoords(xaxis, yaxis, 2, 4),
+              ],
+              midPointCoords = [
+                  getPairOfCoords(xaxis, yaxis, 3, 7),
+                  { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 }
+              ],
+              finalCoordsPinch = [
+                  { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 }
+              ],
+              finalCoordsPan = [
+                  { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 15 }
+              ];
+
+          //simulate pinch
+          simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+          simulate.sendTouchEvents(midPointCoords, eventHolder, 'touchmove');
+          simulate.sendTouchEvents(finalCoordsPinch, eventHolder, 'touchend');
+
+          previousXmin = xaxis.min;
+          previousXmax = xaxis.max;
+          previousYmin = yaxis.min;
+          previousYmax = yaxis.max;
+
+          expect(previousXmin).not.toBeCloseTo(initialXmin, 6);
+          expect(previousXmax).not.toBeCloseTo(initialXmax, 6);
+          expect(previousYmin).not.toBeCloseTo(initialYmin, 6);
+          expect(previousYmax).not.toBeCloseTo(initialYmax, 6);
+
+          //simulate pan after pinch event
+          simulate.sendTouchEvents(finalCoordsPan, eventHolder, 'touchmove');
+          simulate.sendTouchEvents(finalCoordsPan, eventHolder, 'touchend');
+
+          expect(xaxis.min).toBeCloseTo(xaxis.c2p(xaxis.p2c(previousXmin) + (finalCoordsPinch[0].x - finalCoordsPan[0].x)), 6);
+          expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(previousXmax) + (finalCoordsPinch[0].x - finalCoordsPan[0].x)), 6);
+          expect(yaxis.min).toBe(previousYmin);
+          expect(yaxis.max).toBe(previousYmax);
+
+        });
     });
 
     describe('doubleTap', function() {

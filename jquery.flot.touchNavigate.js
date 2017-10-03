@@ -194,8 +194,17 @@
 
     function getAxis(plot, e, gesture, navigationState) {
         if (e.detail.type === 'touchstart') {
-            var point = getPoint(e, gesture);
-            return getTouchedAxis(plot, point.x, point.y);
+            if (gesture === 'pinch') {
+                var axisTouch1 = getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+                var axisTouch2 = getTouchedAxis(plot, e.detail.touches[1].pageX, e.detail.touches[1].pageY);
+                var allEqual = axisTouch1 => axisTouch1.every(v => v === axisTouch1[0]);
+                if (axisTouch1.length === axisTouch2.length && allEqual(axisTouch2)) {
+                    return axisTouch1;
+                }
+            } else return getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+        } else if (e.detail.type === 'touchend' && gesture === 'pinch') {
+            //update axis since instead on pinch, a pan event is made
+            return getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
         } else return navigationState.touchedAxis;
     }
 
