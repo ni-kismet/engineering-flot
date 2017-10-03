@@ -17,6 +17,7 @@ module.exports = function(config) {
         'jquery.flot.symbol.js',
         'jquery.flot.flatdata.js',
         'jquery.flot.drawSeries.js',
+        'jquery.flot.gldrawSeries.js',
         'jquery.flot.navigate.js',
         'jquery.flot.touchNavigate.js',
         'jquery.flot.touch.js',
@@ -29,7 +30,7 @@ module.exports = function(config) {
         'lib/globalize.js',
         'lib/globalize.culture.en-US.js',
         'lib/jquery.event.drag.js',
-        'lib/jquery.mousewheel.js'
+        'lib/jquery.mousewheel.js',
     ].concat(coverage_sources);
 
     var settings = {

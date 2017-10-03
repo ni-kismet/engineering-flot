@@ -296,26 +296,37 @@
             ctx.restore();
         }
 
-        function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-            var positions = [];
+        function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+            function drawCircle(ctx, x, y, radius, shadow, fill) {
+                ctx.moveTo(x + radius, y);
+                ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
+            }
+            drawCircle.fill = true;
             function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy, drawSymbolFn) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize;
 
+                ctx.beginPath();
                 for (var i = 0; i < points.length; i += ps) {
-                    if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
+                    var x = points[i],
+                        y = points[i + 1];
+                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
                         continue;
                     }
 
-                    positions[i] = axisx.p2c(points[i]);
-                    positions[i+1] = axisy.p2c(points[i + 1]) + offset;
-                }
+                    x = axisx.p2c(x);
+                    y = axisy.p2c(y) + offset;
 
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.DYNAMIC_DRAW);
-                gl.positionBuffer.numItems = positions.length / 2;
+                    drawSymbolFn(ctx, x, y, radius, shadow, fill);
+                }
+                if (drawSymbolFn.fill && !shadow) {
+                    ctx.fill();
+                }
+                ctx.stroke();
             }
 
-            //gl.translate(plotOffset.left, plotOffset.top);
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
 
             var datapoints = {
                 format: series.datapoints.format,
@@ -324,13 +335,21 @@
             };
 
             if (series.decimatePoints) {
-                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth, series.yaxis.min, series.yaxis.max, plotHeight);
+                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth);
             }
 
             var lw = series.points.lineWidth,
                 radius = series.points.radius,
                 symbol = series.points.symbol,
                 drawSymbolFn;
+
+            if (symbol === 'circle') {
+                drawSymbolFn = drawCircle;
+            } else if (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
+                drawSymbolFn = drawSymbol[symbol];
+            } else if (typeof drawSymbol === 'function') {
+                drawSymbolFn = drawSymbol;
+            }
 
             // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
@@ -339,9 +358,13 @@
                 lw = 0.0001;
             }
 
+            ctx.lineWidth = lw;
+            ctx.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient);
+            ctx.strokeStyle = series.color;
             plotPoints(datapoints, radius,
                 true, 0, false,
                 series.xaxis, series.yaxis, drawSymbolFn);
+            ctx.restore();
         }
 
         function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, lineWidth) {

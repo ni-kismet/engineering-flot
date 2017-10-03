@@ -13,8 +13,8 @@
         var index = 0;
         function generate(start, end, fn) {
             var res = [];
-            for (var i = 0; i <= 40; ++i) {
-                var x = start + i / 40 * (end - start);
+            for (var i = 0; i <= 100000; ++i) {
+                var x = start + i / 100000 * (end - start);
                 res.push([x, fn(x)]);
             }
             return res;

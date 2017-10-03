@@ -759,8 +759,8 @@
 
         this.element = element;
 
-        var gl = element.getContext('webgl') ||
-                 element.getContext('experimental-webgl');
+        var gl = element.getContext('webgl', {antialias: true}) ||
+                 element.getContext('experimental-webgl', {antialias: true});
 
         // Determine the screen's ratio of physical to device-independent
         // pixels.  This is the ratio between the canvas width that the browser
@@ -778,97 +778,6 @@
         this.width = box.width;
         this.height = box.height;
 
-        var vertexShaderCode = `
-            attribute vec2 a_position;
-
-            uniform vec2 u_resolution;
-            uniform float u_pointSize;
-            
-            void main() {
-                // convert the position from pixels coords to (0.0 -> 1.0)
-                vec2 zeroToOne = a_position / u_resolution;
-        
-                // convert from 0->1 to 0->2
-                vec2 zeroToTwo = zeroToOne * 2.0;
-        
-                // convert from 0->2 to -1->+1 (clipspace)
-                vec2 clipSpace = zeroToTwo - 1.0;
-        
-                gl_Position = vec4(clipSpace * vec2(1., -1.), 0., 1.);
-                gl_PointSize = u_pointSize;
-            }`;
-
-        var fragmentShaderCode = `
-            // fragment shaders don't have a default precision so we need
-            // to pick one. mediump is a good default. It means "medium precision"
-            precision mediump float;
-            
-            void main() {
-                // gl_FragColor is a special variable a fragment shader
-                // is responsible for setting
-                gl_FragColor = vec4(1, 0, 0.5, 1); // return redish-purple
-            }`;
-
-        /**
-         * Creates a program from 2 shaders.
-         *
-         * @param {!WebGLRenderingContext} gl The WebGL context.
-         * @param {!WebGLShader} vertexShader A vertex shader.
-         * @param {!WebGLShader} fragmentShader A fragment shader.
-         * @return {!WebGLProgram} A program.
-         */
-        function createProgram(gl, vertexShaderCode, fragmentShaderCode) {
-            // create a program.
-            var vertexShader = compileShader(gl, vertexShaderCode, gl.VERTEX_SHADER),
-                fragmentShader = compileShader(gl, fragmentShaderCode, gl.FRAGMENT_SHADER),
-                program = gl.createProgram();
-            
-            // attach the shaders.
-            gl.attachShader(program, vertexShader);
-            gl.attachShader(program, fragmentShader);
-        
-            // link the program.
-            gl.linkProgram(program);
-        
-            // Check if it linked.
-            var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-            if (!success) {
-                // something went wrong with the link
-                throw ("program failed to link:" + gl.getProgramInfoLog (program));
-            }
-        
-            return program;
-        };
-
-        /**
-         * Creates and compiles a shader.
-         *
-         * @param {!WebGLRenderingContext} gl The WebGL Context.
-         * @param {string} shaderSource The GLSL source code for the shader.
-         * @param {number} shaderType The type of shader, VERTEX_SHADER or FRAGMENT_SHADER.
-         * @return {!WebGLShader} The shader.
-         */
-        function compileShader(gl, shaderSource, shaderType) {
-            // Create the shader object
-            var shader = gl.createShader(shaderType);
-        
-            // Set the shader source code.
-            gl.shaderSource(shader, shaderSource);
-        
-            // Compile the shader
-            gl.compileShader(shader);
-        
-            // Check if it compiled
-            var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-            if (!success) {
-                // Something went wrong during compilation; get the error
-                throw "could not compile shader:" + gl.getShaderInfoLog(shader);
-            }
-        
-            return shader;
-        };
-
-        var program, positionBuffer, positionAttributeLocation, resolutionUniformLocation, pointSizeUniformLocation
         if (gl !== null) {
             backingStoreRatio =
             gl.webkitBackingStorePixelRatio ||
@@ -880,43 +789,14 @@
             gl.canvas.width = box.width;
             gl.canvas.height = box.height;
 
-            ////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////
-            program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-            positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-            resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
-            pointSizeUniformLocation = gl.getUniformLocation(program, "u_pointSize");
-
-            positionBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-            gl.useProgram(program);
-            // Turn on the attribute
-            gl.enableVertexAttribArray(positionAttributeLocation);
-
-            // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-            var size = 2;          // 2 components per iteration
-            var type = gl.FLOAT;   // the data is 32bit floats
-            var normalize = false; // don't normalize the data
-            var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-            var offset = 0;        // start at the beginning of the buffer
-            gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
-            
-            // set the resolution
-            gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
-            // set the point size
-            gl.uniform1f(pointSizeUniformLocation, 10.);
-    
             // Clear the canvas
-            gl.clearColor(0., 0., 0., 0.5);
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
             gl.clear(gl.COLOR_BUFFER_BIT);
-            gl.viewport(0., 0., gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-            positionBuffer.itemSize = size;
-            gl.positionBuffer = positionBuffer;
+            gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
             this.context = gl;
         } else {
-            throw new Error('WebGL not supported on this device.');
+            console.warn('WebGL not supported on this device.');
         }
 
         this.pixelRatio = devicePixelRatio / backingStoreRatio;
@@ -944,10 +824,10 @@
     WebGlCanvas.prototype.render = function() {
         var gl = this.context;
         if (gl) {
-            gl.viewport(0., 0., gl.drawingBufferWidth, gl.drawingBufferHeight);
-            gl.drawArrays(gl.POINTS, 0, gl.positionBuffer.numItems);
+            gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+            //gl.drawArrays(gl.POINTS, 0, gl.positionBuffer.numItems);
         }
-    };  
+    };
 
     function generateKey(text) {
         return text.replace(/0|1|2|3|4|5|6|7|8|9/g, '0');
@@ -3340,10 +3220,10 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                if (!gl) {
-                    $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                if (gl && series.usewebgl) {
+                    $.plot.gldrawSeries.drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
                 } else {
-                    $.plot.drawSeries.drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                    $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
                 }
             }
         }
@@ -4154,26 +4034,37 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
-        function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-            var positions = [];
+        function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+            function drawCircle(ctx, x, y, radius, shadow, fill) {
+                ctx.moveTo(x + radius, y);
+                ctx.arc(x, y, radius, 0, shadow ? Math.PI : Math.PI * 2, false);
+            }
+            drawCircle.fill = true;
             function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy, drawSymbolFn) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize;
 
+                ctx.beginPath();
                 for (var i = 0; i < points.length; i += ps) {
-                    if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
+                    var x = points[i],
+                        y = points[i + 1];
+                    if (x == null || x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max) {
                         continue;
                     }
 
-                    positions[i] = axisx.p2c(points[i]);
-                    positions[i+1] = axisy.p2c(points[i + 1]) + offset;
-                }
+                    x = axisx.p2c(x);
+                    y = axisy.p2c(y) + offset;
 
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.DYNAMIC_DRAW);
-                gl.positionBuffer.numItems = positions.length / 2;
+                    drawSymbolFn(ctx, x, y, radius, shadow, fill);
+                }
+                if (drawSymbolFn.fill && !shadow) {
+                    ctx.fill();
+                }
+                ctx.stroke();
             }
 
-            //gl.translate(plotOffset.left, plotOffset.top);
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
 
             var datapoints = {
                 format: series.datapoints.format,
@@ -4182,13 +4073,21 @@ Licensed under the MIT license.
             };
 
             if (series.decimatePoints) {
-                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth, series.yaxis.min, series.yaxis.max, plotHeight);
+                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth);
             }
 
             var lw = series.points.lineWidth,
                 radius = series.points.radius,
                 symbol = series.points.symbol,
                 drawSymbolFn;
+
+            if (symbol === 'circle') {
+                drawSymbolFn = drawCircle;
+            } else if (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
+                drawSymbolFn = drawSymbol[symbol];
+            } else if (typeof drawSymbol === 'function') {
+                drawSymbolFn = drawSymbol;
+            }
 
             // If the user sets the line width to 0, we change it to a very
             // small value. A line width of 0 seems to force the default of 1.
@@ -4197,9 +4096,13 @@ Licensed under the MIT license.
                 lw = 0.0001;
             }
 
+            ctx.lineWidth = lw;
+            ctx.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient);
+            ctx.strokeStyle = series.color;
             plotPoints(datapoints, radius,
                 true, 0, false,
                 series.xaxis, series.yaxis, drawSymbolFn);
+            ctx.restore();
         }
 
         function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, lineWidth) {
@@ -4367,6 +4270,174 @@ Licensed under the MIT license.
     };
 
     $.plot.drawSeries = new DrawSeries();
+})(jQuery);
+
+(function($) {
+    "use strict";
+
+    var GlDrawSeries = function() {
+        var vertexShaderCode = `
+            attribute vec2 a_position;
+
+            varying vec4 v_color;
+
+            uniform vec2 u_resolution;
+            uniform float u_pointSize;
+            uniform vec4 u_color;
+            
+            void main() {            
+                // convert from canvas coords to clip space(-1->1)
+                vec2 clipSpace = a_position * 2. / u_resolution - 1.0;
+                
+                // Multiply the position by the matrix
+                gl_Position = vec4(clipSpace * vec2(1., -1.), 0., 1.);
+
+                // set point size
+                gl_PointSize = u_pointSize;
+
+                // pass the color to fragment shader
+                v_color = u_color / 255.;
+
+            }`;
+
+        var fragmentShaderCode = `
+            precision mediump float;
+
+            // passed in from vertex shader
+            varying vec4 v_color;
+            void main() {
+                // Transform color from 0-255 to 0-1
+                gl_FragColor = v_color;
+            }`;
+
+        /**
+         * Creates a program from 2 shaders.
+         *
+         * @param {!WebGLRenderingContext} gl The WebGL context.
+         * @param {!WebGLShader} vertexShader A vertex shader.
+         * @param {!WebGLShader} fragmentShader A fragment shader.
+         * @return {!WebGLProgram} A program.
+         */
+        function createProgram(gl, vertexShaderCode, fragmentShaderCode) {
+            // create a program.
+            var vertexShader = compileShader(gl, vertexShaderCode, gl.VERTEX_SHADER),
+                fragmentShader = compileShader(gl, fragmentShaderCode, gl.FRAGMENT_SHADER),
+                program = gl.createProgram();
+
+            // attach the shaders.
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+
+            // link the program.
+            gl.linkProgram(program);
+
+            // Check if it linked.
+            var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+            if (!success) {
+                // something went wrong with the link
+                throw new Error("program failed to link:" + gl.getProgramInfoLog(program));
+            }
+
+            return program;
+        };
+
+        /**
+         * Creates and compiles a shader.
+         *
+         * @param {!WebGLRenderingContext} gl The WebGL Context.
+         * @param {string} shaderSource The GLSL source code for the shader.
+         * @param {number} shaderType The type of shader, VERTEX_SHADER or FRAGMENT_SHADER.
+         * @return {!WebGLShader} The shader.
+         */
+        function compileShader(gl, shaderSource, shaderType) {
+            // Create the shader object
+            var shader = gl.createShader(shaderType);
+
+            // Set the shader source code.
+            gl.shaderSource(shader, shaderSource);
+
+            // Compile the shader
+            gl.compileShader(shader);
+
+            // Check if it compiled
+            var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+            if (!success) {
+                // Something went wrong during compilation; get the error
+                throw new Error("could not compile shader:" + gl.getShaderInfoLog(shader));
+            }
+
+            return shader;
+        };
+
+        var program, positionAttributeLocation, resolutionUniformLocation, pointSizeUniformLocation, colorUniformLocation;
+        function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+            var positions,
+                positionBuffer = gl.createBuffer();
+
+            if (!program) {
+                program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
+                positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+                resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+                pointSizeUniformLocation = gl.getUniformLocation(program, "u_pointSize");
+                colorUniformLocation = gl.getUniformLocation(program, "u_color");
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                gl.useProgram(program);
+
+                // Turn on the attribute
+                gl.enableVertexAttribArray(positionAttributeLocation);
+                gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+                // set the resolution
+                gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+            }
+
+            function fillBufferPoints(datapoints, radius, fill, offset, shadow, axisx, axisy, drawSymbolFn) {
+                var points = datapoints.points,
+                    ps = datapoints.pointsize;
+                positions = new Float32Array(points.length);
+                positionBuffer.numItems = 0;
+                for (var i = 0; i < points.length; i += ps) {
+                    if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
+                        continue;
+                    }
+
+                    positions[i] = axisx.p2c(points[i]) + offset.left;
+                    positions[i + 1] = axisy.p2c(points[i + 1]) + offset.top;
+                    positionBuffer.numItems++;
+                }
+
+                gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
+            }
+
+            // set the point size
+            gl.uniform1f(pointSizeUniformLocation, series.points.radius);
+            // set the point color
+            var colorObj = $.color.parse(series.color);
+            gl.uniform4f(colorUniformLocation, colorObj.r, colorObj.g, colorObj.b, colorObj.a * 255.0);
+
+            var datapoints = {
+                points: series.datapoints.points,
+                pointsize: series.datapoints.pointsize
+            };
+
+            if (series.decimatePoints) {
+                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth, series.yaxis.min, series.yaxis.max, plotHeight);
+            }
+
+            fillBufferPoints(datapoints, series.points.radius,
+                true, plotOffset, false,
+                series.xaxis, series.yaxis);
+            gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+            // don't fill console with warnings
+            if (positionBuffer.numItems > 0) {
+                gl.drawArrays(gl.POINTS, 0, positionBuffer.numItems);
+            }
+        }
+
+        this.drawSeriesPoints = drawSeriesPoints;
+    };
+
+    $.plot.gldrawSeries = new GlDrawSeries();
 })(jQuery);
 
 (function ($) {
