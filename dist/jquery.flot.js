@@ -3220,10 +3220,10 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                if (gl && series.usewebgl) {
-                    $.plot.gldrawSeries.drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                } else {
+                if (!gl) {
                     $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                } else {
+                    $.plot.gldrawSeries.drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
                 }
             }
         }
@@ -4073,7 +4073,7 @@ Licensed under the MIT license.
             };
 
             if (series.decimatePoints) {
-                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth);
+                datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth, series.yaxis.min, series.yaxis.max, plotHeight);
             }
 
             var lw = series.points.lineWidth,
