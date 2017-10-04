@@ -205,7 +205,9 @@
         } else if (e.type === 'pinchend') {
             //update axis since instead on pinch, a pan event is made
             return getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
-        } else return navigationState.touchedAxis;
+        } else {
+            return navigationState.touchedAxis;
+        }
     }
 
     function noAxisTouched(navigationState) {
