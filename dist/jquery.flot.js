@@ -789,9 +789,7 @@
             gl.canvas.width = box.width;
             gl.canvas.height = box.height;
 
-            // Clear the canvas
-            gl.clearColor(0.0, 0.0, 0.0, 0.0);
-            gl.clear(gl.COLOR_BUFFER_BIT);
+            this.clear();
             gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
             this.context = gl;
@@ -817,6 +815,14 @@
         }
     };
 
+    WebGlCanvas.prototype.clear = function() {
+        var gl = this.context;
+        if(gl) {
+            // Clear the canvas
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+    };
     /**
      * Render the 
      * 
@@ -936,7 +942,7 @@ Licensed under the MIT license.
                 series: {
                     points: {
                         show: false,
-                        radius: 3,
+                        radius: 5,
                         lineWidth: 2, // in pixels
                         fill: true,
                         fillColor: "#ffffff",
@@ -1760,8 +1766,9 @@ Licensed under the MIT license.
             }
 
             surface = new Canvas("flot-base", placeholder[0]);
-            overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
             webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
+            overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
+            
             gl = webglsurface.context;
             ctx = surface.context;
             octx = overlay.context;
@@ -2651,7 +2658,7 @@ Licensed under the MIT license.
 
         function draw() {
             surface.clear();
-
+            webglsurface.clear();
             executeHooks(hooks.drawBackground, [ctx]);
 
             var grid = options.grid;
@@ -2666,7 +2673,7 @@ Licensed under the MIT license.
             }
 
             for (var i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i], gl]);
+                executeHooks(hooks.drawSeries, [ctx, series[i]]);
                 drawSeries(series[i]);
             }
 
@@ -4282,7 +4289,7 @@ Licensed under the MIT license.
             varying vec4 v_color;
 
             uniform vec2 u_resolution;
-            uniform float u_pointSize;
+            // uniform float u_pointSize;
             uniform vec4 u_color;
             
             void main() {            
@@ -4293,7 +4300,7 @@ Licensed under the MIT license.
                 gl_Position = vec4(clipSpace * vec2(1., -1.), 0., 1.);
 
                 // set point size
-                gl_PointSize = u_pointSize;
+                // gl_PointSize = u_pointSize;
 
                 // pass the color to fragment shader
                 v_color = u_color / 255.;
@@ -4369,16 +4376,16 @@ Licensed under the MIT license.
             return shader;
         };
 
-        var program, positionAttributeLocation, resolutionUniformLocation, pointSizeUniformLocation, colorUniformLocation;
+        var program, positionAttributeLocation, resolutionUniformLocation, pointSizeUniformLocation, colorUniformLocation,
+            positions = [];
+            
         function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-            var positions,
-                positionBuffer = gl.createBuffer();
-
+            var positionBuffer = gl.createBuffer();
             if (!program) {
                 program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
                 positionAttributeLocation = gl.getAttribLocation(program, "a_position");
                 resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
-                pointSizeUniformLocation = gl.getUniformLocation(program, "u_pointSize");
+                //pointSizeUniformLocation = gl.getUniformLocation(program, "u_pointSize");
                 colorUniformLocation = gl.getUniformLocation(program, "u_color");
 
                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -4391,26 +4398,50 @@ Licensed under the MIT license.
                 gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
             }
 
-            function fillBufferPoints(datapoints, radius, fill, offset, shadow, axisx, axisy, drawSymbolFn) {
+            function drawSquarePoints(datapoints, radius, fill, offset, shadow, axisx, axisy) {
                 var points = datapoints.points,
-                    ps = datapoints.pointsize;
-                positions = new Float32Array(points.length);
+                    ps = datapoints.pointsize, x, y, down, top, left, right;
+
+                positions = new Float32Array(points.length * 12);          
                 positionBuffer.numItems = 0;
-                for (var i = 0; i < points.length; i += ps) {
+                for (var i = 0, j = 0; i < points.length; i += ps, j += 12) {
                     if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
+                        j -= 12;
                         continue;
                     }
+                    x = axisx.p2c(points[i]) + offset.left;
+                    y = axisy.p2c(points[i + 1]) + offset.top;
+                    down = x - radius;
+                    left = y - radius;
+                    top = x + radius;
+                    right = y + radius;
+                    // first triangle
+                    positions[j] = down;
+                    positions[j + 1] = left;
 
-                    positions[i] = axisx.p2c(points[i]) + offset.left;
-                    positions[i + 1] = axisy.p2c(points[i + 1]) + offset.top;
-                    positionBuffer.numItems++;
+                    positions[j + 2] = down;
+                    positions[j + 3] = right;
+
+                    positions[j + 4] = top;
+                    positions[j + 5] = left;
+                    // second triangle
+                    positions[j + 6] = top;
+                    positions[j + 7] = right;
+
+                    positions[j + 8] = down;
+                    positions[j + 9] = right;
+
+                    positions[j + 10] = top;
+                    positions[j + 11] = left;
+
+                    positionBuffer.numItems += 6;
                 }
-
                 gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
             }
 
             // set the point size
-            gl.uniform1f(pointSizeUniformLocation, series.points.radius);
+            // gl.uniform1f(pointSizeUniformLocation, series.points.radius);
+
             // set the point color
             var colorObj = $.color.parse(series.color);
             gl.uniform4f(colorUniformLocation, colorObj.r, colorObj.g, colorObj.b, colorObj.a * 255.0);
@@ -4423,14 +4454,11 @@ Licensed under the MIT license.
             if (series.decimatePoints) {
                 datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth, series.yaxis.min, series.yaxis.max, plotHeight);
             }
-
-            fillBufferPoints(datapoints, series.points.radius,
-                true, plotOffset, false,
-                series.xaxis, series.yaxis);
             gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+            drawSquarePoints(datapoints, series.points.radius, true, plotOffset, false, series.xaxis, series.yaxis);
             // don't fill console with warnings
             if (positionBuffer.numItems > 0) {
-                gl.drawArrays(gl.POINTS, 0, positionBuffer.numItems);
+                gl.drawArrays(gl.TRIANGLES, 0, positionBuffer.numItems);
             }
         }
 

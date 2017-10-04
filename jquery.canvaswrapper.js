@@ -589,9 +589,7 @@
             gl.canvas.width = box.width;
             gl.canvas.height = box.height;
 
-            // Clear the canvas
-            gl.clearColor(0.0, 0.0, 0.0, 0.0);
-            gl.clear(gl.COLOR_BUFFER_BIT);
+            this.clear();
             gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
             this.context = gl;
@@ -617,6 +615,14 @@
         }
     };
 
+    WebGlCanvas.prototype.clear = function() {
+        var gl = this.context;
+        if(gl) {
+            // Clear the canvas
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+    };
     /**
      * Render the 
      * 

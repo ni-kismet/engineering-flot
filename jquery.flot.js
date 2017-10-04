@@ -93,7 +93,7 @@ Licensed under the MIT license.
                 series: {
                     points: {
                         show: false,
-                        radius: 3,
+                        radius: 5,
                         lineWidth: 2, // in pixels
                         fill: true,
                         fillColor: "#ffffff",
@@ -917,8 +917,9 @@ Licensed under the MIT license.
             }
 
             surface = new Canvas("flot-base", placeholder[0]);
-            overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
             webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
+            overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
+            
             gl = webglsurface.context;
             ctx = surface.context;
             octx = overlay.context;
@@ -1808,7 +1809,7 @@ Licensed under the MIT license.
 
         function draw() {
             surface.clear();
-
+            webglsurface.clear();
             executeHooks(hooks.drawBackground, [ctx]);
 
             var grid = options.grid;
@@ -1823,7 +1824,7 @@ Licensed under the MIT license.
             }
 
             for (var i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i], gl]);
+                executeHooks(hooks.drawSeries, [ctx, series[i]]);
                 drawSeries(series[i]);
             }
 
