@@ -131,11 +131,9 @@ can set the default in the options.
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
-            if (plot.getOptions().zoom.highlighted) {
-                e.preventDefault();
-                onZoomClick(e, delta < 0);
-                return false;
-            }
+            e.preventDefault();
+            onZoomClick(e, delta < 0);
+            return false;
         }
 
         var prevCursor = 'default',
@@ -163,10 +161,6 @@ can set the default in the options.
         }
 
         function onDragStart(e) {
-            if (!plot.getOptions().pan.highlighted) {
-                return;
-            }
-
             if (e.which !== 1) {
                 // only accept left-click
                 return false;
@@ -198,9 +192,6 @@ can set the default in the options.
         }
 
         function onDrag(e) {
-            if (!plot.getOptions().pan.highlighted) {
-                return;
-            }
             var frameRate = plot.getOptions().pan.frameRate;
 
             if (frameRate === -1) {
@@ -225,10 +216,6 @@ can set the default in the options.
         }
 
         function onDragEnd(e) {
-            if (!plot.getOptions().pan.highlighted) {
-                return;
-            }
-
             if (panTimeout) {
                 clearTimeout(panTimeout);
                 panTimeout = null;
@@ -243,10 +230,7 @@ can set the default in the options.
         }
 
         function onDblClick(e) {
-            var o = plot.getOptions();
-            if (o.pan.highlighted && o.zoom.highlighted) {
-                plot.getPlaceholder().trigger("re-center", e);
-            }
+            plot.getPlaceholder().trigger("re-center", e);
         }
 
         function onClick(e) {
@@ -599,14 +583,6 @@ can set the default in the options.
         plot.hooks.bindEvents.push(bindEvents);
         plot.hooks.shutdown.push(shutdown);
     }
-
-    $(document).on('click touch', function(event) {
-        existingPlots.forEach(function(plot) {
-            var options = plot.getOptions();
-            options.zoom.highlighted = false;
-            options.pan.highlighted = false;
-        });
-    });
 
     $.plot.plugins.push({
         init: init,

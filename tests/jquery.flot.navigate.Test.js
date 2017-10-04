@@ -640,39 +640,6 @@ describe("flot navigate plugin", function () {
     });
 
     describe('mousePan', function() {
-        it('does not pan for highlighted false', function(){
-            plot = $.plot(placeholder, [
-                [
-                    [0, 0],
-                    [10, 10]
-                ]
-            ], {
-                xaxes: [{ autoscale: 'exact' }],
-                yaxes: [{ autoscale: 'exact' }],
-                zoom: { interactive: true, highlighted: false, amount: 10 },
-                pan: { interactive: true, highlighted: false, frameRate: -1 }
-            });
-
-            var xaxis = plot.getXAxes()[0],
-                yaxis = plot.getYAxes()[0],
-                eventHolder = plot.getEventHolder(),
-                pointCoords = [
-                    { x: 10, y: 50 },
-                    { x: 20, y: plot.height() }
-                ];
-
-            simulate.mouseDown(eventHolder, pointCoords[0].x, pointCoords[0].y);
-            simulate.mouseMove(eventHolder, pointCoords[0].x, pointCoords[0].y);
-            simulate.mouseMove(eventHolder, pointCoords[1].x, pointCoords[1].y);
-            simulate.mouseUp(eventHolder, pointCoords[1].x, pointCoords[1].y);
-
-            expect(xaxis.min).toBe(0);
-            expect(xaxis.max).toBe(10);
-            expect(yaxis.min).toBe(0);
-            expect(yaxis.max).toBe(10);
-
-        });
-
         it ('pans on xaxis only', function () {
             plot = $.plot(placeholder, [
                 [
@@ -753,34 +720,6 @@ describe("flot navigate plugin", function () {
 
               expect(plot.getOptions().pan.highlighted).toBe(true);
               expect(plot.getOptions().zoom.highlighted).toBe(true);
-        });
-
-        it('outside plot deactivates plot\'s zoom and pan highlighted propriety', function() {
-            var pointCoords = { x: 0, y: 10 },
-                outsideContainer = setFixtures('<div id="container" style="width: 10px;height: 20px">')
-                    .find('#container');
-
-            plot = $.plot(placeholder, [
-                [
-                    [0, 0],
-                    [10, 10]
-                ]
-              ], {
-                  zoom: { interactive: true, highlighted: true, amount: 10 },
-                  pan: { interactive: true, highlighted: true}
-              });
-
-              outsideContainer.getBoundingClientRect = function() {
-                  return {left: 0, top: 0};
-              };
-              outsideContainer.dispatchEvent = function(evt) {
-                  document.dispatchEvent(evt);
-              };
-              simulate.click(outsideContainer, pointCoords.x, pointCoords.y);
-
-
-              expect(plot.getOptions().pan.highlighted).toBe(false);
-              expect(plot.getOptions().zoom.highlighted).toBe(false);
         });
     });
 });

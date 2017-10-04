@@ -22,6 +22,7 @@
                 prevTap: { x: 0, y: 0 },
                 currentTap: { x: 0, y: 0 },
                 interceptedLongTap: false,
+                allowEventPropagation: false,
                 prevTapTime: null,
                 tapStartTime: null,
                 longTapTriggerId: null
@@ -34,9 +35,12 @@
 
         function interpretGestures(e) {
             var o = plot.getOptions();
+
             if (!o.pan.highlighted || !o.zoom.highlighted) {
                 return;
             }
+
+            updateOnMultipleTouches(e);
 
             if (isPinchEvent(e)) {
                 executeAction(e, 'pinch');
@@ -89,8 +93,6 @@
 
         var pan = {
             touchstart: function(e) {
-                preventEventPropagation(e);
-
                 updatePrevForDoubleTap();
                 updateCurrentForDoubleTap(e);
                 updateStateForLongTapStart(e);
@@ -99,6 +101,8 @@
             },
 
             touchmove: function(e) {
+                preventEventPropagation(e);
+
                 updateCurrentForDoubleTap(e);
                 updateStateForLongTapEnd(e);
 
@@ -107,6 +111,7 @@
 
             touchend: function(e) {
                 preventEventPropagation(e);
+
                 if (wasPinchEvent(e)) {
                     mainEventHolder.dispatchEvent(new CustomEvent('pinchend', { detail: e }));
                     mainEventHolder.dispatchEvent(new CustomEvent('panstart', { detail: e }));
@@ -118,7 +123,6 @@
 
         var pinch = {
             touchstart: function(e) {
-                preventEventPropagation(e);
                 mainEventHolder.dispatchEvent(new CustomEvent('pinchstart', { detail: e }));
             },
 
@@ -235,8 +239,10 @@
         }
 
         function preventEventPropagation(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            if (!gestureState.allowEventPropagation) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
         }
 
         function distance(x1, y1, x2, y2) {
@@ -249,6 +255,14 @@
 
         function wasPinchEvent(e) {
             return (gestureState.twoTouches && e.touches.length === 1);
+        }
+
+        function updateOnMultipleTouches(e) {
+            if (e.touches.length >= 3) {
+                gestureState.allowEventPropagation = true;
+            } else {
+                gestureState.allowEventPropagation = false;
+            }
         }
 
         function isPinchEvent(e) {
