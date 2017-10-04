@@ -227,6 +227,27 @@ describe("flot touch plugin", function () {
             expect(spy).not.toHaveBeenCalled();
             expect(spy.calls.count()).toBe(0);
         });
+
+        it('allows default propagation for three touches',function() {
+            plot = $.plot(placeholder, [], options);
+
+            var eventHolder = plot.getEventHolder(),
+                touchCoords = [{pageX: 10, pageY: 20}, {pageX: 15, pageY: 20}, {pageX: 20, pageY: 25}],
+                touchStartEvent = new CustomEvent('touchstart'),
+                touchMoveEvent = new CustomEvent('touchmove');
+
+            touchStartEvent.touches = touchCoords;
+            touchStartEvent.preventDefault = jasmine.createSpy();
+            touchMoveEvent.touches = touchCoords;
+            touchMoveEvent.preventDefault = jasmine.createSpy();
+
+            eventHolder.dispatchEvent(touchStartEvent);
+            eventHolder.dispatchEvent(touchMoveEvent);
+
+            expect(touchStartEvent.preventDefault).not.toHaveBeenCalled();
+            expect(touchMoveEvent.preventDefault).not.toHaveBeenCalled();
+
+        });
     });
 
     describe('pan', function() {
