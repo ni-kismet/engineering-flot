@@ -13,10 +13,8 @@ dependencies:
     - curl -s https://raw.githubusercontent.com/chronogolf/circleci-google-chrome/master/use_chrome_stable_version.sh | bash
     - node --version
     - npm --version
+    - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
   post:
-    - printenv
-    - env
-    - echo $NPM_TOKEN
     - npm install -g dont-break
 test:
   override:
