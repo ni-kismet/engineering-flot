@@ -10,8 +10,8 @@ describe("flot touch plugin", function () {
         options = {
             xaxes: [{ autoscale: 'exact' }],
             yaxes: [{ autoscale: 'exact' }],
-            zoom: { interactive: true, amount: 10 },
-            pan: { interactive: true, frameRate: -1, enableTouch: true }
+            zoom: { interactive: true, amount: 10, active: true },
+            pan: { interactive: true, frameRate: -1, enableTouch: true, active: true }
         };
     });
 
@@ -170,6 +170,31 @@ describe("flot touch plugin", function () {
             expect(spy.calls.count()).toBe(1);
         });
 
+        it('should not trigger pinch event for plot not active',function() {
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+                ], {
+                xaxes: [{ autoscale: 'exact' }],
+                yaxes: [{ autoscale: 'exact' }],
+                zoom: { interactive: true, active: false, amount: 10 },
+                pan: { interactive: true, active: false, frameRate: -1 }
+            });
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('pinch handler'),
+                coords = [{x: 10, y: 20}, {x: 15, y: 20}];
+
+            eventHolder.addEventListener('pinchstart', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+
         it('should not trigger pinch event for only one touch',function() {
             plot = $.plot(placeholder, [[]], options);
 
@@ -191,7 +216,7 @@ describe("flot touch plugin", function () {
             var eventHolder = plot.getEventHolder(),
                 mockEventHolder = {},
                 spy = jasmine.createSpy('pinch handler'),
-                coords = [{x: 10, y: 20}];
+                coords = [{x: 10, y: 20}, {x: 15, y: 20}];
 
             eventHolder.addEventListener('pinchstart', spy);
 
@@ -201,6 +226,179 @@ describe("flot touch plugin", function () {
 
             expect(spy).not.toHaveBeenCalled();
             expect(spy.calls.count()).toBe(0);
+        });
+
+        it('allows default propagation for three touches',function() {
+            plot = $.plot(placeholder, [], options);
+
+            var eventHolder = plot.getEventHolder(),
+                touchCoords = [{pageX: 10, pageY: 20}, {pageX: 15, pageY: 20}, {pageX: 20, pageY: 25}],
+                touchStartEvent = new CustomEvent('touchstart'),
+                touchMoveEvent = new CustomEvent('touchmove');
+
+            touchStartEvent.touches = touchCoords;
+            touchStartEvent.preventDefault = jasmine.createSpy();
+            touchMoveEvent.touches = touchCoords;
+            touchMoveEvent.preventDefault = jasmine.createSpy();
+
+            eventHolder.dispatchEvent(touchStartEvent);
+            eventHolder.dispatchEvent(touchMoveEvent);
+
+            expect(touchStartEvent.preventDefault).not.toHaveBeenCalled();
+            expect(touchMoveEvent.preventDefault).not.toHaveBeenCalled();
+
+        });
+    });
+
+    describe('pan', function() {
+
+        beforeEach(function() {
+            jasmine.clock().install().mockDate();
+        });
+
+        afterEach(function() {
+            jasmine.clock().uninstall();
+        });
+
+        it('should be able to trigger pan event',function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('pan handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('pan', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'pan');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should not trigger pan event for plot not active',function() {
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+                ], {
+                xaxes: [{ autoscale: 'exact' }],
+                yaxes: [{ autoscale: 'exact' }],
+                zoom: { interactive: true, active: false, amount: 10 },
+                pan: { interactive: true, active: false, frameRate: -1 }
+            });
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('pan handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('pan', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+
+        it('should not trigger pan event for touch outside plot',function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                mockEventHolder = {},
+                spy = jasmine.createSpy('pan handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('panstart', spy);
+
+            mockEventHolder.dispatchEvent = function() {};
+
+            simulate.sendTouchEvents(coords, mockEventHolder, 'touchstart');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+    });
+
+    describe('doubletap', function() {
+
+        beforeEach(function() {
+            jasmine.clock().install().mockDate();
+        });
+
+        afterEach(function() {
+            jasmine.clock().uninstall();
+        });
+
+        it('should trigger the double tap event', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('double tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('doubletap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(200);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should trigger the double tap event even when there is a different touch point', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('double tap handler'),
+                initialCoords = [{x: 10, y: 20}],
+                finalCoords = [{x: 11, y: 21}];
+
+            eventHolder.addEventListener('doubletap', spy);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(300);
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchstart');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should not trigger the double tap event for a big interval between taps', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('double tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('doubletap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(1000);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+
+        it('should not trigger the double tap event for one of the touches outside plot area', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                mockEventHolder = {},
+                spy = jasmine.createSpy('double tap handler'),
+                initialCoords = [{x: 10, y: 20}],
+                finalCoords = [{x: 100, y: 200}];
+
+            mockEventHolder.dispatchEvent = function() {};
+
+            eventHolder.addEventListener('doubletap', spy);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(100);
+            simulate.sendTouchEvents(finalCoords, mockEventHolder, 'touchmove');
+
+            expect(spy).not.toHaveBeenCalled();
         });
     });
 });

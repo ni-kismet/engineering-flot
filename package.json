@@ -33,6 +33,6 @@
     "karma-spec-reporter": "0.0.31",
     "phantomjs-polyfill-find": "0.0.1",
     "tmp": "0.0.33",
-    "webcharts-development-settings": "0.0.4"
+    "webcharts-development-settings": "0.0.7"
   }
 }
