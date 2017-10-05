@@ -3,9 +3,6 @@ machine:
     version: "8.2.0"
 dependencies:
   pre:
-    #- mkdir ../ff-release
-    #- wget -O ff-release.tar.bz2 'https://archive.mozilla.org/pub/firefox/releases/43.0b5/linux-x86_64/en-US/firefox-43.0b5.tar.bz2' && tar xjf ff-release.tar.bz2:
-    #    pwd: ../ff-release
     - sudo apt-get update
     - sudo apt-get install libpango1.0-0
     - sudo apt-get install firefox
