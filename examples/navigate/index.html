@@ -22,7 +22,8 @@
 		font-size: smaller;
 	}
 
-	</style>
+    </style>
+    <script language="javascript" type="text/javascript" src="../../node_modules/three/build/three.js"></script>        
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="../../lib/jquery.event.drag.js"></script>
 	<script language="javascript" type="text/javascript" src="../../lib/jquery.mousewheel.js"></script>
@@ -53,8 +54,11 @@
 		var plot = $.plot(placeholder, data, {
 			series: {
 				lines: {
-					show: true
-				},
+                    show: true
+                },
+                points: {
+                    show: true
+                },
 				shadowSize: 0
 			},
 			xaxis: {

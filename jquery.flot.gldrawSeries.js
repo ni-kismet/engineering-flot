@@ -1,169 +1,65 @@
 (function($) {
     "use strict";
 
-    var GlDrawSeries = function() {
-        var vertexShaderCode = `
-            attribute vec2 a_position;
+    var GlDrawSeries = function() {           
+        function drawSeriesPoints(series, scene, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+            var texture = scene.userData.texture;
+            var material = scene.userData.material;
+            var geometry = new THREE.Geometry();
 
-            varying vec4 v_color;
+            // create point texture
+            if(!texture) {
+                var textureCanvas = document.createElement('canvas');
+                textureCanvas.width = 128;
+                textureCanvas.height = 128;
+                var context = textureCanvas.getContext( '2d' );
+                context.globalAlpha = 1;
+                context.strokeStyle = series.color;
+                context.lineWidth = series.points.lineWidth * 10 || 10;
 
-            uniform vec2 u_resolution;
-            // uniform float u_pointSize;
-            uniform vec4 u_color;
-            
-            void main() {            
-                // convert from canvas coords to clip space(-1->1)
-                vec2 clipSpace = a_position * 2. / u_resolution - 1.0;
-                
-                // Multiply the position by the matrix
-                gl_Position = vec4(clipSpace * vec2(1., -1.), 0., 1.);
+                context.arc(64, 64, 32, 0, 2 * Math.PI);
+                context.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient) || series.color;
 
-                // set point size
-                // gl_PointSize = u_pointSize;
+                context.fill();   
+                context.stroke();
 
-                // pass the color to fragment shader
-                v_color = u_color / 255.;
+                texture = new THREE.Texture(textureCanvas);
+                texture.needsUpdate = true;
 
-            }`;
-
-        var fragmentShaderCode = `
-            precision mediump float;
-
-            // passed in from vertex shader
-            varying vec4 v_color;
-            void main() {
-                // Transform color from 0-255 to 0-1
-                gl_FragColor = v_color;
-            }`;
-
-        /**
-         * Creates a program from 2 shaders.
-         *
-         * @param {!WebGLRenderingContext} gl The WebGL context.
-         * @param {!WebGLShader} vertexShader A vertex shader.
-         * @param {!WebGLShader} fragmentShader A fragment shader.
-         * @return {!WebGLProgram} A program.
-         */
-        function createProgram(gl, vertexShaderCode, fragmentShaderCode) {
-            // create a program.
-            var vertexShader = compileShader(gl, vertexShaderCode, gl.VERTEX_SHADER),
-                fragmentShader = compileShader(gl, fragmentShaderCode, gl.FRAGMENT_SHADER),
-                program = gl.createProgram();
-
-            // attach the shaders.
-            gl.attachShader(program, vertexShader);
-            gl.attachShader(program, fragmentShader);
-
-            // link the program.
-            gl.linkProgram(program);
-
-            // Check if it linked.
-            var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-            if (!success) {
-                // something went wrong with the link
-                throw new Error("program failed to link:" + gl.getProgramInfoLog(program));
+                // save texture for future draw
+                scene.userData.texture = texture;
             }
 
-            return program;
-        };
+            // update points material from texture
+            if(!material || texture.needsUpdate) {
+                material = new THREE.PointsMaterial({ size: series.points.radius / 20, map: texture, transparent: true, alphaTest: .1 });
+                material.needsUpdate = true;
 
-        /**
-         * Creates and compiles a shader.
-         *
-         * @param {!WebGLRenderingContext} gl The WebGL Context.
-         * @param {string} shaderSource The GLSL source code for the shader.
-         * @param {number} shaderType The type of shader, VERTEX_SHADER or FRAGMENT_SHADER.
-         * @return {!WebGLShader} The shader.
-         */
-        function compileShader(gl, shaderSource, shaderType) {
-            // Create the shader object
-            var shader = gl.createShader(shaderType);
-
-            // Set the shader source code.
-            gl.shaderSource(shader, shaderSource);
-
-            // Compile the shader
-            gl.compileShader(shader);
-
-            // Check if it compiled
-            var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-            if (!success) {
-                // Something went wrong during compilation; get the error
-                throw new Error("could not compile shader:" + gl.getShaderInfoLog(shader));
+                // save material for future draw
+                scene.userData.material = material;
             }
 
-            return shader;
-        };
-
-        var program, positionAttributeLocation, resolutionUniformLocation, pointSizeUniformLocation, colorUniformLocation,
-            positions = [];
-            
-        function drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
-            var positionBuffer = gl.createBuffer();
-            if (!program) {
-                program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-                positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-                resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
-                //pointSizeUniformLocation = gl.getUniformLocation(program, "u_pointSize");
-                colorUniformLocation = gl.getUniformLocation(program, "u_color");
-
-                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-                gl.useProgram(program);
-
-                // Turn on the attribute
-                gl.enableVertexAttribArray(positionAttributeLocation);
-                gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-                // set the resolution
-                gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+            // clear the scene
+            while(scene.children.length > 0){ 
+                scene.remove(scene.children[0]); 
             }
 
-            function drawSquarePoints(datapoints, radius, fill, offset, shadow, axisx, axisy) {
+            function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize, x, y, down, top, left, right;
+         
 
-                positions = new Float32Array(points.length * 12);          
-                positionBuffer.numItems = 0;
-                for (var i = 0, j = 0; i < points.length; i += ps, j += 12) {
+                for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
-                        j -= 12;
                         continue;
                     }
-                    x = axisx.p2c(points[i]) + offset.left;
-                    y = axisy.p2c(points[i + 1]) + offset.top;
-                    down = x - radius;
-                    left = y - radius;
-                    top = x + radius;
-                    right = y + radius;
-                    // first triangle
-                    positions[j] = down;
-                    positions[j + 1] = left;
+                    x = axisx.p2c(points[i]) + offset.left/2;
+                    y = axisy.p2c(points[i + 1]) - offset.top/2;
 
-                    positions[j + 2] = down;
-                    positions[j + 3] = right;
-
-                    positions[j + 4] = top;
-                    positions[j + 5] = left;
-                    // second triangle
-                    positions[j + 6] = top;
-                    positions[j + 7] = right;
-
-                    positions[j + 8] = down;
-                    positions[j + 9] = right;
-
-                    positions[j + 10] = top;
-                    positions[j + 11] = left;
-
-                    positionBuffer.numItems += 6;
+                    geometry.vertices.push(new THREE.Vector3(x - plotWidth/2, -y + plotHeight/2, 0));
                 }
-                gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
+                scene.add(new THREE.Points(geometry, material));
             }
-
-            // set the point size
-            // gl.uniform1f(pointSizeUniformLocation, series.points.radius);
-
-            // set the point color
-            var colorObj = $.color.parse(series.color);
-            gl.uniform4f(colorUniformLocation, colorObj.r, colorObj.g, colorObj.b, colorObj.a * 255.0);
 
             var datapoints = {
                 points: series.datapoints.points,
@@ -173,12 +69,23 @@
             if (series.decimatePoints) {
                 datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth, series.yaxis.min, series.yaxis.max, plotHeight);
             }
-            gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-            drawSquarePoints(datapoints, series.points.radius, true, plotOffset, false, series.xaxis, series.yaxis);
-            // don't fill console with warnings
-            if (positionBuffer.numItems > 0) {
-                gl.drawArrays(gl.TRIANGLES, 0, positionBuffer.numItems);
+            plotPoints(datapoints, series.points.radius, true, plotOffset, false, series.xaxis, series.yaxis);
+        }
+
+        function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
+            var fill = filloptions.fill;
+            if (!fill) {
+                return null;
             }
+
+            if (filloptions.fillColor) {
+                return getColorOrGradient(filloptions.fillColor, bottom, top, seriesColor);
+            }
+
+            var c = $.color.parse(seriesColor);
+            c.a = typeof fill === "number" ? fill : 0.4;
+            c.normalize();
+            return c.toString();
         }
 
         this.drawSeriesPoints = drawSeriesPoints;

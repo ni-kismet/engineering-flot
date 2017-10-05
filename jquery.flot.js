@@ -151,7 +151,7 @@ Licensed under the MIT license.
             overlay = null, // canvas for interactive stuff on top of plot
             webglsurface = null, // the canvas for webgl rendering
             eventHolder = null, // jQuery object that events should be bound to
-            gl = null, // the webgl context
+            renderer = null, // the webgl context
             ctx = null,
             octx = null,
             xaxes = [],
@@ -268,7 +268,7 @@ Licensed under the MIT license.
             webglsurface = null;
             overlay = null;
             eventHolder = null;
-            gl = null;
+            renderer = null;
             ctx = null;
             octx = null;
             xaxes = [];
@@ -920,13 +920,9 @@ Licensed under the MIT license.
             webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
             overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
             
-            gl = webglsurface.context;
+            renderer = webglsurface.renderer;
             ctx = surface.context;
             octx = overlay.context;
-            if (gl) {
-                gl.clearColor(0.0, 0.0, 0.0, 0.2);
-                gl.enable(gl.DEPTH_TEST);
-            }
 
             // define which element we're listening for events on
             eventHolder = $(overlay.element).unbind();
@@ -1823,9 +1819,16 @@ Licensed under the MIT license.
                 drawGrid();
             }
 
+            if(series.length !== webglsurface.scenes.length) {
+                webglsurface.scenes = [];
+                for(var i = 0; i < series.length; i++) {
+                    webglsurface.scenes[i] = new THREE.Scene();;
+                }
+            }
+
             for (var i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
-                drawSeries(series[i]);
+                drawSeries(series[i], webglsurface.scenes[i]);
             }
 
             executeHooks(hooks.draw, [ctx]);
@@ -2368,7 +2371,7 @@ Licensed under the MIT license.
             });
         }
 
-        function drawSeries(series) {
+        function drawSeries(series, scene) {
             if (series.lines.show) {
                 $.plot.drawSeries.drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
             }
@@ -2378,10 +2381,10 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                if (!gl) {
+                if (!renderer) {
                     $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
                 } else {
-                    $.plot.gldrawSeries.drawSeriesPoints(series, gl, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                    $.plot.gldrawSeries.drawSeriesPoints(series, scene, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
                 }
             }
         }

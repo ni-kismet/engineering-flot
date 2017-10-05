@@ -539,9 +539,11 @@
      */
     var WebGlCanvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
+        var renderer, camera, scenes = [new THREE.Scene()];
 
         if (!element) {
-            element = document.createElement('canvas');
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            element = renderer.domElement;//document.createElement('canvas');
             element.className = cls;
             element.style.direction = 'ltr';
             element.style.position = 'absolute';
@@ -556,11 +558,6 @@
                 throw new Error('Canvas is not available.');
             }
         }
-
-        this.element = element;
-
-        var gl = element.getContext('webgl', {antialias: true}) ||
-                 element.getContext('experimental-webgl', {antialias: true});
 
         // Determine the screen's ratio of physical to device-independent
         // pixels.  This is the ratio between the canvas width that the browser
@@ -577,27 +574,30 @@
         // Size the canvas to match the internal dimensions of its container
         this.width = box.width;
         this.height = box.height;
-
-        if (gl !== null) {
+        
+        this.element = element;
+        this.scenes = scenes;
+        this.camera = camera = new THREE.OrthographicCamera( this.width / - 2, this.width / 2, this.height / 2, this.height / - 2, 0.1, 1000 );
+        this.renderer = renderer;// = new THREE.WebGLRenderer({ canvas: element, antialias: true, alpha: true });;
+        camera.position.z = 5;
+        camera.position.x = 0;
+        camera.position.y = 0;
+        if (renderer !== null) {
             backingStoreRatio =
-            gl.webkitBackingStorePixelRatio ||
-            gl.mozBackingStorePixelRatio ||
-            gl.msBackingStorePixelRatio ||
-            gl.oBackingStorePixelRatio ||
-            gl.backingStorePixelRatio || 1;
+            renderer.webkitBackingStorePixelRatio ||
+            renderer.mozBackingStorePixelRatio ||
+            renderer.msBackingStorePixelRatio ||
+            renderer.oBackingStorePixelRatio ||
+            renderer.backingStorePixelRatio || 1;
 
-            gl.canvas.width = box.width;
-            gl.canvas.height = box.height;
-
+            renderer.setSize(box.width, box.height, true);
+            renderer.setPixelRatio(devicePixelRatio / backingStoreRatio);
+            renderer.autoClear = false;
             this.clear();
-            gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-            this.context = gl;
         } else {
             console.warn('WebGL not supported on this device.');
-        }
-
-        this.pixelRatio = devicePixelRatio / backingStoreRatio;
+        }   
+           
     };
 
     /**
@@ -607,20 +607,26 @@
      * @param {number} heigh The desired height of the canvas
      */
     WebGlCanvas.prototype.resize = function(width, height) {
-        var gl = this.context;
-        if (gl.canvas.width !== width ||
-            gl.canvas.height !== height) {
-            gl.canvas.width = width;
-            gl.canvas.height = height;
+        var renderer = this.context;
+        if (this.element.width !== width ||
+            this.element.height !== height) {
+                renderer.setSize(width, height, false);
         }
     };
 
     WebGlCanvas.prototype.clear = function() {
-        var gl = this.context;
-        if(gl) {
+        var renderer = this.renderer,
+            scenes = this.scenes;
+
+        if(renderer) {
             // Clear the canvas
-            gl.clearColor(0.0, 0.0, 0.0, 0.0);
-            gl.clear(gl.COLOR_BUFFER_BIT);
+            renderer.setClearColor(0xffffff, 0.0);
+            renderer.setScissorTest(false);
+            renderer.clear();
+
+
+            renderer.setClearColor(0x000000, 0.0);
+            renderer.setScissorTest(true);
         }
     };
     /**
@@ -628,10 +634,18 @@
      * 
      */
     WebGlCanvas.prototype.render = function() {
-        var gl = this.context;
-        if (gl) {
-            gl.viewport(0.0, 0.0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-            //gl.drawArrays(gl.POINTS, 0, gl.positionBuffer.numItems);
+        var renderer = this.renderer,
+            camera = this.camera,
+            scenes = this.scenes;
+        if (renderer) {
+            var rendererSize = renderer.getSize();
+            renderer.setViewport(0.0, 0.0, rendererSize.width, rendererSize.height);
+            renderer.setScissor(0.0, 0.0, rendererSize.width, rendererSize.height);
+            renderer.clear();
+            scenes.forEach(function(scene) {   
+                renderer.render(scene, camera);
+                renderer.clearDepth();
+            });
         }
     };
 
