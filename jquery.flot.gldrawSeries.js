@@ -32,7 +32,7 @@
 
             // update points material from texture
             if(!material || texture.needsUpdate) {
-                material = new THREE.PointsMaterial({ size: series.points.radius / 20, map: texture, transparent: true, alphaTest: .1 });
+                material = new THREE.PointsMaterial({ size: series.points.radius / 15, map: texture, transparent: true, alphaTest: .1 });
                 material.needsUpdate = true;
 
                 // save material for future draw
@@ -53,10 +53,10 @@
                     if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
                         continue;
                     }
-                    x = axisx.p2c(points[i]) + offset.left/2;
-                    y = axisy.p2c(points[i + 1]) - offset.top/2;
+                    x = axisx.p2c(points[i]) + offset.left/2 - plotWidth/2 + 11;
+                    y = -axisy.p2c(points[i + 1]) + offset.top/2 + plotHeight/2 - 10;
 
-                    geometry.vertices.push(new THREE.Vector3(x - plotWidth/2, -y + plotHeight/2, 0));
+                    geometry.vertices.push(new THREE.Vector3(x , y, 0));
                 }
                 scene.add(new THREE.Points(geometry, material));
             }

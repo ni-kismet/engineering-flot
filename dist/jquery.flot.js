@@ -742,7 +742,7 @@
         var renderer, camera, scenes = [new THREE.Scene()];
 
         if (!element) {
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
             element = renderer.domElement;//document.createElement('canvas');
             element.className = cls;
             element.style.direction = 'ltr';
@@ -823,7 +823,11 @@
             renderer.setClearColor(0xffffff, 0.0);
             renderer.setScissorTest(false);
             renderer.clear();
-
+            scenes.forEach(function(scene) {
+                while(scene.children.length > 0){ 
+                    scene.remove(scene.children[0]); 
+                }
+            });
 
             renderer.setClearColor(0x000000, 0.0);
             renderer.setScissorTest(true);
@@ -4330,7 +4334,7 @@ Licensed under the MIT license.
 
             // update points material from texture
             if(!material || texture.needsUpdate) {
-                material = new THREE.PointsMaterial({ size: series.points.radius / 20, map: texture, transparent: true, alphaTest: .1 });
+                material = new THREE.PointsMaterial({ size: series.points.radius / 15, map: texture, transparent: true, alphaTest: .1 });
                 material.needsUpdate = true;
 
                 // save material for future draw
@@ -4351,10 +4355,10 @@ Licensed under the MIT license.
                     if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
                         continue;
                     }
-                    x = axisx.p2c(points[i]) + offset.left/2;
-                    y = axisy.p2c(points[i + 1]) - offset.top/2;
+                    x = axisx.p2c(points[i]) + offset.left/2 - plotWidth/2 + 11;
+                    y = -axisy.p2c(points[i + 1]) + offset.top/2 + plotHeight/2 - 10;
 
-                    geometry.vertices.push(new THREE.Vector3(x - plotWidth/2, -y + plotHeight/2, 0));
+                    geometry.vertices.push(new THREE.Vector3(x , y, 0));
                 }
                 scene.add(new THREE.Points(geometry, material));
             }

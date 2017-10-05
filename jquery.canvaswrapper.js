@@ -542,7 +542,7 @@
         var renderer, camera, scenes = [new THREE.Scene()];
 
         if (!element) {
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
             element = renderer.domElement;//document.createElement('canvas');
             element.className = cls;
             element.style.direction = 'ltr';
@@ -623,7 +623,11 @@
             renderer.setClearColor(0xffffff, 0.0);
             renderer.setScissorTest(false);
             renderer.clear();
-
+            scenes.forEach(function(scene) {
+                while(scene.children.length > 0){ 
+                    scene.remove(scene.children[0]); 
+                }
+            });
 
             renderer.setClearColor(0x000000, 0.0);
             renderer.setScissorTest(true);
