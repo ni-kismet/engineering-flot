@@ -13,13 +13,13 @@ The plugin supports these options:
 
     zoom: {
         interactive: false,
-        highlighted: false,
+        active: false,
         amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
     }
 
     pan: {
         interactive: false,
-        highlighted: false,
+        active: false,
         cursor: "move",     // CSS mouse cursor value used when dragging, e.g. "pointer"
         frameRate: 20,
         mode: "smart"       // enable smart pan mode
@@ -29,8 +29,8 @@ The plugin supports these options:
 interactive for pan, then you'll have a basic plot that supports moving
 around; the same for zoom.
 
-"highlighted" is activated on mouse click or touch tap on plot. This enables
-plot navigation.
+"active" is true after a touch tap on plot. This enables plot navigation.
+Once activated, zoom and pan cannot be deactivated.
 
 "amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
 the current viewport.
@@ -74,12 +74,12 @@ can set the default in the options.
     var options = {
         zoom: {
             interactive: false,
-            highlighted: false,
+            active: false,
             amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
         },
         pan: {
             interactive: false,
-            highlighted: false,
+            active: false,
             cursor: "move",
             frameRate: 60
         }
@@ -87,11 +87,8 @@ can set the default in the options.
 
     var saturated = $.plot.saturated;
 
-    var existingPlots = [];
-
     function init(plot) {
         var panAxes = null;
-        existingPlots.push(plot);
 
         function onZoomClick(e, zoomOut) {
             var c = plot.offset();
@@ -131,9 +128,11 @@ can set the default in the options.
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
-            e.preventDefault();
-            onZoomClick(e, delta < 0);
-            return false;
+            if (plot.getOptions().zoom.active) {
+                e.preventDefault();
+                onZoomClick(e, delta < 0);
+                return false;
+            }
         }
 
         var prevCursor = 'default',
@@ -235,9 +234,9 @@ can set the default in the options.
 
         function onClick(e) {
             var o = plot.getOptions();
-            if (!o.pan.highlighted || !o.zoom.highlighted) {
-                o.pan.highlighted = true;
-                o.zoom.highlighted = true;
+            if (!o.pan.active || !o.zoom.active) {
+                o.pan.active = true;
+                o.zoom.active = true;
             }
             return false;
         }

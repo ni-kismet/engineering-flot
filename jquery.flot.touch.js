@@ -36,7 +36,7 @@
         function interpretGestures(e) {
             var o = plot.getOptions();
 
-            if (!o.pan.highlighted || !o.zoom.highlighted) {
+            if (!o.pan.active || !o.zoom.active) {
                 return;
             }
 
@@ -106,7 +106,9 @@
                 updateCurrentForDoubleTap(e);
                 updateStateForLongTapEnd(e);
 
-                mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
+                if (!gestureState.allowEventPropagation) {
+                    mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
+                }
             },
 
             touchend: function(e) {
@@ -129,7 +131,9 @@
             touchmove: function(e) {
                 preventEventPropagation(e);
                 gestureState.twoTouches = isPinchEvent(e);
-                mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
+                if (!gestureState.allowEventPropagation) {
+                    mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
+                }
             },
 
             touchend: function(e) {

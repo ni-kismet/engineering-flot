@@ -10,8 +10,8 @@ describe("flot touch plugin", function () {
         options = {
             xaxes: [{ autoscale: 'exact' }],
             yaxes: [{ autoscale: 'exact' }],
-            zoom: { interactive: true, amount: 10, highlighted: true },
-            pan: { interactive: true, frameRate: -1, enableTouch: true, highlighted: true }
+            zoom: { interactive: true, amount: 10, active: true },
+            pan: { interactive: true, frameRate: -1, enableTouch: true, active: true }
         };
     });
 
@@ -170,7 +170,7 @@ describe("flot touch plugin", function () {
             expect(spy.calls.count()).toBe(1);
         });
 
-        it('should not trigger pinch event for highlighted false',function() {
+        it('should not trigger pinch event for plot not active',function() {
             plot = $.plot(placeholder, [
                 [
                     [0, 0],
@@ -179,8 +179,8 @@ describe("flot touch plugin", function () {
                 ], {
                 xaxes: [{ autoscale: 'exact' }],
                 yaxes: [{ autoscale: 'exact' }],
-                zoom: { interactive: true, highlighted: false, amount: 10 },
-                pan: { interactive: true, highlighted: false, frameRate: -1 }
+                zoom: { interactive: true, active: false, amount: 10 },
+                pan: { interactive: true, active: false, frameRate: -1 }
             });
 
             var eventHolder = plot.getEventHolder(),
@@ -275,7 +275,7 @@ describe("flot touch plugin", function () {
             expect(spy.calls.count()).toBe(1);
         });
 
-        it('should not trigger pan event for highlighted false',function() {
+        it('should not trigger pan event for plot not active',function() {
             plot = $.plot(placeholder, [
                 [
                     [0, 0],
@@ -284,8 +284,8 @@ describe("flot touch plugin", function () {
                 ], {
                 xaxes: [{ autoscale: 'exact' }],
                 yaxes: [{ autoscale: 'exact' }],
-                zoom: { interactive: true, highlighted: false, amount: 10 },
-                pan: { interactive: true, highlighted: false, frameRate: -1 }
+                zoom: { interactive: true, active: false, amount: 10 },
+                pan: { interactive: true, active: false, frameRate: -1 }
             });
 
             var eventHolder = plot.getEventHolder(),

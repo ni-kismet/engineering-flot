@@ -10,8 +10,8 @@ describe("flot navigate plugin", function () {
         options = {
             xaxes: [{ autoscale: 'exact' }],
             yaxes: [{ autoscale: 'exact' }],
-            zoom: { interactive: true, highlighted: true, amount: 10 },
-            pan: { interactive: true, highlighted: true, frameRate: -1 }
+            zoom: { interactive: true, active: true, amount: 10 },
+            pan: { interactive: true, active: true, frameRate: -1 }
         };
     });
 
@@ -228,7 +228,7 @@ describe("flot navigate plugin", function () {
 
         });
 
-        it('does not zoom for highlighted false', function () {
+        it('does not zoom for active false', function () {
             plot = $.plot(placeholder, [
                 [
                     [0, 0],
@@ -237,8 +237,8 @@ describe("flot navigate plugin", function () {
             ], {
                 xaxes: [{ autoscale: 'exact' }],
                 yaxes: [{ autoscale: 'exact' }],
-                zoom: { interactive: true, highlighted: false, amount: 10 },
-                pan: { interactive: true, highlighted: false, frameRate: -1 }
+                zoom: { interactive: true, active: false, amount: 10 },
+                pan: { interactive: true, active: false, frameRate: -1 }
             });
 
             var eventHolder = plot.getEventHolder(),
@@ -592,8 +592,8 @@ describe("flot navigate plugin", function () {
             ], {
                 xaxes: [{ autoscale: 'exact', mode : 'log'}],
                 yaxes: [{ autoscale: 'exact' }],
-                zoom: { interactive: true, highlighted: true, amount: 10 },
-                pan: { interactive: true, highlighted: true, frameRate: -1 }
+                zoom: { interactive: true, active: true, amount: 10 },
+                pan: { interactive: true, active: true, frameRate: -1 }
             });
 
             xaxis = plot.getXAxes()[0];
@@ -702,15 +702,15 @@ describe("flot navigate plugin", function () {
     });
 
     describe('mouse click', function(){
-        it('on plot activates plot\'s zoom and pan highlighted propriety', function() {
+        it('on plot activates plot\'s zoom and pan active propriety', function() {
             plot = $.plot(placeholder, [
                 [
                     [0, 0],
                     [10, 10]
                 ]
               ], {
-                  zoom: { interactive: true, highlighted: false, amount: 10 },
-                  pan: { interactive: true, highlighted: false}
+                  zoom: { interactive: true, active: false, amount: 10 },
+                  pan: { interactive: true, active: false}
               });
 
               var eventHolder = plot.getEventHolder(),
@@ -718,8 +718,8 @@ describe("flot navigate plugin", function () {
 
               simulate.click(eventHolder, pointCoords.x, pointCoords.y);
 
-              expect(plot.getOptions().pan.highlighted).toBe(true);
-              expect(plot.getOptions().zoom.highlighted).toBe(true);
+              expect(plot.getOptions().pan.active).toBe(true);
+              expect(plot.getOptions().zoom.active).toBe(true);
         });
     });
 });
