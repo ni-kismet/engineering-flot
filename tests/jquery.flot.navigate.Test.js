@@ -10,8 +10,8 @@ describe("flot navigate plugin", function () {
         options = {
             xaxes: [{ autoscale: 'exact' }],
             yaxes: [{ autoscale: 'exact' }],
-            zoom: { interactive: true, amount: 10 },
-            pan: { interactive: true, frameRate: -1 }
+            zoom: { interactive: true, active: true, amount: 10 },
+            pan: { interactive: true, active: true, frameRate: -1 }
         };
     });
 
@@ -227,6 +227,47 @@ describe("flot navigate plugin", function () {
             expect(ticks[middle + 1].v).toBe(4);
 
         });
+
+        it('does not zoom for active false', function () {
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], {
+                xaxes: [{ autoscale: 'exact' }],
+                yaxes: [{ autoscale: 'exact' }],
+                zoom: { interactive: true, active: false, amount: 10 },
+                pan: { interactive: true, active: false, frameRate: -1 }
+            });
+
+            var eventHolder = plot.getEventHolder(),
+                xaxis = plot.getXAxes()[0],
+                yaxis = plot.getYAxes()[0],
+                initialCoords = [
+                    {x: 3, y: 5},
+                    {x:7, y:9}
+                ],
+                finalCoords = [
+                    {x: 2, y: 4},
+                    {x: 8, y: 10}
+                ],
+                midPointCoords = {
+                    x: (xaxis.c2p(finalCoords[0].x - plot.offset().left) + xaxis.c2p(finalCoords[1].x - plot.offset().left)) / 2,
+                    y: (yaxis.c2p(finalCoords[0].y - plot.offset().top) + yaxis.c2p(finalCoords[1].y - plot.offset().top)) / 2
+                };
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
+
+        });
+
 
         describe('with large numbers', function() {
             it ('limits the navigation offsets', function () {
@@ -551,8 +592,8 @@ describe("flot navigate plugin", function () {
             ], {
                 xaxes: [{ autoscale: 'exact', mode : 'log'}],
                 yaxes: [{ autoscale: 'exact' }],
-                zoom: { interactive: true, amount: 10 },
-                pan: { interactive: true, frameRate: -1 }
+                zoom: { interactive: true, active: true, amount: 10 },
+                pan: { interactive: true, active: true, frameRate: -1 }
             });
 
             xaxis = plot.getXAxes()[0];
@@ -613,8 +654,8 @@ describe("flot navigate plugin", function () {
                 initialXmax = xaxis.max,
                 eventHolder = plot.getEventHolder(),
                 pointCoords = [
-                        { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
-                        { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 15 }
+                    { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
+                    { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 15 }
                 ];
 
             simulate.mouseDown(eventHolder, pointCoords[0].x, pointCoords[0].y);
@@ -657,6 +698,28 @@ describe("flot navigate plugin", function () {
             expect(yaxis.min).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y)), 0);
             expect(yaxis.max).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y)), 0);
 
+        });
+    });
+
+    describe('mouse click', function(){
+        it('on plot activates plot\'s zoom and pan active propriety', function() {
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+              ], {
+                  zoom: { interactive: true, active: false, amount: 10 },
+                  pan: { interactive: true, active: false}
+              });
+
+              var eventHolder = plot.getEventHolder(),
+                  pointCoords = { x: 0, y: plot.height() };
+
+              simulate.click(eventHolder, pointCoords.x, pointCoords.y);
+
+              expect(plot.getOptions().pan.active).toBe(true);
+              expect(plot.getOptions().zoom.active).toBe(true);
         });
     });
 });
