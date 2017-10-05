@@ -82,6 +82,18 @@ can set the default in the options.
             active: false,
             cursor: "move",
             frameRate: 60
+        },
+        xaxis: {
+            axisZoom: true, //zoom axis when mouse over it is allowed
+            plotZoom: true, //zoom axis is allowed for plot zoom
+            axisPan: true, //pan axis when mouse over it is allowed
+            plotPan: true //pan axis is allowed for plot pan
+        },
+        yaxis: {
+            axisZoom: true, //zoom axis when mouse over it is allowed
+            plotZoom: true, //zoom axis is allowed for plot zoom
+            axisPan: true, //pan axis when mouse over it is allowed
+            plotPan: true //pan axis is allowed for plot pan
         }
     };
 
@@ -316,7 +328,8 @@ can set the default in the options.
                     max = minmax[axis.direction].max,
                     navigationOffset = axis.options.offset;
 
-                if (opts.disableZoom) {
+                //skip axis without axisZoom when zooming only on certain axis or axis without plotZoom for zoom on entire plot
+                if ((!opts.axisZoom && args.axes) || (!args.axes && !opts.plotZoom)) {
                     continue;
                 }
 
@@ -355,7 +368,8 @@ can set the default in the options.
                 var opts = axis.options,
                     d = delta[axis.direction];
 
-                if (opts.disablePan === true) {
+                //skip axis without axisPan when panning only on certain axis or axis without plotPan for pan the entire plot
+                if ((!opts.axisPan && panAxes) || (!panAxes && !opts.plotPan)) {
                     return;
                 }
 
@@ -441,7 +455,8 @@ can set the default in the options.
         var prevDelta = { x: 0, y: 0 };
         plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
             var snap = shouldSnap(delta),
-                axes = plot.getAxes();
+                axes = plot.getAxes(),
+                opts;
             delta = adjustDeltaToSnap(delta);
 
             if (isDiagonalMode(delta)) {
@@ -486,11 +501,13 @@ can set the default in the options.
                 axis = axes[axisName];
                 axisMin = axis.min;
                 axisMax = axis.max;
+                opts = axis.options;
 
                 d = delta[axis.direction];
                 p = prevDelta[axis.direction];
 
-                if (axis.options.disablePan === true) {
+                //skip axis without axisPan when panning only on certain axis or axis without plotPan for pan the entire plot
+                if ((!opts.axisPan && panAxes) || (!panAxes && !opts.plotPan)) {
                     return;
                 }
 
