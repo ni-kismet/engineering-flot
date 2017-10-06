@@ -369,7 +369,7 @@ can set the default in the options.
                     d = delta[axis.direction];
 
                 //skip axis without axisPan when panning only on certain axis or axis without plotPan for pan the entire plot
-                if ((panAxes === null && !opts.axisPan) || (!panAxes && !opts.plotPan)) {
+                if ((!opts.axisPan && args.axes) || (!opts.plotPan && !args.axes)) {
                     return;
                 }
 
