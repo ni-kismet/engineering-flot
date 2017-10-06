@@ -25,6 +25,20 @@ The plugin supports these options:
         mode: "smart"       // enable smart pan mode
     }
 
+    xaxis: {
+        axisZoom: true, //zoom axis when mouse over it is allowed
+        plotZoom: true, //zoom axis is allowed for plot zoom
+        axisPan: true, //pan axis when mouse over it is allowed
+        plotPan: true //pan axis is allowed for plot pan
+    }
+
+    yaxis: {
+        axisZoom: true, //zoom axis when mouse over it is allowed
+        plotZoom: true, //zoom axis is allowed for plot zoom
+        axisPan: true, //pan axis when mouse over it is allowed
+        plotPan: true //pan axis is allowed for plot pan
+    }
+
 "interactive" enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
 around; the same for zoom.
@@ -90,10 +104,10 @@ can set the default in the options.
             plotPan: true //pan axis is allowed for plot pan
         },
         yaxis: {
-            axisZoom: true, //zoom axis when mouse over it is allowed
-            plotZoom: true, //zoom axis is allowed for plot zoom
-            axisPan: true, //pan axis when mouse over it is allowed
-            plotPan: true //pan axis is allowed for plot pan
+            axisZoom: true,
+            plotZoom: true,
+            axisPan: true,
+            plotPan: true
         }
     };
 
