@@ -392,7 +392,7 @@ describe("flot navigate plugin", function () {
 
         });
 
-        it ('can be disabled per axis', function () {
+        it ('can be disabled per axis for zoom on plot', function () {
             var xaxis, yaxis;
 
             plot = $.plot(placeholder, [
@@ -405,7 +405,7 @@ describe("flot navigate plugin", function () {
             xaxis = plot.getXAxes()[0];
             yaxis = plot.getYAxes()[0];
 
-            xaxis.options.disableZoom = true;
+            xaxis.options.plotZoom = false;
 
             plot.zoomOut({
                 amount: 0.5
@@ -415,7 +415,32 @@ describe("flot navigate plugin", function () {
             expect(xaxis.max).toBe(10);
             expect(yaxis.min).toBeCloseTo(2.5, 7);
             expect(yaxis.max).toBeCloseTo(7.5, 7);
+        });
 
+        it ('can be disabled per axis for zoom on axis', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            xaxis.options.axisZoom = false;
+
+            plot.zoomOut({
+                amount: 0.5,
+                axes: [xaxis]
+            });
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
         });
     });
 
@@ -555,7 +580,7 @@ describe("flot navigate plugin", function () {
             expect(yaxis.max).toBe(10);
         });
 
-        it ('can be disabled per axis', function () {
+        it ('can be disabled per axis for panning the etire plot', function () {
             var xaxis, yaxis;
 
             plot = $.plot(placeholder, [
@@ -568,7 +593,7 @@ describe("flot navigate plugin", function () {
             xaxis = plot.getXAxes()[0];
             yaxis = plot.getYAxes()[0];
 
-            xaxis.options.disablePan = true;
+            xaxis.options.plotPan = false;
 
             plot.smartPan({
                 x: plot.width(),
@@ -579,6 +604,32 @@ describe("flot navigate plugin", function () {
             expect(xaxis.max).toBe(10);
             expect(yaxis.min).toBe(-10);
             expect(yaxis.max).toBe(0);
+        });
+
+        it ('can be disabled per axis for pan on that axis', function () {
+            var xaxis, yaxis;
+
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], options);
+
+            xaxis = plot.getXAxes()[0];
+            yaxis = plot.getYAxes()[0];
+
+            xaxis.options.axisPan = false;
+
+            plot.smartPan({
+                x: plot.width(),
+                y: plot.height(),
+            }, plot.navigationState(), [xaxis]);
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
         });
 
         it('can pan close to 0 for logaxis', function () {
