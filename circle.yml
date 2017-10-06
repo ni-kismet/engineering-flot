@@ -1,0 +1,18 @@
+machine:
+  node:
+    version: "8.2.0"
+dependencies:
+  pre:
+    - sudo apt-get update
+    - sudo apt-get install libpango1.0-0
+    - sudo apt-get install firefox
+    - sudo ln -sf /usr/lib/firefox/firefox /usr/bin/firefox
+    - curl -s https://raw.githubusercontent.com/chronogolf/circleci-google-chrome/master/use_chrome_stable_version.sh | bash
+    - node --version
+    - npm --version
+    - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+  post:
+    - npm install -g dont-break
+test:
+  override:
+    - npm run dont-break
