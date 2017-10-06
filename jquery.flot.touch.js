@@ -36,7 +36,7 @@
         function interpretGestures(e) {
             var o = plot.getOptions();
 
-            if (!o.pan.active || !o.zoom.active) {
+            if (!o.pan.active && !o.zoom.active) {
                 return;
             }
 

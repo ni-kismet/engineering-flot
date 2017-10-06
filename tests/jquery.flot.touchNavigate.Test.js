@@ -301,6 +301,80 @@ describe("flot touch navigate plugin", function () {
 
           });
 
+        it('should not zoom the plot on axis for axis zoom not enabled',function() {
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], {
+                xaxes: [{ autoscale: 'exact', axisZoom: false, axisPan: false }],
+                yaxes: [{ autoscale: 'exact' }],
+                zoom: { interactive: true, active: true, amount: 10 },
+                pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
+            });
+
+            var eventHolder = plot.getEventHolder(),
+                xaxis = plot.getXAxes()[0],
+                yaxis = plot.getYAxes()[0],
+                initialCoords = [
+                    { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
+                    { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 10 }
+                ],
+                finalCoords = [
+                    getPairOfCoords(xaxis, yaxis, 2, 4),
+                    getPairOfCoords(xaxis, yaxis, 6, 6)
+                ],
+                amount = getDistance(finalCoords) / getDistance(initialCoords);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).toBe(0);
+            expect(yaxis.max).toBe(10);
+
+        });
+
+        it('should not zoom the axis for plot zoom not enabled',function() {
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+            ], {
+                xaxes: [{ autoscale: 'exact', plotZoom: false, plotPan: false }],
+                yaxes: [{ autoscale: 'exact' }],
+                zoom: { interactive: true, active: true, amount: 10 },
+                pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
+            });
+
+            var eventHolder = plot.getEventHolder(),
+                xaxis = plot.getXAxes()[0],
+                yaxis = plot.getYAxes()[0],
+                initialCoords = [
+                    { x: 0, y: 10 },
+                    { x: 1, y: 50 }
+                ],
+                finalCoords = [
+                    getPairOfCoords(xaxis, yaxis, 2, 4),
+                    getPairOfCoords(xaxis, yaxis, 6, 6)
+                ],
+                amount = getDistance(finalCoords) / getDistance(initialCoords);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+
+            expect(xaxis.min).toBe(0);
+            expect(xaxis.max).toBe(10);
+            expect(yaxis.min).not.toBe(0);
+            expect(yaxis.max).not.toBe(10);
+
+        });
+
         function getDistance(coords) {
             return Math.sqrt((coords[0].x - coords[1].x) * (coords[0].x - coords[1].x) + ((coords[0].y - coords[1].y) * (coords[0].y - coords[1].y)));
         }
@@ -548,6 +622,74 @@ describe("flot touch navigate plugin", function () {
 
           expect(xaxis.min).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmin) + (pointCoords[0].x - pointCoords[1].x)), 6);
           expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmax) + (pointCoords[0].x - pointCoords[1].x)), 6);
+          expect(yaxis.min).toBe(0);
+          expect(yaxis.max).toBe(10);
+      });
+
+      it('should not drag the plot on axis for axis pan not enabled', function() {
+          plot = $.plot(placeholder, [
+              [
+                  [0, 0],
+                  [10, 10]
+              ]
+          ], {
+              xaxes: [{ autoscale: 'exact', axisPan: false }],
+              yaxes: [{ autoscale: 'exact' }],
+              zoom: { interactive: true, active: true, amount: 10 },
+              pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
+          });
+
+          var eventHolder = plot.getEventHolder(),
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              pointCoords = [
+                      { x: xaxis.p2c(4), y: xaxis.box.top + plot.offset().top + 10 },
+                      { x: xaxis.p2c(5), y: xaxis.box.top + plot.offset().top + 15 }
+              ];
+
+          simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+          expect(xaxis.min).toBe(0);
+          expect(yaxis.max).toBe(10);
+          expect(yaxis.min).toBe(0);
+          expect(yaxis.max).toBe(10);
+      });
+
+      it('should not drag the axis for plot pan not enabled', function() {
+          plot = $.plot(placeholder, [
+              [
+                  [0, 0],
+                  [10, 10]
+              ]
+          ], {
+              xaxes: [{ autoscale: 'exact', plotPan: false }],
+              yaxes: [{ autoscale: 'exact' }],
+              zoom: { interactive: true, active: true, amount: 10 },
+              pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
+          });
+
+          var eventHolder = plot.getEventHolder(),
+              xaxis = plot.getXAxes()[0],
+              yaxis = plot.getYAxes()[0],
+              initialXmin = xaxis.min,
+              initialXmax = xaxis.max,
+              pointCoords = [
+                      { x: 0, y: 10 },
+                      { x: 5, y: 15 }
+              ];
+
+          simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+          expect(xaxis.min).toBe(0);
+          expect(yaxis.max).toBe(10);
           expect(yaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
       });
