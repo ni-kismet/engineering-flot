@@ -9,20 +9,27 @@
 
             // create point texture
             if(!texture) {
+                var symbol = series.points.symbol;
                 var textureCanvas = document.createElement('canvas');
                 textureCanvas.width = 128;
                 textureCanvas.height = 128;
-                var context = textureCanvas.getContext( '2d' );
+                var context = textureCanvas.getContext('2d');
+                context.clearRect(0, 0, 128, 128);
                 context.globalAlpha = 1;
                 context.strokeStyle = series.color;
                 context.lineWidth = series.points.lineWidth * 10 || 10;
 
-                context.arc(64, 64, 32, 0, 2 * Math.PI);
-                context.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient) || series.color;
+                if(symbol === "circle") {
+                    context.arc(64, 64, 32, 0, 2 * Math.PI);
+                } else if (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
+                    drawSymbol[symbol](context, 64, 64, 32, false);
+                } else if (typeof drawSymbol === 'function') {
+                    drawSymbol(context, 64, 64, 32, false);
+                }
 
+                context.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient) || series.color;
                 context.fill();   
                 context.stroke();
-
                 texture = new THREE.Texture(textureCanvas);
                 texture.needsUpdate = true;
 
@@ -32,7 +39,7 @@
 
             // update points material from texture
             if(!material || texture.needsUpdate) {
-                material = new THREE.PointsMaterial({ size: series.points.radius / 15, map: texture, transparent: true, alphaTest: .1 });
+                material = new THREE.PointsMaterial({ size: series.points.radius / 10, map: texture, transparent: true, alphaTest: .1 });
                 material.needsUpdate = true;
 
                 // save material for future draw
@@ -53,8 +60,8 @@
                     if (points[i] == null || points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
                         continue;
                     }
-                    x = axisx.p2c(points[i]) + offset.left/2 - plotWidth/2 + 11;
-                    y = -axisy.p2c(points[i + 1]) + offset.top/2 + plotHeight/2 - 10;
+                    x = axisx.p2c(points[i]) + offset.left/2 - plotWidth/2;
+                    y = -axisy.p2c(points[i + 1]) + offset.top/2 + plotHeight/2;
 
                     geometry.vertices.push(new THREE.Vector3(x , y, 0));
                 }
