@@ -1,224 +1,46 @@
 [{
-    type: "PROFILER",
-    GPU: "AMD Radeon 380",
-    master: 
-    {
-        benchmarks: 
-        [
-            {
-                pointsNo: 300,
-                draw: 
-                {
-                    duration: "6.9ms",
-                    drawSeries: 
-                    {
-                        duration: "6.7 ms"
-                    },
-                    Renderer: 
-                    {
-                        type: Canvas,
-                        duration: "0.1ms"
-                    }
-                } 
-            },
-            {
-                pointsNo: 10000,
-                draw: 
-                {
-                    duration: "91 ms",
-                    drawSeries: 
-                    {
-                        duration: "88 ms",
-                    },
-                    Renderer: 
-                    {
-                        type: Canvas,
-                        duration: "0.1 ms"
-                    }
-                }
-            },
-            {
-                pointsNo: 100000,
-                draw: 
-                {
-                    duration: "1226 ms",
-                    drawSeries: 
-                    {
-                        duration: "1224 ms",
-                    },
-                    Renderer: 
-                    {
-                        type: Canvas,
-                        duration: "0.1 ms"
-                    }
-                }
-            }     
-        ]
-    },
-    webgl_prototyping: 
-    {
-        benchmarks: 
-        [
-            {
-                pointsNo: 300,
-                draw: 
-                {
-                    duration: "0.4 ms",
-                    drawSeries: 
-                    {
-                        duration: "0.1 ms"
-                    },
-                    Renderer: 
-                    {
-                        type: WebGlCanvas,
-                        duration: "0.1ms"
-                    }
-                } 
-            },
-            {
-                pointsNo: 10000,
-                draw: 
-                {
-                    duration: "12 ms",
-                    drawSeries: 
-                    {
-                        duration: "0.5 ms",
-                    },
-                    Renderer: 
-                    {
-                        type: WebGlCanvas,
-                        duration: "0.4 ms"
-                    }
-                }
-            },
-            {
-                pointsNo: 100000,
-                draw: 
-                {
-                    duration: "59 ms",
-                    drawSeries: 
-                    {
-                        duration: "58 md",
-                    },
-                    Renderer: 
-                    {
-                        type: WebGlCanvas,
-                        duration: "7.5 ms"
-                    }
-                }
-            }     
-        ]
-    }
+    type: "Chrome Performance Profiler",
+    GPU: "AMD Radeon R9 380",
+    CPU: "Intel Pentium G3258 - 4.2GHz - 2 Cores",
+    benchmarks: 
+    [
+        {
+            pointsNo: 300,
+            master_drawDuration: "6.9 ms",
+            threejs_drawDuration: "0.4 ms",
+        },
+        {
+            pointsNo: 10000,
+            drawDuration: "91 ms",
+            threejs_drawDuration: "12 ms",
+        },
+        {
+            pointsNo: 100000,
+            drawDuration: "1226 ms",
+            threejs_drawDuration: "59 ms",
+        }     
+    ]
 },
 {
-    type: JS_PROFILER,
-    master: 
-    {
-        benchmarks: 
-        [
-            {
-                pointsNo: 300,
-                draw: 
-                {
-                    duration: "2595 ms",
-                    drawSeries: 
-                    {
-                        duration: "2424 ms"
-                    },
-                    Renderer: 
-                    {
-                        type: Canvas,
-                        duration: "32 ms"
-                    }
-                } 
-            },
-            {
-                pointsNo: 10000,
-                draw: 
-                {
-                    duration: "10965 ms",
-                    drawSeries: 
-                    {
-                        duration: "10927 ms",
-                    },
-                    Renderer: 
-                    {
-                        type: Canvas,
-                        duration: "1.8 ms"
-                    }
-                }
-            },
-            {
-                pointsNo: 100000,
-                draw: 
-                {
-                    duration: "13986 ms",
-                    drawSeries: 
-                    {
-                        duration: "13974 ms",
-                    },
-                    Renderer: 
-                    {
-                        type: Canvas,
-                        duration: "0.1 ms"
-                    }
-                }
-            }     
-        ]
-    },
-    webgl_prototyping: 
-    {
-        benchmarks: 
-        [
-            {
-                pointsNo: 300,
-                draw: 
-                {
-                    duration: "425 ms",
-                    drawSeries: 
-                    {
-                        duration: "64 ms"
-                    },
-                    Renderer: 
-                    {
-                        type: WebGlCanvas,
-                        duration: "188 ms"
-                    }
-                } 
-            },
-            {
-                pointsNo: 10000,
-                draw: 
-                {
-                    duration: "1518 ms",
-                    drawSeries: 
-                    {
-                        duration: "706 ms",
-                    },
-                    Renderer: 
-                    {
-                        type: WebGlCanvas,
-                        duration: "779 ms"
-                    }
-                }
-            },
-            {
-                pointsNo: 100000,
-                draw: 
-                {
-                    duration: "3225 ms",
-                    drawSeries: 
-                    {
-                        duration: "1395 ms",
-                    },
-                    Renderer: 
-                    {
-                        type: WebGlCanvas,
-                        duration: "1788 ms"
-                    }
-                }
-            }     
-        ]
-    }
-
+    type: "Chrome Performance Profiler",
+    GPU: "Intel HD Graphics 4000",
+    CPU: "Intel Core i7-3770 - 3.7 GHz - 8 Cores",
+    benchmarks: 
+    [
+        {
+            pointsNo: 300,
+            master_drawDuration: "3.6 ms",
+            threejs_drawDuration: "1.6 ms",
+        },
+        {
+            pointsNo: 10000,
+            master_drawDuration: "98.5 ms",
+            threejs_drawDuration: "16.5 ms",
+        },
+        {
+            pointsNo: 100000,
+            master_drawDuration: "1359 ms",
+            threejs_drawDuration: "63 ms",
+        }     
+    ]
 }]
