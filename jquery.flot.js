@@ -919,7 +919,7 @@ Licensed under the MIT license.
             surface = new Canvas("flot-base", placeholder[0]);
             webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
             overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
-            
+
             renderer = webglsurface.renderer;
             ctx = surface.context;
             octx = overlay.context;
@@ -1819,14 +1819,14 @@ Licensed under the MIT license.
                 drawGrid();
             }
 
-            if(series.length !== webglsurface.scenes.length) {
+            if (series.length !== webglsurface.scenes.length) {
                 webglsurface.scenes = [];
-                for(var i = 0; i < series.length; i++) {
-                    webglsurface.scenes[i] = new THREE.Scene();;
+                for (var i = 0; i < series.length; i++) {
+                    webglsurface.scenes[i] = new THREE.Scene();
                 }
             }
 
-            for (var i = 0; i < series.length; ++i) {
+            for (i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
                 drawSeries(series[i], webglsurface.scenes[i], webglsurface.mainscene);
             }

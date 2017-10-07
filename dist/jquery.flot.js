@@ -739,12 +739,12 @@
      */
     var WebGlCanvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
-        var renderer, camera, 
-            scenes = [ new THREE.Scene() ], 
+        var renderer, camera,
+            scenes = [ new THREE.Scene() ],
             mainscene = new THREE.Scene();
 
         if (!element) {
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
             element = renderer.domElement;//document.createElement('canvas');
             element.className = cls;
             element.style.direction = 'ltr';
@@ -755,7 +755,6 @@
             container.appendChild(element);
 
             // If HTML5 Canvas isn't available, throw
-
             if (!element.getContext) {
                 throw new Error('Canvas is not available.');
             }
@@ -776,14 +775,13 @@
         // Size the canvas to match the internal dimensions of its container
         this.width = box.width;
         this.height = box.height;
-        
+
         this.element = element;
         this.scenes = scenes;
         this.mainscene = mainscene;
-        //new THREE.CombinedCamera( this.width / 2, this.height / 2, 70, 1, 1000, - 500, 1000 );
-        this.camera = camera = new THREE.OrthographicCamera(this.width / 2,  this.width / -2, this.height / -2, this.height / 2, 0.1, 1000);
-        this.renderer = renderer;// = new THREE.WebGLRenderer({ canvas: element, antialias: true, alpha: true });;
-        if (renderer !== null) {
+        this.camera = camera = new THREE.OrthographicCamera(this.width / 2, -this.width / 2, -this.height / 2, this.height / 2, 0.1, 1000);
+        this.renderer = renderer;
+        if (renderer) {
             backingStoreRatio =
             renderer.webkitBackingStorePixelRatio ||
             renderer.mozBackingStorePixelRatio ||
@@ -805,8 +803,7 @@
             this.clear();
         } else {
             console.warn('WebGL not supported on this device.');
-        }   
-           
+        }
     };
 
     /**
@@ -819,9 +816,9 @@
         var renderer = this.renderer;
         if (this.element.width !== width ||
             this.element.height !== height) {
-                if(renderer) {
-                    renderer.setSize(width, height, false);
-                }
+            if (renderer) {
+                renderer.setSize(width, height, false);
+            }
         }
     };
 
@@ -830,18 +827,18 @@
             scenes = this.scenes,
             mainscene = this.mainscene;
 
-        if(renderer) {
+        if (renderer) {
             // Clear the canvas
             renderer.setClearColor(0xffffff, 0.0);
             renderer.setScissorTest(false);
             renderer.clear();
             scenes.forEach(function(scene) {
-                while(scene.children.length > 0){ 
-                    scene.remove(scene.children[0]); 
+                while (scene.children.length > 0) {
+                    scene.remove(scene.children[0]);
                 }
             });
 
-            while(mainscene.children.length > 0) {
+            while (mainscene.children.length > 0) {
                 mainscene.remove(mainscene.children[0]);
             }
 
@@ -857,16 +854,15 @@
         left: 0,
         right: 0,
         top: 0,
-        bottom : 0
+        bottom: 0
     }
     WebGlCanvas.prototype.render = function() {
         var renderer = this.renderer,
             camera = this.camera,
-            scenes = this.scenes,
             mainscene = this.mainscene,
             plotOffset = mainscene.userData.plotOffset || defaultPlotOffset,
             rendererSize;
-            
+
         if (renderer) {
             renderer.setSize(this.width, this.height, false);
             renderer.setViewport(0.0, 0.0, this.width, this.height);
@@ -876,7 +872,7 @@
             this.cameraSight.x = this.width / 2;
             this.cameraSight.y = this.height / 2;
             this.cameraSight.z = 1000;
-            
+
             camera.position.set(this.width / 2, this.height / 2, 0);
             camera.lookAt(this.cameraSight);
             camera.updateProjectionMatrix();
@@ -1823,7 +1819,7 @@ Licensed under the MIT license.
             surface = new Canvas("flot-base", placeholder[0]);
             webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
             overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
-            
+
             renderer = webglsurface.renderer;
             ctx = surface.context;
             octx = overlay.context;
@@ -2723,14 +2719,14 @@ Licensed under the MIT license.
                 drawGrid();
             }
 
-            if(series.length !== webglsurface.scenes.length) {
+            if (series.length !== webglsurface.scenes.length) {
                 webglsurface.scenes = [];
-                for(var i = 0; i < series.length; i++) {
-                    webglsurface.scenes[i] = new THREE.Scene();;
+                for (var i = 0; i < series.length; i++) {
+                    webglsurface.scenes[i] = new THREE.Scene();
                 }
             }
 
-            for (var i = 0; i < series.length; ++i) {
+            for (i = 0; i < series.length; ++i) {
                 executeHooks(hooks.drawSeries, [ctx, series[i]]);
                 drawSeries(series[i], webglsurface.scenes[i], webglsurface.mainscene);
             }
@@ -4340,7 +4336,7 @@ Licensed under the MIT license.
 (function($) {
     "use strict";
 
-    var GlDrawSeries = function() {   
+    var GlDrawSeries = function() {
         /**
          * TODO: - set camera projection matrics instead of calling axis.p2c 
          *       - Improve memory management for points allocation
@@ -4352,13 +4348,13 @@ Licensed under the MIT license.
          * @param {*} drawSymbol 
          * @param {*} getColorOrGradient 
          */      
-        function drawSeriesPoints(series, plotscene, mainscene,  plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
+        function drawSeriesPoints(series, plotscene, mainscene, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             var texture = plotscene.userData.texture;
             var material = plotscene.userData.material;
             var geometry = plotscene.userData.geometry;
 
             // create point texture
-            if(!texture) {
+            if (!texture) {
                 var symbol = series.points.symbol;
                 var textureCanvas = document.createElement('canvas');
                 textureCanvas.width = 128;
@@ -4369,7 +4365,7 @@ Licensed under the MIT license.
                 context.strokeStyle = series.color;
                 context.lineWidth = series.points.lineWidth * 10 || 10;
 
-                if(symbol === "circle") {
+                if (symbol === "circle") {
                     context.arc(64, 64, 32, 0, 2 * Math.PI);
                 } else if (typeof symbol === 'string' && drawSymbol && drawSymbol[symbol]) {
                     drawSymbol[symbol](context, 64, 64, 32, false);
@@ -4378,7 +4374,7 @@ Licensed under the MIT license.
                 }
 
                 context.fillStyle = getFillStyle(series.points, series.color, null, null, getColorOrGradient) || series.color;
-                context.fill();   
+                context.fill();
                 context.stroke();
                 texture = new THREE.Texture(textureCanvas);
                 texture.needsUpdate = true;
@@ -4388,29 +4384,29 @@ Licensed under the MIT license.
             }
 
             // update points material from texture
-            if(!material || texture.needsUpdate) {
-                material = new THREE.PointsMaterial({ size: series.points.radius / 10, map: texture, transparent: true, alphaTest: .1 });
+            if (!material || texture.needsUpdate) {
+                material = new THREE.PointsMaterial({ size: series.points.radius / 10, map: texture, transparent: true, alphaTest: 0.1 });
                 material.needsUpdate = true;
 
                 // save material for future draw
                 plotscene.userData.material = material;
             }
 
-            if(!geometry) {
-                geometry = plotscene.userData.geometry = new THREE.Geometry();;
+            if (!geometry) {
+                geometry = plotscene.userData.geometry = new THREE.Geometry();
             } else {
                 geometry.verticesNeedUpdate = true;
                 geometry.dynamic = true;
             }
 
             // clear the scene
-            while(plotscene.children.length > 0){ 
-                plotscene.remove(plotscene.children[0]); 
+            while (plotscene.children.length > 0) {
+                plotscene.remove(plotscene.children[0]);
             }
 
             function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy) {
                 var points = datapoints.points,
-                    ps = datapoints.pointsize, x, y, down, top, left, right;
+                    ps = datapoints.pointsize, x, y;
                 var j = 0;
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null) {
@@ -4419,9 +4415,9 @@ Licensed under the MIT license.
                         continue;
                     }
 
-                    if(points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
-                        if(geometry.vertices[i/ps - j]) {
-                            geometry.vertices[i/ps - j].z = -1;
+                    if (points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
+                        if (geometry.vertices[i / ps - j]) {
+                            geometry.vertices[i / ps - j].z = -1;
                         }
                         continue;
                     }
@@ -4430,19 +4426,18 @@ Licensed under the MIT license.
                     x = axisx.p2c(points[i]) + offset.left;
                     y = axisy.p2c(points[i + 1]) + offset.top;
 
-                    if(geometry.vertices.length > points.length / ps) {
+                    if (geometry.vertices.length > points.length / ps) {
                         geometry.vertices = geometry.vertices.slice(0, points.length / ps);
                     }
-                    if(!geometry.vertices[i / ps - j]) {
-                        geometry.vertices[i / ps - j] = new THREE.Vector3(x , y, 5);
-                    } 
+                    if (!geometry.vertices[i / ps - j]) {
+                        geometry.vertices[i / ps - j] = new THREE.Vector3(x, y, 5);
+                    }
 
                     geometry.vertices[i / ps - j].x = x;
                     geometry.vertices[i / ps - j].y = y;
                     geometry.vertices[i / ps - j].z = 5;
-
-                    
                 }
+
                 mainscene.add(new THREE.Points(geometry, material));
             }
 

@@ -539,12 +539,12 @@
      */
     var WebGlCanvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
-        var renderer, camera, 
-            scenes = [ new THREE.Scene() ], 
+        var renderer, camera,
+            scenes = [ new THREE.Scene() ],
             mainscene = new THREE.Scene();
 
         if (!element) {
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
             element = renderer.domElement;//document.createElement('canvas');
             element.className = cls;
             element.style.direction = 'ltr';
@@ -555,7 +555,6 @@
             container.appendChild(element);
 
             // If HTML5 Canvas isn't available, throw
-
             if (!element.getContext) {
                 throw new Error('Canvas is not available.');
             }
@@ -576,14 +575,13 @@
         // Size the canvas to match the internal dimensions of its container
         this.width = box.width;
         this.height = box.height;
-        
+
         this.element = element;
         this.scenes = scenes;
         this.mainscene = mainscene;
-        //new THREE.CombinedCamera( this.width / 2, this.height / 2, 70, 1, 1000, - 500, 1000 );
-        this.camera = camera = new THREE.OrthographicCamera(this.width / 2,  this.width / -2, this.height / -2, this.height / 2, 0.1, 1000);
-        this.renderer = renderer;// = new THREE.WebGLRenderer({ canvas: element, antialias: true, alpha: true });;
-        if (renderer !== null) {
+        this.camera = camera = new THREE.OrthographicCamera(this.width / 2, -this.width / 2, -this.height / 2, this.height / 2, 0.1, 1000);
+        this.renderer = renderer;
+        if (renderer) {
             backingStoreRatio =
             renderer.webkitBackingStorePixelRatio ||
             renderer.mozBackingStorePixelRatio ||
@@ -605,8 +603,7 @@
             this.clear();
         } else {
             console.warn('WebGL not supported on this device.');
-        }   
-           
+        }
     };
 
     /**
@@ -619,9 +616,9 @@
         var renderer = this.renderer;
         if (this.element.width !== width ||
             this.element.height !== height) {
-                if(renderer) {
-                    renderer.setSize(width, height, false);
-                }
+            if (renderer) {
+                renderer.setSize(width, height, false);
+            }
         }
     };
 
@@ -630,18 +627,18 @@
             scenes = this.scenes,
             mainscene = this.mainscene;
 
-        if(renderer) {
+        if (renderer) {
             // Clear the canvas
             renderer.setClearColor(0xffffff, 0.0);
             renderer.setScissorTest(false);
             renderer.clear();
             scenes.forEach(function(scene) {
-                while(scene.children.length > 0){ 
-                    scene.remove(scene.children[0]); 
+                while (scene.children.length > 0) {
+                    scene.remove(scene.children[0]);
                 }
             });
 
-            while(mainscene.children.length > 0) {
+            while (mainscene.children.length > 0) {
                 mainscene.remove(mainscene.children[0]);
             }
 
@@ -657,16 +654,15 @@
         left: 0,
         right: 0,
         top: 0,
-        bottom : 0
+        bottom: 0
     }
     WebGlCanvas.prototype.render = function() {
         var renderer = this.renderer,
             camera = this.camera,
-            scenes = this.scenes,
             mainscene = this.mainscene,
             plotOffset = mainscene.userData.plotOffset || defaultPlotOffset,
             rendererSize;
-            
+
         if (renderer) {
             renderer.setSize(this.width, this.height, false);
             renderer.setViewport(0.0, 0.0, this.width, this.height);
@@ -676,7 +672,7 @@
             this.cameraSight.x = this.width / 2;
             this.cameraSight.y = this.height / 2;
             this.cameraSight.z = 1000;
-            
+
             camera.position.set(this.width / 2, this.height / 2, 0);
             camera.lookAt(this.cameraSight);
             camera.updateProjectionMatrix();

@@ -44,6 +44,7 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
+            'node_modules/three/build/three.js',
             'node_modules/phantomjs-polyfill-find/find-polyfill.js',
             'node_modules/webcharts-development-settings/tests/utils/*.js',
             'tests/*.Test.js'
