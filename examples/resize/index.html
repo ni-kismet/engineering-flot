@@ -6,7 +6,8 @@
 	<link href="../examples.css" rel="stylesheet" type="text/css">
 	<link href="../shared/jquery-ui/jquery-ui.min.css" rel="stylesheet" type="text/css">
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
-	<script language="javascript" type="text/javascript" src="../shared/jquery-ui/jquery-ui.min.js"></script>
+    <script language="javascript" type="text/javascript" src="../shared/jquery-ui/jquery-ui.min.js"></script>
+    <script language="javascript" type="text/javascript" src="../../node_modules/three/build/three.js"></script>        
 	<script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.flot.resize.js"></script>
 	<script type="text/javascript">
@@ -22,7 +23,13 @@
 		var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
 
 		var placeholder = $("#placeholder");
-		var plot = $.plot(placeholder, [d1, d2, d3]);
+        var plot = $.plot(placeholder, [d1, d2, d3], {
+			series: {
+                shadowSize: 0,	// Drawing is faster without shadows
+                points: {show: true, radius: 3},
+                lines: {show: true}
+			},
+		});
 
 		// The plugin includes a jQuery plugin for adding resize events to any
 		// element.  Add a callback so we can display the placeholder size.
