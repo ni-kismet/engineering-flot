@@ -12,20 +12,39 @@ plot.pan( offset ) so you easily can add custom controls. It also fires
 The plugin supports these options:
 
     zoom: {
-        interactive: false
+        interactive: false,
+        active: false,
         amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
     }
 
     pan: {
-        interactive: false
-        cursor: "move"      // CSS mouse cursor value used when dragging, e.g. "pointer"
-        frameRate: 20
+        interactive: false,
+        active: false,
+        cursor: "move",     // CSS mouse cursor value used when dragging, e.g. "pointer"
+        frameRate: 20,
         mode: "smart"       // enable smart pan mode
+    }
+
+    xaxis: {
+        axisZoom: true, //zoom axis when mouse over it is allowed
+        plotZoom: true, //zoom axis is allowed for plot zoom
+        axisPan: true, //pan axis when mouse over it is allowed
+        plotPan: true //pan axis is allowed for plot pan
+    }
+
+    yaxis: {
+        axisZoom: true, //zoom axis when mouse over it is allowed
+        plotZoom: true, //zoom axis is allowed for plot zoom
+        axisPan: true, //pan axis when mouse over it is allowed
+        plotPan: true //pan axis is allowed for plot pan
     }
 
 "interactive" enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
 around; the same for zoom.
+
+"active" is true after a touch tap on plot. This enables plot navigation.
+Once activated, zoom and pan cannot be deactivated.
 
 "amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
 the current viewport.
@@ -69,12 +88,26 @@ can set the default in the options.
     var options = {
         zoom: {
             interactive: false,
+            active: false,
             amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
         },
         pan: {
             interactive: false,
+            active: false,
             cursor: "move",
             frameRate: 60
+        },
+        xaxis: {
+            axisZoom: true, //zoom axis when mouse over it is allowed
+            plotZoom: true, //zoom axis is allowed for plot zoom
+            axisPan: true, //pan axis when mouse over it is allowed
+            plotPan: true //pan axis is allowed for plot pan
+        },
+        yaxis: {
+            axisZoom: true,
+            plotZoom: true,
+            axisPan: true,
+            plotPan: true
         }
     };
 
@@ -121,9 +154,11 @@ can set the default in the options.
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
-            e.preventDefault();
-            onZoomClick(e, delta < 0);
-            return false;
+            if (plot.getOptions().zoom.active) {
+                e.preventDefault();
+                onZoomClick(e, delta < 0);
+                return false;
+            }
         }
 
         var prevCursor = 'default',
@@ -223,6 +258,15 @@ can set the default in the options.
             plot.getPlaceholder().trigger("re-center", e);
         }
 
+        function onClick(e) {
+            var o = plot.getOptions();
+            if (!o.pan.active || !o.zoom.active) {
+                o.pan.active = true;
+                o.zoom.active = true;
+            }
+            return false;
+        }
+
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.zoom.interactive) {
@@ -239,6 +283,7 @@ can set the default in the options.
 
             if (o.zoom.interactive || o.pan.interactive) {
                 eventHolder.dblclick(onDblClick);
+                eventHolder.click(onClick);
             }
         }
 
@@ -297,7 +342,8 @@ can set the default in the options.
                     max = minmax[axis.direction].max,
                     navigationOffset = axis.options.offset;
 
-                if (opts.disableZoom) {
+                //skip axis without axisZoom when zooming only on certain axis or axis without plotZoom for zoom on entire plot
+                if ((!opts.axisZoom && args.axes) || (!args.axes && !opts.plotZoom)) {
                     continue;
                 }
 
@@ -336,7 +382,8 @@ can set the default in the options.
                 var opts = axis.options,
                     d = delta[axis.direction];
 
-                if (opts.disablePan === true) {
+                //skip axis without axisPan when panning only on certain axis or axis without plotPan for pan the entire plot
+                if ((!opts.axisPan && args.axes) || (!opts.plotPan && !args.axes)) {
                     return;
                 }
 
@@ -422,7 +469,8 @@ can set the default in the options.
         var prevDelta = { x: 0, y: 0 };
         plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
             var snap = shouldSnap(delta),
-                axes = plot.getAxes();
+                axes = plot.getAxes(),
+                opts;
             delta = adjustDeltaToSnap(delta);
 
             if (isDiagonalMode(delta)) {
@@ -467,11 +515,13 @@ can set the default in the options.
                 axis = axes[axisName];
                 axisMin = axis.min;
                 axisMax = axis.max;
+                opts = axis.options;
 
                 d = delta[axis.direction];
                 p = prevDelta[axis.direction];
 
-                if (axis.options.disablePan === true) {
+                //skip axis without axisPan when panning only on certain axis or axis without plotPan for pan the entire plot
+                if ((!opts.axisPan && panAxes) || (!panAxes && !opts.plotPan)) {
                     return;
                 }
 
@@ -507,6 +557,7 @@ can set the default in the options.
             eventHolder.unbind("drag", onDrag);
             eventHolder.unbind("dragend", onDragEnd);
             eventHolder.unbind("dblclick", onDblClick);
+            eventHolder.unbind("click", onClick);
 
             if (panTimeout) clearTimeout(panTimeout);
         }

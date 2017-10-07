@@ -1,12 +1,13 @@
 {
   "name": "engineering-flot",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "main": "dist/jquery.flot.js",
   "scripts": {
     "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 && npm run build-test",
     "coverage": "node node_modules/karma/bin/karma start --single-run --coverage --no-auto-watch --concurrency=1",
     "build": "node build",
-    "build-test": "npm --silent run build test"
+    "build-test": "npm --silent run build test",
+    "dont-break": "dont-break --timeout 300"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,6 @@
     "phantomjs-polyfill-find": "0.0.1",
     "three": "^0.87.1",
     "tmp": "0.0.33",
-    "webcharts-development-settings": "0.0.4"
+    "webcharts-development-settings": "0.0.8"
   }
 }

@@ -1,3 +1,37 @@
+## engineering-flot 0.5.7 ##
+
+### Changes ###
+
+- three fingers pinch affects browser zoom
+- consider axisZoom and plotZoom flags for enabling axis zooming, axisPan and plotPan for panning
+
+### Bug fixes ###
+
+- touch pan for axis, zoom plot and zoom axis
+
+## engineering-flot 0.5.6 ##
+
+### Bug fixes ###
+
+- touch pan plot
+- call points decimation from webcharts before drawing series points
+
+## engineering-flot 0.5.5 ##
+
+### Changes ###
+
+- order of default plot color
+
+### Bug fixes ###
+
+- plot margins and axis position should be adjusted based on user's grid margin options
+
+## engineering-flot 0.5.4 ##
+
+### Bug fixes ###
+
+- axis for bar plot with no data
+
 ## engineering-flot 0.5.3 ##
 
 ### Bug fixes ###

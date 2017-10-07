@@ -46,7 +46,7 @@ module.exports = function(config) {
         files: sources.concat([
             'node_modules/three/build/three.js',
             'node_modules/phantomjs-polyfill-find/find-polyfill.js',
-            'node_modules/webcharts-development-settings/tests/utils/*.js',
+            'node_modules/webcharts-development-settings/testsUtils/utils/*.js',
             'tests/*.Test.js'
         ]),
 

@@ -14,10 +14,12 @@ describe("flot navigate plugin interactions", function () {
         }],
         zoom: {
             interactive: true,
+            active: true,
             amount: 10
         },
         pan: {
-            interactive: true
+            interactive: true,
+            active: true
         }
     };
 
@@ -142,9 +144,11 @@ describe("flot navigate plugin interactions", function () {
         }],
         zoom: {
             interactive: false,
+            highlighted: true
         },
         pan: {
-            interactive: true
+            interactive: true,
+            highlighted: true
         },
         selection: {
             mode: 'smart',
