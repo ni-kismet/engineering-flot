@@ -17,6 +17,7 @@
             var texture = plotscene.userData.texture;
             var material = plotscene.userData.material;
             var geometry = plotscene.userData.geometry;
+            // var rendererSize = mainscene.userData.rendererSize;
 
             // create point texture
             if (!texture) {
@@ -50,9 +51,16 @@
 
             // update points material from texture
             if (!material || texture.needsUpdate) {
-                material = new THREE.PointsMaterial({ size: series.points.radius / 10, map: texture, transparent: true, alphaTest: 0.1 });
+                var viewRation = 3;
+                material = new THREE.PointsMaterial(
+                    {
+                        size: series.points.radius * 2 * mainscene.userData.pixelRatio * viewRation,
+                        sizeAttenuation: false,
+                        map: texture,
+                        transparent: true,
+                        alphaTest: 0.1
+                    });
                 material.needsUpdate = true;
-
                 // save material for future draw
                 plotscene.userData.material = material;
             }
@@ -79,7 +87,7 @@
                         j++;
                         continue;
                     }
-
+                    
                     if (points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
                         if (geometry.vertices[i / ps - j]) {
                             geometry.vertices[i / ps - j].z = -1;
@@ -92,10 +100,15 @@
                     y = axisy.p2c(points[i + 1]) + offset.top;
 
                     if (geometry.vertices.length > points.length / ps) {
-                        geometry.vertices = geometry.vertices.slice(0, points.length / ps);
+                        for(var k=points.length/ps; k<geometry.vertices.length; k++) {
+                            geometry.vertices[k].z = -1;
+                        }
+                        //geometry.vertices = geometry.vertices.slice(0, points.length / ps);
+                        geometry.verticesNeedUpdate = true;
                     }
                     if (!geometry.vertices[i / ps - j]) {
                         geometry.vertices[i / ps - j] = new THREE.Vector3(x, y, 5);
+                        geometry.verticesNeedUpdate = true;
                     }
 
                     geometry.vertices[i / ps - j].x = x;
@@ -103,7 +116,12 @@
                     geometry.vertices[i / ps - j].z = 5;
                 }
 
-                mainscene.add(new THREE.Points(geometry, material));
+                if(points.length>0) {
+                    mainscene.add(new THREE.Points(geometry, material));
+                } else {
+                    geometry = null;
+                    material = null;
+                }
             }
 
             var datapoints = {

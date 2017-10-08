@@ -570,7 +570,8 @@
 
         var devicePixelRatio = window.devicePixelRatio || 1,
             backingStoreRatio = 1,
-            box = container.getBoundingClientRect();
+            box = container.getBoundingClientRect(),
+            rendererSize = { width: box.width, height: box.height };
 
         // Size the canvas to match the internal dimensions of its container
         this.width = box.width;
@@ -590,6 +591,8 @@
             renderer.backingStorePixelRatio || 1;
 
             this.pixelRatio = devicePixelRatio / backingStoreRatio
+            mainscene.userData.pixelRatio = this.pixelRatio;
+            mainscene.userData.rendererSize = rendererSize;
             renderer.setPixelRatio(this.pixelRatio);
             renderer.setSize(this.width, this.height, true);
             renderer.autoClear = true;
@@ -613,13 +616,60 @@
      * @param {number} heigh The desired height of the canvas
      */
     WebGlCanvas.prototype.resize = function(width, height) {
-        var renderer = this.renderer;
-        if (this.element.width !== width ||
-            this.element.height !== height) {
-            if (renderer) {
-                renderer.setSize(width, height, false);
+        var renderer = this.renderer,
+            mainscene = this.mainscene,
+            scenes = this.scenes,
+            camera = this.camera;
+        
+
+////////////////////////////////////////////////
+            var minSize = 10,
+                shouldresize = false;
+            width = width < minSize ? minSize : width;
+            height = height < minSize ? minSize : height;
+    
+            var element = this.element,
+                pixelRatio = this.pixelRatio;
+    
+            // Resize the canvas, increasing its density based on the display's
+            // pixel ratio; basically giving it more pixels without increasing the
+            // size of its element, to take advantage of the fact that retina
+            // displays have that many more pixels in the same advertised space.
+    
+            // Resizing should reset the state (excanvas seems to be buggy though)
+    
+            if (this.width !== width) {
+                element.width = width * pixelRatio;
+                element.style.width = width + 'px';
+                this.width = width;
+                shouldresize = true;
             }
-        }
+    
+            if (this.height !== height) {
+                element.height = height * pixelRatio;
+                element.style.height = height + 'px';
+                this.height = height;
+                shouldresize = true;
+            }
+    
+            // Scale the coordinate space to match the display density; so even though we
+            // may have twice as many pixels, we still want lines and other drawing to
+            // appear at the same size; the extra pixels will just make them crisper.
+
+            if (renderer && shouldresize) {
+                renderer.clear();
+                mainscene.userData.rendererSize.width = width;
+                mainscene.userData.rendererSize.height = height;
+
+                camera.aspect = width/height;
+                camera.updateProjectionMatrix();
+
+                
+                renderer.setSize(width, height, false);
+                scenes.forEach(function(scene) {
+                    scene.userData.material = null;
+                });
+            }
     };
 
     WebGlCanvas.prototype.clear = function() {
@@ -629,7 +679,7 @@
 
         if (renderer) {
             // Clear the canvas
-            renderer.setClearColor(0xffffff, 0.0);
+            renderer.setClearColor(0x0f0f0f, 0);
             renderer.setScissorTest(false);
             renderer.clear();
             scenes.forEach(function(scene) {
@@ -642,7 +692,7 @@
                 mainscene.remove(mainscene.children[0]);
             }
 
-            renderer.setClearColor(0x000000, 0);
+            renderer.setClearColor(0x0f0000, 0);
             renderer.setScissorTest(true);
         }
     };
@@ -665,7 +715,7 @@
 
         if (renderer) {
             renderer.setSize(this.width, this.height, false);
-            renderer.setViewport(0.0, 0.0, this.width, this.height);
+            renderer.setViewport(this.width / 2, -this.width / 2, -this.height / 2, this.height / 2);
             rendererSize = renderer.getSize();
             renderer.clear();
 
@@ -680,6 +730,7 @@
 
             mainscene.updateMatrixWorld();
             mainscene.userData.camera = camera;
+            
             renderer.setScissor(plotOffset.left, plotOffset.top, rendererSize.width - plotOffset.right - plotOffset.left, rendererSize.height - plotOffset.bottom - plotOffset.top);
             renderer.render(mainscene, camera);
             renderer.clearDepth();
