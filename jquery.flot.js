@@ -2557,7 +2557,7 @@ Licensed under the MIT license.
 
         function findNearbyInterpolationPoint(posX, posY, seriesFilter) {
             var i, j, dist, dx, dy, ps,
-                item = [],
+                item,
                 smallestDistance = Number.MAX_VALUE;
 
             for (i = 0; i < series.length; ++i) {
@@ -2608,7 +2608,7 @@ Licensed under the MIT license.
                 i = item[2];
                 j = item[3];
                 ps = series[i].datapoints.pointsize;
-                points = series[i];
+                points = series[i].datapoints.points;
                 p1x = points[j - ps];
                 p1y = points[j - ps + 1];
                 p2x = points[j];
