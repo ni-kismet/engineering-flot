@@ -16,7 +16,7 @@
 		// be fetched from a server
 
 		var data = [],
-			totalPoints = 1000,
+			totalPoints = 10000,
 			step = 0;
 
 		function getRandomData() {
@@ -70,7 +70,7 @@
 		var plot = $.plot("#placeholder", [ getRandomData() ], {
 			series: {
                 shadowSize: 0,	// Drawing is faster without shadows
-                points:{show:true}
+                points:{show:true, radius: 5}
 			},
 			yaxis: {
 				min: 0,

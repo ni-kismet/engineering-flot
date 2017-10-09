@@ -540,7 +540,7 @@
     var WebGlCanvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
         var renderer, camera,
-            scenes = [ new THREE.Scene() ],
+            scenes = [new THREE.Scene()],
             mainscene = new THREE.Scene();
 
         if (!element) {
@@ -661,14 +661,17 @@
                 mainscene.userData.rendererSize.width = width;
                 mainscene.userData.rendererSize.height = height;
 
-                camera.aspect = width/height;
-                camera.updateProjectionMatrix();
-
-                
+                renderer.setClearColor(0xff0000, 0);
                 renderer.setSize(width, height, false);
-                scenes.forEach(function(scene) {
-                    scene.userData.material = null;
-                });
+
+                this.cameraSight.x = width / 2;
+                this.cameraSight.y = height / 2;
+                this.cameraSight.z = 1000;
+                camera.aspect = width/height;
+                camera.position.set(width / 2, height / 2, 0);
+                camera.lookAt(this.cameraSight);
+                camera.updateProjectionMatrix();
+                camera.updateMatrixWorld();
             }
     };
 
@@ -682,22 +685,17 @@
             renderer.setClearColor(0x0f0f0f, 0);
             renderer.setScissorTest(false);
             renderer.clear();
-            scenes.forEach(function(scene) {
-                while (scene.children.length > 0) {
-                    scene.remove(scene.children[0]);
-                }
-            });
 
             while (mainscene.children.length > 0) {
                 mainscene.remove(mainscene.children[0]);
             }
 
-            renderer.setClearColor(0x0f0000, 0);
+            renderer.setClearColor(0xff0000, 0);
             renderer.setScissorTest(true);
         }
     };
     /**
-     * Render the 
+     * Render the mainscene to 
      * 
      */
     var defaultPlotOffset = {
@@ -715,10 +713,10 @@
 
         if (renderer) {
             renderer.setSize(this.width, this.height, false);
-            renderer.setViewport(this.width / 2, -this.width / 2, -this.height / 2, this.height / 2);
+            renderer.setViewport(0, 0, this.width, this.height);
             rendererSize = renderer.getSize();
-            renderer.clear();
-
+            //renderer.clear();
+            
             this.cameraSight.x = this.width / 2;
             this.cameraSight.y = this.height / 2;
             this.cameraSight.z = 1000;

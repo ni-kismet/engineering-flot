@@ -740,7 +740,7 @@
     var WebGlCanvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
         var renderer, camera,
-            scenes = [ new THREE.Scene() ],
+            scenes = [new THREE.Scene()],
             mainscene = new THREE.Scene();
 
         if (!element) {
@@ -861,14 +861,17 @@
                 mainscene.userData.rendererSize.width = width;
                 mainscene.userData.rendererSize.height = height;
 
-                camera.aspect = width/height;
-                camera.updateProjectionMatrix();
-
-                
+                renderer.setClearColor(0xff0000, 0);
                 renderer.setSize(width, height, false);
-                scenes.forEach(function(scene) {
-                    scene.userData.material = null;
-                });
+
+                this.cameraSight.x = width / 2;
+                this.cameraSight.y = height / 2;
+                this.cameraSight.z = 1000;
+                camera.aspect = width/height;
+                camera.position.set(width / 2, height / 2, 0);
+                camera.lookAt(this.cameraSight);
+                camera.updateProjectionMatrix();
+                camera.updateMatrixWorld();
             }
     };
 
@@ -882,22 +885,17 @@
             renderer.setClearColor(0x0f0f0f, 0);
             renderer.setScissorTest(false);
             renderer.clear();
-            scenes.forEach(function(scene) {
-                while (scene.children.length > 0) {
-                    scene.remove(scene.children[0]);
-                }
-            });
 
             while (mainscene.children.length > 0) {
                 mainscene.remove(mainscene.children[0]);
             }
 
-            renderer.setClearColor(0x0f0000, 0);
+            renderer.setClearColor(0xff0000, 0);
             renderer.setScissorTest(true);
         }
     };
     /**
-     * Render the 
+     * Render the mainscene to 
      * 
      */
     var defaultPlotOffset = {
@@ -915,10 +913,10 @@
 
         if (renderer) {
             renderer.setSize(this.width, this.height, false);
-            renderer.setViewport(this.width / 2, -this.width / 2, -this.height / 2, this.height / 2);
+            renderer.setViewport(0, 0, this.width, this.height);
             rendererSize = renderer.getSize();
-            renderer.clear();
-
+            //renderer.clear();
+            
             this.cameraSight.x = this.width / 2;
             this.cameraSight.y = this.height / 2;
             this.cameraSight.z = 1000;
@@ -4403,7 +4401,8 @@ Licensed under the MIT license.
             var texture = plotscene.userData.texture;
             var material = plotscene.userData.material;
             var geometry = plotscene.userData.geometry;
-            // var rendererSize = mainscene.userData.rendererSize;
+            var rendererSize = mainscene.userData.rendererSize;
+            mainscene.userData.plotOffset = plotOffset;
 
             // create point texture
             if (!texture) {
@@ -4437,10 +4436,9 @@ Licensed under the MIT license.
 
             // update points material from texture
             if (!material || texture.needsUpdate) {
-                var viewRation = 3;
                 material = new THREE.PointsMaterial(
                     {
-                        size: series.points.radius * 2 * mainscene.userData.pixelRatio * viewRation,
+                        size: series.points.radius * 4,
                         sizeAttenuation: false,
                         map: texture,
                         transparent: true,
@@ -4453,10 +4451,7 @@ Licensed under the MIT license.
 
             if (!geometry) {
                 geometry = plotscene.userData.geometry = new THREE.Geometry();
-            } else {
-                geometry.verticesNeedUpdate = true;
-                geometry.dynamic = true;
-            }
+            } 
 
             // clear the scene
             while (plotscene.children.length > 0) {
@@ -4466,10 +4461,10 @@ Licensed under the MIT license.
             function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy) {
                 var points = datapoints.points,
                     ps = datapoints.pointsize, x, y;
-                var j = 0;
-                for (var i = 0; i < points.length; i += ps) {
+                var i = 0, j = 0, k = 0;
+            
+                for (i = 0; i < points.length; i += ps) {
                     if (points[i] == null) {
-                        // move the point behind the camera
                         j++;
                         continue;
                     }
@@ -4485,28 +4480,26 @@ Licensed under the MIT license.
                     x = axisx.p2c(points[i]) + offset.left;
                     y = axisy.p2c(points[i + 1]) + offset.top;
 
-                    if (geometry.vertices.length > points.length / ps) {
-                        for(var k=points.length/ps; k<geometry.vertices.length; k++) {
-                            geometry.vertices[k].z = -1;
-                        }
-                        //geometry.vertices = geometry.vertices.slice(0, points.length / ps);
-                        geometry.verticesNeedUpdate = true;
-                    }
                     if (!geometry.vertices[i / ps - j]) {
                         geometry.vertices[i / ps - j] = new THREE.Vector3(x, y, 5);
-                        geometry.verticesNeedUpdate = true;
+                    } else {
+                        geometry.vertices[i / ps - j].x = x;
+                        geometry.vertices[i / ps - j].y = y;
+                        geometry.vertices[i / ps - j].z = 5;
                     }
-
-                    geometry.vertices[i / ps - j].x = x;
-                    geometry.vertices[i / ps - j].y = y;
-                    geometry.vertices[i / ps - j].z = 5;
+                }
+                
+                if (geometry.vertices.length > points.length / ps) {
+                    for(k = points.length / ps; k < geometry.vertices.length; k++) {
+                        geometry.vertices[k].z = -1;
+                    }
                 }
 
-                if(points.length>0) {
+                if(points.length > 0) {
+                    geometry.verticesNeedUpdate = true;
+                    geometry.dynamic = true;
+
                     mainscene.add(new THREE.Points(geometry, material));
-                } else {
-                    geometry = null;
-                    material = null;
                 }
             }
 
@@ -4518,7 +4511,7 @@ Licensed under the MIT license.
             if (series.decimatePoints) {
                 datapoints.points = series.decimatePoints(series, series.xaxis.min, series.xaxis.max, plotWidth, series.yaxis.min, series.yaxis.max, plotHeight);
             }
-            mainscene.userData.plotOffset = plotOffset;
+            
             plotPoints(datapoints, series.points.radius, true, plotOffset, false, series.xaxis, series.yaxis);
         }
 
