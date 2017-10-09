@@ -498,6 +498,24 @@ describe('flot', function() {
             expect(item.datapoint[0]).toEqual(1);
             expect(item.datapoint[1]).toEqual(expectedY);
         });
+
+        it('should return null for empty dataseries', function() {
+            plot = $.plot(placeholder, [], {});
+            var item = plot.findNearbyInterpolationPoint(0.5, 0, function() {
+                return true;
+            });
+
+            expect(item).toEqual(null);
+        });
+
+        it('for a dataserie with a single plot should return that point', function() {
+            plot = $.plot(placeholder, [[[1, 2]]], {});
+            var item = plot.findNearbyInterpolationPoint(0, 0, function() {
+                return true;
+            });
+
+            expect(item.datapoint).toEqual([1, 2]);
+        });
     });
 
     describe('setupTickFormatter', function() {
