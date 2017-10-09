@@ -1023,7 +1023,7 @@ Licensed under the MIT license.
         plot.computeRangeForDataSeries = computeRangeForDataSeries;
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
         plot.findNearbyItem = findNearbyItem;
-        plot.interpolateNearestItems = interpolateNearestItems;
+        plot.findNearbyInterpolationPoint = findNearbyInterpolationPoint;
         plot.computeValuePrecision = computeValuePrecision;
         plot.defaultTickFormatter = defaultTickFormatter;
         plot.expRepTickFormatter = expRepTickFormatter;
@@ -3296,7 +3296,7 @@ Licensed under the MIT license.
             return null;
         }
 
-        function interpolateNearestItems(posX, posY, seriesFilter) {
+        function findNearbyInterpolationPoint(posX, posY, seriesFilter) {
             var i, j, dist, dx, dy, ps,
                 item = [],
                 smallestDistance = Number.MAX_VALUE;
