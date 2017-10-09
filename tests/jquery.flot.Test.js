@@ -485,6 +485,7 @@ describe('flot', function() {
                 return true;
             });
             var expectedY = sampledata[0][1] + (sampledata[1][1] - sampledata[0][1]) / 2;
+
             expect(item.datapoint[0]).toEqual(0.5);
             expect(item.datapoint[1]).toEqual(expectedY);
         });
@@ -495,6 +496,7 @@ describe('flot', function() {
                 return true;
             });
             var expectedY = 0 + (1 - 0) / 2;
+
             expect(item.datapoint[0]).toEqual(1);
             expect(item.datapoint[1]).toEqual(expectedY);
         });
@@ -508,7 +510,7 @@ describe('flot', function() {
             expect(item).toEqual(null);
         });
 
-        it('for a dataserie with a single plot should return that point', function() {
+        it('for a dataserie with a single point should return that point', function() {
             plot = $.plot(placeholder, [[[1, 2]]], {});
             var item = plot.findNearbyInterpolationPoint(0, 0, function() {
                 return true;
