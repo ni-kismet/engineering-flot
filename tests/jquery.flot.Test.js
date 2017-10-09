@@ -462,6 +462,44 @@ describe('flot', function() {
         });
     });
 
+    describe('interpolateNearestItems', function() {
+        var placeholder, plot, sampledata = [[0, 1], [1, 1.1], [2, 1.2]];
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+                .find('#test-container');
+        });
+
+        it('should be able to find the nearest point to the given coordinates', function() {
+            plot = $.plot(placeholder, [sampledata], {});
+            var item = plot.interpolateNearestItems(0, 0, function() {
+                return true;
+            });
+            expect(item.datapoint[0]).toEqual(sampledata[0][0]);
+            expect(item.datapoint[1]).toEqual(sampledata[0][1]);
+        });
+
+        it('should interpolate the intersections properly with linear scales', function() {
+            plot = $.plot(placeholder, [sampledata], {});
+            var item = plot.interpolateNearestItems(0.5, 0, function() {
+                return true;
+            });
+            var expectedY = sampledata[0][1] + (sampledata[1][1] - sampledata[0][1]) / 2;
+            expect(item.datapoint[0]).toEqual(0.5);
+            expect(item.datapoint[1]).toEqual(expectedY);
+        });
+
+        it('should return the interpolation with the closest point for multiple series', function() {
+            plot = $.plot(placeholder, [[[-10, 0], [10, 1], [100, 2]], [[5, 0], [20, 1], [21, 2]], [[0, 0], [2, 1], [4, 2]]], {});
+            var item = plot.interpolateNearestItems(1, 1, function() {
+                return true;
+            });
+            var expectedY = 0 + (1 - 0) / 2;
+            expect(item.datapoint[0]).toEqual(1);
+            expect(item.datapoint[1]).toEqual(expectedY);
+        });
+    });
+
     describe('setupTickFormatter', function() {
         var placeholder, plot, sampledata = [[0, 1], [1, 1.1], [2, 1.2]];
 
