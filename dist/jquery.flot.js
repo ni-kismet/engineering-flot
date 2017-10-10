@@ -1023,6 +1023,7 @@ Licensed under the MIT license.
         plot.computeRangeForDataSeries = computeRangeForDataSeries;
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
         plot.findNearbyItem = findNearbyItem;
+        plot.findNearbyInterpolationPoint = findNearbyInterpolationPoint;
         plot.computeValuePrecision = computeValuePrecision;
         plot.defaultTickFormatter = defaultTickFormatter;
         plot.expRepTickFormatter = expRepTickFormatter;
@@ -3225,6 +3226,7 @@ Licensed under the MIT license.
             var maxDistance = radius,
                 smallestDistance = maxDistance * maxDistance + 1,
                 item = null,
+                dx, dy, dist,
                 i, j, ps;
 
             for (i = series.length - 1; i >= 0; --i) {
@@ -3254,7 +3256,9 @@ Licensed under the MIT license.
                 for (j = 0; j < points.length; j += ps) {
                     x = points[j];
                     y = points[j + 1];
-                    if (x == null) continue;
+                    if (x == null) {
+                        continue;
+                    }
 
                     if (x - mx > maxx || x - mx < -maxx ||
                         y - my > maxy || y - my < -maxy) {
@@ -3263,9 +3267,9 @@ Licensed under the MIT license.
 
                     // We have to calculate distances in pixels, not in
                     // data units, because the scales of the axes may be different
-                    var dx = Math.abs(axisx.p2c(x) - mouseX),
-                        dy = Math.abs(axisy.p2c(y) - mouseY),
-                        dist = computeDistance ? computeDistance(dx, dy) : dx * dx + dy * dy;
+                    dx = Math.abs(axisx.p2c(x) - mouseX);
+                    dy = Math.abs(axisy.p2c(y) - mouseY);
+                    dist = computeDistance ? computeDistance(dx, dy) : dx * dx + dy * dy;
 
                     // use <= to ensure last point takes precedence
                     // (last generally means on top of)
@@ -3285,6 +3289,76 @@ Licensed under the MIT license.
                     datapoint: series[i].datapoints.points.slice(j * ps, (j + 1) * ps),
                     dataIndex: j,
                     series: series[i],
+                    seriesIndex: i
+                };
+            }
+
+            return null;
+        }
+
+        function findNearbyInterpolationPoint(posX, posY, seriesFilter) {
+            var i, j, dist, dx, dy, ps,
+                item,
+                smallestDistance = Number.MAX_VALUE;
+
+            for (i = 0; i < series.length; ++i) {
+                if (!seriesFilter(i)) {
+                    continue;
+                }
+                var points = series[i].datapoints.points;
+                ps = series[i].datapoints.pointsize;
+
+                // Find the nearest points, x-wise
+                for (j = 0; j < points.length; j += ps) {
+                    if (points[j] > posX) {
+                        break;
+                    }
+                }
+
+                // Now Interpolate
+                var y,
+                    p1x = points[j - ps],
+                    p1y = points[j - ps + 1],
+                    p2x = points[j],
+                    p2y = points[j + 1];
+
+                if ((p1x === undefined) || (p2x === undefined) ||
+                    (p1y === undefined) || (p2y === undefined)) {
+                    continue;
+                }
+
+                if (p1x === p2x) {
+                    y = p2y
+                } else {
+                    y = p1y + (p2y - p1y) * (posX - p1x) / (p2x - p1x);
+                }
+
+                posY = y;
+
+                dx = Math.abs(series[i].xaxis.p2c(p2x) - posX);
+                dy = Math.abs(series[i].yaxis.p2c(p2y) - posY);
+                dist = dx * dx + dy * dy;
+
+                if (dist < smallestDistance) {
+                    smallestDistance = dist;
+                    item = [posX, posY, i, j];
+                }
+            }
+
+            if (item) {
+                i = item[2];
+                j = item[3];
+                ps = series[i].datapoints.pointsize;
+                points = series[i].datapoints.points;
+                p1x = points[j - ps];
+                p1y = points[j - ps + 1];
+                p2x = points[j];
+                p2y = points[j + 1];
+
+                return {
+                    datapoint: [item[0], item[1]],
+                    leftPoint: [p1x, p1y],
+                    rightPoint: [p2x, p2y],
                     seriesIndex: i
                 };
             }
