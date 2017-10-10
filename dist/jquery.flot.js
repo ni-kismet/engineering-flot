@@ -782,6 +782,7 @@
         this.mainscene = mainscene;
         this.camera = camera = new THREE.OrthographicCamera(this.width / 2, -this.width / 2, -this.height / 2, this.height / 2, 0.1, 1000);
         this.renderer = renderer;
+        this.scale = { x: 1, y: 1, z: 1 };
         if (renderer) {
             backingStoreRatio =
             renderer.webkitBackingStorePixelRatio ||
@@ -790,13 +791,15 @@
             renderer.oBackingStorePixelRatio ||
             renderer.backingStorePixelRatio || 1;
 
-            this.pixelRatio = devicePixelRatio / backingStoreRatio
+            this.pixelRatio = devicePixelRatio / backingStoreRatio;
             mainscene.userData.pixelRatio = this.pixelRatio;
             mainscene.userData.rendererSize = rendererSize;
             renderer.setPixelRatio(this.pixelRatio);
             renderer.setSize(this.width, this.height, true);
+            renderer.setPixelRatio(this.pixelRatio);
             renderer.autoClear = true;
             camera.aspect = this.width / this.height;
+            
             this.cameraSight = new THREE.Vector3(this.width / 2, this.height / 2, 1000);
             camera.position.set(this.width / 2, this.height / 2, 0);
             camera.lookAt(this.cameraSight);
@@ -819,18 +822,16 @@
         var renderer = this.renderer,
             mainscene = this.mainscene,
             scenes = this.scenes,
-            camera = this.camera;
-        
+            camera = this.camera
+            minSize = 10,
+            shouldresize = false,
+            element = this.element,
+            pixelRatio = this.pixelRatio,
+            scale = this.scale;
 
-////////////////////////////////////////////////
-            var minSize = 10,
-                shouldresize = false;
             width = width < minSize ? minSize : width;
             height = height < minSize ? minSize : height;
-    
-            var element = this.element,
-                pixelRatio = this.pixelRatio;
-    
+
             // Resize the canvas, increasing its density based on the display's
             // pixel ratio; basically giving it more pixels without increasing the
             // size of its element, to take advantage of the fact that retina
@@ -839,19 +840,23 @@
             // Resizing should reset the state (excanvas seems to be buggy though)
     
             if (this.width !== width) {
+                scale.x = 1;
                 element.width = width * pixelRatio;
                 element.style.width = width + 'px';
                 this.width = width;
-                shouldresize = true;
+                shouldresize = true; 
             }
     
             if (this.height !== height) {
+                scale.y = 1;
                 element.height = height * pixelRatio;
                 element.style.height = height + 'px';
                 this.height = height;
                 shouldresize = true;
             }
-    
+
+            scale.z = 1;
+
             // Scale the coordinate space to match the display density; so even though we
             // may have twice as many pixels, we still want lines and other drawing to
             // appear at the same size; the extra pixels will just make them crisper.
@@ -863,14 +868,17 @@
 
                 renderer.setClearColor(0xff0000, 0);
                 renderer.setSize(width, height, false);
+                renderer.setPixelRatio(this.pixelRatio);
+
+                camera.aspect = width/height;
+                camera.updateProjectionMatrix();
 
                 this.cameraSight.x = width / 2;
                 this.cameraSight.y = height / 2;
                 this.cameraSight.z = 1000;
-                camera.aspect = width/height;
+                
                 camera.position.set(width / 2, height / 2, 0);
                 camera.lookAt(this.cameraSight);
-                camera.updateProjectionMatrix();
                 camera.updateMatrixWorld();
             }
     };
@@ -909,6 +917,7 @@
             camera = this.camera,
             mainscene = this.mainscene,
             plotOffset = mainscene.userData.plotOffset || defaultPlotOffset,
+            scale = this.scale,
             rendererSize;
 
         if (renderer) {
@@ -926,9 +935,9 @@
             camera.updateProjectionMatrix();
             camera.updateMatrixWorld();
 
-            mainscene.updateMatrixWorld();
             mainscene.userData.camera = camera;
-            
+            mainscene.updateMatrixWorld();
+
             renderer.setScissor(plotOffset.left, plotOffset.top, rendererSize.width - plotOffset.right - plotOffset.left, rendererSize.height - plotOffset.bottom - plotOffset.top);
             renderer.render(mainscene, camera);
             renderer.clearDepth();
