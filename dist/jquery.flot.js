@@ -744,8 +744,7 @@
             mainscene = new THREE.Scene();
 
         if (!element) {
-            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
-            element = renderer.domElement;//document.createElement('canvas');
+            element = document.createElement('canvas');
             element.className = cls;
             element.style.direction = 'ltr';
             element.style.position = 'absolute';
@@ -759,6 +758,7 @@
                 throw new Error('Canvas is not available.');
             }
         }
+        renderer = new THREE.WebGLRenderer({canvas: element, antialias: false, alpha: true });
 
         // Determine the screen's ratio of physical to device-independent
         // pixels.  This is the ratio between the canvas width that the browser
