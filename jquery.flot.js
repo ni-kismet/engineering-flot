@@ -2583,11 +2583,7 @@ Licensed under the MIT license.
 
                 if ((p1x === undefined) || (p2x === undefined) ||
                     (p1y === undefined) || (p2y === undefined)) {
-                    if (points.length === 2) {
-                        item = [points[0], points[1], i, 0];
-                    } else {
-                        continue;
-                    }
+                    continue;
                 }
 
                 if (p1x === p2x) {

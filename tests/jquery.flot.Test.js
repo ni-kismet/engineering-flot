@@ -510,13 +510,13 @@ describe('flot', function() {
             expect(item).toEqual(null);
         });
 
-        it('for a dataserie with a single point should return that point', function() {
+        it('for a dataserie with a single point should return null', function() {
             plot = $.plot(placeholder, [[[1, 2]]], {});
             var item = plot.findNearbyInterpolationPoint(0, 0, function() {
                 return true;
             });
 
-            expect(item.datapoint).toEqual([1, 2]);
+            expect(item).toEqual(null);
         });
     });
 
