@@ -1827,7 +1827,7 @@ Licensed under the MIT license.
             }
 
             for (i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i]]);
+                executeHooks(hooks.drawSeries, [ctx, series[i], i]);
                 drawSeries(series[i], webglsurface.scenes[i], webglsurface.mainscene);
             }
 
@@ -2381,11 +2381,11 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                if (!renderer) {
-                    $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                } else {
-                    $.plot.gldrawSeries.drawSeriesPoints(series, scene, mainscene, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                }
+                // if (!renderer) {
+                $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                // } else {
+                //      $.plot.gldrawSeries.drawSeriesPoints(series, scene, mainscene, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                // }
             }
         }
 

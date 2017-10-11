@@ -17,17 +17,18 @@ function GlPlotter() {
         var textures = [],
             materials = [],
             geometries = [];
-
+        var container, webglsurface, canvas, width, height,
+            renderer;
         plot.hooks.processOptions.push(processOptions);
 
         function processOptions(plot, options) {
-            var container = plot.getPlaceholder(),
-                webglsurface = plot.getWebGlSurface(),
-                canvas = plot.getWebGlCanvas(),
-                width = webglsurface.width,
-                height = webglsurface.height,
-                renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true }),
-                mainScene = new THREE.Scene(),
+            container = plot.getPlaceholder();
+            webglsurface = plot.getWebGlSurface();
+            canvas = plot.getWebGlCanvas();
+            width = webglsurface.width;
+            height = webglsurface.height;
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true });
+            var mainScene = new THREE.Scene(),
                 camera = new THREE.OrthographicCamera(webglsurface.width / 2, -webglsurface.width / 2, -webglsurface.height / 2, webglsurface.height / 2, 0.1, 1000),
                 cameraFocus = new THREE.Vector3(width / 2, height / 2, 1000);
 
@@ -49,42 +50,36 @@ function GlPlotter() {
             renderer.userData.mainScene = mainScene;
             renderer.userData.plotOffset = defaultPlotOffset;
             
-            this.renderer = renderer;
-            webglsurface.render = getRenderingFunction(renderer);
+            // 
+            webglsurface.render = render(renderer);
 
             if(renderer) {
                 plot.hooks.drawSeries.push(drawSeries);
             }
         };
 
-        function getRenderingFunction(renderer) {
-            if(renderer) {
-                return function() {
-                    var camera = renderer.userData.camera,
-                        mainScene = renderer.userData.mainScene,
-                        cameraFocus = camera.userData.cameraFocus,
-                        plotOffset = renderer.userData.plotOffset || defaultPlotOffset;
+        function render() {
+            var camera = renderer.userData.camera,
+                mainScene = renderer.userData.mainScene,
+                cameraFocus = camera.userData.cameraFocus,
+                plotOffset = renderer.userData.plotOffset || defaultPlotOffset;
 
-                    cameraFocus.x = this.width / 2;
-                    cameraFocus.y = this.height / 2;
-                    cameraFocus.z = 1000;
+            cameraFocus.x = this.width / 2;
+            cameraFocus.y = this.height / 2;
+            cameraFocus.z = 1000;
 
-                    renderer.clear();
-                    renderer.setSize(this.width, this.height, false);
-                    renderer.setViewport(0, 0, this.width, this.height);
+            renderer.clear();
+            renderer.setSize(this.width, this.height, false);
+            renderer.setViewport(0, 0, this.width, this.height);
 
-                    camera.position.set(this.width / 2, this.height / 2, 0);
-                    camera.lookAt(cameraFocus);
-                    camera.updateProjectionMatrix();
-                    camera.updateMatrixWorld();
+            camera.position.set(this.width / 2, this.height / 2, 0);
+            camera.lookAt(cameraFocus);
+            camera.updateProjectionMatrix();
+            camera.updateMatrixWorld();
 
-                    renderer.setScissor(plotOffset.left, plotOffset.top, rendererSize.width - plotOffset.right - plotOffset.left, rendererSize.height - plotOffset.bottom - plotOffset.top);
-                    renderer.render(mainscene, camera);
-                    renderer.clearDepth();
-                };
-            } else {
-                return function() {};
-            }
+            renderer.setScissor(plotOffset.left, plotOffset.top, rendererSize.width - plotOffset.right - plotOffset.left, rendererSize.height - plotOffset.bottom - plotOffset.top);
+            renderer.render(mainscene, camera);
+            renderer.clearDepth();
         };
 
         function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
@@ -172,16 +167,71 @@ function GlPlotter() {
     
                 if (serie.decimatePoints) {
                     //after adjusting the axis, plot width and height will be modified
-                    plotWidth = surface.width - plotOffset.left - plotOffset.right;
-                    plotHeight = surface.height - plotOffset.bottom - plotOffset.top;
-                    datapoints.points = serie.decimatePoints(serie, serie.xaxis.min, serie.xaxis.max, plot., series.yaxis.min, series.yaxis.max, plotHeight);
+                    plotWidth = webglsurface.width - plotOffset.left - plotOffset.right;
+                    plotHeight = webglsurface.height - plotOffset.bottom - plotOffset.top;
+                    // TODO: return Vector3 array of p2c coords after switching to BufferGeometry.
+                    datapoints.points = serie.decimatePoints(
+                        serie, 
+                        serie.xaxis.min, 
+                        serie.xaxis.max, 
+                        plotWidth, 
+                        series.yaxis.min, 
+                        series.yaxis.max, 
+                        plotHeight
+                    );
                 }
 
-                drawSeriesPoints(serie, index)
+                drawSeriesPoints(datapoints, index,);
             }
         };
+        function drawSeriesPoints(datapoints, offset, axisx, axisy) {
+            var geometry = geometries[index],
+                material = materials[index],
+                vertices = geometry.vertices;
+                points = datapoints.points,
+                ps = datapoints.pointsize, 
+                x, y, z = points.length / ps - index;
+            var i = 0, j = 0, k = 0;
+        
+            // move/create each vertex
+            for (i = 0; i < points.length; i += ps) {
+                if (points[i] == null) {
+                    j++;
+                    continue;
+                }
+                
+                if (points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
+                    if (vertices[i / ps - j]) {
+                        vertices[i / ps - j].z = -1;
+                    }
+                    continue;
+                }
+ 
+                x = axisx.p2c(points[i]) + offset.left;
+                y = axisy.p2c(points[i + 1]) + offset.top;
 
-        function drawSeriesPoints()
-    }
+                if (!vertices[i / ps - j]) {
+                    vertices[i / ps - j] = new THREE.Vector3(x, y, z);
+                } else {
+                    vertices[i / ps - j].x = x;
+                    vertices[i / ps - j].y = y;
+                    vertices[i / ps - j].z = z;
+                }
+            }
+            
+            if (vertices.length > points.length / ps) {
+                for(k = points.length / ps; k < vertices.length; k++) {
+                    vertices[k].z = -1;
+                }
+            }
+
+            if(points.length > 0) {
+                geometry.verticesNeedUpdate = true;
+                geometry.dynamic = true;
+
+                mainscene.add(new THREE.Points(geometry, material[index]));
+            }
+        }
+    };
 }
 })();

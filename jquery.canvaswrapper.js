@@ -702,6 +702,14 @@
             renderer.setScissorTest(true);
         }
     };
+
+    var defaultPlotOffset = {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0
+    };
+
     /**
      * Render the mainscene to 
      * 
@@ -714,7 +722,7 @@
             scale = this.scale,
             rendererSize;
 
-        if (renderer) {
+        if (renderer && (mainscene.children.length > 0)) {
             renderer.setSize(this.width, this.height, false);
             renderer.setViewport(0, 0, this.width, this.height);
             rendererSize = renderer.getSize();

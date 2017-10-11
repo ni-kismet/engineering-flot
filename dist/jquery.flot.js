@@ -902,16 +902,18 @@
             renderer.setScissorTest(true);
         }
     };
-    /**
-     * Render the mainscene to 
-     * 
-     */
+
     var defaultPlotOffset = {
         left: 0,
         right: 0,
         top: 0,
         bottom: 0
-    }
+    };
+
+    /**
+     * Render the mainscene to 
+     * 
+     */
     WebGlCanvas.prototype.render = function() {
         var renderer = this.renderer,
             camera = this.camera,
@@ -920,7 +922,7 @@
             scale = this.scale,
             rendererSize;
 
-        if (renderer) {
+        if (renderer && (mainscene.children.length > 0)) {
             renderer.setSize(this.width, this.height, false);
             renderer.setViewport(0, 0, this.width, this.height);
             rendererSize = renderer.getSize();
@@ -2785,7 +2787,7 @@ Licensed under the MIT license.
             }
 
             for (i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i]]);
+                executeHooks(hooks.drawSeries, [ctx, series[i], i]);
                 drawSeries(series[i], webglsurface.scenes[i], webglsurface.mainscene);
             }
 
@@ -3339,11 +3341,11 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                if (!renderer) {
-                    $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                } else {
-                    $.plot.gldrawSeries.drawSeriesPoints(series, scene, mainscene, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                }
+                // if (!renderer) {
+                $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                // } else {
+                //      $.plot.gldrawSeries.drawSeriesPoints(series, scene, mainscene, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
+                // }
             }
         }
 
@@ -4460,11 +4462,6 @@ Licensed under the MIT license.
 
             if (!geometry) {
                 geometry = plotscene.userData.geometry = new THREE.Geometry();
-            } 
-
-            // clear the scene
-            while (plotscene.children.length > 0) {
-                plotscene.remove(plotscene.children[0]);
             }
 
             function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy) {
