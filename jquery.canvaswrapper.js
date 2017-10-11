@@ -706,12 +706,6 @@
      * Render the mainscene to 
      * 
      */
-    var defaultPlotOffset = {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0
-    }
     WebGlCanvas.prototype.render = function() {
         var renderer = this.renderer,
             camera = this.camera,

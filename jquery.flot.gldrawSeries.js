@@ -67,11 +67,6 @@
 
             if (!geometry) {
                 geometry = plotscene.userData.geometry = new THREE.Geometry();
-            } 
-
-            // clear the scene
-            while (plotscene.children.length > 0) {
-                plotscene.remove(plotscene.children[0]);
             }
 
             function plotPoints(datapoints, radius, fill, offset, shadow, axisx, axisy) {
