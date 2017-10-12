@@ -1,3 +1,9 @@
+## engineering-flot 0.6.0 ##
+
+### Changes ###
+
+- change API by adding function to interpolate the position between nearest neighbors on OY axis
+
 ## engineering-flot 0.5.7 ##
 
 ### Changes ###
