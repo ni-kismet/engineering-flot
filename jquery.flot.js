@@ -10,7 +10,6 @@ Licensed under the MIT license.
     "use strict";
 
     var Canvas = window.Flot.Canvas;
-    var WebGlCanvas = window.Flot.WebGlCanvas;
 
     function defaultTickGenerator(axis) {
         var ticks = [],
@@ -149,9 +148,7 @@ Licensed under the MIT license.
             },
             surface = null, // the canvas for the plot itself
             overlay = null, // canvas for interactive stuff on top of plot
-            webglsurface = null, // the canvas for webgl rendering
             eventHolder = null, // jQuery object that events should be bound to
-            renderer = null, // the webgl context
             ctx = null,
             octx = null,
             xaxes = [],
@@ -179,7 +176,8 @@ Licensed under the MIT license.
                 axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
-                shutdown: []
+                resize: [],
+                shutdown: [],
             },
             plot = this;
 
@@ -194,12 +192,6 @@ Licensed under the MIT license.
         plot.draw = draw;
         plot.getPlaceholder = function() {
             return placeholder;
-        };
-        plot.getWebGlSurface = function() {
-            return webglsurface;
-        };
-        plot.getWebGlCanvas = function() {
-            return webglsurface.element;
         };
         plot.getCanvas = function() {
             return surface.element;
@@ -265,10 +257,8 @@ Licensed under the MIT license.
             series = [];
             options = null;
             surface = null;
-            webglsurface = null;
             overlay = null;
             eventHolder = null;
-            renderer = null;
             ctx = null;
             octx = null;
             xaxes = [];
@@ -282,8 +272,9 @@ Licensed under the MIT license.
             var width = placeholder.width(),
                 height = placeholder.height();
             surface.resize(width, height);
-            webglsurface.resize(width, height);
             overlay.resize(width, height);
+
+            executeHooks(hooks.resize, [width, height]);
         };
 
         plot.clearTextCache = function () {
@@ -325,7 +316,6 @@ Licensed under the MIT license.
 
             var classes = {
                 Canvas: Canvas,
-                WebGlCanvas: WebGlCanvas
             };
 
             for (var i = 0; i < plugins.length; ++i) {
@@ -917,10 +907,8 @@ Licensed under the MIT license.
             }
 
             surface = new Canvas("flot-base", placeholder[0]);
-            webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
             overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
 
-            renderer = webglsurface.renderer;
             ctx = surface.context;
             octx = overlay.context;
 
@@ -1805,7 +1793,6 @@ Licensed under the MIT license.
 
         function draw() {
             surface.clear();
-            webglsurface.clear();
             executeHooks(hooks.drawBackground, [ctx]);
 
             var grid = options.grid;
@@ -1831,7 +1818,6 @@ Licensed under the MIT license.
             }
 
             surface.render();
-            webglsurface.render();
 
             // A draw implies that either the axes or data have changed, so we
             // should probably update the overlay highlights as well.
@@ -2374,11 +2360,7 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                // if (!renderer) {
                 $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                // } else {
-                //      $.plot.gldrawSeries.drawSeriesPoints(series, scene, mainscene, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                // }
             }
         }
 

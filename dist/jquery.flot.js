@@ -730,160 +730,6 @@
         this._textCache = {};
     };
 
-    /**
-     * The WebGlCanvas object is a wrapper around an HTML5 <canvas> tag with a webgl context.
-     * 
-     * @constructor
-     * @param {string} cls The class name of the element
-     * @param {element} container Element onto which to append the canvas.
-     */
-    var WebGlCanvas = function(cls, container) {
-        var element = container.getElementsByClassName(cls)[0];
-        var renderer = {};
-
-        if (!element) {
-            element = document.createElement('canvas');
-            element.className = cls;
-            element.style.direction = 'ltr';
-            element.style.position = 'absolute';
-            element.style.left = '0px';
-            element.style.top = '0px';
-
-            container.appendChild(element);
-
-            // If HTML5 Canvas isn't available, throw
-            if (!element.getContext) {
-                throw new Error('Canvas is not available.');
-            }
-        }
-
-        // Determine the screen's ratio of physical to device-independent
-        // pixels.  This is the ratio between the canvas width that the browser
-        // advertises and the number of pixels actually present in that space.
-
-        // The iPhone 4, for example, has a device-independent width of 320px,
-        // but its screen is actually 640px wide.  It therefore has a pixel
-        // ratio of 2, while most normal devices have a ratio of 1.
-
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio = 1,
-            box = container.getBoundingClientRect();
-
-        // Size the canvas to match the internal dimensions of its container
-        this.width = box.width;
-        this.height = box.height;
-
-        this.element = element;
-
-
-        this.renderer = renderer;
-        this.scale = { x: 1, y: 1, z: 1 };
-        
-        backingStoreRatio =
-            renderer.webkitBackingStorePixelRatio ||
-            renderer.mozBackingStorePixelRatio ||
-            renderer.msBackingStorePixelRatio ||
-            renderer.oBackingStorePixelRatio ||
-            renderer.backingStorePixelRatio || 1;
-
-        this.pixelRatio = devicePixelRatio / backingStoreRatio;
-        
-    };
-
-    /**
-     * Resizes the canvas to the given dimensions.
-     * 
-     * @param {number} width The desired width of the canvas
-     * @param {number} heigh The desired height of the canvas
-     */
-    WebGlCanvas.prototype.resize = function(width, height) {
-        var renderer = this.renderer,
-            userData = renderer.userData,
-            minSize = 10,
-            shouldresize = false,
-            element = this.element,
-            pixelRatio = this.pixelRatio,
-            scale = this.scale;
-
-            width = width < minSize ? minSize : width;
-            height = height < minSize ? minSize : height;
-
-            // Resize the canvas, increasing its density based on the display's
-            // pixel ratio; basically giving it more pixels without increasing the
-            // size of its element, to take advantage of the fact that retina
-            // displays have that many more pixels in the same advertised space.
-    
-            // Resizing should reset the state (excanvas seems to be buggy though)
-    
-            if (this.width !== width) {
-                scale.x = 1;
-                element.width = width * pixelRatio;
-                element.style.width = width + 'px';
-                this.width = width;
-                shouldresize = true; 
-            }
-    
-            if (this.height !== height) {
-                scale.y = 1;
-                element.height = height * pixelRatio;
-                element.style.height = height + 'px';
-                this.height = height;
-                shouldresize = true;
-            }
-
-            scale.z = 1;
-
-            // Scale the coordinate space to match the display density; so even though we
-            // may have twice as many pixels, we still want lines and other drawing to
-            // appear at the same size; the extra pixels will just make them crisper.
-
-            if (renderer && userData && shouldresize) {
-                var mainscene = renderer.userData.mainScene,
-                    camera = renderer.userData.camera;
-                renderer.clear();
-                //mainscene.userData.rendererSize.width = width;
-                //mainscene.userData.rendererSize.height = height;
-
-                renderer.setClearColor(0xff0000, 0);
-                renderer.setSize(width, height, false);
-                renderer.setPixelRatio(this.pixelRatio);
-
-                camera.aspect = width/height;
-                camera.updateProjectionMatrix();
-                camera.userData.cameraFocus.x = width / 2;
-                camera.userData.cameraFocus.y = height / 2;
-                camera.userData.cameraFocus.z = 1000;
-
-                camera.position.set(width / 2, height / 2, 0);
-                camera.lookAt(camera.userData.cameraFocus);
-                camera.updateMatrixWorld();
-                renderer.clear();
-            }
-    };
-
-    WebGlCanvas.prototype.clear = function() {
-        var renderer = this.renderer,
-            mainscene;
-
-        if (renderer && renderer.userData) {
-            // Clear the canvas
-            mainscene = renderer.userData.mainScene;
-            renderer.setClearColor(0x0f0f0f, 0.2);
-            renderer.setScissorTest(false);
-            renderer.clear();
-
-            while (mainscene.children.length > 0) {
-                mainscene.remove(mainscene.children[0]);
-            }
-
-            renderer.setClearColor(0xff0000, 0.2);
-            renderer.setScissorTest(true);
-            renderer.clear();
-        }
-    };
-
-    WebGlCanvas.prototype.render = function () {};
-
     function generateKey(text) {
         return text.replace(/0|1|2|3|4|5|6|7|8|9/g, '0');
     }
@@ -893,7 +739,6 @@
     }
 
     window.Flot.Canvas = Canvas;
-    window.Flot.WebGlCanvas = WebGlCanvas;
 })();
 
 /* Javascript plotting library for jQuery, version 0.8.3.
@@ -908,7 +753,6 @@ Licensed under the MIT license.
     "use strict";
 
     var Canvas = window.Flot.Canvas;
-    var WebGlCanvas = window.Flot.WebGlCanvas;
 
     function defaultTickGenerator(axis) {
         var ticks = [],
@@ -1047,9 +891,7 @@ Licensed under the MIT license.
             },
             surface = null, // the canvas for the plot itself
             overlay = null, // canvas for interactive stuff on top of plot
-            webglsurface = null, // the canvas for webgl rendering
             eventHolder = null, // jQuery object that events should be bound to
-            renderer = null, // the webgl context
             ctx = null,
             octx = null,
             xaxes = [],
@@ -1077,7 +919,8 @@ Licensed under the MIT license.
                 axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
-                shutdown: []
+                resize: [],
+                shutdown: [],
             },
             plot = this;
 
@@ -1092,12 +935,6 @@ Licensed under the MIT license.
         plot.draw = draw;
         plot.getPlaceholder = function() {
             return placeholder;
-        };
-        plot.getWebGlSurface = function() {
-            return webglsurface;
-        };
-        plot.getWebGlCanvas = function() {
-            return webglsurface.element;
         };
         plot.getCanvas = function() {
             return surface.element;
@@ -1163,10 +1000,8 @@ Licensed under the MIT license.
             series = [];
             options = null;
             surface = null;
-            webglsurface = null;
             overlay = null;
             eventHolder = null;
-            renderer = null;
             ctx = null;
             octx = null;
             xaxes = [];
@@ -1180,8 +1015,9 @@ Licensed under the MIT license.
             var width = placeholder.width(),
                 height = placeholder.height();
             surface.resize(width, height);
-            webglsurface.resize(width, height);
             overlay.resize(width, height);
+
+            executeHooks(hooks.resize, [width, height]);
         };
 
         plot.clearTextCache = function () {
@@ -1223,7 +1059,6 @@ Licensed under the MIT license.
 
             var classes = {
                 Canvas: Canvas,
-                WebGlCanvas: WebGlCanvas
             };
 
             for (var i = 0; i < plugins.length; ++i) {
@@ -1815,10 +1650,8 @@ Licensed under the MIT license.
             }
 
             surface = new Canvas("flot-base", placeholder[0]);
-            webglsurface = new WebGlCanvas("flot-gl", placeholder[0]); // overlay canvas for web-gl rendereing
             overlay = new Canvas("flot-overlay", placeholder[0]); // overlay canvas for interactive features
 
-            renderer = webglsurface.renderer;
             ctx = surface.context;
             octx = overlay.context;
 
@@ -2703,7 +2536,6 @@ Licensed under the MIT license.
 
         function draw() {
             surface.clear();
-            webglsurface.clear();
             executeHooks(hooks.drawBackground, [ctx]);
 
             var grid = options.grid;
@@ -2729,7 +2561,6 @@ Licensed under the MIT license.
             }
 
             surface.render();
-            webglsurface.render();
 
             // A draw implies that either the axes or data have changed, so we
             // should probably update the overlay highlights as well.
@@ -3272,11 +3103,7 @@ Licensed under the MIT license.
             }
 
             if (series.points.show) {
-                // if (!renderer) {
                 $.plot.drawSeries.drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                // } else {
-                //      $.plot.gldrawSeries.drawSeriesPoints(series, scene, mainscene, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
-                // }
             }
         }
 

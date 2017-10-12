@@ -16,24 +16,34 @@ function GlPlotter() {
         var textures = [],
             materials = [],
             geometries = [];
-        var container, webglsurface, canvas, width, height,
-            renderer;
+        var container, canvas, width, height,
+            renderer, pixelRatio;
         plot.hooks.processOptions.push(processOptions);
 
         function processOptions(plot, options) {
             var mainScene, camera, cameraFocus;
-            container = plot.getPlaceholder();
-            webglsurface = plot.getWebGlSurface();
-            canvas = plot.getWebGlCanvas();
-            width = webglsurface.width;
-            height = webglsurface.height;
-            renderer = webglsurface.renderer;
-            if(!renderer.userData) {
+            container = plot.getPlaceholder()[0];
+
+            if(!canvas) {
+                canvas = getGlSurface("flot-gl", container);
+            }
+    
+            if(!renderer) {
                 renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true });
                 mainScene = new THREE.Scene();
-                camera = new THREE.OrthographicCamera(webglsurface.width / 2, -webglsurface.width / 2, -webglsurface.height / 2, webglsurface.height / 2, 0.1, 1000);
+                camera = new THREE.OrthographicCamera(width / 2, -width / 2, -height / 2, height / 2, 0.1, 1000);
                 cameraFocus = new THREE.Vector3(width / 2, height / 2, 1000);
-            }else{
+
+                var devicePixelRatio = window.devicePixelRatio || 1;
+                var backingStoreRatio =
+                        renderer.webkitBackingStorePixelRatio ||
+                        renderer.mozBackingStorePixelRatio ||
+                        renderer.msBackingStorePixelRatio ||
+                        renderer.oBackingStorePixelRatio ||
+                        renderer.backingStorePixelRatio || 1;
+    
+                pixelRatio = devicePixelRatio / backingStoreRatio;
+            } else {
                 mainScene = renderer.userData.mainScene;
                 camera = renderer.userData.camera;
                 cameraFocus = camera.userData.cameraFocus;
@@ -47,8 +57,8 @@ function GlPlotter() {
             camera.updateProjectionMatrix();
 
             // Setup the THREE.WebGLRenderer
-            renderer.setPixelRatio(webglsurface.pixelRatio);
-            renderer.setSize(webglsurface.width, webglsurface.height, true);
+            renderer.setPixelRatio(pixelRatio);
+            renderer.setSize(width, height, true);
             renderer.autoClear = true;
             renderer.userData = {};
 
@@ -57,38 +67,209 @@ function GlPlotter() {
             renderer.userData.camera = camera;
             renderer.userData.mainScene = mainScene;
             renderer.userData.plotOffset = defaultPlotOffset;
-            
-            webglsurface.renderer = renderer;
-            webglsurface.render = render;
 
-            if(renderer) {
-                plot.hooks.drawSeries.push(setupDrawSeries(renderer));
+            resize(plot, width, height);
+            
+            plot.hooks.drawSeries.push(drawSeries);
+            plot.hooks.draw.push(render);
+            plot.hooks.resize.push(resize);
+            plot.hooks.drawBackground.push(clear);
+            plot.hooks.shutdown.push(shutdown);
+        };
+
+        function getGlSurface(cls, container) {
+            var element = container.getElementsByClassName(cls)[0];
+            var flotBaseElement = container.getElementsByClassName("flot-base")[0];
+
+            if (!element) {
+                element = document.createElement('canvas');
+                element.className = cls;
+                element.style.direction = 'ltr';
+                element.style.position = 'absolute';
+                element.style.left = '0px';
+                element.style.top = '0px';
+
+                container.insertBefore(element, flotBaseElement.nextSibling);
             }
+
+            // Determine the screen's ratio of physical to device-independent
+            // pixels.  This is the ratio between the canvas width that the browser
+            // advertises and the number of pixels actually present in that space.
+
+            // The iPhone 4, for example, has a device-independent width of 320px,
+            // but its screen is actually 640px wide.  It therefore has a pixel
+            // ratio of 2, while most normal devices have a ratio of 1.
+
+            
+            var box = container.getBoundingClientRect();
+
+            // Size the canvas to match the internal dimensions of its container
+            width = box.width;
+            height = box.height;
+
+            return element;
         };
 
         function render() {
-            var renderer = this.renderer,
-                camera = renderer.userData.camera,
+            var camera = renderer.userData.camera,
                 mainScene = renderer.userData.mainScene,
                 cameraFocus = camera.userData.cameraFocus,
                 plotOffset = renderer.userData.plotOffset || defaultPlotOffset;
 
-            cameraFocus.x = this.width / 2;
-            cameraFocus.y = this.height / 2;
+            cameraFocus.x = width / 2;
+            cameraFocus.y = height / 2;
             cameraFocus.z = 1000;
 
-            renderer.clear();
-            renderer.setSize(this.width, this.height, false);
-            renderer.setViewport(0, 0, this.width, this.height);
+            renderer.setSize(width, height, false);
+            renderer.setViewport(0, 0, width, height);
 
-            camera.position.set(this.width / 2, this.height / 2, 0);
+            camera.position.set(width / 2, height / 2, 0);
             camera.lookAt(cameraFocus);
             camera.updateProjectionMatrix();
             camera.updateMatrixWorld();
 
-            renderer.setScissor(plotOffset.left, plotOffset.top, this.width - plotOffset.right - plotOffset.left, this.height - plotOffset.bottom - plotOffset.top);
+            renderer.setScissor(
+                plotOffset.left,
+                plotOffset.top,
+                width - plotOffset.right - plotOffset.left,
+                height - plotOffset.bottom - plotOffset.top
+            );
             renderer.render(mainScene, camera);
             renderer.clearDepth();
+        };
+
+        function resize(plot, newWidth, newHeight) {
+            var userData = renderer.userData,
+                minSize = 10,
+                shouldresize = false,
+                element = canvas;
+    
+                newWidth = newWidth < minSize ? minSize : newWidth;
+                newHeight = newHeight < minSize ? minSize : newHeight;
+    
+                // Resize the canvas, increasing its density based on the display's
+                // pixel ratio; basically giving it more pixels without increasing the
+                // size of its element, to take advantage of the fact that retina
+                // displays have that many more pixels in the same advertised space.
+        
+                // Resizing should reset the state (excanvas seems to be buggy though)
+        
+                if (width !== newWidth) {
+                    element.width = newWidth * pixelRatio;
+                    element.style.width = newWidth + 'px';
+                    width = newWidth;
+                    shouldresize = true; 
+                }
+        
+                if (height !== newHeight) {
+                    element.height = newHeight * pixelRatio;
+                    element.style.height = newHeight + 'px';
+                    height = newHeight;
+                    shouldresize = true;
+                }
+    
+                if (renderer && shouldresize) {
+                    var mainscene = renderer.userData.mainScene,
+                        camera = renderer.userData.camera;
+    
+                    renderer.setClearColor(0xff0000, 0);
+                    renderer.setSize(width, height, false);
+                    renderer.setPixelRatio(pixelRatio);
+    
+                    if(camera) {
+                        camera.aspect = width/height;
+                        camera.userData.cameraFocus.x = width / 2;
+                        camera.userData.cameraFocus.y = height / 2;
+                        camera.userData.cameraFocus.z = 1000;
+        
+                        camera.position.set(width / 2, height / 2, 0);
+                        camera.lookAt(camera.userData.cameraFocus);
+                        camera.updateMatrixWorld();
+                        camera.updateProjectionMatrix();
+                    }
+
+                    renderer.clear();
+                }
+        };
+
+        function clear() {
+            if (renderer) {
+                // Clear the canvas
+                mainscene = renderer.userData.mainScene;
+                renderer.setClearColor(0x0f0f0f, 0.2);
+                renderer.setScissorTest(false);
+                renderer.clear();
+    
+                while (mainscene.children.length > 0) {
+                    mainscene.remove(mainscene.children[0]);
+                }
+    
+                renderer.setClearColor(0xff0000, 0.2);
+                renderer.setScissorTest(true);
+                renderer.clear();
+            }
+        };
+
+        function shutdown() {
+            renderer.dispose();
+            canvas.remove();
+        };
+
+        function drawSeries(plot, ctx, serie, index, getColorOrGradient) {
+            var plotOffset = plot.getPlotOffset(),
+                plotWidth, plotHeight;
+            if(serie.points.glshow || serie.points.show) {
+                serie.points.show = false;
+                serie.points.glshow = true;
+                renderer.userData.plotOffset = plotOffset;
+
+                // generate a texture if needed
+                if(!textures[index]) {
+                    var filloptions = getFillStyle(serie.points, serie.color, null, null, getColorOrGradient) || serie.color;
+                    textures[index] = generateTexture(serie.points.symbol, serie.points.lineWidth, serie.color, filloptions, plot.drawSymbol)
+                }
+
+                // generate a material if texture changed
+                if (!materials[index] || textures[index].needsUpdate) {
+                    materials[index] = new THREE.PointsMaterial({
+                            size: serie.points.radius * 4,
+                            sizeAttenuation: false,
+                            map: textures[index],
+                            transparent: true,
+                            alphaTest: 0.1
+                        });
+                    materials[index].needsUpdate = true;
+                }
+
+                // generate a geometry
+                // TODO: switch to buffer geometry for better performance
+                if(!geometries[index]) {
+                    geometries[index] = new THREE.Geometry();
+                }
+
+                var datapoints = {
+                    points: serie.datapoints.points,
+                    pointsize: serie.datapoints.pointsize
+                };
+    
+                if (serie.decimatePoints) {
+                    //after adjusting the axis, plot width and height will be modified
+                    plotWidth = width - plotOffset.left - plotOffset.right;
+                    plotHeight = height - plotOffset.bottom - plotOffset.top;
+                    // TODO: return Vector3 array of p2c coords after switching to BufferGeometry.
+                    datapoints.points = serie.decimatePoints(
+                        serie, 
+                        serie.xaxis.min, 
+                        serie.xaxis.max, 
+                        plotWidth, 
+                        serie.yaxis.min, 
+                        serie.yaxis.max, 
+                        plotHeight
+                    );
+                }
+
+                drawSeriesPoints(renderer, datapoints, index, plotOffset, serie.xaxis, serie.yaxis);
+            }
         };
 
         function getFillStyle(filloptions, seriesColor, bottom, top, getColorOrGradient) {
@@ -136,117 +317,54 @@ function GlPlotter() {
             return texture;
         };
 
-        function setupDrawSeries(renderer) {
-            var renderer = renderer;
-            function drawSeries(plot, ctx, serie, index, getColorOrGradient) {
-                var plotOffset = plot.getPlotOffset(),
-                    webglsurface = plot.getWebGlSurface();
-                var plotWidth, plotHeight;
-                if(serie.points.glshow || serie.points.show) {
-                    serie.points.show = false;
-                    serie.points.glshow = true;
-                    renderer.userData.plotOffset = plotOffset;
-
-                    // generate a texture if needed
-                    if(!textures[index]) {
-                        var filloptions = getFillStyle(serie.points, serie.color, null, null, getColorOrGradient) || serie.color;
-                        textures[index] = generateTexture(serie.points.symbol, serie.points.lineWidth, serie.color, filloptions, plot.drawSymbol)
-                    }
-
-                    // generate a material if texture changed
-                    if (!materials[index] || textures[index].needsUpdate) {
-                        materials[index] = new THREE.PointsMaterial({
-                                size: serie.points.radius * 4,
-                                sizeAttenuation: false,
-                                map: textures[index],
-                                transparent: true,
-                                alphaTest: 0.1
-                            });
-                        materials[index].needsUpdate = true;
-                    }
-
-                    // generate a geometry
-                    // TODO: switch to buffer geometry for better performance
-                    if(!geometries[index]) {
-                        geometries[index] = new THREE.Geometry();
-                    }
-
-                    var datapoints = {
-                        points: serie.datapoints.points,
-                        pointsize: serie.datapoints.pointsize
-                    };
+        function drawSeriesPoints(renderer, datapoints, index, offset, axisx, axisy) {
+            var mainscene = renderer.userData.mainScene,
+                geometry = geometries[index],
+                material = materials[index],
+                vertices = geometry.vertices,
+                points = datapoints.points,
+                ps = datapoints.pointsize, 
+                x, y, z = 1000 - index;
+            var i = 0, j = 0, k = 0;
         
-                    if (serie.decimatePoints) {
-                        //after adjusting the axis, plot width and height will be modified
-                        plotWidth = webglsurface.width - plotOffset.left - plotOffset.right;
-                        plotHeight = webglsurface.height - plotOffset.bottom - plotOffset.top;
-                        // TODO: return Vector3 array of p2c coords after switching to BufferGeometry.
-                        datapoints.points = serie.decimatePoints(
-                            serie, 
-                            serie.xaxis.min, 
-                            serie.xaxis.max, 
-                            plotWidth, 
-                            serie.yaxis.min, 
-                            serie.yaxis.max, 
-                            plotHeight
-                        );
-                    }
-
-                    drawSeriesPoints(renderer, datapoints, index, plotOffset, serie.xaxis, serie.yaxis);
-                }
-            };
-
-            function drawSeriesPoints(renderer, datapoints, index, offset, axisx, axisy) {
-                var mainscene = renderer.userData.mainScene,
-                    geometry = geometries[index],
-                    material = materials[index],
-                    vertices = geometry.vertices,
-                    points = datapoints.points,
-                    ps = datapoints.pointsize, 
-                    x, y, z = 1000 - index;
-                var i = 0, j = 0, k = 0;
-            
-                // move/create each vertex
-                for (i = 0; i < points.length; i += ps) {
-                    if (points[i] == null) {
-                        j++;
-                        continue;
-                    }
-                    
-                    if (points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
-                        if (vertices[i / ps - j]) {
-                            vertices[i / ps - j].z = -1;
-                        }
-                        continue;
-                    }
-    
-                    x = axisx.p2c(points[i]) + offset.left;
-                    y = axisy.p2c(points[i + 1]) + offset.top;
-
-                    if (!vertices[i / ps - j]) {
-                        vertices[i / ps - j] = new THREE.Vector3(x, y, z);
-                    } else {
-                        vertices[i / ps - j].x = x;
-                        vertices[i / ps - j].y = y;
-                        vertices[i / ps - j].z = z;
-                    }
+            // move/create each vertex
+            for (i = 0; i < points.length; i += ps) {
+                if (points[i] == null) {
+                    j++;
+                    continue;
                 }
                 
-                if (vertices.length > points.length / ps) {
-                    for(k = points.length / ps; k < vertices.length; k++) {
-                        vertices[k].z = -1;
+                if (points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
+                    if (vertices[i / ps - j]) {
+                        vertices[i / ps - j].z = -1;
                     }
+                    continue;
                 }
 
-                if(points.length > 0) {
-                    geometry.verticesNeedUpdate = true;
-                    geometry.dynamic = true;
+                x = axisx.p2c(points[i]) + offset.left;
+                y = axisy.p2c(points[i + 1]) + offset.top;
 
-                    mainscene.add(new THREE.Points(geometry, material));
+                if (!vertices[i / ps - j]) {
+                    vertices[i / ps - j] = new THREE.Vector3(x, y, z);
+                } else {
+                    vertices[i / ps - j].x = x;
+                    vertices[i / ps - j].y = y;
+                    vertices[i / ps - j].z = z;
                 }
-            };
+            }
+            
+            if (vertices.length > points.length / ps) {
+                for(k = points.length / ps; k < vertices.length; k++) {
+                    vertices[k].z = -1;
+                }
+            }
 
-            return drawSeries;
+            if(points.length > 0) {
+                geometry.verticesNeedUpdate = true;
+                geometry.dynamic = true;
+
+                mainscene.add(new THREE.Points(geometry, material));
+            }
         };
     };
 };
