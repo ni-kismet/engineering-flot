@@ -306,8 +306,8 @@ Licensed under the MIT license.
         var MINOR_TICKS_COUNT_CONSTANT = $.plot.uiConstants.MINOR_TICKS_COUNT_CONSTANT;
         var TICK_LENGTH_CONSTANT = $.plot.uiConstants.TICK_LENGTH_CONSTANT;
         initPlugins(plot);
-        parseOptions(options_);
         setupCanvases();
+        parseOptions(options_);
         setData(data_);
         setupGrid();
         draw();
@@ -909,7 +909,7 @@ Licensed under the MIT license.
 
             placeholder.css("padding", 0) // padding messes up the positioning
                 .children().filter(function() {
-                    return !$(this).hasClass("flot-overlay") && !$(this).hasClass('flot-base') && !$(this).hasClass('flot-gl');
+                    return !$(this).hasClass("flot-overlay") && !$(this).hasClass('flot-base');
                 }).remove();
 
             if (placeholder.css("position") === 'static') {
@@ -1819,16 +1819,9 @@ Licensed under the MIT license.
                 drawGrid();
             }
 
-            if (series.length !== webglsurface.scenes.length) {
-                webglsurface.scenes = [];
-                for (var i = 0; i < series.length; i++) {
-                    webglsurface.scenes[i] = new THREE.Scene();
-                }
-            }
-
-            for (i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i], i]);
-                drawSeries(series[i], webglsurface.scenes[i], webglsurface.mainscene);
+            for (var i = 0; i < series.length; ++i) {
+                executeHooks(hooks.drawSeries, [ctx, series[i], i, getColorOrGradient]);
+                drawSeries(series[i]);
             }
 
             executeHooks(hooks.draw, [ctx]);
@@ -2371,7 +2364,7 @@ Licensed under the MIT license.
             });
         }
 
-        function drawSeries(series, scene, mainscene) {
+        function drawSeries(series) {
             if (series.lines.show) {
                 $.plot.drawSeries.drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, plot.drawSymbol, getColorOrGradient);
             }

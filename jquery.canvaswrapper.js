@@ -539,9 +539,7 @@
      */
     var WebGlCanvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
-        var renderer, camera,
-            scenes = [new THREE.Scene()],
-            mainscene = new THREE.Scene();
+        var renderer = {};
 
         if (!element) {
             element = document.createElement('canvas');
@@ -558,7 +556,6 @@
                 throw new Error('Canvas is not available.');
             }
         }
-        renderer = new THREE.WebGLRenderer({canvas: element, antialias: false, alpha: true });
 
         // Determine the screen's ratio of physical to device-independent
         // pixels.  This is the ratio between the canvas width that the browser
@@ -570,46 +567,27 @@
 
         var devicePixelRatio = window.devicePixelRatio || 1,
             backingStoreRatio = 1,
-            box = container.getBoundingClientRect(),
-            rendererSize = { width: box.width, height: box.height };
+            box = container.getBoundingClientRect();
 
         // Size the canvas to match the internal dimensions of its container
         this.width = box.width;
         this.height = box.height;
 
         this.element = element;
-        this.scenes = scenes;
-        this.mainscene = mainscene;
-        this.camera = camera = new THREE.OrthographicCamera(this.width / 2, -this.width / 2, -this.height / 2, this.height / 2, 0.1, 1000);
+
+
         this.renderer = renderer;
         this.scale = { x: 1, y: 1, z: 1 };
-        if (renderer) {
-            backingStoreRatio =
+        
+        backingStoreRatio =
             renderer.webkitBackingStorePixelRatio ||
             renderer.mozBackingStorePixelRatio ||
             renderer.msBackingStorePixelRatio ||
             renderer.oBackingStorePixelRatio ||
             renderer.backingStorePixelRatio || 1;
 
-            this.pixelRatio = devicePixelRatio / backingStoreRatio;
-            mainscene.userData.pixelRatio = this.pixelRatio;
-            mainscene.userData.rendererSize = rendererSize;
-            renderer.setPixelRatio(this.pixelRatio);
-            renderer.setSize(this.width, this.height, true);
-            renderer.setPixelRatio(this.pixelRatio);
-            renderer.autoClear = true;
-            camera.aspect = this.width / this.height;
-            
-            this.cameraSight = new THREE.Vector3(this.width / 2, this.height / 2, 1000);
-            camera.position.set(this.width / 2, this.height / 2, 0);
-            camera.lookAt(this.cameraSight);
-            camera.updateMatrixWorld();
-            camera.updateProjectionMatrix();
-
-            this.clear();
-        } else {
-            console.warn('WebGL not supported on this device.');
-        }
+        this.pixelRatio = devicePixelRatio / backingStoreRatio;
+        
     };
 
     /**
@@ -620,9 +598,7 @@
      */
     WebGlCanvas.prototype.resize = function(width, height) {
         var renderer = this.renderer,
-            mainscene = this.mainscene,
-            scenes = this.scenes,
-            camera = this.camera
+            userData = renderer.userData,
             minSize = 10,
             shouldresize = false,
             element = this.element,
@@ -661,10 +637,12 @@
             // may have twice as many pixels, we still want lines and other drawing to
             // appear at the same size; the extra pixels will just make them crisper.
 
-            if (renderer && shouldresize) {
+            if (renderer && userData && shouldresize) {
+                var mainscene = renderer.userData.mainScene,
+                    camera = renderer.userData.camera;
                 renderer.clear();
-                mainscene.userData.rendererSize.width = width;
-                mainscene.userData.rendererSize.height = height;
+                //mainscene.userData.rendererSize.width = width;
+                //mainscene.userData.rendererSize.height = height;
 
                 renderer.setClearColor(0xff0000, 0);
                 renderer.setSize(width, height, false);
@@ -672,25 +650,25 @@
 
                 camera.aspect = width/height;
                 camera.updateProjectionMatrix();
+                camera.userData.cameraFocus.x = width / 2;
+                camera.userData.cameraFocus.y = height / 2;
+                camera.userData.cameraFocus.z = 1000;
 
-                this.cameraSight.x = width / 2;
-                this.cameraSight.y = height / 2;
-                this.cameraSight.z = 1000;
-                
                 camera.position.set(width / 2, height / 2, 0);
-                camera.lookAt(this.cameraSight);
+                camera.lookAt(camera.userData.cameraFocus);
                 camera.updateMatrixWorld();
+                renderer.clear();
             }
     };
 
     WebGlCanvas.prototype.clear = function() {
         var renderer = this.renderer,
-            scenes = this.scenes,
-            mainscene = this.mainscene;
+            mainscene;
 
-        if (renderer) {
+        if (renderer && renderer.userData) {
             // Clear the canvas
-            renderer.setClearColor(0x0f0f0f, 0);
+            mainscene = renderer.userData.mainScene;
+            renderer.setClearColor(0x0f0f0f, 0.2);
             renderer.setScissorTest(false);
             renderer.clear();
 
@@ -698,53 +676,13 @@
                 mainscene.remove(mainscene.children[0]);
             }
 
-            renderer.setClearColor(0xff0000, 0);
+            renderer.setClearColor(0xff0000, 0.2);
             renderer.setScissorTest(true);
+            renderer.clear();
         }
     };
 
-    var defaultPlotOffset = {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0
-    };
-
-    /**
-     * Render the mainscene to 
-     * 
-     */
-    WebGlCanvas.prototype.render = function() {
-        var renderer = this.renderer,
-            camera = this.camera,
-            mainscene = this.mainscene,
-            plotOffset = mainscene.userData.plotOffset || defaultPlotOffset,
-            scale = this.scale,
-            rendererSize;
-
-        if (renderer && (mainscene.children.length > 0)) {
-            renderer.setSize(this.width, this.height, false);
-            renderer.setViewport(0, 0, this.width, this.height);
-            rendererSize = renderer.getSize();
-            //renderer.clear();
-            
-            this.cameraSight.x = this.width / 2;
-            this.cameraSight.y = this.height / 2;
-            this.cameraSight.z = 1000;
-
-            camera.position.set(this.width / 2, this.height / 2, 0);
-            camera.lookAt(this.cameraSight);
-            camera.updateProjectionMatrix();
-            camera.updateMatrixWorld();
-
-            mainscene.userData.camera = camera;
-            mainscene.updateMatrixWorld();
-
-            renderer.setScissor(plotOffset.left, plotOffset.top, rendererSize.width - plotOffset.right - plotOffset.left, rendererSize.height - plotOffset.bottom - plotOffset.top);
-            renderer.render(mainscene, camera);
-            renderer.clearDepth();
-        }
-    };
+    WebGlCanvas.prototype.render = function () {};
 
     function generateKey(text) {
         return text.replace(/0|1|2|3|4|5|6|7|8|9/g, '0');

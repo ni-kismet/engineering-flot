@@ -7,15 +7,21 @@
     <script language="javascript" type="text/javascript" src="../../node_modules/three/build/three.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
-	<!--script language="javascript" type="text/javascript" src="../../jquery.flot.navigate.js"></script-->
+    <script language="javascript" type="text/javascript" src="../../GlCanvas.js"></script>
+    <script language="javascript" type="text/javascript" src="../stats/stats.min.js"></script>
   <script type="text/javascript">
 
     $(function() {
         var index = 0;
+        var count = 100;
+        var stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+        stats.begin();
         function generate(start, end, fn) {
             var res = [];
-            for (var i = 0; i <= 40; ++i) {
-                var x = start + i / 40 * (end - start);
+            for (var i = 0; i <= count; ++i) {
+                var x = start + i / count * (end - start);
                 res.push([x, fn(x)]);
             }
             return res;
@@ -27,7 +33,7 @@
 
         var plot = $.plot("#placeholder", data, {
             xaxes: [
-                { position: 'bottom' }
+                { position: 'bottom', show: false }
             ],
             yaxes: [
                 { position: 'left', autoscale: 'none', min: -2.0, max: 2.0 }
@@ -48,6 +54,7 @@
             plot.setData(data);
             plot.setupGrid();
             plot.draw();
+            stats.update();
             window.requestAnimationFrame(update);
         }
 

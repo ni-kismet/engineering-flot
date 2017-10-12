@@ -1,8 +1,7 @@
-(function() {
+(function(global, $) {
 function GlPlotter() {
     this.pluginName = 'glplotter';
     this.pluginVersion = '0.2';
-
     /**
      * Initialize a webgl layer
      */
@@ -22,15 +21,23 @@ function GlPlotter() {
         plot.hooks.processOptions.push(processOptions);
 
         function processOptions(plot, options) {
+            var mainScene, camera, cameraFocus;
             container = plot.getPlaceholder();
             webglsurface = plot.getWebGlSurface();
             canvas = plot.getWebGlCanvas();
             width = webglsurface.width;
             height = webglsurface.height;
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true });
-            var mainScene = new THREE.Scene(),
-                camera = new THREE.OrthographicCamera(webglsurface.width / 2, -webglsurface.width / 2, -webglsurface.height / 2, webglsurface.height / 2, 0.1, 1000),
+            renderer = webglsurface.renderer;
+            if(!renderer.userData) {
+                renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true });
+                mainScene = new THREE.Scene();
+                camera = new THREE.OrthographicCamera(webglsurface.width / 2, -webglsurface.width / 2, -webglsurface.height / 2, webglsurface.height / 2, 0.1, 1000);
                 cameraFocus = new THREE.Vector3(width / 2, height / 2, 1000);
+            }else{
+                mainScene = renderer.userData.mainScene;
+                camera = renderer.userData.camera;
+                cameraFocus = camera.userData.cameraFocus;
+            }
 
             // Setup the THREE.OrthographicCamera
             camera.aspect = width / height;
@@ -43,6 +50,7 @@ function GlPlotter() {
             renderer.setPixelRatio(webglsurface.pixelRatio);
             renderer.setSize(webglsurface.width, webglsurface.height, true);
             renderer.autoClear = true;
+            renderer.userData = {};
 
             // Save settings for future reuse.
             camera.userData.cameraFocus = cameraFocus;
@@ -50,16 +58,17 @@ function GlPlotter() {
             renderer.userData.mainScene = mainScene;
             renderer.userData.plotOffset = defaultPlotOffset;
             
-            // 
-            webglsurface.render = render(renderer);
+            webglsurface.renderer = renderer;
+            webglsurface.render = render;
 
             if(renderer) {
-                plot.hooks.drawSeries.push(drawSeries);
+                plot.hooks.drawSeries.push(setupDrawSeries(renderer));
             }
         };
 
         function render() {
-            var camera = renderer.userData.camera,
+            var renderer = this.renderer,
+                camera = renderer.userData.camera,
                 mainScene = renderer.userData.mainScene,
                 cameraFocus = camera.userData.cameraFocus,
                 plotOffset = renderer.userData.plotOffset || defaultPlotOffset;
@@ -77,8 +86,8 @@ function GlPlotter() {
             camera.updateProjectionMatrix();
             camera.updateMatrixWorld();
 
-            renderer.setScissor(plotOffset.left, plotOffset.top, rendererSize.width - plotOffset.right - plotOffset.left, rendererSize.height - plotOffset.bottom - plotOffset.top);
-            renderer.render(mainscene, camera);
+            renderer.setScissor(plotOffset.left, plotOffset.top, this.width - plotOffset.right - plotOffset.left, this.height - plotOffset.bottom - plotOffset.top);
+            renderer.render(mainScene, camera);
             renderer.clearDepth();
         };
 
@@ -98,7 +107,7 @@ function GlPlotter() {
             return c.toString();
         };
 
-        function generateTexture(symbol, filloptions, drawSymbol) {
+        function generateTexture(symbol, lineWidth, color, filloptions, drawSymbol) {
             var textureCanvas, context, texture;
 
             textureCanvas = document.createElement('canvas');
@@ -107,8 +116,8 @@ function GlPlotter() {
             context = textureCanvas.getContext('2d');
             context.clearRect(0, 0, 128, 128);
             context.globalAlpha = 1;
-            context.strokeStyle = series.color;
-            context.lineWidth = series.points.lineWidth * 10 || 10;
+            context.strokeStyle = color;
+            context.lineWidth = lineWidth * 10 || 10;
 
             if (symbol === "circle") {
                 context.arc(64, 64, 32, 0, 2 * Math.PI);
@@ -127,111 +136,126 @@ function GlPlotter() {
             return texture;
         };
 
-        function drawSeries(plot, ctx, serie, index) {
-            var plotOffset = plot.getOffset(),
-                webglsurface = plot.getWebGlSurface();
-            var plotWidth, plotHeight;
-            if(serie.points.glshow || serie.points.show) {
-                serie.points.show = false;
-                serie.points.glshow = true;
-                this.renderer.userData.plotOffset = plotOffset;
+        function setupDrawSeries(renderer) {
+            var renderer = renderer;
+            function drawSeries(plot, ctx, serie, index, getColorOrGradient) {
+                var plotOffset = plot.getPlotOffset(),
+                    webglsurface = plot.getWebGlSurface();
+                var plotWidth, plotHeight;
+                if(serie.points.glshow || serie.points.show) {
+                    serie.points.show = false;
+                    serie.points.glshow = true;
+                    renderer.userData.plotOffset = plotOffset;
 
-                // generate a texture if needed
-                if(!textures[index]) {
-                    var filloptions = getFillStyle(serie.points, serie.color, null, null, getColorOrGradient) || serie.color;
-                    textures[index] = generateTexture(serie.points.symbol, filloptions, plot.drawSymbol)
-                }
+                    // generate a texture if needed
+                    if(!textures[index]) {
+                        var filloptions = getFillStyle(serie.points, serie.color, null, null, getColorOrGradient) || serie.color;
+                        textures[index] = generateTexture(serie.points.symbol, serie.points.lineWidth, serie.color, filloptions, plot.drawSymbol)
+                    }
 
-                // generate a material if texture changed
-                if (!materials[index] || textures[index].needsUpdate) {
-                    materials[index] = new THREE.PointsMaterial({
-                            size: serie.points.radius * 4,
-                            sizeAttenuation: false,
-                            map: textures[index],
-                            transparent: true,
-                            alphaTest: 0.1
-                        });
-                    materials[index].needsUpdate = true;
-                }
+                    // generate a material if texture changed
+                    if (!materials[index] || textures[index].needsUpdate) {
+                        materials[index] = new THREE.PointsMaterial({
+                                size: serie.points.radius * 4,
+                                sizeAttenuation: false,
+                                map: textures[index],
+                                transparent: true,
+                                alphaTest: 0.1
+                            });
+                        materials[index].needsUpdate = true;
+                    }
 
-                // generate a geometry
-                // TODO: switch to buffer geometry for better performance
-                if(!geometries[index]) {
-                    geometries[index] = new THREE.Geometry();
-                }
+                    // generate a geometry
+                    // TODO: switch to buffer geometry for better performance
+                    if(!geometries[index]) {
+                        geometries[index] = new THREE.Geometry();
+                    }
 
-                var datapoints = {
-                    points: serie.datapoints.points,
-                    pointsize: serie.datapoints.pointsize
-                };
-    
-                if (serie.decimatePoints) {
-                    //after adjusting the axis, plot width and height will be modified
-                    plotWidth = webglsurface.width - plotOffset.left - plotOffset.right;
-                    plotHeight = webglsurface.height - plotOffset.bottom - plotOffset.top;
-                    // TODO: return Vector3 array of p2c coords after switching to BufferGeometry.
-                    datapoints.points = serie.decimatePoints(
-                        serie, 
-                        serie.xaxis.min, 
-                        serie.xaxis.max, 
-                        plotWidth, 
-                        series.yaxis.min, 
-                        series.yaxis.max, 
-                        plotHeight
-                    );
-                }
-
-                drawSeriesPoints(datapoints, index,);
-            }
-        };
-        function drawSeriesPoints(datapoints, offset, axisx, axisy) {
-            var geometry = geometries[index],
-                material = materials[index],
-                vertices = geometry.vertices;
-                points = datapoints.points,
-                ps = datapoints.pointsize, 
-                x, y, z = points.length / ps - index;
-            var i = 0, j = 0, k = 0;
+                    var datapoints = {
+                        points: serie.datapoints.points,
+                        pointsize: serie.datapoints.pointsize
+                    };
         
-            // move/create each vertex
-            for (i = 0; i < points.length; i += ps) {
-                if (points[i] == null) {
-                    j++;
-                    continue;
+                    if (serie.decimatePoints) {
+                        //after adjusting the axis, plot width and height will be modified
+                        plotWidth = webglsurface.width - plotOffset.left - plotOffset.right;
+                        plotHeight = webglsurface.height - plotOffset.bottom - plotOffset.top;
+                        // TODO: return Vector3 array of p2c coords after switching to BufferGeometry.
+                        datapoints.points = serie.decimatePoints(
+                            serie, 
+                            serie.xaxis.min, 
+                            serie.xaxis.max, 
+                            plotWidth, 
+                            serie.yaxis.min, 
+                            serie.yaxis.max, 
+                            plotHeight
+                        );
+                    }
+
+                    drawSeriesPoints(renderer, datapoints, index, plotOffset, serie.xaxis, serie.yaxis);
+                }
+            };
+
+            function drawSeriesPoints(renderer, datapoints, index, offset, axisx, axisy) {
+                var mainscene = renderer.userData.mainScene,
+                    geometry = geometries[index],
+                    material = materials[index],
+                    vertices = geometry.vertices,
+                    points = datapoints.points,
+                    ps = datapoints.pointsize, 
+                    x, y, z = 1000 - index;
+                var i = 0, j = 0, k = 0;
+            
+                // move/create each vertex
+                for (i = 0; i < points.length; i += ps) {
+                    if (points[i] == null) {
+                        j++;
+                        continue;
+                    }
+                    
+                    if (points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
+                        if (vertices[i / ps - j]) {
+                            vertices[i / ps - j].z = -1;
+                        }
+                        continue;
+                    }
+    
+                    x = axisx.p2c(points[i]) + offset.left;
+                    y = axisy.p2c(points[i + 1]) + offset.top;
+
+                    if (!vertices[i / ps - j]) {
+                        vertices[i / ps - j] = new THREE.Vector3(x, y, z);
+                    } else {
+                        vertices[i / ps - j].x = x;
+                        vertices[i / ps - j].y = y;
+                        vertices[i / ps - j].z = z;
+                    }
                 }
                 
-                if (points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
-                    if (vertices[i / ps - j]) {
-                        vertices[i / ps - j].z = -1;
+                if (vertices.length > points.length / ps) {
+                    for(k = points.length / ps; k < vertices.length; k++) {
+                        vertices[k].z = -1;
                     }
-                    continue;
                 }
- 
-                x = axisx.p2c(points[i]) + offset.left;
-                y = axisy.p2c(points[i + 1]) + offset.top;
 
-                if (!vertices[i / ps - j]) {
-                    vertices[i / ps - j] = new THREE.Vector3(x, y, z);
-                } else {
-                    vertices[i / ps - j].x = x;
-                    vertices[i / ps - j].y = y;
-                    vertices[i / ps - j].z = z;
+                if(points.length > 0) {
+                    geometry.verticesNeedUpdate = true;
+                    geometry.dynamic = true;
+
+                    mainscene.add(new THREE.Points(geometry, material));
                 }
-            }
-            
-            if (vertices.length > points.length / ps) {
-                for(k = points.length / ps; k < vertices.length; k++) {
-                    vertices[k].z = -1;
-                }
-            }
+            };
 
-            if(points.length > 0) {
-                geometry.verticesNeedUpdate = true;
-                geometry.dynamic = true;
-
-                mainscene.add(new THREE.Points(geometry, material[index]));
-            }
-        }
+            return drawSeries;
+        };
     };
-}
-})();
+};
+
+var glplotter = new GlPlotter();
+$.plot.plugins.push({
+    init: glplotter.init,
+    name: glplotter.pluginName,
+    version: glplotter.pluginVersion
+});
+global.GlPlotter = GlPlotter;
+})(this, jQuery);

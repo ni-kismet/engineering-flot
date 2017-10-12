@@ -17,7 +17,7 @@ module.exports = function(config) {
         'jquery.flot.symbol.js',
         'jquery.flot.flatdata.js',
         'jquery.flot.drawSeries.js',
-        'jquery.flot.gldrawSeries.js',
+        'GlCanvas.js',
         'jquery.flot.navigate.js',
         'jquery.flot.touchNavigate.js',
         'jquery.flot.touch.js',
