@@ -14,7 +14,7 @@ dependencies:
   post:
     # testing indirect dependents is not supported yet by the mainline version
     # https://github.com/bahmutov/dont-break/pull/57
-    - npm install -g npm git+https://cristiingineru@github.com/cristiingineru/dont-break.git
+    - npm install -g git+https://cristiingineru@github.com/cristiingineru/dont-break.git
 test:
   override:
     - npm run dont-break
