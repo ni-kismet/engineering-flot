@@ -92,7 +92,7 @@ Licensed under the MIT license.
                 series: {
                     points: {
                         show: false,
-                        radius: 5,
+                        radius: 3,
                         lineWidth: 2, // in pixels
                         fill: true,
                         fillColor: "#ffffff",
@@ -177,7 +177,7 @@ Licensed under the MIT license.
                 bindEvents: [],
                 drawOverlay: [],
                 resize: [],
-                shutdown: [],
+                shutdown: []
             },
             plot = this;
 
@@ -315,7 +315,7 @@ Licensed under the MIT license.
             // References to key classes, allowing plugins to modify them
 
             var classes = {
-                Canvas: Canvas,
+                Canvas: Canvas
             };
 
             for (var i = 0; i < plugins.length; ++i) {

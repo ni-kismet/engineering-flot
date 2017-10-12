@@ -17,7 +17,6 @@ module.exports = function(config) {
         'jquery.flot.symbol.js',
         'jquery.flot.flatdata.js',
         'jquery.flot.drawSeries.js',
-        'GlCanvas.js',
         'jquery.flot.navigate.js',
         'jquery.flot.touchNavigate.js',
         'jquery.flot.touch.js',
@@ -30,7 +29,7 @@ module.exports = function(config) {
         'lib/globalize.js',
         'lib/globalize.culture.en-US.js',
         'lib/jquery.event.drag.js',
-        'lib/jquery.mousewheel.js',
+        'lib/jquery.mousewheel.js'
     ].concat(coverage_sources);
 
     var settings = {
@@ -44,7 +43,6 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
-            'node_modules/three/build/three.js',
             'node_modules/phantomjs-polyfill-find/find-polyfill.js',
             'node_modules/webcharts-development-settings/testsUtils/utils/*.js',
             'tests/*.Test.js'

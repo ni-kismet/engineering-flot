@@ -196,7 +196,7 @@ function GlPlotter() {
             if (renderer) {
                 // Clear the canvas
                 mainscene = renderer.userData.mainScene;
-                renderer.setClearColor(0x0f0f0f, 0.2);
+                renderer.setClearColor(0x0f0f0f, 0);
                 renderer.setScissorTest(false);
                 renderer.clear();
     
@@ -204,7 +204,7 @@ function GlPlotter() {
                     mainscene.remove(mainscene.children[0]);
                 }
     
-                renderer.setClearColor(0xff0000, 0.2);
+                renderer.setClearColor(0xff0000, 0);
                 renderer.setScissorTest(true);
                 renderer.clear();
             }

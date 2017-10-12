@@ -4,7 +4,6 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Flot Examples: Real-time updates</title>
     <link href="../examples.css" rel="stylesheet" type="text/css">
-    <script language="javascript" type="text/javascript" src="../../node_modules/three/build/three.js"></script>    
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
     <script language="javascript" type="text/javascript" src="../../jquery.flot.absRelTime.js"></script>
@@ -18,7 +17,7 @@
 		// be fetched from a server
 
 		var data = [],
-			totalPoints = 10000,
+			totalPoints = 300,
 			step = 0;
 
 		function getRandomData() {
@@ -71,8 +70,7 @@
 
 		var plot = $.plot("#placeholder", [ getRandomData() ], {
 			series: {
-                shadowSize: 0,	// Drawing is faster without shadows
-                points:{show:true, radius: 5}
+                shadowSize: 0	// Drawing is faster without shadows
 			},
 			yaxis: {
 				min: 0,
@@ -94,7 +92,7 @@
 			plot.setupGrid();
 
 			plot.draw();
-			requestAnimationFrame(update);
+			setTimeout(update, updateInterval);
 		}
 
 		update();

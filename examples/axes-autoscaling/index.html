@@ -4,31 +4,24 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Flot Examples: Axes autoscaling options</title>
     <link href="../examples.css" rel="stylesheet" type="text/css">
-    <script language="javascript" type="text/javascript" src="../../node_modules/three/build/three.js"></script>
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
-	<script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
-    <script language="javascript" type="text/javascript" src="../../GlCanvas.js"></script>
-    <script language="javascript" type="text/javascript" src="../stats/stats.min.js"></script>
+    <script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../../jquery.flot.glplotter.js"></script>
   <script type="text/javascript">
 
     $(function() {
         var index = 0;
-        var count = 100;
-        var stats = new Stats();
-        stats.showPanel(0);
-        document.body.appendChild(stats.dom);
-        stats.begin();
         function generate(start, end, fn) {
             var res = [];
-            for (var i = 0; i <= count; ++i) {
-                var x = start + i / count * (end - start);
+            for (var i = 0; i <= 40; ++i) {
+                var x = start + i / 40 * (end - start);
                 res.push([x, fn(x)]);
             }
             return res;
         }
 
         var data = [
-            { data: generate(index, 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, points: { show: true }}
+            { data: generate(index, 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
         ];
 
         var plot = $.plot("#placeholder", data, {
@@ -49,12 +42,11 @@
         function update () {
             index += 0.01;
             data = [
-                { data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, points: { show: true }}
+                { data: generate(index, index + 2, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
             ];
             plot.setData(data);
             plot.setupGrid();
             plot.draw();
-            stats.update();
             window.requestAnimationFrame(update);
         }
 
