@@ -6,7 +6,6 @@
     <link href="../examples.css" rel="stylesheet" type="text/css">
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
     <script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
-    <script language="javascript" type="text/javascript" src="../../jquery.flot.glplotter.js"></script>
   <script type="text/javascript">
 
     $(function() {
@@ -26,7 +25,7 @@
 
         var plot = $.plot("#placeholder", data, {
             xaxes: [
-                { position: 'bottom', show: false }
+                { position: 'bottom' }
             ],
             yaxes: [
                 { position: 'left', autoscale: 'none', min: -2.0, max: 2.0 }
