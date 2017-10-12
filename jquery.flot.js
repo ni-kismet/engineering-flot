@@ -176,6 +176,7 @@ Licensed under the MIT license.
                 axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
+                resize: [],
                 shutdown: []
             },
             plot = this;
@@ -272,6 +273,8 @@ Licensed under the MIT license.
                 height = placeholder.height();
             surface.resize(width, height);
             overlay.resize(width, height);
+
+            executeHooks(hooks.resize, [width, height]);
         };
 
         plot.clearTextCache = function () {
@@ -295,8 +298,8 @@ Licensed under the MIT license.
         var MINOR_TICKS_COUNT_CONSTANT = $.plot.uiConstants.MINOR_TICKS_COUNT_CONSTANT;
         var TICK_LENGTH_CONSTANT = $.plot.uiConstants.TICK_LENGTH_CONSTANT;
         initPlugins(plot);
-        parseOptions(options_);
         setupCanvases();
+        parseOptions(options_);
         setData(data_);
         setupGrid();
         draw();
@@ -1791,7 +1794,6 @@ Licensed under the MIT license.
 
         function draw() {
             surface.clear();
-
             executeHooks(hooks.drawBackground, [ctx]);
 
             var grid = options.grid;
@@ -1806,7 +1808,7 @@ Licensed under the MIT license.
             }
 
             for (var i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i]]);
+                executeHooks(hooks.drawSeries, [ctx, series[i], i, getColorOrGradient]);
                 drawSeries(series[i]);
             }
 
