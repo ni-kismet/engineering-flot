@@ -17,7 +17,7 @@
     </style>
 </head>
 <body bgcolor="#DDDDDD">
-  <input type="button" value="Compose images" title="This will call the function to compose images." onclick="composeImagesOnClick();">
+  <!--<input type="button" value="Compose images" title="This will call the function to compose images." onclick="composeImagesOnClick();"> -->
   <input type="button" value="Test promises" title="This will test promises." onclick="testPromisesOnClick();">
   <canvas id="canvasSource" width="100" height="100" title="canvasSource"></canvas>
   <svg id="svgSource" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg">
@@ -66,9 +66,8 @@
         //ctx.rectangle(0, 0, 99, 99);
     }
 
-    function copyCanvasToImg(canvas, img, onCopyCanvasDone) {
+    function copyCanvasToImg(canvas, img) {
         img.src = canvas.toDataURL('image/png');
-        //img.onload = onCopyCanvasDone;
     }
 
     function getCSSRules(document) {
@@ -99,14 +98,13 @@
         return text;
     }
 
-    function copySVGToImgMostBrowsers(svg, img, onCopySVGDone) {
+    function copySVGToImgMostBrowsers(svg, img) {
         var rules = getCSSRules(document),
             text = embedCSSRulesInSVG(rules, svg),
             blob = new Blob([text], {type:"image/svg+xml;charset=utf-8"}),
             domURL = self.URL || self.webkitURL || self,
             url = domURL.createObjectURL(blob);
         img.src = url;
-        //img.onload = onCopySVGDone;
     }
 
     function copySVGToImgSafari(svg, img) {
@@ -116,9 +114,9 @@
         img.src = data;
     }
 
-    function copySVGToImg(svg, img, onCopySVGDone) {
+    function copySVGToImg(svg, img) {
         if (isEdge || isIE || isFirefox || isOpera || isChrome) {
-            copySVGToImgMostBrowsers(svg, img, onCopySVGDone);
+            copySVGToImgMostBrowsers(svg, img);
         } else {
             copySVGToImgSafari(svg, img);
         }
@@ -225,133 +223,57 @@
     writeSomethingToCanvas(originalCanvas);
     console.log("after writeSomethingToCanvas");
 
-    //copyCanvasToImg(originalCanvas, tempImg1, null);
-    //copySVGToImg(originalSvg, tempImg2, null);
-
-    //copyImgsToCanvas([tempImg1, tempImg2], destinationImg);
-    /*
-    setTimeout(function() {
-        destinationImg.width = 100; //the width and height have to be set prior to calling copyImgsToCanvas. Otherwise, no image will be painted.
-        destinationImg.height = 100;
-        //var copyResult = copyImgsToCanvas([tempImg1, tempImg2], destinationImg);
-        var copyResult = copyImgsToCanvas([originalCanvas, originalSvg], destinationImg);
-        if (copyResult !== 0) {
-            alert("Can't compose final image. Error: " + copyResult);
-        }
-        setDownloadableImgRef(linkElement, destinationImg);
-    }, 200);
-    */
-
-
 
     var onCopyCount = 0;
     var onCopyTotalCount = 0;
     var generatedTempImages = [tempImg1, tempImg2]; ////////////////////////////////////////// should be initialized with empty
 
 
-    function onCopySVGDone() {
-        console.log('onload is working for SVG');
-        console.log('Res = ' + composeImages());
-    }
-
-    function onCopyCanvasDone() {
-        console.log('onload is working for Canvas');
-        //console.log('Res = ' + composeImages());
-    }
-
-    function onCopyCanvasOrSVGDone() {
-        console.log('onload is working for Canvas or SVG');
-        onCopyCount++;
-        if (onCopyCount >= onCopyTotalCount) {
-            composeImages();
-            onCopyCount = 0;
-        }
-    }
-
-
-    function generateTempImageFromCanvasOrSvg(srcCanvasOrSvg, destImg, onCopyDone) {
+    function generateTempImageFromCanvasOrSvg(srcCanvasOrSvg, destImg) {
         if (srcCanvasOrSvg.tagName === "CANVAS") {
-            copyCanvasToImg(srcCanvasOrSvg, destImg, onCopyDone);
+            copyCanvasToImg(srcCanvasOrSvg, destImg);
         }
 
         if (srcCanvasOrSvg.tagName === "svg") {
-            copySVGToImg(srcCanvasOrSvg, destImg, onCopyDone);
+            copySVGToImg(srcCanvasOrSvg, destImg);
         }
     }
 
 
-    function generateTempImages(canvasOrSvgSources, destination) {
-        onCopyTotalCount = canvasOrSvgSources.length; //two images will call event handlers
-        onCopyCount = 0;
-        ///// ToDo: generate the array of tempImg sources (i.e. generatedTempImages) from canvasOrSvgSources, using a for loop. This array should be passed to copyImgsToCanvas.
-        ///// Every image from generatedTempImages array should have extra properties, used by prepareImagesToBeComposed function, instead of left, top, right, bottom.
-        generateTempImageFromCanvasOrSvg(originalCanvas, generatedTempImages[0], onCopyCanvasOrSVGDone);
-        generateTempImageFromCanvasOrSvg(originalSvg, generatedTempImages[1], onCopyCanvasOrSVGDone);
-    }
-
-
-    function composeImages() {
-        destinationImg.width = 100; //the width and height have to be set prior to calling copyImgsToCanvas. Otherwise, no image will be painted.
-        destinationImg.height = 100;
-        var copyResult = copyImgsToCanvas(generatedTempImages, destinationImg);
-        if (copyResult !== 0) {
-            alert("Can't compose final image. Error: " + copyResult);
-        }
-        setDownloadableImgRef(linkElement, destinationImg);
-        return copyResult;
-    }
-
-    function composeImagesOnClick() {
-        generateTempImages([originalCanvas, originalSvg], destinationImg);
-        console.log("Exiting composeImagesOnClick");
-    }
-
-
-
-
+///// ToDo: generate the array of tempImg sources (i.e. generatedTempImages) from canvasOrSvgSources, using a for loop. This array should be passed to copyImgsToCanvas.
+///// Every image from generatedTempImages array should have extra properties, used by prepareImagesToBeComposed function, instead of left, top, right, bottom.
 
     var allPromises = [];
-    var mySharedValue = 0;
-
 
 
     function getFinalSuccessCallback(tempImgs, destination) {
         return function finalSuccessCallback(result) {
           console.log("successCallback succeeded with " + result);
-          copyImgsToCanvas(tempImgs, destination);
-          return "URA!!!";
+          var compositionResult = copyImgsToCanvas(tempImgs, destination);
+          setDownloadableImgRef(linkElement, destinationImg);
+          return "Done. compositionResult = " + compositionResult;
       };
     }
 
     function failureCallback(error) {
       console.log("failureCallback failed with " + error);
     }
-/*
-    function doSomethingOLD(successCallbackFunc, failureCallbackFunc) {
-        console.log("entering from doSomething");
-        console.log("mySharedValue = " + mySharedValue);
-        tempImg1.onload = successCallbackFunc;
-        tempImg1.src = 'empty.png';
-        console.log("exiting doSomething");
-    };
-*/
-    function getDoSomething(tempImg, source) {
+
+
+    function getDoSomething(tempImg, canvasOrSvgSource) {
         return function doSomething(successCallbackFunc, failureCallbackFunc) {
             console.log("entering from doSomething");
-            console.log("mySharedValue = " + mySharedValue);
             tempImg.onload = successCallbackFunc;
-            generateTempImageFromCanvasOrSvg(source, tempImg);
+            generateTempImageFromCanvasOrSvg(canvasOrSvgSource, tempImg);
             console.log("exiting doSomething");
         };
     }
 
 
-    function manyPromises() {
-        var sources = [originalCanvas, originalSvg],
-            tempImgs = [tempImg1, tempImg2];
-        for (var i = 0; i < sources.length; i++) {
-            mySharedValue = i;
-            var currentPromise = new Promise(getDoSomething(tempImgs[i], sources[i]));
+    function manyPromises(canvasOrSvgSources) {
+        var tempImgs = [tempImg1, tempImg2];
+        for (var i = 0; i < canvasOrSvgSources.length; i++) {
+            var currentPromise = new Promise(getDoSomething(tempImgs[i], canvasOrSvgSources[i]));
             allPromises.push(currentPromise);
         }
         var lastPromise = Promise.all(allPromises).then(getFinalSuccessCallback(tempImgs, destinationImg), failureCallback);
@@ -363,42 +285,14 @@
 
 
     async function asyncManyPromises() {
-        //generateTempImageFromCanvasOrSvg(originalCanvas, tempImg1, null);
-        //generateTempImageFromCanvasOrSvg(originalSvg, tempImg2, null);
-
-        var asynResult = await manyPromises();
+        var sources = [originalCanvas, originalSvg];
+        var asynResult = await manyPromises(sources);
         console.log("asynResult is: " + asynResult);
     }
 
 
     function testPromisesOnClick() {
-        /*console.log("========");
-        console.log("entering testPromisesOnClick");
-        var myPromise = new Promise(doSomething);
-        console.log("after creating the first promise");
-        myPromise.then(successCallback, failureCallback);
-        console.log("...");
-        myPromise = new Promise(doSomething);
-        console.log("after creating the second promise");
-        myPromise.then(successCallback, failureCallback);
-        console.log("exiting testPromisesOnClick");
-        console.log("..........");*/
-
         asyncManyPromises();
-
-        /* log:
-        entering testPromisesOnClick
-        called from doSomething
-        exiting doSomething
-        after creating the first promise
-        ...
-        called from doSomething
-        exiting doSomething
-        after creating the second promise
-        exiting testPromisesOnClick
-        It succeeded with 10
-        It succeeded with 10
-        */
     }
 
   </script>
