@@ -21,7 +21,8 @@ module.exports = function(config) {
         'jquery.flot.touchNavigate.js',
         'jquery.flot.touch.js',
         'jquery.flot.absRelTime.js',
-        'jquery.flot.axislabels.js'
+        'jquery.flot.axislabels.js',
+        'jquery.flot.composeImages.js'
     ];
 
     var sources = [
@@ -59,7 +60,7 @@ module.exports = function(config) {
         },
 
         eslint: {
-            stopOnError: true,
+            stopOnError: false,
             showWarnings: true,
             engine: {
                 configFile: 'node_modules/webcharts-development-settings/.eslintrc.json',
