@@ -17,16 +17,13 @@
     </style>
 </head>
 <body bgcolor="#DDDDDD">
-  <!--<input type="button" value="Compose images" title="This will call the function to compose images." onclick="composeImagesOnClick();"> -->
-  <input type="button" value="Test promises" title="This will test promises." onclick="testPromisesOnClick();">
+  <input type="button" value="Compose images using promises" title="This will compose images using promises." onclick="composeImagesOnClick();">
   <canvas id="canvasSource" width="100" height="100" title="canvasSource"></canvas>
   <svg id="svgSource" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg">
     <circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>
     <circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>
     <circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>
   </svg>
-  <img id="canvasDestination" width="100" height="100" title="canvasDestination"></img>
-  <img id="svgDestination" width="100" height="100" title="svgDestination"></img>
   <table border="1"><tr><td><canvas id="destination" width="300" height="300" title="destination"></canvas></td></tr></table>
   <a id="downloadElement" href="link here" download>Download merged image</a>
   <script>
@@ -128,44 +125,40 @@
         if (sources.length === 0) {
             Result = -1; //nothing to do if called without sources
         } else {
-            ///////////////////////????????????????????????????? use offsetLeft and offsetTop properties instead of getBoundingClientRect().left  and getBoundingClientRect().top ???   https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
-            var minX = sources[0].getBoundingClientRect().left;
-            var minY = sources[0].getBoundingClientRect().top;
-            var maxX = sources[0].getBoundingClientRect().right;
-            var maxY = sources[0].getBoundingClientRect().bottom;
+            var minX = sources[0].genLeft;
+            var minY = sources[0].genTop;
+            var maxX = sources[0].genRight;
+            var maxY = sources[0].genBottom;
 
             for (var i = 1; i < sources.length; i++) {
-                if (minX > sources[i].getBoundingClientRect().left) {
-                    minX = sources[i].getBoundingClientRect().left;
+                if (minX > sources[i].genLeft) {
+                    minX = sources[i].genLeft;
                 }
 
-                if (minY > sources[i].getBoundingClientRect().top) {
-                    minY = sources[i].getBoundingClientRect().top;
+                if (minY > sources[i].genTop) {
+                    minY = sources[i].genTop;
                 }
             }
 
             for (var i = 1; i < sources.length; i++) {
-                if (maxX < sources[i].getBoundingClientRect().right) {
-                    maxX = sources[i].getBoundingClientRect().right;
+                if (maxX < sources[i].genRight) {
+                    maxX = sources[i].genRight;
                 }
 
-                if (maxY < sources[i].getBoundingClientRect().bottom) {
-                    maxY = sources[i].getBoundingClientRect().bottom;
+                if (maxY < sources[i].genBottom) {
+                    maxY = sources[i].genBottom;
                 }
             }
 
-            //console.log("destination.width = " + destination.width + "     destination.height = " + destination.height);
             if ((maxX - minX <= 0) || (maxY - minY <= 0)) {
                 Result = -2;
             } else {
                 destination.width = maxX - minX;
                 destination.height = maxY - minY;
-                //console.log("destination.width = " + destination.width + "     destination.height = " + destination.height);
 
-                //console.log("minX = " + minX + "     minY = " + minY);
                 for (var i = 0; i < sources.length; i++) {
-                    sources[i]["xCompOffset"] = sources[i].getBoundingClientRect().left - minX;
-                    sources[i]["yCompOffset"] = sources[i].getBoundingClientRect().top - minY;
+                    sources[i]["xCompOffset"] = sources[i].genLeft - minX;
+                    sources[i]["yCompOffset"] = sources[i].genTop - minY;
                 }
             }
         }
@@ -191,44 +184,6 @@
     }
 
 
-    var originalCanvas = document.getElementById('canvasSource'),
-        originalSvg = document.getElementById('svgSource'),
-        tempImg1 = document.getElementById('canvasDestination'),
-        tempImg2 = document.getElementById('svgDestination'),
-        destinationImg = document.getElementById('destination'),
-        linkElement = document.getElementById('downloadElement');
-
-
-        //var tempImg1 = new Image;
-        tempImg1.width = 100;
-        tempImg1.height = 100;
-
-        tempImg1["offsetLeft"] = 216;
-        tempImg1["offsetTop"] = 8;
-
-        console.log("tempImg1.offsetLeft = " + tempImg1.offsetLeft);
-        console.log("tempImg1.offsetTop = " + tempImg1.offsetTop);
-
-        //var tempImg2 = new Image;
-        tempImg2.width = 100;
-        tempImg2.height = 100;
-
-
-        //console.log("tempImg1.hidden = " + tempImg1.hidden);
-        //console.log("tempImg2.hidden = " + tempImg2.hidden);
-
-        //tempImg1.hidden = true;
-        //tempImg2.hidden = true;
-    console.log("before writeSomethingToCanvas");
-    writeSomethingToCanvas(originalCanvas);
-    console.log("after writeSomethingToCanvas");
-
-
-    var onCopyCount = 0;
-    var onCopyTotalCount = 0;
-    var generatedTempImages = [tempImg1, tempImg2]; ////////////////////////////////////////// should be initialized with empty
-
-
     function generateTempImageFromCanvasOrSvg(srcCanvasOrSvg, destImg) {
         if (srcCanvasOrSvg.tagName === "CANVAS") {
             copyCanvasToImg(srcCanvasOrSvg, destImg);
@@ -237,13 +192,13 @@
         if (srcCanvasOrSvg.tagName === "svg") {
             copySVGToImg(srcCanvasOrSvg, destImg);
         }
+
+        //destImg will be used as temp image, so add to it some properties about position on page.
+        destImg["genLeft"] = srcCanvasOrSvg.getBoundingClientRect().left;
+        destImg["genTop"] = srcCanvasOrSvg.getBoundingClientRect().top;
+        destImg["genRight"] = srcCanvasOrSvg.getBoundingClientRect().right;
+        destImg["genBottom"] = srcCanvasOrSvg.getBoundingClientRect().bottom;
     }
-
-
-///// ToDo: generate the array of tempImg sources (i.e. generatedTempImages) from canvasOrSvgSources, using a for loop. This array should be passed to copyImgsToCanvas.
-///// Every image from generatedTempImages array should have extra properties, used by prepareImagesToBeComposed function, instead of left, top, right, bottom.
-
-    var allPromises = [];
 
 
     function getFinalSuccessCallback(tempImgs, destination) {
@@ -271,12 +226,14 @@
 
 
     function manyPromises(canvasOrSvgSources) {
-        var tempImgs = [tempImg1, tempImg2];
+        var tempImgs = [];
         for (var i = 0; i < canvasOrSvgSources.length; i++) {
-            var currentPromise = new Promise(getDoSomething(tempImgs[i], canvasOrSvgSources[i]));
-            allPromises.push(currentPromise);
+            var currentTempImg = new Image;
+            tempImgs.push(currentTempImg);
+            var currentPromise = new Promise(getDoSomething(currentTempImg, canvasOrSvgSources[i]));
+            allImgCompositionPromises.push(currentPromise);
         }
-        var lastPromise = Promise.all(allPromises).then(getFinalSuccessCallback(tempImgs, destinationImg), failureCallback);
+        var lastPromise = Promise.all(allImgCompositionPromises).then(getFinalSuccessCallback(tempImgs, destinationImg), failureCallback);
         console.log("lastPromise is:")
         console.log(lastPromise);
         console.log("exiting manyPromises");
@@ -291,9 +248,20 @@
     }
 
 
-    function testPromisesOnClick() {
+    function composeImagesOnClick() {
         asyncManyPromises();
     }
+
+    var originalCanvas = document.getElementById('canvasSource'),
+        originalSvg = document.getElementById('svgSource'),
+        destinationImg = document.getElementById('destination'),
+        linkElement = document.getElementById('downloadElement');
+
+    var allImgCompositionPromises = [];
+
+    console.log("before writeSomethingToCanvas");
+    writeSomethingToCanvas(originalCanvas);
+    console.log("after writeSomethingToCanvas");
 
   </script>
 </body>
