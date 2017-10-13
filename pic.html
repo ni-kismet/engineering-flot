@@ -201,55 +201,50 @@
     }
 
 
-    function getFinalSuccessCallback(tempImgs, destination) {
-        return function finalSuccessCallback(result) {
-          console.log("successCallback succeeded with " + result);
+    function getExecuteImgComposition(tempImgs, destination) {
+        return function executeImgComposition(result) {
+          //console.log("successCallback succeeded with " + result);
           var compositionResult = copyImgsToCanvas(tempImgs, destination);
           setDownloadableImgRef(linkElement, destinationImg);
-          return "Done. compositionResult = " + compositionResult;
+          return compositionResult;
       };
     }
 
     function failureCallback(error) {
-      console.log("failureCallback failed with " + error);
+      return -100; //a negative number
     }
 
 
-    function getDoSomething(tempImg, canvasOrSvgSource) {
-        return function doSomething(successCallbackFunc, failureCallbackFunc) {
-            console.log("entering from doSomething");
+    function getGenerateTempImg(tempImg, canvasOrSvgSource) {
+        return function doGenerateTempImg(successCallbackFunc, failureCallbackFunc) {
             tempImg.onload = successCallbackFunc;
             generateTempImageFromCanvasOrSvg(canvasOrSvgSource, tempImg);
-            console.log("exiting doSomething");
         };
     }
 
 
-    function manyPromises(canvasOrSvgSources) {
+    function processAllImagesForComposition(canvasOrSvgSources) {
         var tempImgs = [];
         for (var i = 0; i < canvasOrSvgSources.length; i++) {
             var currentTempImg = new Image;
             tempImgs.push(currentTempImg);
-            var currentPromise = new Promise(getDoSomething(currentTempImg, canvasOrSvgSources[i]));
+            var currentPromise = new Promise(getGenerateTempImg(currentTempImg, canvasOrSvgSources[i]));
             allImgCompositionPromises.push(currentPromise);
         }
-        var lastPromise = Promise.all(allImgCompositionPromises).then(getFinalSuccessCallback(tempImgs, destinationImg), failureCallback);
-        console.log("lastPromise is:")
-        console.log(lastPromise);
-        console.log("exiting manyPromises");
+        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(tempImgs, destinationImg), failureCallback);
         return lastPromise;
     }
 
 
-    async function asyncManyPromises() {
+    async function asyncProcessAllImagesForComposition() {
         var sources = [originalCanvas, originalSvg];
-        var asynResult = await manyPromises(sources);
+        var asynResult = await processAllImagesForComposition(sources);
         console.log("asynResult is: " + asynResult);
     }
 
 
     function composeImagesOnClick() {
-        asyncManyPromises();
+        asyncProcessAllImagesForComposition();
     }
 
     var originalCanvas = document.getElementById('canvasSource'),
