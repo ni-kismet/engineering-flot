@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Flot Examples: Basic Usage</title>
+    <link href="../examples.css" rel="stylesheet" type="text/css">
+    <script language="javascript" type="text/javascript" src="../../jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../../node_modules/three/build/three.min.js"></script>
+    <script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../../jquery.flot.glplotter.js"></script>
+    <script type="text/javascript">
+
+    $(function() {
+
+        var plot = $.plot("#placeholder", [[]], {
+                    lines: {
+                        show: true
+                    },
+                    points: {
+                        show: true
+                    }
+                ,
+                xaxis: {
+                    show: true,
+                    min: -10,
+                    max: 10
+                },
+                yaxis: {
+                    show: true,
+                    min: -10,
+                    max: 10
+                }
+            });
+
+        var cx = 0, cy = 0, r = 10, n = 1000, data = [
+                {
+                    data: [],
+                    points: { show: true },
+                    lines: { show: true}
+                }
+            ];
+
+        function update() {
+            var serie = data[0].data, point = [];
+            for (var i = 0; i < n; i++) {
+                point[0] = cx + r * Math.random() * (Math.random() < 0.5 ? -1 : 1);
+                point[1] = cy + r * Math.random() * (Math.random() < 0.5 ? -1 : 1);
+                serie[i] = point;
+            }
+
+            plot.setData(data);
+            window.requestAnimationFrame(update);
+        }
+
+        window.requestAnimationFrame(update);
+
+        // Add the Flot version string to the footer
+
+        $("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+    });
+
+    </script>
+</head>
+<body>
+
+    <div id="header">
+        <h2>Basic Usage</h2>
+    </div>
+
+    <div id="content">
+
+        <div class="demo-container">
+            <div id="placeholder" class="demo-placeholder"></div>
+        </div>
+
+        <p>You don't have to do much to get an attractive plot.  Create a placeholder, make sure it has dimensions (so Flot knows at what size to draw the plot), then call the plot function with your data.</p>
+
+        <p>The axes are automatically scaled.</p>
+
+    </div>
+
+    <div id="footer">
+        Copyright &copy; 2007 - 2014 IOLA and Ole Laursen
+    </div>
+
+</body>
+</html>
