@@ -186,7 +186,7 @@ describe("integration tests for log scale functions", function() {
         expect(yAxisDivs.length).toBe(1);
         var childDivs = yAxisDivs.find('.tickLabel');
         childDivs.each(function(i, e) {
-            actualTicks.push(e.innerText);
+            actualTicks.push(e.innerHTML);
         });
 
         return actualTicks.sort(compareNumbers);

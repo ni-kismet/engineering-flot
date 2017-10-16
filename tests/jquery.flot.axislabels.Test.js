@@ -26,7 +26,7 @@ describe('flot axis labels plugin', function() {
 
         var labels$ = $('.axisLabels'),
             labels = labels$.map(function(i, label) {
-                return label.innerText;
+                return label.innerHTML;
             }).get();
         expect(labels.length).toBe(4);
         expect(labels).toContain(options.xaxes[0].axisLabel);

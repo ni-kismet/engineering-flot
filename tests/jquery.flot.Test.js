@@ -737,7 +737,7 @@ describe('flot', function() {
         function xTickLabels(placeholder) {
             var labels$ = placeholder.find('.flot-x-axis').find('.flot-tick-label'),
                 labels = labels$.map(function(i, label) {
-                    return label.innerText;
+                    return label.innerHTML;
                 }).get();
             return labels;
         }

@@ -58,8 +58,8 @@
 
         // Collection of HTML div layers for text overlaid onto the canvas
 
-        this.SVG = {};
         this.SVGContainer = null;
+        this.SVG = {};
 
         // Cache of text fragments and metrics, so we can avoid expensively
         // re-calculating them when the plot is re-rendered in a loop.

@@ -108,8 +108,8 @@ describe('CanvasWrapper', function() {
             box = elem.getBoundingClientRect();
         expect(box.left).toBe(100);
         expect(box.top).toBe(200);
-        expect(elem.className).toBe('a');
-        expect(elem.parentNode.className).toBe('layer');
+        expect(elem.className.baseVal).toBe('a');
+        expect(elem.parentNode.className.baseVal).toBe('layer');
     });
 
     it('should add the same text with the same CSS at different coords', function() {
