@@ -12,7 +12,7 @@
 
     $(function() {
 
-        var plot = $.plot("#placeholder", [[]], {
+        var plot, cx = 0, cy = 0, r = 10, n = 10000, data, options = {
                     lines: {
                         show: true
                     },
@@ -22,37 +22,58 @@
                 ,
                 xaxis: {
                     show: true,
+                    autoscale: false,
                     min: -10,
                     max: 10
                 },
                 yaxis: {
                     show: true,
+                    autoscale: false,
                     min: -10,
                     max: 10
                 }
-            });
+            };
 
-        var cx = 0, cy = 0, r = 10, n = 1000, data = [
+        function initData() {
+            data = [
                 {
                     data: [],
                     points: { show: true },
-                    lines: { show: true}
+                    lines: { show: false}
                 }
             ];
+            for (var i = 0; i < n; i++) {
+                data[0].data[i] = [];
+            }
+        }
 
         function update() {
-            var serie = data[0].data, point = [];
+            if (!data || data[0].data.length !== n) {
+                initData();
+            }
+
+            var serie = data[0].data;
             for (var i = 0; i < n; i++) {
+                point = serie[i];
                 point[0] = cx + r * Math.random() * (Math.random() < 0.5 ? -1 : 1);
                 point[1] = cy + r * Math.random() * (Math.random() < 0.5 ? -1 : 1);
-                serie[i] = point;
             }
 
             plot.setData(data);
+            plot.setupGrid();
+            plot.draw();
             window.requestAnimationFrame(update);
         }
 
+        plot = $.plot("#placeholder", [], options);
         window.requestAnimationFrame(update);
+
+        $('#scaling input').on('change', function() {
+            var val = $('input[name="scaling"]:checked', '#scaling').val();
+
+            n = parseInt(val);
+            plot = $.plot("#placeholder", [], options);
+        });
 
         // Add the Flot version string to the footer
 
@@ -73,9 +94,15 @@
             <div id="placeholder" class="demo-placeholder"></div>
         </div>
 
-        <p>You don't have to do much to get an attractive plot.  Create a placeholder, make sure it has dimensions (so Flot knows at what size to draw the plot), then call the plot function with your data.</p>
-
-        <p>The axes are automatically scaled.</p>
+        <br>
+        <fieldset id="scaling">
+            <legend>Point count</legend>
+            <input type="radio" name="scaling" value="10000" checked="checked" /> 10k <br />
+            <input type="radio" name="scaling" value="15000"/> 15k <br />
+            <input type="radio" name="scaling" value="20000" /> 20k <br />
+            <input type="radio" name="scaling" value="25000" /> 25k <br />
+            <input type="radio" name="scaling" value="50000" /> 50k <br />
+        </fieldset>
 
     </div>
 
