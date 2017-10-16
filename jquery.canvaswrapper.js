@@ -206,7 +206,6 @@
                 svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svgElement.style.width = '100%';
                 svgElement.style.height = '100%';
-                svgElement.style.fill = '#0000ff';
 
                 this.SVGContainer.appendChild(svgElement);
             } else {
@@ -216,7 +215,7 @@
             layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             layer.className.baseVal = classes;
             layer.style.position = 'absolute';
-            layer.style.top = '10px';
+            layer.style.top = '0px';
             layer.style.left = '0px';
             layer.style.bottom = '0px';
             layer.style.right = '0px'
@@ -385,12 +384,8 @@
             } else if (position.active === false) {
                 position.active = true;
                 position.text = text;
-                position.x = x;
-                position.y = y;
-                //position.element.style.top = Math.round(y) + 'px';
-                //position.element.style.left = Math.round(x) + 'px';
-                position.element.y = Math.round(y);
-                position.element.x = Math.round(x);
+                position.element.setAttributeNS(null, "x", x);
+                position.element.setAttributeNS(null, "y", y);
                 position.element.innerHTML = text;
                 return;
             }
@@ -414,6 +409,8 @@
 
         // Move the element to its final position within the container
 
+        position.element.setAttributeNS(null, "x", x);
+        position.element.setAttributeNS(null, "y", y);
         position.element.style.top = Math.round(y) + 'px';
         position.element.style.left = Math.round(x) + 'px';
         position.element.style.textAlign = halign;
