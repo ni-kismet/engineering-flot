@@ -32,7 +32,8 @@
   <canvas id="canvasSource2" width="100" height="100" title="canvasSource2"></canvas>
   <canvas id="canvasSource3" width="150" height="100" title="canvasSource3"></canvas>
 
-  <table border="1"><tr><td><canvas id="destination" width="300" height="300" title="destination"></canvas></td></tr></table>
+  <table border="1"><tr><td><canvas id="destinationCanvas" width="300" height="300" title="destination - this is a canvas"></canvas></td></tr></table>
+  <table border="1"><tr><td><img id="destinationImage" width="300" height="300" title="destination2 - this is an image"></canvas></td></tr></table>
   <a id="downloadElement" href="link here" download>Download merged image</a>
   <script>
 
@@ -226,12 +227,22 @@
     }
 
 
-    function getExecuteImgComposition(tempImgs, destination) {
+    function getExecuteImgComposition(tempImgs, destinationCanvas) {
         return function executeImgComposition(result) {
-          var compositionResult = copyImgsToCanvas(tempImgs, destination);
+          var compositionResult = copyImgsToCanvas(tempImgs, destinationCanvas);
           return compositionResult;
       };
     }
+
+    function getCopyCanvasToImg(canvas, img) {
+        return function copyCanvasToImgOuter(result) {
+            img.width = canvas.width;
+            img.height = canvas.height;
+            copyCanvasToImg(canvas, img);
+            return 0;
+        }
+    }
+
 
     function failureCallback(error) {
       return -100; //a negative number
@@ -246,23 +257,25 @@
     }
 
 
-    function processAllImagesForComposition(canvasOrSvgSources, destinationImage) {
+    function processAllImagesForComposition(canvasOrSvgSources, destinationCanvas) {
         var tempImgs = [];
+        var allImgCompositionPromises = [];
         for (var i = 0; i < canvasOrSvgSources.length; i++) {
             var currentTempImg = new Image;
             tempImgs.push(currentTempImg);
             var currentPromise = new Promise(getGenerateTempImg(currentTempImg, canvasOrSvgSources[i]));
             allImgCompositionPromises.push(currentPromise);
         }
-        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(tempImgs, destinationImage), failureCallback);
+        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(tempImgs, destinationCanvas), failureCallback);
         return lastPromise;
     }
 
 
     function asyncProcessAllImagesForComposition() {
         var sources = [originalCanvas, originalSvg, originalSvg2, originalCanvas2, originalCanvas3];
-        var asynResult = processAllImagesForComposition(sources, destinationImg);
-        asynResult.then(getSetDownloadableImgRef(linkElement, destinationImg), failureCallback);
+        var asynResult = processAllImagesForComposition(sources, destinationCanvas);
+        asynResult.then(getSetDownloadableImgRef(linkElement, destinationCanvas), failureCallback);
+        asynResult.then(getCopyCanvasToImg(destinationCanvas, destinationImage), failureCallback);
     }
 
 
@@ -275,10 +288,10 @@
         originalCanvas2 = document.getElementById('canvasSource2'),
         originalCanvas3 = document.getElementById('canvasSource3'),
         originalSvg2 = document.getElementById('svgSource2'),
-        destinationImg = document.getElementById('destination'),
+        destinationCanvas = document.getElementById('destinationCanvas'),
+        destinationImage = document.getElementById('destinationImage'),
         linkElement = document.getElementById('downloadElement');
 
-    var allImgCompositionPromises = [];
 
     writeSomethingToCanvas(originalCanvas);
     writeSomethingToCanvas(originalCanvas2);
