@@ -44,6 +44,13 @@
     }
 
     function copySVGToImgSafari(svg, img) {
+        var rules = getCSSRules(document),
+            text = embedCSSRulesInSVG(rules, svg),
+            data = "data:image/svg+xml;base64," + btoa(text);
+        img.src = data;
+    }
+
+    function copySVGToImg(svg, img) {
         // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
         //
         // Opera 8.0+
@@ -68,13 +75,6 @@
         var isBlink = (isChrome || isOpera) && !!window.CSS;
         // ***
 
-        var rules = getCSSRules(document),
-            text = embedCSSRulesInSVG(rules, svg),
-            data = "data:image/svg+xml;base64," + btoa(text);
-        img.src = data;
-    }
-
-    function copySVGToImg(svg, img) {
         if (isEdge || isIE || isFirefox || isOpera || isChrome) {
             copySVGToImgMostBrowsers(svg, img);
         } else {
@@ -169,9 +169,9 @@
     }
 
 
-    function getExecuteImgComposition(tempImgs, destination) {
+    function getExecuteImgComposition(tempImgs, destinationCanvas) {
         return function executeImgComposition(result) {
-          var compositionResult = copyImgsToCanvas(tempImgs, destination);
+          var compositionResult = copyImgsToCanvas(tempImgs, destinationCanvas);
           return compositionResult;
       };
     }
@@ -189,7 +189,7 @@
     }
 
 
-    function composeImages(canvasOrSvgSources, destinationImage) {
+    function composeImages(canvasOrSvgSources, destinationCanvas) {
         var tempImgs = [];
         var allImgCompositionPromises = [];
         for (var i = 0; i < canvasOrSvgSources.length; i++) {
@@ -198,7 +198,7 @@
             var currentPromise = new Promise(getGenerateTempImg(currentTempImg, canvasOrSvgSources[i]));
             allImgCompositionPromises.push(currentPromise);
         }
-        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(tempImgs, destinationImage), failureCallback);
+        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(tempImgs, destinationCanvas), failureCallback);
         return lastPromise;
     }
 

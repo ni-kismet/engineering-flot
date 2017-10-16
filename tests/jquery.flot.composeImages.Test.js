@@ -2,7 +2,7 @@
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
 describe("composeImages", function() {
-    var sources, plot;
+    var placeholder, plot;
     var options = {
         series: {
             shadowSize: 0, // don't draw shadows
@@ -12,8 +12,17 @@ describe("composeImages", function() {
     };
     var composeImages = $.plot.composeImages;
 
+    function matchPixelColor(pixelData, r, g, b, a) {
+        return (pixelData[0] === r) && (pixelData[1] === g) && (pixelData[2] === b) && (pixelData[3] === a);
+    }
+
     beforeEach(function() {
-        sources = setFixtures(`<div id="test-container" style="width: 600px;height: 400px">
+        placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+            .find('#test-container');
+    });
+
+    it('should call composeImages on two identical SVGs, one near the other', function (done) {
+        var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
         <svg id="svgSource" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg">
           <circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>
           <circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>
@@ -26,18 +35,13 @@ describe("composeImages", function() {
         </svg>
         </div>
         <canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>
-        <img id="dest">
         `).find('svg').toArray();
-    });
 
+        var destinationCanvas = document.getElementById("myCanvas");
+        var pixelData; //used later
 
-    it('should call async', function (done) {
-        //var sources = [originalCanvas, originalSVG];
-        //var sources = [];
-        //var destinationImage = new Image;
-        var destinationImage = document.getElementById("myCanvas");
-
-        var ctx = destinationImage.getContext('2d');
+/*
+        var ctx = destinationCanvas.getContext('2d');
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(99, 99);
@@ -56,7 +60,7 @@ describe("composeImages", function() {
             ctx.putImageData(imgData, 10, 70);
         }
 */
-        composeImages(sources, destinationImage).then(function() {
+        composeImages(sources, destinationCanvas).then(function() {
             /*
             var canvas = document.createElement('canvas');
             canvas.width = destinationImage.width;
@@ -66,15 +70,26 @@ describe("composeImages", function() {
             //myCanvas
 */
             //var pixelData = canvas.getContext('2d').getImageData(51, 67, 1, 1).data;
-            var pixelData = destinationImage.getContext('2d').getImageData(51, 67, 1, 1).data;
-/*
-            copy();
-            var pixelData = c.getContext('2d').getImageData(30, 30, 1, 1).data;
-*/
-            //expect(pixelData[0]).toBe(0);
-            //expect(pixelData[1]).toBe(0);
-            //expect(pixelData[2]).toBe(255);
-            //expect(pixelData[3]).toBe(255);
+
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
+            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(110, 10, 1, 1).data;
+            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(130, 40, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(150, 70, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
             done();
         }, null);
     });
