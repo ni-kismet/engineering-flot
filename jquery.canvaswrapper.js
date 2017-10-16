@@ -312,13 +312,13 @@
 
             if (typeof font === 'object') {
                 element.style.font = textStyle;
-                element.style.color = font.color;
+                element.style.fill = font.fill;
             } else if (typeof font === 'string') {
                 element.className.baseVal = font;
             }
 
             this.getSVGLayer(layer).appendChild(element);
-            var elementRect = element.getBBox(); //TODO: there is a possible problem here since offsetWidth is deprecated for svg
+            var elementRect = element.getBBox();
 
             info = styleCache[key] = {
                 width: elementRect.width,
@@ -372,6 +372,8 @@
         } else if (valign === 'bottom') {
             y -= info.height;
         }
+
+        y += 0.75 * info.height;
 
         // Determine whether this text already exists at this position.
         // If so, mark it for inclusion in the next render pass.

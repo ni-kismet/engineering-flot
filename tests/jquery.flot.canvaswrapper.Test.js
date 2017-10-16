@@ -122,7 +122,7 @@ describe('CanvasWrapper', function() {
             elem2 = placeholder.find('.a')[1],
             box1 = elem1.getBoundingClientRect(),
             box2 = elem2.getBoundingClientRect();
-        expect(elem2.innerText).toBe(elem2.innerText);
+        expect(elem2.innerHTML).toBe(elem2.innerHTML);
         expect(box2.left).not.toBe(box1.left);
         expect(box2.top).not.toBe(box1.top);
     });
@@ -137,7 +137,7 @@ describe('CanvasWrapper', function() {
             elem2 = placeholder.find('.a')[1],
             box1 = elem1.getBoundingClientRect(),
             box2 = elem2.getBoundingClientRect();
-        expect(elem2.innerText).not.toBe(elem1.innerText);
+        expect(elem2.innerHTML).not.toBe(elem1.innerHTML);
         expect(box2.left).not.toBe(box1.left);
         expect(box2.top).not.toBe(box1.top);
     });
@@ -219,7 +219,7 @@ describe('CanvasWrapper', function() {
 
         var finalTextElements = placeholder.find('.a');
         expect(finalTextElements.length).toBe(2);
-        var remainingTexts = [finalTextElements[0].innerText, finalTextElements[1].innerText];
+        var remainingTexts = [finalTextElements[0].innerHTML, finalTextElements[1].innerHTML];
         expect(remainingTexts).toContain('123');
         expect(remainingTexts).toContain('7890');
     });
@@ -266,18 +266,18 @@ describe('CanvasWrapper', function() {
                 size: '40',
                 lineHeight: '23',
                 family: '"Times New Roman"',
-                color: 'rgb(100, 200, 0)'
+                fill: 'rgb(100, 200, 0)'
             };
         var info = canvas.getTextInfo('layerA', '123', settings);
         expect(info.width).toBeGreaterThan(10);
 
         canvas.addText('layerA', 100, 200, '123', settings);
         canvas.render();
-        var as = placeholder.find('.layerA div'),
-            style = window.getComputedStyle(as[0]);
+        var as = placeholder.find('.layerA'),
+            style = window.getComputedStyle(as[0].firstChild);
         expect(as.length).toBe(1);
         expect(style.fontFamily).toContain(settings.family.slice(1, -1));
-        expect(style.color).toBe(settings.color);
+        expect(style.fill).toBe(settings.fill);
 
         canvas.removeText('layerA', 100, 200, '123', settings);
         canvas.render();

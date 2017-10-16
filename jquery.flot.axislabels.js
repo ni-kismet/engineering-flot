@@ -94,17 +94,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         };
         if (this.position === 'bottom') {
             offsets.x = box.left + box.width / 2 - this.labelWidth / 2;
-            offsets.y = box.top + box.height - this.labelHeight / 2;
+            offsets.y = box.top + box.height - this.labelHeight;
         } else if (this.position === 'top') {
             offsets.x = box.left + box.width / 2 - this.labelWidth / 2;
-            offsets.y = box.top + this.labelHeight;
+            offsets.y = box.top;
         } else if (this.position === 'left') {
             offsets.degrees = -90;
-            offsets.x = box.left - this.labelWidth / 2 + this.labelHeight;
+            offsets.x = box.left - this.labelWidth / 2 + this.labelHeight / 2;
             offsets.y = box.height / 2 + box.top;
         } else if (this.position === 'right') {
             offsets.degrees = 90;
-            offsets.x = box.left + box.width - this.labelWidth / 2 - this.labelHeight;
+            offsets.x = box.left + box.width - this.labelWidth / 2 - this.labelHeight / 2;
             offsets.y = box.height / 2 + box.top;
         }
         offsets.x = Math.round(offsets.x);
@@ -132,6 +132,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 display: 'inline-block',
                 'white-space': 'nowrap'
             });
+        //this.transformOrigin();
 
         var layer = this.surface.getSVGLayer(layerId);
         var transforms = this.transforms(offsets.degrees, offsets.x, offsets.y, layer.parentNode);

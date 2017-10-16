@@ -2307,7 +2307,7 @@ Licensed under the MIT license.
                             return nullBox;
                         }
 
-                        surface.addText(layer, x, y + info.height * 0.75, tick.label, font, null, null, halign, valign);
+                        surface.addText(layer, x, y, tick.label, font, null, null, halign, valign);
 
                         return newLabelBox;
                     };
