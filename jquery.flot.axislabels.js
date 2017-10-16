@@ -68,43 +68,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
-    AxisLabel.prototype.transforms = function(degrees, x, y) {
-        var stransforms = {
-            'top': 0,
-            'left': 0,
-            '-moz-transform': '',
-            '-webkit-transform': '',
-            '-o-transform': '',
-            '-ms-transform': ''
-        };
+    AxisLabel.prototype.transforms = function(degrees, x, y, svgLayer) {
+        var transforms = [], translate, rotate;
         if (x !== 0 || y !== 0) {
-            var stdTranslate = ' translate(' + x + 'px, ' + y + 'px)';
-            stransforms['-moz-transform'] += stdTranslate;
-            stransforms['-webkit-transform'] += stdTranslate;
-            stransforms['-o-transform'] += stdTranslate;
-            stransforms['-ms-transform'] += stdTranslate;
+            translate = svgLayer.createSVGTransform();
+            translate.setTranslate(x, y);
+            transforms.push(translate);
         }
         if (degrees !== 0) {
-            var stdRotate = ' rotate(' + degrees + 'deg)';
-            stransforms['-moz-transform'] += stdRotate;
-            stransforms['-webkit-transform'] += stdRotate;
-            stransforms['-o-transform'] += stdRotate;
-            stransforms['-ms-transform'] += stdRotate;
+            rotate = svgLayer.createSVGTransform();
+            var centerX = Math.round(this.labelWidth / 2),
+                centerY = 0;
+            rotate.setRotate(degrees, centerX, centerY);
+            transforms.push(rotate);
         }
 
-        return stransforms;
-    };
-
-    AxisLabel.prototype.transformOrigin = function() {
-        var centerX = Math.round(this.labelWidth / 2) + 'px ',
-            centerY = Math.round(this.labelHeight / 2) + 'px';
-        return {
-            'transform-origin': centerX + centerY,
-            '-moz-transform-origin': centerX + centerY,
-            '-webkit-transform-origin': centerX + centerY,
-            '-o-transform-origin': centerX + centerY,
-            '-ms-transform-origin': centerX + centerY
-        };
+        return transforms;
     };
 
     AxisLabel.prototype.calculateOffsets = function(box) {
@@ -115,17 +94,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         };
         if (this.position === 'bottom') {
             offsets.x = box.left + box.width / 2 - this.labelWidth / 2;
-            offsets.y = box.top + box.height - this.labelHeight;
+            offsets.y = box.top + box.height - this.labelHeight / 2;
         } else if (this.position === 'top') {
             offsets.x = box.left + box.width / 2 - this.labelWidth / 2;
-            offsets.y = box.top;
+            offsets.y = box.top + this.labelHeight;
         } else if (this.position === 'left') {
             offsets.degrees = -90;
-            offsets.x = box.left - this.labelWidth / 2 + this.labelHeight / 2;
+            offsets.x = box.left - this.labelWidth / 2 + this.labelHeight;
             offsets.y = box.height / 2 + box.top;
         } else if (this.position === 'right') {
             offsets.degrees = 90;
-            offsets.x = box.left + box.width - this.labelWidth / 2 - this.labelHeight / 2;
+            offsets.x = box.left + box.width - this.labelWidth / 2 - this.labelHeight;
             offsets.y = box.height / 2 + box.top;
         }
         offsets.x = Math.round(offsets.x);
@@ -152,12 +131,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 right: '',
                 display: 'inline-block',
                 'white-space': 'nowrap'
-            },
-            this.transforms(offsets.degrees, offsets.x, offsets.y),
-            this.transformOrigin());
+            });
 
-        var layer = this.surface.getTextLayer(layerId);
-        this.surface.addText(layerId, 0, 0, this.axisLabel, className);
+        var layer = this.surface.getSVGLayer(layerId);
+        var transforms = this.transforms(offsets.degrees, offsets.x, offsets.y, layer.parentNode);
+
+        this.surface.addText(layerId, 0, 0, this.axisLabel, className, undefined, undefined, undefined, undefined, transforms);
         this.surface.render();
         Object.keys(style).forEach(function(key) {
             layer.style[key] = style[key];

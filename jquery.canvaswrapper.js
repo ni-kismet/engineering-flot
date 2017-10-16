@@ -58,10 +58,8 @@
 
         // Collection of HTML div layers for text overlaid onto the canvas
 
-        this.textContainer = null;
-        this.SVGContainer = null;
-        this.text = {};
         this.SVG = {};
+        this.SVGContainer = null;
 
         // Cache of text fragments and metrics, so we can avoid expensively
         // re-calculating them when the plot is re-rendered in a loop.
@@ -132,7 +130,7 @@
 
         for (var layerKey in cache) {
             if (hasOwnProperty.call(cache, layerKey)) {
-                var layer = this.getTextLayer(layerKey),
+                var layer = this.getSVGLayer(layerKey),
                     layerCache = cache[layerKey];
 
                 var display = layer.style.display;
@@ -178,45 +176,6 @@
         }
     };
 
-    // Creates (if necessary) and returns the text overlay container.
-    //
-    // @param {string} classes String of space-separated CSS classes used to
-    //     uniquely identify the text layer.
-    // @return {object} The text-layer div.
-
-    Canvas.prototype.getTextLayer = function(classes) {
-        var layer = this.text[classes];
-
-        // Create the text layer if it doesn't exist
-
-        if (!layer) {
-            // Create the text layer container, if it doesn't exist
-            if (!this.textContainer) {
-                this.textContainer = document.createElement('div');
-                this.textContainer.className = 'flot-text';
-                this.textContainer.style.position = 'absolute';
-                this.textContainer.style.top = '0px';
-                this.textContainer.style.left = '0px';
-                this.textContainer.style.bottom = '0px';
-                this.textContainer.style.right = '0px';
-                this.textContainer.style.color = 'inherit';
-                this.element.parentNode.insertBefore(this.textContainer, this.element);
-            }
-
-            layer = document.createElement('div');
-            layer.className = classes;
-            layer.style.position = 'absolute';
-            layer.style.top = '0px';
-            layer.style.left = '0px';
-            layer.style.bottom = '0px';
-            layer.style.right = '0px';
-            this.textContainer.appendChild(layer);
-            this.text[classes] = layer;
-        }
-
-        return layer;
-    };
-
     // Creates (if necessary) and returns the SVG overlay container.
     //
     // @param {string} classes String of space-separated CSS classes used to
@@ -229,7 +188,7 @@
         // Create the SVG layer if it doesn't exist
 
         if (!layer) {
-            // Create the text layer container, if it doesn't exist
+            // Create the svg layer container, if it doesn't exist
 
             var svgElement;
 
@@ -242,26 +201,26 @@
                 this.SVGContainer.style.bottom = '0px';
                 this.SVGContainer.style.right = '0px';
                 this.SVGContainer.style.pointerEvents = 'none';
-                this.element.parentNode.insertAfter(this.SVGContainer, this.element);
+                this.element.parentNode.appendChild(this.SVGContainer);
 
                 svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svgElement.style.width = '100%';
                 svgElement.style.height = '100%';
+                svgElement.style.fill = '#0000ff';
+
                 this.SVGContainer.appendChild(svgElement);
             } else {
-                svgElement = this.SVGContainer.getElementsByName('svg')[0];
+                svgElement = this.SVGContainer.firstChild;
             }
 
             layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            layer.className = 'classes';
+            layer.className.baseVal = classes;
             layer.style.position = 'absolute';
-            layer.style.top = '0px';
+            layer.style.top = '10px';
             layer.style.left = '0px';
             layer.style.bottom = '0px';
-            layer.style.right = '0px';
-            layer.style.fill = '#aaaaaa';
-            svgElement.appendChild(layer, this.element);
-
+            layer.style.right = '0px'
+            svgElement.appendChild(layer);
             this.SVG[classes] = layer;
         }
 
@@ -344,24 +303,27 @@
         // If we can't find a matching element in our cache, create a new one
 
         if (!info) {
-            var element = document.createElement('div');
-            element.innerHTML = text;
+            var element = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            var textNode = document.createTextNode(text);
+            element.appendChild(textNode);
             element.style.position = 'absolute';
             element.style.maxWidth = width;
-            element.style.top = '-9999px';
+            element.x = -9999;
+            element.y = -9999;
 
             if (typeof font === 'object') {
                 element.style.font = textStyle;
                 element.style.color = font.color;
             } else if (typeof font === 'string') {
-                element.className = font;
+                element.className.baseVal = font;
             }
 
-            this.getTextLayer(layer).appendChild(element);
+            this.getSVGLayer(layer).appendChild(element);
+            var elementRect = element.getBBox(); //TODO: there is a possible problem here since offsetWidth is deprecated for svg
 
             info = styleCache[key] = {
-                width: element.offsetWidth,
-                height: element.offsetHeight,
+                width: elementRect.width,
+                height: elementRect.height,
                 measured: true,
                 element: element,
                 positions: []
@@ -394,7 +356,7 @@
     // @param {string=} valign Vertical alignment of the text; either "top",
     //     "middle" or "bottom".
 
-    Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
+    Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign, transforms) {
         var info = this.getTextInfo(layer, text, font, angle, width),
             positions = info.positions;
 
@@ -425,8 +387,10 @@
                 position.text = text;
                 position.x = x;
                 position.y = y;
-                position.element.style.top = Math.round(y) + 'px';
-                position.element.style.left = Math.round(x) + 'px';
+                //position.element.style.top = Math.round(y) + 'px';
+                //position.element.style.left = Math.round(x) + 'px';
+                position.element.y = Math.round(y);
+                position.element.x = Math.round(x);
                 position.element.innerHTML = text;
                 return;
             }
@@ -455,6 +419,12 @@
         position.element.style.textAlign = halign;
 
         position.element.innerHTML = text;
+
+        if (transforms) {
+            transforms.forEach(function(element) {
+                info.element.transform.baseVal.appendItem(element);
+            });
+        }
     };
 
     // Removes one or more text strings from the canvas text overlay.
@@ -518,7 +488,7 @@
         var cache = this._textCache;
         for (var layerKey in cache) {
             if (hasOwnProperty.call(cache, layerKey)) {
-                var layer = this.getTextLayer(layerKey);
+                var layer = this.getSVGLayer(layerKey);
                 while (layer.firstChild) {
                     layer.removeChild(layer.firstChild);
                 }
