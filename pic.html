@@ -197,7 +197,6 @@
                 destinationCtx.drawImage(sources[i], sources[i].xCompOffset, sources[i].yCompOffset);
             }
         }
-        console.log("exiting copyImgsToCanvas");
         return prepareImagesResult;
     }
 
@@ -205,7 +204,6 @@
     function getSetDownloadableImgRef(downloadLinkElement, img) {
         return function setDownloadableImgRef(result) {
             downloadLinkElement.href = img.toDataURL('image/png');
-            console.log("setting link to destination image");
             return true;
         }
     }
@@ -230,9 +228,7 @@
 
     function getExecuteImgComposition(tempImgs, destination) {
         return function executeImgComposition(result) {
-          console.log("successCallback succeeded with " + result);
           var compositionResult = copyImgsToCanvas(tempImgs, destination);
-          //setDownloadableImgRef(downloadLinkElement, destination);
           return compositionResult;
       };
     }
@@ -263,20 +259,10 @@
     }
 
 
-/*
-    async function asyncProcessAllImagesForComposition() {
-        var sources = [originalCanvas, originalSvg, originalSvg2, originalCanvas2];
-        var asynResult = await processAllImagesForComposition(sources, destinationImg);
-        asynResult.then(setDownloadableImgRef(linkElement, destinationImg), failureCallback);
-        console.log("asynResult is: " + asynResult);
-    }
-*/
-
     function asyncProcessAllImagesForComposition() {
         var sources = [originalCanvas, originalSvg, originalSvg2, originalCanvas2, originalCanvas3];
         var asynResult = processAllImagesForComposition(sources, destinationImg);
         asynResult.then(getSetDownloadableImgRef(linkElement, destinationImg), failureCallback);
-        console.log("asynResult is: " + asynResult);
     }
 
 
@@ -294,11 +280,9 @@
 
     var allImgCompositionPromises = [];
 
-    console.log("before writeSomethingToCanvas");
     writeSomethingToCanvas(originalCanvas);
     writeSomethingToCanvas(originalCanvas2);
     writeSomethingToAnotherCanvas(originalCanvas3);
-    console.log("after writeSomethingToCanvas");
 
   </script>
 </body>
