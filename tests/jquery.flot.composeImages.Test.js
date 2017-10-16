@@ -95,6 +95,50 @@ describe("composeImages", function() {
     });
 
 
+    it('should call composeImages on two identical SVGs, one after the other', function (done) {
+        var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
+        <svg id="svgSource" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg">
+          <circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>
+          <circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>
+          <circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>
+        </svg>
+        <br>
+        <svg id="svgSource2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg2">
+          <circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>
+          <circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>
+          <circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>
+        </svg>
+        </div>
+        <canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('svg').toArray();
+
+        var destinationCanvas = document.getElementById("myCanvas");
+        var pixelData; //used later
+
+        composeImages(sources, destinationCanvas).then(function() {
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
+            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110, 1, 1).data;
+            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
+            done();
+        }, null);
+    });
+
+
     function composeAsync(sources, finalDestinationCanvas, onDone) {
         var originalCanvas = sources[0],
             originalSvg = sources[1];
