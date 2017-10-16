@@ -100,11 +100,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             offsets.y = box.top;
         } else if (this.position === 'left') {
             offsets.degrees = -90;
-            offsets.x = box.left - this.labelWidth / 2 + this.labelHeight / 2;
+            offsets.x = box.left - this.labelWidth / 2;
             offsets.y = box.height / 2 + box.top;
         } else if (this.position === 'right') {
             offsets.degrees = 90;
-            offsets.x = box.left + box.width - this.labelWidth / 2 - this.labelHeight / 2;
+            offsets.x = box.left + box.width - this.labelWidth / 2;
             offsets.y = box.height / 2 + box.top;
         }
         offsets.x = Math.round(offsets.x);

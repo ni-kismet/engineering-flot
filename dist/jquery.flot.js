@@ -507,8 +507,8 @@
             element.appendChild(textNode);
             element.style.position = 'absolute';
             element.style.maxWidth = width;
-            element.x = -9999;
-            element.y = -9999;
+            element.setAttributeNS(null, "x", -9999);
+            element.setAttributeNS(null, "y", -9999);
 
             if (typeof font === 'object') {
                 element.style.font = textStyle;
@@ -613,8 +613,6 @@
 
         position.element.setAttributeNS(null, "x", x);
         position.element.setAttributeNS(null, "y", y);
-        position.element.style.top = Math.round(y) + 'px';
-        position.element.style.left = Math.round(x) + 'px';
         position.element.style.textAlign = halign;
 
         position.element.innerHTML = text;
@@ -647,7 +645,7 @@
     //     Angle is currently unused, it will be implemented in the future.
 
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
-        var position, i;
+        var position, i, info, htmlYCoord;
         if (text == null) {
             var layerCache = this._textCache[layer];
             if (layerCache != null) {
@@ -667,10 +665,12 @@
                 }
             }
         } else {
-            positions = this.getTextInfo(layer, text, font, angle).positions;
+            info = this.getTextInfo(layer, text, font, angle);
+            positions = info.positions;
             for (i = 0; positions[i]; i++) {
                 position = positions[i];
-                if (position.x === x && position.y === y && position.text === text) {
+                htmlYCoord = y + 0.75 * info.height;
+                if (position.x === x && position.y === htmlYCoord && position.text === text) {
                     position.active = false;
                 }
             }
