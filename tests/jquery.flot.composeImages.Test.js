@@ -410,16 +410,51 @@ describe("composeImages", function() {
         }, null);
     });
 
+    it('should call composeImages on two partially overlapped canvases', function (done) {
+        var sources = placeholder.html(`<style type="text/css">
+        #canvasSource2 {position:relative; left:-10px;}
+        </style>
+        <div id="test-container" style="width: 600px;height: 400px">
+        <canvas class="imgsrc" id="canvasSource1" width="20" height="20" title="canvasSource1"></canvas>
+        <canvas class="imgsrc" id="canvasSource2" width="20" height="20" title="canvasSource2"></canvas>
+        </div>
+        <canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('.imgsrc').toArray();
 
-    function composeAsync(sources, finalDestinationCanvas, onDone) {
-        var originalCanvas = sources[0],
-            originalSvg = sources[1];
-        copyCanvasToImg(originalCanvas, tempImg1);
-        copySVGToImg(originalSvg, tempImg2, function() {
-            destinationImg.width = 100; //the width and height have to be set prior to calling copyImgsToCanvas. Otherwise, no image will be painted.
-            destinationImg.height = 100;
-            var copyResult = copyImgsToCanvas([tempImg1, tempImg2], destinationImg);
-            onDone();
-        });
-    }
+        var originalCanvas1 = document.getElementById("canvasSource1");
+        var originalCanvas2 = document.getElementById("canvasSource2");
+        var destinationCanvas = document.getElementById("myCanvas");
+        var canvas1_Data; //used later
+        var canvas2_Data; //used later
+        var canvas3_Data; //used later
+
+        function writeSomethingToCanvas(canvas, color) {
+            var ctx = canvas.getContext('2d');
+            ctx.rect(0, 0, 20, 20);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        writeSomethingToCanvas(originalCanvas1, "#FF0000");
+        writeSomethingToCanvas(originalCanvas2, "#00FF00");
+
+        expect(sources.length).toBe(2);
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(34); //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
+            expect(destinationCanvas.height).toBe(20);
+
+            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 14, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 14, 20).data;
+            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+
+            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 4 - 10, 0, 20, 20).data;
+
+            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
+
+            done();
+        }, null);
+    });
+
 });
