@@ -12,8 +12,16 @@ describe("composeImages", function() {
     };
     var composeImages = $.plot.composeImages;
 
+/*
     function matchPixelColor(pixelData, r, g, b, a) {
         return (pixelData[0] === r) && (pixelData[1] === g) && (pixelData[2] === b) && (pixelData[3] === a);
+    }
+*/
+
+    //it looks like in some browsers (e.g. Firefox), the colors are affected at drawing, so the matchPixelColor function should expect a small difference
+    function matchPixelColor(pixelData, r, g, b, a) {
+        const err = 11;
+        return (Math.abs(pixelData[0] - r) <= err) && (Math.abs(pixelData[1] - g) <= err) && (Math.abs(pixelData[2] - b) <= err) && (Math.abs(pixelData[3] - a) <= err);
     }
 
     beforeEach(function() {
@@ -181,15 +189,15 @@ describe("composeImages", function() {
     it('should call composeImages on two identical SVGs, one after the other', function (done) {
         var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
         <svg id="svgSource" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg">
-          <circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>
+          <circle id="c1" cx="10" cy="10" r="5" style="fill:#FF0000"/>
           <circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>
-          <circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>
+          <circle id="c3" cx="50" cy="70" r="9" style="fill:#0000FF"/>
         </svg>
         <br>
         <svg id="svgSource2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg2">
-          <circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>
+          <circle id="c1" cx="10" cy="10" r="5" style="fill:#FF0000"/>
           <circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>
-          <circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>
+          <circle id="c3" cx="50" cy="70" r="9" style="fill:#0000FF"/>
         </svg>
         </div>
         <canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>
@@ -325,6 +333,68 @@ describe("composeImages", function() {
                 }
             }
             expect(sameValue).toBe(true);
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one canvas and one SVG', function (done) {
+        var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
+        <canvas class="imgsrc" id="canvasSource" width="20" height="20" title="canvasSource"></canvas>
+        <svg class="imgsrc" id="svgSource1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg1">
+          <circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>
+          <circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>
+          <circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>
+        </svg>
+        </div>
+        <canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('.imgsrc').toArray();
+
+        var originalCanvas = document.getElementById("canvasSource");
+        var destinationCanvas = document.getElementById("myCanvas");
+        var canvas1_Data; //used later
+        var canvas2_Data; //used later
+
+        function writeSomethingToCanvas(canvas) {
+            var ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(19, 19);
+            ctx.moveTo(3, 18);
+            ctx.lineTo(17, 5);
+            ctx.stroke();
+        }
+
+        writeSomethingToCanvas(originalCanvas);
+
+        expect(sources.length).toBe(2);
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(124); //120 + 2 * 2px_spacing
+            expect(destinationCanvas.height).toBe(100);
+
+            canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 80, 20, 20).data;
+
+            expect(canvas1_Data.length).toBe(canvas2_Data.length); //if these two arrays have different length, it means the getImageData returns two different sizes
+
+            var sameValue = true;
+            for (var i = 0; i < canvas1_Data.length; i++) {
+                if (canvas1_Data[i] !== canvas2_Data[i]) {
+                    sameValue = false;
+                    break;
+                }
+            }
+            expect(sameValue).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(24 + 10, 10, 1, 1).data;
+            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(24 + 30, 40, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(24 + 50, 70, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
             done();
         }, null);
     });
