@@ -279,7 +279,8 @@ describe("composeImages", function() {
 
         var originalCanvas = document.getElementById("canvasSource");
         var destinationCanvas = document.getElementById("myCanvas");
-        var pixelData; //used later
+        var canvas1_Data; //used later
+        var canvas2_Data; //used later
 
         function writeSomethingToCanvas(canvas) {
             var ctx = canvas.getContext('2d');
@@ -296,16 +297,20 @@ describe("composeImages", function() {
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(100);
             expect(destinationCanvas.height).toBe(100);
-/*
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+            canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 100, 100).data;
+            canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 100, 100).data;
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
-*/
+            expect(canvas1_Data.length).toBe(canvas2_Data.length); //if these two arrays have different length, it means the getImageData returns two different sizes
+
+            var sameValue = true;
+            for (var i = 0; i < canvas1_Data.length; i++) {
+                if (canvas1_Data[i] !== canvas2_Data[i]) {
+                    sameValue = false;
+                    break;
+                }
+            }
+            expect(sameValue).toBe(true);
             done();
         }, null);
     });
