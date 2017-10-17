@@ -446,7 +446,7 @@
      * Angle is currently unused, it will be implemented in the future.
      */
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
-        var position, i, info, htmlYCoord;
+        var info, htmlYCoord;
         if (text == null) {
             var layerCache = this._textCache[layer];
             if (layerCache != null) {
@@ -471,7 +471,7 @@
                 htmlYCoord = y + 0.75 * info.height;
                 if (position.x === x && position.y === htmlYCoord && position.text === text) {
                     position.active = false;
-              }
+                }
             });
         }
     };
