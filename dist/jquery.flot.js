@@ -413,7 +413,7 @@
             }
 
             layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            layer.className.baseVal = classes;
+            layer.setAttribute('class', classes);
             layer.style.position = 'absolute';
             layer.style.top = '0px';
             layer.style.left = '0px';
@@ -502,19 +502,19 @@
         // If we can't find a matching element in our cache, create a new one
 
         if (!info) {
-            var element = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            var element = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             var textNode = document.createTextNode(text);
             element.appendChild(textNode);
             element.style.position = 'absolute';
             element.style.maxWidth = width;
-            element.setAttributeNS(null, "x", -9999);
-            element.setAttributeNS(null, "y", -9999);
+            element.setAttributeNS(null, 'x', -9999);
+            element.setAttributeNS(null, 'y', -9999);
 
             if (typeof font === 'object') {
                 element.style.font = textStyle;
                 element.style.fill = font.fill;
             } else if (typeof font === 'string') {
-                element.className.baseVal = font;
+                element.setAttribute('class', font);
             }
 
             this.getSVGLayer(layer).appendChild(element);
@@ -585,9 +585,8 @@
                 return;
             } else if (position.active === false) {
                 position.active = true;
-                position.text = text;
-                position.element.setAttributeNS(null, "x", x);
-                position.element.setAttributeNS(null, "y", y);
+                position.element.setAttributeNS(null, 'x', x);
+                position.element.setAttributeNS(null, 'y', y);
                 position.element.textContent = text;
                 return;
             }
@@ -611,21 +610,21 @@
 
         // Move the element to its final position within the container
 
-        position.element.setAttributeNS(null, "x", x);
-        position.element.setAttributeNS(null, "y", y);
+        position.element.setAttributeNS(null, 'x', x);
+        position.element.setAttributeNS(null, 'y', y);
         position.element.style.textAlign = halign;
 
         position.element.textContent = text;
 
         if (transforms) {
-            transforms.forEach(function(element) {
-                info.element.transform.baseVal.appendItem(element);
+            transforms.forEach(function(t) {
+                info.element.transform.baseVal.appendItem(t);
             });
         }
     };
 
     /**
-     * 
+     *
      * Removes one or more text strings from the canvas text overlay.
      *
      * If no parameters are given, all text within the layer is removed.
@@ -669,13 +668,12 @@
         } else {
             info = this.getTextInfo(layer, text, font, angle);
             positions = info.positions;
-            for (i = 0; positions[i]; i++) {
-                position = positions[i];
+            positions.forEach(function(position) {
                 htmlYCoord = y + 0.75 * info.height;
                 if (position.x === x && position.y === htmlYCoord && position.text === text) {
                     position.active = false;
-                }
-            }
+              }
+            });
         }
     };
 
