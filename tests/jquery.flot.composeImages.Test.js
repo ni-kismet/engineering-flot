@@ -12,18 +12,18 @@ describe("composeImages", function() {
     };
     var composeImages = $.plot.composeImages;
 
-/*
+
     function matchPixelColor(pixelData, r, g, b, a) {
         return (pixelData[0] === r) && (pixelData[1] === g) && (pixelData[2] === b) && (pixelData[3] === a);
     }
-*/
 
+/*
     //it looks like in some browsers (e.g. Firefox), the colors are affected at drawing, so the matchPixelColor function should expect a small difference
     function matchPixelColor(pixelData, r, g, b, a) {
         const err = 11;
         return (Math.abs(pixelData[0] - r) <= err) && (Math.abs(pixelData[1] - g) <= err) && (Math.abs(pixelData[2] - b) <= err) && (Math.abs(pixelData[3] - a) <= err);
     }
-
+*/
     function matchPixelDataArrays(pixelData1, pixelData2) {
         var sameValue = true;
         if (pixelData1.length !== pixelData2.length) {
@@ -204,13 +204,13 @@ describe("composeImages", function() {
             pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110 + 4, 1, 1).data;
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140 + 4, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170 + 4, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
             done();
@@ -264,13 +264,13 @@ describe("composeImages", function() {
             pixelData = destinationCanvas.getContext('2d').getImageData(150, 70, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110 + 4, 1, 1).data;
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140 + 4, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170 + 4, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
             done();
@@ -450,7 +450,99 @@ describe("composeImages", function() {
 
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 4 - 10, 0, 20, 20).data;
+            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
 
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on two partially overlapped canvases. Same as above test, but the two canvases have the opposite Z order.', function (done) {
+        var sources = placeholder.html(`<style type="text/css">
+        #canvasSource2 {position:relative; left:-10px;}
+        </style>
+        <div id="test-container" style="width: 600px;height: 400px">
+        <canvas class="imgsrc" id="canvasSource1" width="20" height="20" title="canvasSource1"></canvas>
+        <canvas class="imgsrc" id="canvasSource2" width="20" height="20" title="canvasSource2"></canvas>
+        </div>
+        <canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('.imgsrc').toArray();
+
+        var originalCanvas1 = document.getElementById("canvasSource1");
+        var originalCanvas2 = document.getElementById("canvasSource2");
+        var destinationCanvas = document.getElementById("myCanvas");
+        var canvas1_Data; //used later
+        var canvas2_Data; //used later
+        var canvas3_Data; //used later
+
+        function writeSomethingToCanvas(canvas, color) {
+            var ctx = canvas.getContext('2d');
+            ctx.rect(0, 0, 20, 20);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        writeSomethingToCanvas(originalCanvas1, "#FF0000");
+        writeSomethingToCanvas(originalCanvas2, "#00FF00");
+
+        sources.reverse(); //make sure the images are composed in the inverse order
+        expect(sources.length).toBe(2);
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(34); //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
+            expect(destinationCanvas.height).toBe(20);
+
+            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
+            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+
+            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20 - 10 + 4, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20, 0, 20 - 10 + 4, 20).data;
+            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on two partially overlapped canvases, one canvas is outside of view area', function (done) {
+        var sources = placeholder.html(`<style type="text/css">
+        #canvasSource2 {position:relative; left:-100px;}
+        </style>
+        <div id="test-container" style="width: 600px;height: 400px">
+        <canvas class="imgsrc" id="canvasSource1" width="20" height="20" title="canvasSource1"></canvas>
+        <canvas class="imgsrc" id="canvasSource2" width="20" height="20" title="canvasSource2"></canvas>
+        </div>
+        <canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('.imgsrc').toArray();
+
+        var originalCanvas1 = document.getElementById("canvasSource1");
+        var originalCanvas2 = document.getElementById("canvasSource2");
+        var destinationCanvas = document.getElementById("myCanvas");
+        var canvas1_Data; //used later
+        var canvas2_Data; //used later
+        var canvas3_Data; //used later
+
+        function writeSomethingToCanvas(canvas, color) {
+            var ctx = canvas.getContext('2d');
+            ctx.rect(0, 0, 20, 20);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        writeSomethingToCanvas(originalCanvas1, "#FF0000");
+        writeSomethingToCanvas(originalCanvas2, "#00FF00");
+
+        expect(sources.length).toBe(2);
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(100 - 4); //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
+            expect(destinationCanvas.height).toBe(20);
+
+            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 20 - 10 + 6, 0, 20, 20).data;
+            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+
+            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
             expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
 
             done();
