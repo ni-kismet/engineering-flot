@@ -2,44 +2,28 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Flot Examples: Basic Usage</title>
+    <title>Flot Examples: GlPlotter </title>
     <link href="../examples.css" rel="stylesheet" type="text/css">
     <script language="javascript" type="text/javascript" src="../../jquery.js"></script>
     <script language="javascript" type="text/javascript" src="../../node_modules/three/build/three.min.js"></script>
     <script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../../jquery.flot.symbol.js"></script>
     <script language="javascript" type="text/javascript" src="../../jquery.flot.glplotter.js"></script>
     <script type="text/javascript">
 
     $(function() {
 
         var plot, cx = 0, cy = 0, r = 10, n = 10000, data, options = {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    }
-                ,
-                xaxis: {
-                    show: true,
-                    autoscale: false,
-                    min: -10,
-                    max: 10
-                },
-                yaxis: {
-                    show: true,
-                    autoscale: false,
-                    min: -10,
-                    max: 10
-                }
+                xaxis: { show: true, autoscale: false, min: -10, max: 10 },
+                yaxis: { show: true, autoscale: false, min: -10, max: 10 }
             };
 
         function initData() {
             data = [
                 {
                     data: [],
-                    points: { show: true },
-                    lines: { show: false}
+                    points: { show: true, symbol: 'cross', glshow: false },
+                    lines: { show: false }
                 }
             ];
             for (var i = 0; i < n; i++) {
@@ -89,6 +73,8 @@
     </div>
 
     <div id="content">
+        <br/>
+        <p>In order to activate the GlPlotter plugin you have to append <strong>?gl=true</strong> to the address.</p>
 
         <div class="demo-container">
             <div id="placeholder" class="demo-placeholder"></div>
@@ -102,6 +88,8 @@
             <input type="radio" name="scaling" value="20000" /> 20k <br />
             <input type="radio" name="scaling" value="25000" /> 25k <br />
             <input type="radio" name="scaling" value="50000" /> 50k <br />
+            <input type="radio" name="scaling" value="75000" /> 75k <br />
+            <input type="radio" name="scaling" value="100000" /> 100k <br />
         </fieldset>
 
     </div>

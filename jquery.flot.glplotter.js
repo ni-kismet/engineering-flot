@@ -19,9 +19,7 @@ function GlPlotter() {
         var container, canvas, width, height,
             renderer, pixelRatio;
 
-        if (isGlRequested()) {
-            plot.hooks.processOptions.push(processOptions);
-        }
+        plot.hooks.processOptions.push(processOptions);
 
         function isGlRequested() {
             var url = window.location.href,
