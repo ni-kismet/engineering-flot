@@ -737,7 +737,7 @@ describe('flot', function() {
         function xTickLabels(placeholder) {
             var labels$ = placeholder.find('.flot-x-axis').find('.flot-tick-label'),
                 labels = labels$.map(function(i, label) {
-                    return label.innerHTML;
+                    return label.textContent;
                 }).get();
             return labels;
         }
@@ -934,9 +934,9 @@ describe('flot', function() {
                     var yaxis = plot.getYAxes()[0];
 
                     if (axisPosition === 'left') {
-                        expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+                        expect(yaxis.box.left + yaxis.box.width).toBeCloseTo(plot.getPlotOffset().left, -1);
                     } else {
-                        expect(yaxis.box.left).toEqual(plot.getPlotOffset().left + plot.width());
+                        expect(yaxis.box.left).toBeCloseTo(plot.getPlotOffset().left + plot.width(), -1);
                     }
                 });
             });
@@ -1002,7 +1002,7 @@ describe('flot', function() {
 
                 var yaxis = plot.getYAxes()[0];
 
-                expect(yaxis.box.left + yaxis.box.width).toEqual(plot.getPlotOffset().left);
+                expect(yaxis.box.left + yaxis.box.width).toBeCloseTo(plot.getPlotOffset().left, -1);
             });
         });
     });

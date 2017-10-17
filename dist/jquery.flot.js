@@ -418,7 +418,7 @@
             layer.style.top = '0px';
             layer.style.left = '0px';
             layer.style.bottom = '0px';
-            layer.style.right = '0px'
+            layer.style.right = '0px';
             svgElement.appendChild(layer);
             this.SVG[classes] = layer;
         }
@@ -443,7 +443,7 @@
     //     active: Flag indicating whether the text should be visible.
     //     rendered: Flag indicating whether the text is currently visible.
     //     element: The HTML div containing the text.
-    //     text: The actual text and is identical with element[0].innerHTML.
+    //     text: The actual text and is identical with element[0].textContent.
     //     x: X coordinate at which to draw the text.
     //     y: Y coordinate at which to draw the text.
     // }
@@ -588,7 +588,7 @@
                 position.text = text;
                 position.element.setAttributeNS(null, "x", x);
                 position.element.setAttributeNS(null, "y", y);
-                position.element.innerHTML = text;
+                position.element.textContent = text;
                 return;
             }
         }
@@ -615,7 +615,7 @@
         position.element.setAttributeNS(null, "y", y);
         position.element.style.textAlign = halign;
 
-        position.element.innerHTML = text;
+        position.element.textContent = text;
 
         if (transforms) {
             transforms.forEach(function(element) {

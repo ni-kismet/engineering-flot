@@ -132,7 +132,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 display: 'inline-block',
                 'white-space': 'nowrap'
             });
-        //this.transformOrigin();
 
         var layer = this.surface.getSVGLayer(layerId);
         var transforms = this.transforms(offsets.degrees, offsets.x, offsets.y, layer.parentNode);

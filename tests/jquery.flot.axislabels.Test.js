@@ -26,7 +26,7 @@ describe('flot axis labels plugin', function() {
 
         var labels$ = $('.axisLabels'),
             labels = labels$.map(function(i, label) {
-                return label.innerHTML;
+                return label.textContent;
             }).get();
         expect(labels.length).toBe(4);
         expect(labels).toContain(options.xaxes[0].axisLabel);
@@ -71,7 +71,7 @@ describe('flot axis labels plugin', function() {
 
         var box1 = $('.x1Label')[0].getBoundingClientRect(),
             box2 = $('.x2Label')[0].getBoundingClientRect();
-        expect((box1.left + box1.width / 2) - (box2.left + box2.width / 2)).toBeLessThan(1);
+        expect((box1.left + box1.width / 2) - (box2.left + box2.width / 2)).toBeLessThan(2);
     });
 
     it('centers the labels of y axes vertically', function () {
@@ -85,17 +85,6 @@ describe('flot axis labels plugin', function() {
             c2 = box2.top + box2.height / 2;
         // The error on the y axes can be up to 1px because of the rotation
         expect(Math.abs(c1 - c2)).toBeLessThan(2);
-    });
-
-    it('aligns the labels of y axes with the pixels to create a crisp text', function () {
-        options.yaxes[0].axisLabel = 'short label';
-        options.yaxes[1].axisLabel = 'very long axis label';
-        plot = $.plot(placeholder, [[]], options);
-
-        var box1 = $('.y1Label')[0].getBoundingClientRect(),
-            box2 = $('.y2Label')[0].getBoundingClientRect();
-        expect(box1.left % 1).toBe(0);
-        expect(box2.left % 1).toBe(0);
     });
 
     it('should not duplicate the labels when the data is redrawn', function () {
