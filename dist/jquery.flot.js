@@ -624,26 +624,28 @@
         }
     };
 
-    // Removes one or more text strings from the canvas text overlay.
-    //
-    // If no parameters are given, all text within the layer is removed.
-    //
-    // Note that the text is not immediately removed; it is simply marked as
-    // inactive, which will result in its removal on the next render pass.
-    // This avoids the performance penalty for 'clear and redraw' behavior,
-    // where we potentially get rid of all text on a layer, but will likely
-    // add back most or all of it later, as when redrawing axes, for example.
-    //
-    // @param {string} layer A string of space-separated CSS classes uniquely
-    //     identifying the layer containing this text.
-    // @param {number=} x X coordinate of the text.
-    // @param {number=} y Y coordinate of the text.
-    // @param {string=} text Text string to remove.
-    // @param {(string|object)=} font Either a string of space-separated CSS
-    //     classes or a font-spec object, defining the text's font and style.
-    // @param {number=} angle Angle at which the text is rotated, in degrees.
-    //     Angle is currently unused, it will be implemented in the future.
-
+    /**
+     * 
+     * Removes one or more text strings from the canvas text overlay.
+     *
+     * If no parameters are given, all text within the layer is removed.
+     *
+     * Note that the text is not immediately removed; it is simply marked as
+     * inactive, which will result in its removal on the next render pass.
+     * This avoids the performance penalty for 'clear and redraw' behavior,
+     * where we potentially get rid of all text on a layer, but will likely
+     * add back most or all of it later, as when redrawing axes, for example.
+     *
+     * @param {string} layer A string of space-separated CSS classes uniquely
+     * identifying the layer containing this text.
+     * @param {number=} x X coordinate of the text.
+     * @param {number=} y Y coordinate of the text.
+     * @param {string=} text Text string to remove.
+     * @param {(string|object)=} font Either a string of space-separated CSS
+     * classes or a font-spec object, defining the text's font and style.
+     * @param {number=} angle Angle at which the text is rotated, in degrees.
+     * Angle is currently unused, it will be implemented in the future.
+     */
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
         var position, i, info, htmlYCoord;
         if (text == null) {
@@ -886,6 +888,7 @@ Licensed under the MIT license.
                 axisReserveSpace: [],
                 bindEvents: [],
                 drawOverlay: [],
+                resize: [],
                 shutdown: []
             },
             plot = this;
@@ -982,6 +985,8 @@ Licensed under the MIT license.
                 height = placeholder.height();
             surface.resize(width, height);
             overlay.resize(width, height);
+
+            executeHooks(hooks.resize, [width, height]);
         };
 
         plot.clearTextCache = function () {
@@ -1005,8 +1010,8 @@ Licensed under the MIT license.
         var MINOR_TICKS_COUNT_CONSTANT = $.plot.uiConstants.MINOR_TICKS_COUNT_CONSTANT;
         var TICK_LENGTH_CONSTANT = $.plot.uiConstants.TICK_LENGTH_CONSTANT;
         initPlugins(plot);
-        parseOptions(options_);
         setupCanvases();
+        parseOptions(options_);
         setData(data_);
         setupGrid();
         draw();
@@ -2501,7 +2506,6 @@ Licensed under the MIT license.
 
         function draw() {
             surface.clear();
-
             executeHooks(hooks.drawBackground, [ctx]);
 
             var grid = options.grid;
@@ -2516,7 +2520,7 @@ Licensed under the MIT license.
             }
 
             for (var i = 0; i < series.length; ++i) {
-                executeHooks(hooks.drawSeries, [ctx, series[i]]);
+                executeHooks(hooks.drawSeries, [ctx, series[i], i, getColorOrGradient]);
                 drawSeries(series[i]);
             }
 

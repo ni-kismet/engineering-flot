@@ -12,7 +12,9 @@ dependencies:
     - npm --version
     - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
   post:
-    - npm install -g dont-break
+    # testing indirect dependents is not supported yet by the mainline version
+    # https://github.com/bahmutov/dont-break/pull/57
+    - npm install -g git+https://cristiingineru@github.com/cristiingineru/dont-break.git#allowTestingIndirectDependents
 test:
   override:
     - npm run dont-break
