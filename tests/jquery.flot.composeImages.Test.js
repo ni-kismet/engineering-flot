@@ -21,7 +21,7 @@ describe("composeImages", function() {
             .find('#test-container');
     });
 
-    it('should call composeImages on an empty array of sources', function (done) {
+    it('should call composeImages on an empty array of sources, so the destination canvas should stay unmodified', function (done) {
         var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
         </div>
         <canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>
@@ -43,6 +43,9 @@ describe("composeImages", function() {
         composeImages(sources, destinationCanvas).then(function() {
             pixelData = destinationCanvas.getContext('2d').getImageData(80, 10, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 0, 255)).toBe(true);
+
+            expect(destinationCanvas.width).toBe(300);
+            expect(destinationCanvas.height).toBe(150);
 
             pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
@@ -287,8 +290,6 @@ describe("composeImages", function() {
         </div>
         <canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>
         `).find('#canvasSource').toArray();
-
-        //sources.pop(); //remove myCanvas from the sources array, because it is a destination
 
         var originalCanvas = document.getElementById("canvasSource");
         var destinationCanvas = document.getElementById("myCanvas");
