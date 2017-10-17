@@ -30,7 +30,20 @@ describe("composeImages", function() {
         var destinationCanvas = document.getElementById("myCanvas");
         var pixelData; //used later
 
+        function writeSomethingToCanvas(canvas) {
+            var ctx = canvas.getContext('2d');
+            //ctx.beginPath();
+            ctx.arc(80, 10, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            //ctx.stroke();
+        }
+
+        writeSomethingToCanvas(destinationCanvas); //make sure composeImages won't modify this content
+
         composeImages(sources, destinationCanvas).then(function() {
+            pixelData = destinationCanvas.getContext('2d').getImageData(80, 10, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 0, 255)).toBe(true);
+
             pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
 
@@ -270,12 +283,12 @@ describe("composeImages", function() {
 
     it('should call composeImages on one canvas as a source', function (done) {
         var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
-        <canvas id="canvasSource" width="100" height="100" title="canvasSource"></canvas>
+        <canvas id="canvasSource" width="20" height="20" title="canvasSource"></canvas>
         </div>
         <canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>
-        `).find('CANVAS').toArray();
+        `).find('#canvasSource').toArray();
 
-        sources.pop(); //remove myCanvas from the sources array, because it is a destination
+        //sources.pop(); //remove myCanvas from the sources array, because it is a destination
 
         var originalCanvas = document.getElementById("canvasSource");
         var destinationCanvas = document.getElementById("myCanvas");
@@ -286,20 +299,20 @@ describe("composeImages", function() {
             var ctx = canvas.getContext('2d');
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.lineTo(99, 99);
-            ctx.moveTo(30, 60);
-            ctx.lineTo(70, 40);
+            ctx.lineTo(19, 19);
+            ctx.moveTo(3, 18);
+            ctx.lineTo(17, 5);
             ctx.stroke();
         }
 
         writeSomethingToCanvas(originalCanvas);
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(100);
-            expect(destinationCanvas.height).toBe(100);
+            expect(destinationCanvas.width).toBe(20);
+            expect(destinationCanvas.height).toBe(20);
 
-            canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 100, 100).data;
-            canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 100, 100).data;
+            canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
 
             expect(canvas1_Data.length).toBe(canvas2_Data.length); //if these two arrays have different length, it means the getImageData returns two different sizes
 
