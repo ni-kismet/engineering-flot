@@ -18,7 +18,6 @@ describe("composeImages", function() {
     }
 
 /*
-    //it looks like in some browsers (e.g. Firefox), the colors are affected at drawing, so the matchPixelColor function should expect a small difference
     function matchPixelColor(pixelData, r, g, b, a) {
         const err = 11;
         return (Math.abs(pixelData[0] - r) <= err) && (Math.abs(pixelData[1] - g) <= err) && (Math.abs(pixelData[2] - b) <= err) && (Math.abs(pixelData[3] - a) <= err);
@@ -503,7 +502,7 @@ describe("composeImages", function() {
         }, null);
     });
 
-    it('should call composeImages on two partially overlapped canvases, one canvas is outside of view area', function (done) {
+    it('should call composeImages on two separate canvases, where one canvas is outside of view area', function (done) {
         var sources = placeholder.html(`<style type="text/css">
         #canvasSource2 {position:relative; left:-100px;}
         </style>
@@ -534,7 +533,7 @@ describe("composeImages", function() {
         expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(100 - 4); //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
+            expect(destinationCanvas.width).toBe(100 - 4);
             expect(destinationCanvas.height).toBe(20);
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
@@ -544,6 +543,67 @@ describe("composeImages", function() {
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
             expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one canvas and an SVG, which are totally overlapped with transparency. This test also expects that the background is not overwritten outside of transparency.', function (done) {
+        var sources = placeholder.html(`<style type="text/css">
+        #canvasSource1 {position:relative; left:-40px; top:-80px;}
+        </style>
+        <div id="test-container" style="width: 600px;height: 400px">
+        <svg class="imgsrc" id="svgSource1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg1">
+          <circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>
+          <circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>
+          <circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>
+        </svg>
+        <canvas class="imgsrc" id="canvasSource1" width="20" height="20" title="canvasSource1"></canvas>
+        </div>
+        <canvas id="myCanvas" width="150" height="150" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('.imgsrc').toArray();
+
+        var originalCanvas1 = document.getElementById("canvasSource1");
+        var destinationCanvas = document.getElementById("myCanvas");
+        var canvas1_Data; //used later
+        var canvas2_Data; //used later
+        var canvas3_Data; //used later
+        var pixelData;//used later
+
+        function writeSomethingToBackgroundCanvas(canvas) {
+            var ctx = canvas.getContext('2d');
+            ctx.arc(20, 80, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        writeSomethingToBackgroundCanvas(destinationCanvas); //make sure composeImages won't modify this content
+
+        function writeSomethingToCanvas(canvas, color) {
+            var ctx = canvas.getContext('2d');
+            ctx.rect(0, 0, 20, 20);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        writeSomethingToCanvas(originalCanvas1, "#FF0000");
+
+        expect(sources.length).toBe(2);
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(100);
+            expect(destinationCanvas.height).toBe(100);
+/*
+            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 20 - 6, 0, 20, 20).data;
+            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+/*
+            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20 - 10 + 4, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20, 0, 20 - 10 + 4, 20).data;
+            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
+*/
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(20, 80, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 0, 255)).toBe(true);
 
             done();
         }, null);
