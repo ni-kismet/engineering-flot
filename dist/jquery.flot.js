@@ -656,10 +656,9 @@
                         for (var key in styleCache) {
                             if (hasOwnProperty.call(styleCache, key)) {
                                 var positions = styleCache[key].positions;
-                                for (i = 0; positions[i]; i++) {
-                                    position = positions[i];
+                                positions.forEach(function(position) {
                                     position.active = false;
-                                }
+                                });
                             }
                         }
                     }
