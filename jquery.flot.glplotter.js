@@ -18,7 +18,17 @@ function GlPlotter() {
             geometries = [];
         var container, canvas, width, height,
             renderer, pixelRatio;
+
         plot.hooks.processOptions.push(processOptions);
+
+        function isGlRequested() {
+            var url = window.location.href,
+                params = url.split('?')[1],
+                searchParams = new URLSearchParams(params);
+            if (searchParams.get('gl') === 'true') {
+                return true;
+            }
+        }
 
         function processOptions(plot, options) {
             var mainScene, camera, cameraFocus;
@@ -27,7 +37,7 @@ function GlPlotter() {
             if(!canvas) {
                 canvas = getGlSurface("flot-gl", container);
             }
-    
+
             if(!renderer) {
                 renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true });
                 mainScene = new THREE.Scene();
@@ -41,7 +51,7 @@ function GlPlotter() {
                         renderer.msBackingStorePixelRatio ||
                         renderer.oBackingStorePixelRatio ||
                         renderer.backingStorePixelRatio || 1;
-    
+
                 pixelRatio = devicePixelRatio / backingStoreRatio;
             } else {
                 mainScene = renderer.userData.mainScene;
@@ -69,7 +79,7 @@ function GlPlotter() {
             renderer.userData.plotOffset = defaultPlotOffset;
 
             resize(plot, width, height);
-            
+
             plot.hooks.drawSeries.push(drawSeries);
             plot.hooks.draw.push(render);
             plot.hooks.resize.push(resize);
@@ -100,7 +110,7 @@ function GlPlotter() {
             // but its screen is actually 640px wide.  It therefore has a pixel
             // ratio of 2, while most normal devices have a ratio of 1.
 
-            
+
             var box = container.getBoundingClientRect();
 
             // Size the canvas to match the internal dimensions of its container
@@ -143,45 +153,45 @@ function GlPlotter() {
                 minSize = 10,
                 shouldresize = false,
                 element = canvas;
-    
+
                 newWidth = newWidth < minSize ? minSize : newWidth;
                 newHeight = newHeight < minSize ? minSize : newHeight;
-    
+
                 // Resize the canvas, increasing its density based on the display's
                 // pixel ratio; basically giving it more pixels without increasing the
                 // size of its element, to take advantage of the fact that retina
                 // displays have that many more pixels in the same advertised space.
-        
+
                 // Resizing should reset the state (excanvas seems to be buggy though)
-        
+
                 if (width !== newWidth) {
                     element.width = newWidth * pixelRatio;
                     element.style.width = newWidth + 'px';
                     width = newWidth;
-                    shouldresize = true; 
+                    shouldresize = true;
                 }
-        
+
                 if (height !== newHeight) {
                     element.height = newHeight * pixelRatio;
                     element.style.height = newHeight + 'px';
                     height = newHeight;
                     shouldresize = true;
                 }
-    
+
                 if (renderer && shouldresize) {
                     var mainscene = renderer.userData.mainScene,
                         camera = renderer.userData.camera;
-    
+
                     renderer.setClearColor(0xff0000, 0);
                     renderer.setSize(width, height, false);
                     renderer.setPixelRatio(pixelRatio);
-    
+
                     if(camera) {
                         camera.aspect = width/height;
                         camera.userData.cameraFocus.x = width / 2;
                         camera.userData.cameraFocus.y = height / 2;
                         camera.userData.cameraFocus.z = 1000;
-        
+
                         camera.position.set(width / 2, height / 2, 0);
                         camera.lookAt(camera.userData.cameraFocus);
                         camera.updateMatrixWorld();
@@ -199,11 +209,11 @@ function GlPlotter() {
                 renderer.setClearColor(0x0f0f0f, 0);
                 renderer.setScissorTest(false);
                 renderer.clear();
-    
+
                 while (mainscene.children.length > 0) {
                     mainscene.remove(mainscene.children[0]);
                 }
-    
+
                 renderer.setClearColor(0xff0000, 0);
                 renderer.setScissorTest(true);
                 renderer.clear();
@@ -218,7 +228,7 @@ function GlPlotter() {
         function drawSeries(plot, ctx, serie, index, getColorOrGradient) {
             var plotOffset = plot.getPlotOffset(),
                 plotWidth, plotHeight;
-            if(serie.points.glshow || serie.points.show) {
+            if (serie.points.glshow || (serie.points.show && isGlRequested())) {
                 serie.points.show = false;
                 serie.points.glshow = true;
                 renderer.userData.plotOffset = plotOffset;
@@ -251,19 +261,19 @@ function GlPlotter() {
                     points: serie.datapoints.points,
                     pointsize: serie.datapoints.pointsize
                 };
-    
+
                 if (serie.decimatePoints) {
                     //after adjusting the axis, plot width and height will be modified
                     plotWidth = width - plotOffset.left - plotOffset.right;
                     plotHeight = height - plotOffset.bottom - plotOffset.top;
                     // TODO: return Vector3 array of p2c coords after switching to BufferGeometry.
                     datapoints.points = serie.decimatePoints(
-                        serie, 
-                        serie.xaxis.min, 
-                        serie.xaxis.max, 
-                        plotWidth, 
-                        serie.yaxis.min, 
-                        serie.yaxis.max, 
+                        serie,
+                        serie.xaxis.min,
+                        serie.xaxis.max,
+                        plotWidth,
+                        serie.yaxis.min,
+                        serie.yaxis.max,
                         plotHeight
                     );
                 }
@@ -323,17 +333,17 @@ function GlPlotter() {
                 material = materials[index],
                 vertices = geometry.vertices,
                 points = datapoints.points,
-                ps = datapoints.pointsize, 
+                ps = datapoints.pointsize,
                 x, y, z = 1000 - index;
             var i = 0, j = 0, k = 0;
-        
+
             // move/create each vertex
             for (i = 0; i < points.length; i += ps) {
                 if (points[i] == null) {
                     j++;
                     continue;
                 }
-                
+
                 if (points[i] < axisx.min || points[i] > axisx.max || points[i + 1] < axisy.min || points[i + 1] > axisy.max) {
                     if (vertices[i / ps - j]) {
                         vertices[i / ps - j].z = -1;
@@ -352,7 +362,7 @@ function GlPlotter() {
                     vertices[i / ps - j].z = z;
                 }
             }
-            
+
             if (vertices.length > points.length / ps) {
                 for(k = points.length / ps; k < vertices.length; k++) {
                     vertices[k].z = -1;
