@@ -21,6 +21,39 @@ describe("composeImages", function() {
             .find('#test-container');
     });
 
+    it('should call composeImages on an empty array of sources', function (done) {
+        var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
+        </div>
+        <canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('svg').toArray();
+
+        var destinationCanvas = document.getElementById("myCanvas");
+        var pixelData; //used later
+
+        composeImages(sources, destinationCanvas).then(function() {
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
+
+            done();
+        }, null);
+    });
+
+
     it('should call composeImages on two identical SVGs, one near the other', function (done) {
         var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
         <svg id="svgSource" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg">
@@ -71,6 +104,8 @@ describe("composeImages", function() {
 */
             //var pixelData = canvas.getContext('2d').getImageData(51, 67, 1, 1).data;
 
+            expect(destinationCanvas.width).toBe(204); //200 + 2 * 2px_spacing
+            expect(destinationCanvas.height).toBe(100);
 
             pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
@@ -116,6 +151,9 @@ describe("composeImages", function() {
         var pixelData; //used later
 
         composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(100);
+            expect(destinationCanvas.height).toBe(204);  //200 + 2 * 2px_spacing
+
             pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
 
