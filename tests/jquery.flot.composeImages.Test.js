@@ -24,6 +24,21 @@ describe("composeImages", function() {
         return (Math.abs(pixelData[0] - r) <= err) && (Math.abs(pixelData[1] - g) <= err) && (Math.abs(pixelData[2] - b) <= err) && (Math.abs(pixelData[3] - a) <= err);
     }
 
+    function matchPixelDataArrays(pixelData1, pixelData2) {
+        var sameValue = true;
+        if (pixelData1.length !== pixelData2.length) {
+            sameValue = false;
+        } else {
+            for (var i = 0; i < pixelData1.length; i++) {
+                if (pixelData1[i] !== pixelData2[i]) {
+                    sameValue = false;
+                    break;
+                }
+            }
+        }
+        return sameValue;
+    }
+
     beforeEach(function() {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
@@ -129,37 +144,7 @@ describe("composeImages", function() {
         var destinationCanvas = document.getElementById("myCanvas");
         var pixelData; //used later
 
-/*
-        var ctx = destinationCanvas.getContext('2d');
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(99, 99);
-        ctx.moveTo(30, 60);
-        ctx.lineTo(70, 40);
-        ctx.stroke();
-/*
-        var c = document.getElementById("myCanvas");
-        var ctx = c.getContext("2d");
-        ctx.fillStyle = "red";
-        ctx.fillRect(0, 0, 50, 50);
-        function copy() {
-            var imgData = ctx.getImageData(0, 0, 1, 1);
-            var aData = imgData.data;
-            alert(aData);
-            ctx.putImageData(imgData, 10, 70);
-        }
-*/
         composeImages(sources, destinationCanvas).then(function() {
-            /*
-            var canvas = document.createElement('canvas');
-            canvas.width = destinationImage.width;
-            canvas.height = destinationImage.height;
-            canvas.getContext('2d').drawImage(destinationImage, 0, 0, destinationImage.width, destinationImage.height);
-
-            //myCanvas
-*/
-            //var pixelData = canvas.getContext('2d').getImageData(51, 67, 1, 1).data;
-
             expect(destinationCanvas.width).toBe(204); //200 + 2 * 2px_spacing
             expect(destinationCanvas.height).toBe(100);
 
@@ -323,16 +308,7 @@ describe("composeImages", function() {
             canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
 
-            expect(canvas1_Data.length).toBe(canvas2_Data.length); //if these two arrays have different length, it means the getImageData returns two different sizes
-
-            var sameValue = true;
-            for (var i = 0; i < canvas1_Data.length; i++) {
-                if (canvas1_Data[i] !== canvas2_Data[i]) {
-                    sameValue = false;
-                    break;
-                }
-            }
-            expect(sameValue).toBe(true);
+            expect(matchPixelDataArrays(canvas1_Data, canvas2_Data)).toBe(true);
             done();
         }, null);
     });
@@ -375,16 +351,7 @@ describe("composeImages", function() {
             canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 80, 20, 20).data;
 
-            expect(canvas1_Data.length).toBe(canvas2_Data.length); //if these two arrays have different length, it means the getImageData returns two different sizes
-
-            var sameValue = true;
-            for (var i = 0; i < canvas1_Data.length; i++) {
-                if (canvas1_Data[i] !== canvas2_Data[i]) {
-                    sameValue = false;
-                    break;
-                }
-            }
-            expect(sameValue).toBe(true);
+            expect(matchPixelDataArrays(canvas1_Data, canvas2_Data)).toBe(true);
 
             pixelData = destinationCanvas.getContext('2d').getImageData(24 + 10, 10, 1, 1).data;
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
@@ -394,6 +361,50 @@ describe("composeImages", function() {
 
             pixelData = destinationCanvas.getContext('2d').getImageData(24 + 50, 70, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on two canvases', function (done) {
+        var sources = placeholder.html(`<div id="test-container" style="width: 600px;height: 400px">
+        <canvas class="imgsrc" id="canvasSource1" width="20" height="20" title="canvasSource1"></canvas>
+        <canvas class="imgsrc" id="canvasSource2" width="20" height="20" title="canvasSource2"></canvas>
+        </div>
+        <canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('.imgsrc').toArray();
+
+        var originalCanvas1 = document.getElementById("canvasSource1");
+        var originalCanvas2 = document.getElementById("canvasSource2");
+        var destinationCanvas = document.getElementById("myCanvas");
+        var canvas1_Data; //used later
+        var canvas2_Data; //used later
+        var canvas3_Data; //used later
+
+        function writeSomethingToCanvas(canvas, color) {
+            var ctx = canvas.getContext('2d');
+            ctx.rect(0, 0, 20, 20);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        writeSomethingToCanvas(originalCanvas1, "#FF0000");
+        writeSomethingToCanvas(originalCanvas2, "#00FF00");
+
+        expect(sources.length).toBe(2);
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(44); //2 * 20 + 2 * spacing
+            expect(destinationCanvas.height).toBe(20);
+
+            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
+            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+
+            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 4, 0, 20, 20).data;
+
+            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
 
             done();
         }, null);
