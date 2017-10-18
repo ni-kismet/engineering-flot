@@ -17,12 +17,11 @@ describe("composeImages", function() {
         return (pixelData[0] === r) && (pixelData[1] === g) && (pixelData[2] === b) && (pixelData[3] === a);
     }
 
-/*
-    function matchPixelColor(pixelData, r, g, b, a) {
-        const err = 11;
+
+    function matchPixelColorWithError(pixelData, r, g, b, a, err) {
         return (Math.abs(pixelData[0] - r) <= err) && (Math.abs(pixelData[1] - g) <= err) && (Math.abs(pixelData[2] - b) <= err) && (Math.abs(pixelData[3] - a) <= err);
     }
-*/
+
     function matchPixelDataArrays(pixelData1, pixelData2) {
         var sameValue = true;
         if (pixelData1.length !== pixelData2.length) {
@@ -548,7 +547,7 @@ describe("composeImages", function() {
         }, null);
     });
 
-    it('should call composeImages on one canvas and an SVG, which are totally overlapped with transparency. This test also expects that the background is not overwritten outside of transparency.', function (done) {
+    it('should call composeImages on one canvas and an SVG, which are totally overlapped with transparency', function (done) {
         var sources = placeholder.html(`<style type="text/css">
         #canvasSource1 {position:relative; left:-40px; top:-80px;}
         circle {
@@ -601,6 +600,79 @@ describe("composeImages", function() {
 
             pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one canvas and an SVG, which are totally overlapped with transparency. The SVG has a different size than the ones from other tests. One component of the SVG is partially outside of the view area.', function (done) {
+        var sources = placeholder.html(`<style type="text/css">
+        #canvasSource1 {position:relative; left:-180px; top:-10px;}
+        circle {
+            stroke: black;
+            stroke-width: 2px;
+        }
+        </style>
+        <div id="test-container" style="width: 600px;height: 400px">
+        <svg class="imgsrc" id="svgSource1" viewBox="0 0 250 150" xmlns="http://www.w3.org/2000/svg" width="250" height="150" title="svg1">
+          <circle id="c1" cx="230" cy="20" r="15" style="fill:red"/>
+          <circle id="c2" cx="175" cy="100" r="25" style="fill:#00FF00"/>
+          <circle id="c3" cx="50" cy="130" r="40" style="fill:blue"/>
+        </svg>
+        <canvas class="imgsrc" id="canvasSource1" width="20" height="20" title="canvasSource1"></canvas>
+        </div>
+        <canvas id="myCanvas" width="150" height="150" style="border:1px solid #d3d3d3;"></canvas>
+        `).find('.imgsrc').toArray();
+
+        var originalCanvas1 = document.getElementById("canvasSource1");
+        var destinationCanvas = document.getElementById("myCanvas");
+        var canvas1_Data; //used later
+        var canvas3_Data; //used later
+        var pixelData;//used later
+
+        function writeSomethingToCanvas(canvas, color) {
+            var ctx = canvas.getContext('2d');
+            ctx.rect(0, 0, 20, 20);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        writeSomethingToCanvas(originalCanvas1, "#FF0000");
+
+        expect(sources.length).toBe(2);
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(250);
+            expect(destinationCanvas.height).toBe(150);
+
+            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(250 - 180 + 4, 150 - 10 - 20, 20, 20).data;
+            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+
+
+            //circle centers
+            pixelData = destinationCanvas.getContext('2d').getImageData(230, 20, 1, 1).data;
+            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(175, 100, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 130, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
+            //other points on circles should match the required colors, because of configured diameters
+            pixelData = destinationCanvas.getContext('2d').getImageData(220, 17, 1, 1).data;
+            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(190, 114, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(80, 149, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+
+            //verify a pixel from the circle border, if it comes from a black line (almost black, because of antialiasing), as described in svg style
+            pixelData = destinationCanvas.getContext('2d').getImageData(79, 102, 1, 1).data;
+            expect(matchPixelColorWithError(pixelData, 0, 0, 0, 255, 15)).toBe(true);
 
             done();
         }, null);
