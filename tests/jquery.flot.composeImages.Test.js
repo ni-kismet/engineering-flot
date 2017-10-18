@@ -610,7 +610,7 @@ describe("composeImages", function() {
         #canvasSource1 {position:relative; left:-180px; top:-10px;}
         circle {
             stroke: black;
-            stroke-width: 2px;
+            stroke-width: 4px;
         }
         </style>
         <div id="test-container" style="width: 600px;height: 400px">
