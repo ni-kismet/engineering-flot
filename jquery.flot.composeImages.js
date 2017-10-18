@@ -95,8 +95,8 @@
             if ((maxX - minX <= 0) || (maxY - minY <= 0)) {
                 Result = -2;
             } else {
-                destination.width = maxX - minX;
-                destination.height = maxY - minY;
+                destination.width = Math.round(maxX - minX);
+                destination.height = Math.round(maxY - minY);
 
                 for (i = 0; i < sources.length; i++) {
                     sources[i]["xCompOffset"] = sources[i].genLeft - minX;
