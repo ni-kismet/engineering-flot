@@ -551,6 +551,10 @@ describe("composeImages", function() {
     it('should call composeImages on one canvas and an SVG, which are totally overlapped with transparency. This test also expects that the background is not overwritten outside of transparency.', function (done) {
         var sources = placeholder.html(`<style type="text/css">
         #canvasSource1 {position:relative; left:-40px; top:-80px;}
+        circle {
+            stroke: black;
+            stroke-width: 2px;
+        }
         </style>
         <div id="test-container" style="width: 600px;height: 400px">
         <svg class="imgsrc" id="svgSource1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg1">
@@ -566,17 +570,8 @@ describe("composeImages", function() {
         var originalCanvas1 = document.getElementById("canvasSource1");
         var destinationCanvas = document.getElementById("myCanvas");
         var canvas1_Data; //used later
-        var canvas2_Data; //used later
         var canvas3_Data; //used later
         var pixelData;//used later
-
-        function writeSomethingToBackgroundCanvas(canvas) {
-            var ctx = canvas.getContext('2d');
-            ctx.arc(20, 80, 5, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-
-        writeSomethingToBackgroundCanvas(destinationCanvas); //make sure composeImages won't modify this content
 
         function writeSomethingToCanvas(canvas, color) {
             var ctx = canvas.getContext('2d');
@@ -592,18 +587,20 @@ describe("composeImages", function() {
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(100);
             expect(destinationCanvas.height).toBe(100);
-/*
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 20 - 6, 0, 20, 20).data;
-            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
-/*
-            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20 - 10 + 4, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20, 0, 20 - 10 + 4, 20).data;
-            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
-*/
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(20, 80, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 0, 255)).toBe(true);
+            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 40 + 4, 0, 20, 20).data;
+            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
+            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
+
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
+            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
             done();
         }, null);
