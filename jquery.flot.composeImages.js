@@ -62,9 +62,9 @@
     }
 
     function prepareImagesToBeComposed(sources, destination) {
-        var Result = 0;
+        var result = 0;
         if (sources.length === 0) {
-            Result = -1; //nothing to do if called without sources
+            result = -1; //nothing to do if called without sources
         } else {
             var minX = sources[0].genLeft;
             var minY = sources[0].genTop;
@@ -93,7 +93,7 @@
             }
 
             if ((maxX - minX <= 0) || (maxY - minY <= 0)) {
-                Result = -2;
+                result = -2;
             } else {
                 destination.width = Math.round(maxX - minX);
                 destination.height = Math.round(maxY - minY);
@@ -104,7 +104,7 @@
                 }
             }
         }
-        return Result;
+        return result;
     }
 
     function copyImgsToCanvas(sources, destination) {
