@@ -1513,7 +1513,7 @@ hooks in the plugins bundled with Flot.
 
  - drawSeries  [phase 5]
 
-    ```function(plot, canvascontext, series)```
+    ```function(plot, canvascontext, serie, i, getColorOrGradient)```
 
     Hook for custom drawing of a single series. Called just before the
     standard drawing routine has been called in the loop that draws
@@ -1577,6 +1577,12 @@ hooks in the plugins bundled with Flot.
     use this to draw things. You'll most likely need some of the
     metrics computed by Flot, e.g. plot.width()/plot.height(). See the
     crosshair plugin for an example.
+
+ - resize   [phase 7]
+
+    ```function (plot, width, height)```
+
+    The resize hook is used to be notified after the plot was resized.
 
  - shutdown  [phase 8]
 
