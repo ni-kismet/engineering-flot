@@ -2,3 +2,5 @@
 node_modules/
 debug.log
 coverage/**
+pic.html
+style.css

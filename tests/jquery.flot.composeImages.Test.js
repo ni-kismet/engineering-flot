@@ -38,7 +38,8 @@ describe("composeImages", function() {
     }
 
     beforeEach(function() {
-        placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+        //placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 2px margin: 0px; border: 0px; font-size:11pt; font-family:sans-serif; line-height:17px;">')
+        placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 2px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
             .find('#test-container');
     });
 
@@ -143,7 +144,7 @@ describe("composeImages", function() {
         var pixelData; //used later
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(204); //200 + 2 * 2px_spacing
+            expect(destinationCanvas.width).toBe(200); //204 - //200 + 2 * 2px_spacing
             expect(destinationCanvas.height).toBe(100);
 
             pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
@@ -191,7 +192,7 @@ describe("composeImages", function() {
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(100);
-            expect(destinationCanvas.height).toBe(204);  //200 + 2 * 2px_spacing
+            expect(destinationCanvas.height).toBe(200);  //204 - //200 + 2 * 2px_spacing
 
             pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
@@ -202,13 +203,13 @@ describe("composeImages", function() {
             pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110 + 4, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110 + 0, 1, 1).data; //110 + 4
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140 + 4, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140 + 0, 1, 1).data; //140 + 4
             expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170 + 4, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170 + 0, 1, 1).data; //170 + 4
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
             done();
@@ -241,8 +242,8 @@ describe("composeImages", function() {
         var pixelData; //used later
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(204);  //200 + 2 * 2px_spacing
-            expect(destinationCanvas.height).toBe(204);  //200 + 2 * 2px_spacing
+            expect(destinationCanvas.width).toBe(200);  //204 - //200 + 2 * 2px_spacing
+            expect(destinationCanvas.height).toBe(200);  //204 - //200 + 2 * 2px_spacing
 
             pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
@@ -262,13 +263,13 @@ describe("composeImages", function() {
             pixelData = destinationCanvas.getContext('2d').getImageData(150, 70, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110 + 4, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110 + 0, 1, 1).data; //110 + 4
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140 + 4, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140 + 0, 1, 1).data; //140 + 4
             expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170 + 4, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170 + 0, 1, 1).data; //170 + 4
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
             done();
@@ -343,7 +344,7 @@ describe("composeImages", function() {
         expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(124); //120 + 2 * 2px_spacing
+            expect(destinationCanvas.width).toBe(120); //124 - //120 + 2 * 2px_spacing
             expect(destinationCanvas.height).toBe(100);
 
             canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
@@ -351,13 +352,13 @@ describe("composeImages", function() {
 
             expect(matchPixelDataArrays(canvas1_Data, canvas2_Data)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(24 + 10, 10, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(20 + 10, 10, 1, 1).data; //24 + 10
             expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(24 + 30, 40, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(20 + 30, 40, 1, 1).data; //24 + 30
             expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
 
-            pixelData = destinationCanvas.getContext('2d').getImageData(24 + 50, 70, 1, 1).data;
+            pixelData = destinationCanvas.getContext('2d').getImageData(20 + 50, 70, 1, 1).data; //24 + 50
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
 
             done();
@@ -392,7 +393,7 @@ describe("composeImages", function() {
         expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(44); //2 * 20 + 2 * spacing
+            expect(destinationCanvas.width).toBe(40); //44 - //2 * 20 + 2 * spacing
             expect(destinationCanvas.height).toBe(20);
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
@@ -400,7 +401,7 @@ describe("composeImages", function() {
             expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
 
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 4, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 0, 0, 20, 20).data; //20 + 4
 
             expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
 
@@ -439,15 +440,15 @@ describe("composeImages", function() {
         expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(34); //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
+            expect(destinationCanvas.width).toBe(30); //34 - //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
             expect(destinationCanvas.height).toBe(20);
 
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 14, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 14, 20).data;
+            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 10, 20).data; //14
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 10, 20).data; //14
             expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
 
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 4 - 10, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 0 - 10, 0, 20, 20).data; //20 + 4 - 10
             expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
 
             done();
@@ -486,15 +487,15 @@ describe("composeImages", function() {
         expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(34); //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
+            expect(destinationCanvas.width).toBe(30); //34 - //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
             expect(destinationCanvas.height).toBe(20);
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
             expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
 
-            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20 - 10 + 4, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20, 0, 20 - 10 + 4, 20).data;
+            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20 - 10 + 0, 20).data; //20 - 10 + 4
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20, 0, 20 - 10 + 0, 20).data; //20 - 10 + 4
             expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
 
             done();
@@ -532,11 +533,11 @@ describe("composeImages", function() {
         expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
-            expect(destinationCanvas.width).toBe(100 - 4);
+            expect(destinationCanvas.width).toBe(100 - 0); //100 - 4
             expect(destinationCanvas.height).toBe(20);
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 20 - 10 + 6, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 20 - 0, 0, 20, 20).data; //100 - 20 - 10 + 6
             expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
 
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
@@ -588,7 +589,7 @@ describe("composeImages", function() {
             expect(destinationCanvas.height).toBe(100);
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 40 + 4, 0, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 40 + 0, 0, 20, 20).data; //100 - 40 + 4
             expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
 
 
@@ -646,7 +647,7 @@ describe("composeImages", function() {
             expect(destinationCanvas.height).toBe(150);
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(250 - 180 + 4, 150 - 10 - 20, 20, 20).data;
+            canvas3_Data = destinationCanvas.getContext('2d').getImageData(250 - 180 + 0, 150 - 10 - 20, 20, 20).data; //250 - 180 + 4
             expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
 
 
