@@ -39,7 +39,7 @@ describe("composeImages", function() {
 
     beforeEach(function() {
         //placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 2px margin: 0px; border: 0px; font-size:11pt; font-family:sans-serif; line-height:17px;">')
-        placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 2px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
+        placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
             .find('#test-container');
     });
 
