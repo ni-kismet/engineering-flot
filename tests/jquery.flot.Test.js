@@ -960,9 +960,9 @@ describe('flot', function() {
                     var xaxis = plot.getXAxes()[0];
 
                     if (axisPosition === 'top') {
-                        expect(xaxis.box.top + xaxis.box.height).toEqual(plot.getPlotOffset().top);
+                        expect(xaxis.box.top + xaxis.box.height).toBeCloseTo(plot.getPlotOffset().top, -1);
                     } else {
-                        expect(xaxis.box.top).toEqual(plot.getPlotOffset().top + plot.height());
+                        expect(xaxis.box.top).toBeCloseTo(plot.getPlotOffset().top + plot.height(), -1);
                     }
                 });
             });
