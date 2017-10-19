@@ -58,8 +58,8 @@ describe('A Flot chart with relative time axes', function () {
             yaxis: {
                 format: 'time',
                 timeformat: '%r',
-                autoscaleMargin: 0,
-                autoscale: 'exact'
+                autoScaleMargin: 0,
+                autoScale: 'exact'
             }
         });
     };

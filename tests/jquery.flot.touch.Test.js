@@ -8,8 +8,8 @@ describe("flot touch plugin", function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
         options = {
-            xaxes: [{ autoscale: 'exact' }],
-            yaxes: [{ autoscale: 'exact' }],
+            xaxes: [{ autoScale: 'exact' }],
+            yaxes: [{ autoScale: 'exact' }],
             zoom: { interactive: true, amount: 10, active: true },
             pan: { interactive: true, frameRate: -1, enableTouch: true, active: true }
         };
@@ -177,8 +177,8 @@ describe("flot touch plugin", function () {
                     [10, 10]
                 ]
                 ], {
-                xaxes: [{ autoscale: 'exact' }],
-                yaxes: [{ autoscale: 'exact' }],
+                xaxes: [{ autoScale: 'exact' }],
+                yaxes: [{ autoScale: 'exact' }],
                 zoom: { interactive: true, active: false, amount: 10 },
                 pan: { interactive: true, active: false, frameRate: -1 }
             });
@@ -282,8 +282,8 @@ describe("flot touch plugin", function () {
                     [10, 10]
                 ]
                 ], {
-                xaxes: [{ autoscale: 'exact' }],
-                yaxes: [{ autoscale: 'exact' }],
+                xaxes: [{ autoScale: 'exact' }],
+                yaxes: [{ autoScale: 'exact' }],
                 zoom: { interactive: true, active: false, amount: 10 },
                 pan: { interactive: true, active: false, frameRate: -1 }
             });

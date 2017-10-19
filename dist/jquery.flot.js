@@ -258,9 +258,7 @@
 
         // Collection of HTML div layers for text overlaid onto the canvas
 
-        this.textContainer = null;
         this.SVGContainer = null;
-        this.text = {};
         this.SVG = {};
 
         // Cache of text fragments and metrics, so we can avoid expensively
@@ -332,7 +330,7 @@
 
         for (var layerKey in cache) {
             if (hasOwnProperty.call(cache, layerKey)) {
-                var layer = this.getTextLayer(layerKey),
+                var layer = this.getSVGLayer(layerKey),
                     layerCache = cache[layerKey];
 
                 var display = layer.style.display;
@@ -378,45 +376,6 @@
         }
     };
 
-    // Creates (if necessary) and returns the text overlay container.
-    //
-    // @param {string} classes String of space-separated CSS classes used to
-    //     uniquely identify the text layer.
-    // @return {object} The text-layer div.
-
-    Canvas.prototype.getTextLayer = function(classes) {
-        var layer = this.text[classes];
-
-        // Create the text layer if it doesn't exist
-
-        if (!layer) {
-            // Create the text layer container, if it doesn't exist
-            if (!this.textContainer) {
-                this.textContainer = document.createElement('div');
-                this.textContainer.className = 'flot-text';
-                this.textContainer.style.position = 'absolute';
-                this.textContainer.style.top = '0px';
-                this.textContainer.style.left = '0px';
-                this.textContainer.style.bottom = '0px';
-                this.textContainer.style.right = '0px';
-                this.textContainer.style.color = 'inherit';
-                this.element.parentNode.insertBefore(this.textContainer, this.element);
-            }
-
-            layer = document.createElement('div');
-            layer.className = classes;
-            layer.style.position = 'absolute';
-            layer.style.top = '0px';
-            layer.style.left = '0px';
-            layer.style.bottom = '0px';
-            layer.style.right = '0px';
-            this.textContainer.appendChild(layer);
-            this.text[classes] = layer;
-        }
-
-        return layer;
-    };
-
     // Creates (if necessary) and returns the SVG overlay container.
     //
     // @param {string} classes String of space-separated CSS classes used to
@@ -429,7 +388,7 @@
         // Create the SVG layer if it doesn't exist
 
         if (!layer) {
-            // Create the text layer container, if it doesn't exist
+            // Create the svg layer container, if it doesn't exist
 
             var svgElement;
 
@@ -442,26 +401,25 @@
                 this.SVGContainer.style.bottom = '0px';
                 this.SVGContainer.style.right = '0px';
                 this.SVGContainer.style.pointerEvents = 'none';
-                this.element.parentNode.insertAfter(this.SVGContainer, this.element);
+                this.element.parentNode.appendChild(this.SVGContainer);
 
                 svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svgElement.style.width = '100%';
                 svgElement.style.height = '100%';
+
                 this.SVGContainer.appendChild(svgElement);
             } else {
-                svgElement = this.SVGContainer.getElementsByName('svg')[0];
+                svgElement = this.SVGContainer.firstChild;
             }
 
             layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            layer.className = 'classes';
+            layer.setAttribute('class', classes);
             layer.style.position = 'absolute';
             layer.style.top = '0px';
             layer.style.left = '0px';
             layer.style.bottom = '0px';
             layer.style.right = '0px';
-            layer.style.fill = '#aaaaaa';
-            svgElement.appendChild(layer, this.element);
-
+            svgElement.appendChild(layer);
             this.SVG[classes] = layer;
         }
 
@@ -485,7 +443,7 @@
     //     active: Flag indicating whether the text should be visible.
     //     rendered: Flag indicating whether the text is currently visible.
     //     element: The HTML div containing the text.
-    //     text: The actual text and is identical with element[0].innerHTML.
+    //     text: The actual text and is identical with element[0].textContent.
     //     x: X coordinate at which to draw the text.
     //     y: Y coordinate at which to draw the text.
     // }
@@ -544,24 +502,27 @@
         // If we can't find a matching element in our cache, create a new one
 
         if (!info) {
-            var element = document.createElement('div');
-            element.innerHTML = text;
+            var element = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            var textNode = document.createTextNode(text);
+            element.appendChild(textNode);
             element.style.position = 'absolute';
             element.style.maxWidth = width;
-            element.style.top = '-9999px';
+            element.setAttributeNS(null, 'x', -9999);
+            element.setAttributeNS(null, 'y', -9999);
 
             if (typeof font === 'object') {
                 element.style.font = textStyle;
-                element.style.color = font.color;
+                element.style.fill = font.fill;
             } else if (typeof font === 'string') {
-                element.className = font;
+                element.setAttribute('class', font);
             }
 
-            this.getTextLayer(layer).appendChild(element);
+            this.getSVGLayer(layer).appendChild(element);
+            var elementRect = element.getBBox();
 
             info = styleCache[key] = {
-                width: element.offsetWidth,
-                height: element.offsetHeight,
+                width: elementRect.width,
+                height: elementRect.height,
                 measured: true,
                 element: element,
                 positions: []
@@ -594,7 +555,7 @@
     // @param {string=} valign Vertical alignment of the text; either "top",
     //     "middle" or "bottom".
 
-    Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign) {
+    Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign, transforms) {
         var info = this.getTextInfo(layer, text, font, angle, width),
             positions = info.positions;
 
@@ -612,6 +573,8 @@
             y -= info.height;
         }
 
+        y += 0.75 * info.height;
+
         // Determine whether this text already exists at this position.
         // If so, mark it for inclusion in the next render pass.
 
@@ -622,12 +585,9 @@
                 return;
             } else if (position.active === false) {
                 position.active = true;
-                position.text = text;
-                position.x = x;
-                position.y = y;
-                position.element.style.top = Math.round(y) + 'px';
-                position.element.style.left = Math.round(x) + 'px';
-                position.element.innerHTML = text;
+                position.element.setAttributeNS(null, 'x', x);
+                position.element.setAttributeNS(null, 'y', y);
+                position.element.textContent = text;
                 return;
             }
         }
@@ -650,15 +610,21 @@
 
         // Move the element to its final position within the container
 
-        position.element.style.top = Math.round(y) + 'px';
-        position.element.style.left = Math.round(x) + 'px';
+        position.element.setAttributeNS(null, 'x', x);
+        position.element.setAttributeNS(null, 'y', y);
         position.element.style.textAlign = halign;
 
-        position.element.innerHTML = text;
+        position.element.textContent = text;
+
+        if (transforms) {
+            transforms.forEach(function(t) {
+                info.element.transform.baseVal.appendItem(t);
+            });
+        }
     };
 
     /**
-     * 
+     *
      * Removes one or more text strings from the canvas text overlay.
      *
      * If no parameters are given, all text within the layer is removed.
@@ -680,7 +646,7 @@
      * Angle is currently unused, it will be implemented in the future.
      */
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
-        var position, i;
+        var info, htmlYCoord;
         if (text == null) {
             var layerCache = this._textCache[layer];
             if (layerCache != null) {
@@ -690,23 +656,23 @@
                         for (var key in styleCache) {
                             if (hasOwnProperty.call(styleCache, key)) {
                                 var positions = styleCache[key].positions;
-                                for (i = 0; positions[i]; i++) {
-                                    position = positions[i];
+                                positions.forEach(function(position) {
                                     position.active = false;
-                                }
+                                });
                             }
                         }
                     }
                 }
             }
         } else {
-            positions = this.getTextInfo(layer, text, font, angle).positions;
-            for (i = 0; positions[i]; i++) {
-                position = positions[i];
-                if (position.x === x && position.y === y && position.text === text) {
+            info = this.getTextInfo(layer, text, font, angle);
+            positions = info.positions;
+            positions.forEach(function(position) {
+                htmlYCoord = y + 0.75 * info.height;
+                if (position.x === x && position.y === htmlYCoord && position.text === text) {
                     position.active = false;
                 }
-            }
+            });
         }
     };
 
@@ -720,7 +686,7 @@
         var cache = this._textCache;
         for (var layerKey in cache) {
             if (hasOwnProperty.call(cache, layerKey)) {
-                var layer = this.getTextLayer(layerKey);
+                var layer = this.getSVGLayer(layerKey);
                 while (layer.firstChild) {
                     layer.removeChild(layer.firstChild);
                 }
@@ -800,8 +766,8 @@ Licensed under the MIT license.
                     inverseTransform: null, // if transform is set, this should be the inverse function
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
-                    autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode,
-                    autoscale: "exact", // Available modes: "none", "loose", "exact", "sliding-window"
+                    autoScaleMargin: null, // margin in % to add if autoScale option is on "loose" mode,
+                    autoScale: "exact", // Available modes: "none", "loose", "exact", "sliding-window"
                     windowSize: null, // null or number. This is the size of sliding-window.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
@@ -822,8 +788,8 @@ Licensed under the MIT license.
                     boxPosition: { centerX: 0, centerY: 0 } //position of the axis on the corresponding axis box
                 },
                 yaxis: {
-                    autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "loose", // Available modes: "none", "loose", "exact"
+                    autoScaleMargin: 0.02, // margin in % to add if autoScale option is on "loose" mode
+                    autoScale: "loose", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
                     showTickLabels: "major", // "none", "endpoints", "major", "all"
@@ -1491,7 +1457,7 @@ Licensed under the MIT license.
                         y: false,
                         number: true,
                         required: true,
-                        computeRange: s.xaxis.options.autoscale !== 'none',
+                        computeRange: s.xaxis.options.autoScale !== 'none',
                         defaultValue: null
                     });
 
@@ -1500,7 +1466,7 @@ Licensed under the MIT license.
                         y: true,
                         number: true,
                         required: true,
-                        computeRange: s.yaxis.options.autoscale !== 'none',
+                        computeRange: s.yaxis.options.autoScale !== 'none',
                         defaultValue: null
                     });
 
@@ -1512,7 +1478,7 @@ Licensed under the MIT license.
                                 y: true,
                                 number: true,
                                 required: false,
-                                computeRange: s.yaxis.options.autoscale !== 'none',
+                                computeRange: s.yaxis.options.autoScale !== 'none',
                                 defaultValue: 0
                             });
                         }
@@ -2132,7 +2098,7 @@ Licensed under the MIT license.
             };
         }
 
-        function autoscaleAxis(axis) {
+        function autoScaleAxis(axis) {
             var opts = axis.options,
                 min = opts.min,
                 max = opts.max,
@@ -2140,7 +2106,7 @@ Licensed under the MIT license.
                 datamax = axis.datamax,
                 delta;
 
-            switch (opts.autoscale) {
+            switch (opts.autoScale) {
                 case "none":
                     min = +(opts.min != null ? opts.min : datamin);
                     max = +(opts.max != null ? opts.max : datamax);
@@ -2150,7 +2116,7 @@ Licensed under the MIT license.
                         min = datamin;
                         max = datamax;
                         delta = $.plot.saturated.saturate(max - min);
-                        var margin = ((typeof opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
+                        var margin = ((typeof opts.autoScaleMargin === 'number') ? opts.autoScaleMargin : 0.02);
                         min = $.plot.saturated.saturate(min - delta * margin);
                         max = $.plot.saturated.saturate(max + delta * margin);
 
@@ -2182,20 +2148,20 @@ Licensed under the MIT license.
             max = widenedMinMax.max;
 
             // grow loose or grow exact supported
-            if (opts.growOnly === true && opts.autoscale !== "none" && opts.autoscale !== "sliding-window") {
+            if (opts.growOnly === true && opts.autoScale !== "none" && opts.autoScale !== "sliding-window") {
                 min = (min < datamin) ? min : (datamin !== null ? datamin : min);
                 max = (max > datamax) ? max : (datamax !== null ? datamax : max);
             }
 
-            axis.autoscaledMin = min;
-            axis.autoscaledMax = max;
+            axis.autoScaledMin = min;
+            axis.autoScaledMax = max;
         }
 
         function setRange(axis) {
-            autoscaleAxis(axis);
+            autoScaleAxis(axis);
 
-            var min = axis.autoscaledMin,
-                max = axis.autoscaledMax,
+            var min = axis.autoScaledMin,
+                max = axis.autoScaledMax,
                 plotOffset = axis.options.offset;
 
             min = (min != null ? min : -1) + (plotOffset.below || 0);
@@ -2493,7 +2459,7 @@ Licensed under the MIT license.
         }
 
         function snapRangeToTicks(axis, ticks) {
-            if (axis.options.autoscale === "loose" && ticks.length > 0) {
+            if (axis.options.autoScale === "loose" && ticks.length > 0) {
                 // snap to ticks
                 axis.min = Math.min(axis.min, ticks[0].v);
                 axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
@@ -3200,7 +3166,7 @@ Licensed under the MIT license.
 
                 // make sure the 0 point is included in the computed y range when requested
                 if (ps <= 2) {
-                    /*if ps > 0 the points were already taken into account for autoscale */
+                    /*if ps > 0 the points were already taken into account for autoScale */
                     range.ymin = Math.min(0, range.ymin);
                     range.ymax = Math.max(0, range.ymax);
                 }

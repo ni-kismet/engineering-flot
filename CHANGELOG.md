@@ -1,3 +1,11 @@
+## engineering-flot 1.0.0 ##
+
+### Changes ###
+
+- autoscale option from axis API renamed autoScale
+- autoscaleMargin option for scale loose renamed autoScaleMargin
+- changelog NEWS.md renamed to CHANGELOG.md
+
 ## engineering-flot 0.6.0 ##
 
 ### Changes ###

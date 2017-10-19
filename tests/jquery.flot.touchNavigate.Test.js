@@ -8,8 +8,8 @@ describe("flot touch navigate plugin", function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
         options = {
-            xaxes: [{ autoscale: 'exact' }],
-            yaxes: [{ autoscale: 'exact' }],
+            xaxes: [{ autoScale: 'exact' }],
+            yaxes: [{ autoScale: 'exact' }],
             zoom: { interactive: true, active: true, amount: 10 },
             pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
         };
@@ -308,8 +308,8 @@ describe("flot touch navigate plugin", function () {
                     [10, 10]
                 ]
             ], {
-                xaxes: [{ autoscale: 'exact', axisZoom: false, axisPan: false }],
-                yaxes: [{ autoscale: 'exact' }],
+                xaxes: [{ autoScale: 'exact', axisZoom: false, axisPan: false }],
+                yaxes: [{ autoScale: 'exact' }],
                 zoom: { interactive: true, active: true, amount: 10 },
                 pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
             });
@@ -345,8 +345,8 @@ describe("flot touch navigate plugin", function () {
                     [10, 10]
                 ]
             ], {
-                xaxes: [{ autoscale: 'exact', plotZoom: false, plotPan: false }],
-                yaxes: [{ autoscale: 'exact' }],
+                xaxes: [{ autoScale: 'exact', plotZoom: false, plotPan: false }],
+                yaxes: [{ autoScale: 'exact' }],
                 zoom: { interactive: true, active: true, amount: 10 },
                 pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
             });
@@ -425,8 +425,8 @@ describe("flot touch navigate plugin", function () {
                   lines: { show: true },
                   points: { show: true }
               },
-              xaxis: { autoscale: 'exact' },
-              yaxis: { mode: 'log', showTickLabels: "all", autoscale: 'exact' },
+              xaxis: { autoScale: 'exact' },
+              yaxis: { mode: 'log', showTickLabels: "all", autoScale: 'exact' },
               zoom: { interactive: true, active: true },
               pan: { interactive: true, active: true, enableTouch: true }
           });
@@ -633,8 +633,8 @@ describe("flot touch navigate plugin", function () {
                   [10, 10]
               ]
           ], {
-              xaxes: [{ autoscale: 'exact', axisPan: false }],
-              yaxes: [{ autoscale: 'exact' }],
+              xaxes: [{ autoScale: 'exact', axisPan: false }],
+              yaxes: [{ autoScale: 'exact' }],
               zoom: { interactive: true, active: true, amount: 10 },
               pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
           });
@@ -667,8 +667,8 @@ describe("flot touch navigate plugin", function () {
                   [10, 10]
               ]
           ], {
-              xaxes: [{ autoscale: 'exact', plotPan: false }],
-              yaxes: [{ autoscale: 'exact' }],
+              xaxes: [{ autoScale: 'exact', plotPan: false }],
+              yaxes: [{ autoScale: 'exact' }],
               zoom: { interactive: true, active: true, amount: 10 },
               pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
           });
