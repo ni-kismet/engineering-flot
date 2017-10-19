@@ -1,9 +1,9 @@
 (function($) {
     "use strict";
-    const CGENERALFAILURECALLBACKERROR = -100; //simply a negative number
-    const CSUCCESSFULIMAGEPREPARATION = 0;
-    const CEMPTYARRAYOFIMAGESOURCES = -1;
-    const CNEGATIVEIMAGESIZE = -2;
+    const GENERALFAILURECALLBACKERROR = -100; //simply a negative number
+    const SUCCESSFULIMAGEPREPARATION = 0;
+    const EMPTYARRAYOFIMAGESOURCES = -1;
+    const NEGATIVEIMAGESIZE = -2;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var tempImgs = [];
@@ -79,9 +79,9 @@
     }
 
     function prepareImagesToBeComposed(sources, destination) {
-        var result = CSUCCESSFULIMAGEPREPARATION;
+        var result = SUCCESSFULIMAGEPREPARATION;
         if (sources.length === 0) {
-            result = CEMPTYARRAYOFIMAGESOURCES; //nothing to do if called without sources
+            result = EMPTYARRAYOFIMAGESOURCES; //nothing to do if called without sources
         } else {
             var minX = sources[0].genLeft;
             var minY = sources[0].genTop;
@@ -110,7 +110,7 @@
             }
 
             if ((maxX - minX <= 0) || (maxY - minY <= 0)) {
-                result = CNEGATIVEIMAGESIZE; //this might occur on hidden images
+                result = NEGATIVEIMAGESIZE; //this might occur on hidden images
             } else {
                 destination.width = Math.round(maxX - minX);
                 destination.height = Math.round(maxY - minY);
@@ -126,7 +126,7 @@
 
     function copyImgsToCanvas(sources, destination) {
         var prepareImagesResult = prepareImagesToBeComposed(sources, destination);
-        if (prepareImagesResult === CSUCCESSFULIMAGEPREPARATION) {
+        if (prepareImagesResult === SUCCESSFULIMAGEPREPARATION) {
             var destinationCtx = destination.getContext('2d');
 
             for (var i = 0; i < sources.length; i++) {
@@ -163,7 +163,7 @@
     }
 
     function failureCallback() {
-        return CGENERALFAILURECALLBACKERROR;
+        return GENERALFAILURECALLBACKERROR;
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
