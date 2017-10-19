@@ -46,6 +46,7 @@ module.exports = function(config) {
         files: sources.concat([
             'node_modules/phantomjs-polyfill-find/find-polyfill.js',
             'node_modules/webcharts-development-settings/testsUtils/utils/*.js',
+            { pattern: 'tests/svgstyle.css', included: true, served: true },
             'tests/*.Test.js'
         ]),
 
