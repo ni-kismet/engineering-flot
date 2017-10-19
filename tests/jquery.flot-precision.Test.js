@@ -94,7 +94,7 @@ describe("unit tests for the precision of axis", function() {
                     max: t[1],
                     ticks: t[2],
                     showTickLabels : 'endpoints',
-                    autoscale: "none",
+                    autoScale: "none",
                     mode: t[3]
                 }]
             });
@@ -139,7 +139,7 @@ describe("unit tests for the precision of axis", function() {
                         showTickLabels : 'endpoints',
                         min : t[0],
                         max : t[1],
-                        autoscale : 'none'
+                        autoScale : 'none'
                         }]
                     });
                 var axis = plot.getXAxes()[0];

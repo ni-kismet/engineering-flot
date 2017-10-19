@@ -215,7 +215,7 @@ describe("integration tests for log scale functions", function() {
         $.plot(placeholder, [lineardata1], {
             yaxis: {
                 mode: 'log',
-                autoscale: 'exact'
+                autoScale: 'exact'
             }
         });
 
@@ -238,7 +238,7 @@ describe("integration tests for log scale functions", function() {
         $.plot(placeholder, [logdata1], {
             yaxis: {
                 mode: 'log',
-                autoscale: 'exact'
+                autoScale: 'exact'
             }
         });
 
@@ -264,7 +264,7 @@ describe("integration tests for log scale functions", function() {
                 tickFormatter: function () {
                     return 'log tick';
                 },
-                autoscale: 'exact'
+                autoScale: 'exact'
             }
         });
 
@@ -286,11 +286,11 @@ describe("integration tests for log scale functions", function() {
         var plot = $.plot(placeholder, [logdata1], {
                 xaxis: {
                     mode: 'log',
-                    autoscale: 'exact'
+                    autoScale: 'exact'
                 },
                 yaxis: {
                     mode: 'log',
-                    autoscale: 'exact'
+                    autoScale: 'exact'
                 }
             }),
             axes = plot.getAxes();
@@ -316,7 +316,7 @@ describe("integration tests for log scale functions", function() {
             plot = $.plot(placeholder, [logdata[i]], {
                   yaxis: {
                       mode: 'log',
-                      autoscale: 'exact'
+                      autoScale: 'exact'
                   }
                 }),
             ticks = queryPlotForYTicks();
@@ -341,7 +341,7 @@ describe("integration tests for log scale functions", function() {
             plot = $.plot(placeholder, [logdata[i]], {
                   yaxis: {
                       mode: 'log',
-                      autoscale: 'exact'
+                      autoScale: 'exact'
                   }
                 }),
             ticks = queryPlotForYTicks();
