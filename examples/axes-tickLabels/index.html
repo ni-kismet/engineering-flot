@@ -36,7 +36,7 @@
                 { position: 'bottom' }
             ],
             yaxes: [
-                { position: 'left', autoscale: 'none', min: -3, max: 3 }
+                { position: 'left', autoScale: 'none', min: -3, max: 3 }
             ]
         });
 
@@ -87,38 +87,38 @@
 
             switch (val) {
                 case 'none':
-                    y.options.autoscale = 'none';
+                    y.options.autoScale = 'none';
                     y.options.min = -3;
                     y.options.max = 3;
-                    y.options.autoscaleMargin = null;
+                    y.options.autoScaleMargin = null;
                     y.options.growOnly = null;
                     break;
                 case 'fitLoosely':
-                    y.options.autoscale = 'loose';
+                    y.options.autoScale = 'loose';
                     y.options.min = undefined;
                     y.options.max = undefined;
-                    y.options.autoscaleMargin = 0.1;
+                    y.options.autoScaleMargin = 0.1;
                     y.options.growOnly = false;
                     break;
                 case 'fitExactly':
-                    y.options.autoscale = 'exact';
+                    y.options.autoScale = 'exact';
                     y.options.min = undefined;
                     y.options.max = undefined;
-                    y.options.autoscaleMargin = null;
+                    y.options.autoScaleMargin = null;
                     y.options.growOnly = false;
                     break;
                 case 'growLoosely':
-                    y.options.autoscale = 'loose';
+                    y.options.autoScale = 'loose';
                     y.options.min = -2.0;
                     y.options.max = 2.0;
-                    y.options.autoscaleMargin = 0.1;
+                    y.options.autoScaleMargin = 0.1;
                     y.options.growOnly = true;
                     break;
                 case 'growExactly':
-                    y.options.autoscale = 'exact';
+                    y.options.autoScale = 'exact';
                     y.options.min = undefined;
                     y.options.max = undefined;
-                    y.options.autoscaleMargin = null;
+                    y.options.autoScaleMargin = null;
                     y.options.growOnly = true;
                     break;
             }

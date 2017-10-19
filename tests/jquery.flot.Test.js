@@ -16,8 +16,8 @@ describe('flot', function() {
         });
 
         it('should keep the axis min and max for none autoscaling if no data is set', function () {
-            options.xaxis = {autoscale: 'none', min: 0, max: 50};
-            options.yaxis = {autoscale: 'none', min: 0, max: 100};
+            options.xaxis = {autoScale: 'none', min: 0, max: 50};
+            options.yaxis = {autoScale: 'none', min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -29,8 +29,8 @@ describe('flot', function() {
         });
 
         it('should swap the axis min and max for min > max', function () {
-            options.xaxis = {autoscale: 'none', min: 50, max: 0};
-            options.yaxis = {autoscale: 'none', min: 100, max: 0};
+            options.xaxis = {autoScale: 'none', min: 50, max: 0};
+            options.yaxis = {autoScale: 'none', min: 100, max: 0};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -42,8 +42,8 @@ describe('flot', function() {
         });
 
         it('should keep the axis min and max for exact autoscaling if no data is set', function () {
-            options.xaxis = {autoscale: 'exact', min: 0, max: 50};
-            options.yaxis = {autoscale: 'exact', min: 0, max: 100};
+            options.xaxis = {autoScale: 'exact', min: 0, max: 50};
+            options.yaxis = {autoScale: 'exact', min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -55,8 +55,8 @@ describe('flot', function() {
         });
 
         it('should keep the axis min and max for grow-exact autoscaling if no data is set', function () {
-            options.xaxis = {autoscale: 'exact', growOnly: true, min: 0, max: 50};
-            options.yaxis = {autoscale: 'exact', growOnly: true, min: 0, max: 100};
+            options.xaxis = {autoScale: 'exact', growOnly: true, min: 0, max: 50};
+            options.yaxis = {autoScale: 'exact', growOnly: true, min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -68,8 +68,8 @@ describe('flot', function() {
         });
 
         it('should keep the axis min and max for loose autoscaling if no data is set', function () {
-            options.xaxis = {autoscale: 'loose', min: 0, max: 50};
-            options.yaxis = {autoscale: 'loose', min: 0, max: 100};
+            options.xaxis = {autoScale: 'loose', min: 0, max: 50};
+            options.yaxis = {autoScale: 'loose', min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -81,8 +81,8 @@ describe('flot', function() {
         });
 
         it('should keep the axis min and max for grow-loose autoscaling if no data is set', function () {
-            options.xaxis = {autoscale: 'loose', growOnly: true, min: 0, max: 50};
-            options.yaxis = {autoscale: 'loose', growOnly: true, min: 0, max: 100};
+            options.xaxis = {autoScale: 'loose', growOnly: true, min: 0, max: 50};
+            options.yaxis = {autoScale: 'loose', growOnly: true, min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -94,8 +94,8 @@ describe('flot', function() {
         });
 
         it('should keep the axis min and max for window autoscaling if no data is set', function () {
-            options.xaxis = {autoscale: 'sliding-window', min: 0, max: 50};
-            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 100};
+            options.xaxis = {autoScale: 'sliding-window', min: 0, max: 50};
+            options.yaxis = {autoScale: 'sliding-window', min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -107,8 +107,8 @@ describe('flot', function() {
         });
 
         it('should not shift the axis min and max for window autoscaling if data is in window', function () {
-            options.xaxis = {autoscale: 'sliding-window', min: 0, max: 10};
-            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10};
+            options.xaxis = {autoScale: 'sliding-window', min: 0, max: 10};
+            options.yaxis = {autoScale: 'sliding-window', min: 0, max: 10};
             // default window size is 100
             plot = $.plot(placeholder, [[]], options);
             plot.setData([[[0, 0], [50, 50], [100, 100]]]);
@@ -123,8 +123,8 @@ describe('flot', function() {
         });
 
         it('should shift the axis min and max for window autoscaling if data is bigger than window', function () {
-            options.xaxis = {autoscale: 'sliding-window', min: 0, max: 10};
-            options.yaxis = {autoscale: 'sliding-window', min: 0, max: 10};
+            options.xaxis = {autoScale: 'sliding-window', min: 0, max: 10};
+            options.yaxis = {autoScale: 'sliding-window', min: 0, max: 10};
             // default window size is 100
             plot = $.plot(placeholder, [[]], options);
             plot.setData([[[0, 0], [100, 100], [200, 200]]]);
@@ -178,8 +178,8 @@ describe('flot', function() {
         });
 
         it('should not change the axis min and max for none autoscaling if data is set', function () {
-            options.xaxis = {autoscale: 'none', min: 0, max: 50};
-            options.yaxis = {autoscale: 'none', min: 0, max: 100};
+            options.xaxis = {autoScale: 'none', min: 0, max: 50};
+            options.yaxis = {autoScale: 'none', min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -194,8 +194,8 @@ describe('flot', function() {
         });
 
         it('should change the axis min and max for exact autoscaling if data is set', function () {
-            options.xaxis = {autoscale: 'exact', min: 0, max: 50};
-            options.yaxis = {autoscale: 'exact', min: 0, max: 100};
+            options.xaxis = {autoScale: 'exact', min: 0, max: 50};
+            options.yaxis = {autoScale: 'exact', min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -210,8 +210,8 @@ describe('flot', function() {
         });
 
         it('should change the axis min and max for loose autoscaling if data is set', function () {
-            options.xaxis = {autoscale: 'loose', min: 0, max: 50};
-            options.yaxis = {autoscale: 'loose', min: 0, max: 100};
+            options.xaxis = {autoScale: 'loose', min: 0, max: 50};
+            options.yaxis = {autoScale: 'loose', min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -226,8 +226,8 @@ describe('flot', function() {
         });
 
         it('should keep the axis min 0 for loose autoscaling if all values are positive', function () {
-            options.xaxis = {autoscale: 'loose', min: 0, max: 50};
-            options.yaxis = {autoscale: 'loose', min: 0, max: 100};
+            options.xaxis = {autoScale: 'loose', min: 0, max: 50};
+            options.yaxis = {autoScale: 'loose', min: 0, max: 100};
             plot = $.plot(placeholder, [[]], options);
 
             var axes = plot.getAxes();
@@ -240,8 +240,8 @@ describe('flot', function() {
         });
 
         it('should ignore NaN, Infinity and -Infinity values', function () {
-            options.xaxis = {autoscale: 'exact'};
-            options.yaxis = {autoscale: 'exact'};
+            options.xaxis = {autoScale: 'exact'};
+            options.yaxis = {autoScale: 'exact'};
             plot = $.plot(placeholder, [[[Infinity, 0], [NaN, NaN], [0, Infinity], [10, -Infinity], [-Infinity, 10], [3, 5], [8, 2]]], options);
 
             var axes = plot.getAxes();
@@ -305,9 +305,9 @@ describe('flot', function() {
             expect(limits.ymax).toBe(3);
         });
 
-        it('should not compute the minimum and the maximum when autoscale="none"', function () {
-            options.xaxis = {autoscale: 'none'};
-            options.yaxis = {autoscale: 'none'};
+        it('should not compute the minimum and the maximum when autoScale="none"', function () {
+            options.xaxis = {autoScale: 'none'};
+            options.yaxis = {autoScale: 'none'};
             plot = $.plot(placeholder, [[[0, 1], [1, 2], [2, 3]]], options);
 
             var series = plot.getData();
@@ -319,9 +319,9 @@ describe('flot', function() {
             expect(limits.ymax).toBe(-Infinity);
         });
 
-        it('should compute the minimum and the maximum when autoscale="none" and force=true', function () {
-            options.xaxis = {autoscale: 'none'};
-            options.yaxis = {autoscale: 'none'};
+        it('should compute the minimum and the maximum when autoScale="none" and force=true', function () {
+            options.xaxis = {autoScale: 'none'};
+            options.yaxis = {autoScale: 'none'};
             plot = $.plot(placeholder, [[[0, 1], [1, 2], [2, 3]]], options);
 
             var series = plot.getData();
@@ -538,10 +538,10 @@ describe('flot', function() {
 
         it('should set a default tick formatter to each specified axis', function () {
             plot = $.plot(placeholder, [sampledata], {
-                xaxis: { autoscale: 'exact' },
+                xaxis: { autoScale: 'exact' },
                 yaxes: [
-                    { autoscale: 'exact' },
-                    { autoscale: 'none', min: -1, max: 1 }
+                    { autoScale: 'exact' },
+                    { autoScale: 'none', min: -1, max: 1 }
                 ]
             });
 
@@ -557,10 +557,10 @@ describe('flot', function() {
                 jasmine.createSpy('formatter')
             ];
             plot = $.plot(placeholder, [sampledata], {
-                xaxis: { autoscale: 'exact', tickFormatter: formatters[0] },
+                xaxis: { autoScale: 'exact', tickFormatter: formatters[0] },
                 yaxes: [
-                    { autoscale: 'exact', tickFormatter: formatters[1] },
-                    { autoscale: 'none', min: -1, max: 1, tickFormatter: formatters[2], show: true }
+                    { autoScale: 'exact', tickFormatter: formatters[1] },
+                    { autoScale: 'none', min: -1, max: 1, tickFormatter: formatters[2], show: true }
                 ]
             });
 
@@ -678,7 +678,7 @@ describe('flot', function() {
         it('should draw no tick labels when showTickLabels = none', function () {
             $.plot(placeholder, [sampledata], {
                 xaxis: {
-                    autoscale: 'loose',
+                    autoScale: 'loose',
                     showTickLabels: 'none'
                 }
             });
@@ -691,7 +691,7 @@ describe('flot', function() {
         it('should draw two tick labels when showTickLabels = endpoints', function () {
             $.plot(placeholder, [sampledata], {
                 xaxis: {
-                    autoscale: 'loose',
+                    autoScale: 'loose',
                     showTickLabels: 'endpoints'
                 }
             });
@@ -704,7 +704,7 @@ describe('flot', function() {
         it('should draw multiple tick labels when showTickLabels = all', function () {
             $.plot(placeholder, [sampledata], {
                 xaxis: {
-                    autoscale: 'loose',
+                    autoScale: 'loose',
                     showTickLabels: 'all'
                 }
             });
@@ -718,7 +718,7 @@ describe('flot', function() {
             it('should not overlap the tick labels when the values are large and showTickLabels = ' + showTickLabels, function () {
                 $.plot(placeholder, [sampledata], {
                     xaxis: {
-                        autoscale: 'exact',
+                        autoScale: 'exact',
                         showTickLabels: showTickLabels
                     }
                 });
@@ -762,11 +762,11 @@ describe('flot', function() {
             it('should not show x axis endpoints for bars with showTickLabels = all', function() {
                 var plot = $.plot(placeholder, [[[-3, 1], [30, 15], [20, 7], [5, 2]]], {
                     xaxis: {
-                        autoscale: 'exact',
+                        autoScale: 'exact',
                         showTickLabels: 'all'
                     },
                     yaxis: {
-                        autoscale: 'exact',
+                        autoScale: 'exact',
                         showTickLabels: 'all'
                     },
                     series: {
@@ -801,7 +801,7 @@ describe('flot', function() {
                     points: { show: true }
                 }], {
                     xaxis: {
-                        autoscale: 'exact',
+                        autoScale: 'exact',
                         showTickLabels: 'all'
                     }});
 
@@ -922,7 +922,7 @@ describe('flot', function() {
                 testVector.forEach(function (testValue) {
                     var plot = $.plot(placeholder, [[1, 2, 3]], {
                         xaxis: {
-                            autoscale: 'none',
+                            autoScale: 'none',
                             min: testValue[0],
                             max: testValue[1],
                             showTickLabels: 'all'
@@ -981,7 +981,7 @@ describe('flot', function() {
             testVector.forEach(function (testValue) {
                 var plot = $.plot(placeholder, [[1, 2, 3]], {
                     xaxis: {
-                        autoscale: 'none',
+                        autoScale: 'none',
                         min: testValue[0],
                         max: testValue[1],
                         showTickLabels: 'all',

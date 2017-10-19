@@ -41,7 +41,7 @@ describe('A Flot chart with absolute time axes', function () {
             yaxis: {
                 format: 'time',
                 timeformat: '%A',
-                autoscale: 'exact'
+                autoScale: 'exact'
             }
         });
     };
