@@ -1,6 +1,22 @@
 (function($) {
     "use strict";
     const CGENERALFAILURECALLBACKERROR = -100; //simply a negative number
+    const CSUCCESSFULIMAGEPREPARATION = 0;
+    const CEMPTYARRAYOFIMAGESOURCES = -1;
+    const CNEGATIVEIMAGESIZE = -2;
+
+    function composeImages(canvasOrSvgSources, destinationCanvas) {
+        var tempImgs = [];
+        var allImgCompositionPromises = [];
+        for (var i = 0; i < canvasOrSvgSources.length; i++) {
+            var currentTempImg = new Image();
+            tempImgs.push(currentTempImg);
+            var currentPromise = new Promise(getGenerateTempImg(currentTempImg, canvasOrSvgSources[i]));
+            allImgCompositionPromises.push(currentPromise);
+        }
+        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(tempImgs, destinationCanvas), failureCallback);
+        return lastPromise;
+    }
 
     function copyCanvasToImg(canvas, img) {
         img.src = canvas.toDataURL('image/png');
@@ -63,9 +79,9 @@
     }
 
     function prepareImagesToBeComposed(sources, destination) {
-        var result = 0;
+        var result = CSUCCESSFULIMAGEPREPARATION;
         if (sources.length === 0) {
-            result = -1; //nothing to do if called without sources
+            result = CEMPTYARRAYOFIMAGESOURCES; //nothing to do if called without sources
         } else {
             var minX = sources[0].genLeft;
             var minY = sources[0].genTop;
@@ -94,7 +110,7 @@
             }
 
             if ((maxX - minX <= 0) || (maxY - minY <= 0)) {
-                result = -2;
+                result = CNEGATIVEIMAGESIZE; //this might occur on hidden images
             } else {
                 destination.width = Math.round(maxX - minX);
                 destination.height = Math.round(maxY - minY);
@@ -110,7 +126,7 @@
 
     function copyImgsToCanvas(sources, destination) {
         var prepareImagesResult = prepareImagesToBeComposed(sources, destination);
-        if (prepareImagesResult === 0) {
+        if (prepareImagesResult === CSUCCESSFULIMAGEPREPARATION) {
             var destinationCtx = destination.getContext('2d');
 
             for (var i = 0; i < sources.length; i++) {
@@ -155,19 +171,6 @@
             tempImg.onload = successCallbackFunc;
             generateTempImageFromCanvasOrSvg(canvasOrSvgSource, tempImg);
         };
-    }
-
-    function composeImages(canvasOrSvgSources, destinationCanvas) {
-        var tempImgs = [];
-        var allImgCompositionPromises = [];
-        for (var i = 0; i < canvasOrSvgSources.length; i++) {
-            var currentTempImg = new Image();
-            tempImgs.push(currentTempImg);
-            var currentPromise = new Promise(getGenerateTempImg(currentTempImg, canvasOrSvgSources[i]));
-            allImgCompositionPromises.push(currentPromise);
-        }
-        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(tempImgs, destinationCanvas), failureCallback);
-        return lastPromise;
     }
 
     $.plot.composeImages = composeImages;

@@ -116,7 +116,7 @@ module.exports = function(config) {
 
         settings.reporters.push('coverage');
         settings.reporters.push('coveralls');
-        settings.browsers = ['PhantomJS'];
+        settings.browsers = ['Chrome'];
     }
 
     config.set(settings);
