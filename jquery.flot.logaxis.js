@@ -260,7 +260,7 @@ Set axis.mode to "log" to enable.
                     }
                     axis.options.transform = logTransform;
                     axis.options.inverseTransform = logInverseTransform;
-                    axis.options.autoscaleMargin = 0;
+                    axis.options.autoScaleMargin = 0;
                     plot.hooks.setRange.push(setDataminRange);
                 }
             });

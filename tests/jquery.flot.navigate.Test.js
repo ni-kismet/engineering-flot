@@ -8,8 +8,8 @@ describe("flot navigate plugin", function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
         options = {
-            xaxes: [{ autoscale: 'exact' }],
-            yaxes: [{ autoscale: 'exact' }],
+            xaxes: [{ autoScale: 'exact' }],
+            yaxes: [{ autoScale: 'exact' }],
             zoom: { interactive: true, active: true, amount: 10 },
             pan: { interactive: true, active: true, frameRate: -1 }
         };
@@ -51,11 +51,11 @@ describe("flot navigate plugin", function () {
 
         });
 
-        it('works with autoscale', function () {
+        it('works with autoScale', function () {
             var xaxis, yaxis,
                 opts = {
-                    xaxes: [{ autoscale: 'sliding-window' , min: 0, max: 100}],
-                    yaxes: [{ autoscale: 'loose' }],
+                    xaxes: [{ autoScale: 'sliding-window' , min: 0, max: 100}],
+                    yaxes: [{ autoScale: 'loose' }],
                     zoom: { interactive: true, amount: 10 },
                     pan: { interactive: true, frameRate: -1 }
                 };
@@ -235,8 +235,8 @@ describe("flot navigate plugin", function () {
                     [10, 10]
                 ]
             ], {
-                xaxes: [{ autoscale: 'exact' }],
-                yaxes: [{ autoscale: 'exact' }],
+                xaxes: [{ autoScale: 'exact' }],
+                yaxes: [{ autoScale: 'exact' }],
                 zoom: { interactive: true, active: false, amount: 10 },
                 pan: { interactive: true, active: false, frameRate: -1 }
             });
@@ -641,8 +641,8 @@ describe("flot navigate plugin", function () {
                     [10, 10]
                 ]
             ], {
-                xaxes: [{ autoscale: 'exact', mode : 'log'}],
-                yaxes: [{ autoscale: 'exact' }],
+                xaxes: [{ autoScale: 'exact', mode : 'log'}],
+                yaxes: [{ autoScale: 'exact' }],
                 zoom: { interactive: true, active: true, amount: 10 },
                 pan: { interactive: true, active: true, frameRate: -1 }
             });

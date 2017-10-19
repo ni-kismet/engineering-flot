@@ -254,13 +254,13 @@ describe('drawSeries', function() {
                 xaxis: {
                     min: minx,
                     max: maxx,
-                    autoscale: 'exact',
+                    autoScale: 'exact',
                     p2c: function(p) { return p; }
                 },
                 yaxis: {
                     min: miny,
                     max: maxy,
-                    autoscale: 'exact',
+                    autoScale: 'exact',
                     p2c: function(p) { return p; }
                 }
             };
@@ -385,7 +385,7 @@ describe('drawSeries', function() {
                         fillColor: 'blue'
                     }
                 },
-                xaxis: { autoscale:'exact' }
+                xaxis: { autoScale:'exact' }
             });
             var ctx = $(placeholder).find('.flot-base').get(0).getContext('2d')
                 insideColor1 = getPixelColor(ctx, ctx.canvas.width / 2, ctx.canvas.height / 2),
