@@ -8,6 +8,8 @@ describe("composeImages", function() {
     beforeEach(function() {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
             .find('#test-container');
+
+        jasmine.addMatchers(pixelMatchers);
     });
 
     it('should call composeImages on an empty array of sources, so the destination canvas should stay unmodified', function (done) {
@@ -614,6 +616,7 @@ describe("composeImages", function() {
 
             pixelData = destinationCanvas.getContext('2d').getImageData(80, 149, 1, 1).data;
             expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelData).toMatchPixelColor([0, 0, 255, 255]);
 
             //verify a pixel from the circle border, if it comes from a black line (almost black, because of antialiasing), as described in svg style
             pixelData = destinationCanvas.getContext('2d').getImageData(79, 102, 1, 1).data;
@@ -663,5 +666,33 @@ describe("composeImages", function() {
         }
         return sameValue;
     }
+
+    //see https://jasmine.github.io/2.0/custom_matcher.html
+    var pixelMatchers = {
+        toMatchPixelColor: function(util, customEqualityTesters) {
+            return {
+                compare: function(actual, expected) {
+                    if (expected === undefined) {
+                        expected = [-1000, -1000, -999, -999]; //no color should match these values
+                    }
+
+                    var pixelData = actual,
+                        r = expected[0],
+                        g = expected[1],
+                        b = expected[2],
+                        a = expected[3],
+
+                        result = {};
+                    result.pass = matchPixelColor(pixelData, r, g, b, a);
+                    if (!result.pass) {
+                        result.message =
+                          'Expected [' + pixelData +
+                          '] to match [' + r + ',' + g + ',' + b + ',' + a + ']';
+                    }
+                    return result;
+                }
+            };
+        }
+    };
 
 });
