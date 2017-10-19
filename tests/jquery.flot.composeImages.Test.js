@@ -19,7 +19,6 @@ describe("composeImages", function() {
         ).find('svg').toArray();
 
         var destinationCanvas = document.getElementById("myCanvas");
-        var pixelData; //used later
 
         function drawCircleOnToCanvas(canvas) {
             var ctx = canvas.getContext('2d');
@@ -30,29 +29,15 @@ describe("composeImages", function() {
         drawCircleOnToCanvas(destinationCanvas); //make sure composeImages won't modify this content
 
         composeImages(sources, destinationCanvas).then(function() {
-            pixelData = destinationCanvas.getContext('2d').getImageData(80, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 0, 255)).toBe(true);
-
+            expect(pixelColor(destinationCanvas, 80, 10, 1, 1)).toMatchPixelColor([0, 0, 0, 255]);
             expect(destinationCanvas.width).toBe(300);
             expect(destinationCanvas.height).toBe(150);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 0, 0)).toBe(true);
+            expect(pixelColor(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([0, 0, 0, 0]);
+            expect(pixelColor(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 0, 0, 0]);
+            expect(pixelColor(destinationCanvas, 50, 70, 1, 1)).toMatchPixelColor([0, 0, 0, 0]);
+            expect(pixelColor(destinationCanvas, 10, 110, 1, 1)).toMatchPixelColor([0, 0, 0, 0]);
+            expect(pixelColor(destinationCanvas, 30, 140, 1, 1)).toMatchPixelColor([0, 0, 0, 0]);
+            expect(pixelColor(destinationCanvas, 50, 170, 1, 1)).toMatchPixelColor([0, 0, 0, 0]);
 
             done();
         }, null);
@@ -68,23 +53,16 @@ describe("composeImages", function() {
         '</svg>' +
         '</div>' +
         '<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>'
-    ).find('svg').toArray();
+        ).find('svg').toArray();
 
         var destinationCanvas = document.getElementById("myCanvas");
-        var pixelData; //used later
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(100);
             expect(destinationCanvas.height).toBe(100);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 50, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
 
             done();
         }, null);
@@ -108,29 +86,16 @@ describe("composeImages", function() {
         ).find('svg').toArray();
 
         var destinationCanvas = document.getElementById("myCanvas");
-        var pixelData; //used later
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(200); //204 - //200 + 2 * 2px_spacing
             expect(destinationCanvas.height).toBe(100);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(110, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(130, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(150, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 50, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
+            expect(pixelColor(destinationCanvas, 110, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]); //110 + 4
+            expect(pixelColor(destinationCanvas, 130, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]); //130 + 4
+            expect(pixelColor(destinationCanvas, 150, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]); //150 + 4
 
             done();
         }, null);
@@ -155,29 +120,16 @@ describe("composeImages", function() {
         ).find('svg').toArray();
 
         var destinationCanvas = document.getElementById("myCanvas");
-        var pixelData; //used later
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(100);
             expect(destinationCanvas.height).toBe(200);  //204 - //200 + 2 * 2px_spacing
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110 + 0, 1, 1).data; //110 + 4
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140 + 0, 1, 1).data; //140 + 4
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170 + 0, 1, 1).data; //170 + 4
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 50, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
+            expect(pixelColor(destinationCanvas, 10, 110, 1, 1)).toMatchPixelColor([255, 0, 0, 255]); //110 + 4
+            expect(pixelColor(destinationCanvas, 30, 140, 1, 1)).toMatchPixelColor([0, 255, 0, 255]); //140 + 4
+            expect(pixelColor(destinationCanvas, 50, 170, 1, 1)).toMatchPixelColor([0, 0, 255, 255]); //170 + 4
 
             done();
         }, null);
@@ -206,38 +158,19 @@ describe("composeImages", function() {
         ).find('svg').toArray();
 
         var destinationCanvas = document.getElementById("myCanvas");
-        var pixelData; //used later
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(200);  //204 - //200 + 2 * 2px_spacing
             expect(destinationCanvas.height).toBe(200);  //204 - //200 + 2 * 2px_spacing
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(110, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(130, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(150, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 110 + 0, 1, 1).data; //110 + 4
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 140 + 0, 1, 1).data; //140 + 4
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 170 + 0, 1, 1).data; //170 + 4
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 50, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
+            expect(pixelColor(destinationCanvas, 110, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]); //110 + 4
+            expect(pixelColor(destinationCanvas, 130, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]); //130 + 4
+            expect(pixelColor(destinationCanvas, 150, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]); //150 + 4
+            expect(pixelColor(destinationCanvas, 10, 110, 1, 1)).toMatchPixelColor([255, 0, 0, 255]); //110 + 4
+            expect(pixelColor(destinationCanvas, 30, 140, 1, 1)).toMatchPixelColor([0, 255, 0, 255]); //140 + 4
+            expect(pixelColor(destinationCanvas, 50, 170, 1, 1)).toMatchPixelColor([0, 0, 255, 255]); //170 + 4
 
             done();
         }, null);
@@ -263,8 +196,8 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
+            expect(canvas1_Data).toMatchCanvasArea(canvas2_Data);
 
-            expect(matchPixelDataArrays(canvas1_Data, canvas2_Data)).toBe(true);
             done();
         }, null);
     });
@@ -294,17 +227,11 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 80, 20, 20).data;
+            expect(canvas1_Data).toMatchCanvasArea(canvas2_Data);
 
-            expect(matchPixelDataArrays(canvas1_Data, canvas2_Data)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(20 + 10, 10, 1, 1).data; //24 + 10
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(20 + 30, 40, 1, 1).data; //24 + 30
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(20 + 50, 70, 1, 1).data; //24 + 50
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 20 + 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]); //24 + 10
+            expect(pixelColor(destinationCanvas, 20 + 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]); //24 + 30
+            expect(pixelColor(destinationCanvas, 20 + 50, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]); //24 + 50
 
             done();
         }, null);
@@ -334,12 +261,11 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
 
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 0, 0, 20, 20).data; //20 + 4
-
-            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
+            expect(canvas2_Data).toMatchCanvasArea(canvas3_Data);
 
             done();
         }, null);
@@ -372,11 +298,11 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 10, 20).data; //14
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 10, 20).data; //14
-            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
 
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 0 - 10, 0, 20, 20).data; //20 + 4 - 10
-            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
+            expect(canvas2_Data).toMatchCanvasArea(canvas3_Data);
 
             done();
         }, null);
@@ -411,11 +337,11 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
 
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20 - 10 + 0, 20).data; //20 - 10 + 4
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(20, 0, 20 - 10 + 0, 20).data; //20 - 10 + 4
-            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
+            expect(canvas2_Data).toMatchCanvasArea(canvas3_Data);
 
             done();
         }, null);
@@ -448,11 +374,11 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 20 - 0, 0, 20, 20).data; //100 - 20 - 10 + 6
-            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
 
             canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            expect(matchPixelDataArrays(canvas2_Data, canvas3_Data)).toBe(true);
+            expect(canvas2_Data).toMatchCanvasArea(canvas3_Data);
 
             done();
         }, null);
@@ -478,7 +404,6 @@ describe("composeImages", function() {
         var destinationCanvas = document.getElementById("myCanvas");
         var canvas1_Data; //used later
         var canvas3_Data; //used later
-        var pixelData;//used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
 
@@ -488,17 +413,11 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 40 + 0, 0, 20, 20).data; //100 - 40 + 4
-            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
 
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(10, 10, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(30, 40, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 70, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 50, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
 
             done();
         }, null);
@@ -524,7 +443,6 @@ describe("composeImages", function() {
         var destinationCanvas = document.getElementById("myCanvas");
         var canvas1_Data; //used later
         var canvas3_Data; //used later
-        var pixelData;//used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
 
@@ -534,32 +452,21 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(250 - 180 + 0, 150 - 10 - 20, 20, 20).data; //250 - 180 + 4
-            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
+            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
 
 
             //circle centers
-            pixelData = destinationCanvas.getContext('2d').getImageData(230, 20, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(175, 100, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 130, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 230, 20, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 175, 100, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 50, 130, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
 
             //other points on circles should match the required colors, because of configured diameters
-            pixelData = destinationCanvas.getContext('2d').getImageData(220, 17, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(190, 114, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(80, 149, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 220, 17, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 190, 114, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 80, 149, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
 
             //verify a pixel from the circle border, if it comes from a black line (almost black, because of antialiasing), as described in svg style
-            pixelData = destinationCanvas.getContext('2d').getImageData(79, 102, 1, 1).data;
-            expect(matchPixelColorWithError(pixelData, 0, 0, 0, 255, 15)).toBe(true);
+            expect(pixelColor(destinationCanvas, 79, 102, 1, 1)).toMatchPixelColorWithError([0, 0, 0, 255, 15]);
 
             done();
         }, null);
@@ -584,7 +491,6 @@ describe("composeImages", function() {
         var destinationCanvas = document.getElementById("myCanvas");
         var canvas1_Data; //used later
         var canvas3_Data; //used later
-        var pixelData;//used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
 
@@ -594,33 +500,20 @@ describe("composeImages", function() {
 
             canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
             canvas3_Data = destinationCanvas.getContext('2d').getImageData(250 - 180 + 0, 150 - 10 - 20, 20, 20).data; //250 - 180 + 4
-            expect(matchPixelDataArrays(canvas1_Data, canvas3_Data)).toBe(true);
-
+            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
 
             //circle centers
-            pixelData = destinationCanvas.getContext('2d').getImageData(230, 20, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(175, 100, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(50, 130, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
+            expect(pixelColor(destinationCanvas, 230, 20, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 175, 100, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 50, 130, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
 
             //other points on circles should match the required colors, because of configured diameters
-            pixelData = destinationCanvas.getContext('2d').getImageData(220, 17, 1, 1).data;
-            expect(matchPixelColor(pixelData, 255, 0, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(190, 114, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 255, 0, 255)).toBe(true);
-
-            pixelData = destinationCanvas.getContext('2d').getImageData(80, 149, 1, 1).data;
-            expect(matchPixelColor(pixelData, 0, 0, 255, 255)).toBe(true);
-            expect(pixelData).toMatchPixelColor([0, 0, 255, 255]);
+            expect(pixelColor(destinationCanvas, 220, 17, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(pixelColor(destinationCanvas, 190, 114, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(pixelColor(destinationCanvas, 80, 149, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
 
             //verify a pixel from the circle border, if it comes from a black line (almost black, because of antialiasing), as described in svg style
-            pixelData = destinationCanvas.getContext('2d').getImageData(79, 102, 1, 1).data;
-            expect(matchPixelColorWithError(pixelData, 0, 0, 0, 255, 15)).toBe(true);
+            expect(pixelColor(destinationCanvas, 79, 102, 1, 1)).toMatchPixelColorWithError([0, 0, 0, 255, 15]);
 
             done();
         }, null);
@@ -642,6 +535,10 @@ describe("composeImages", function() {
         ctx.rect(0, 0, 20, 20);
         ctx.fillStyle = color;
         ctx.fill();
+    }
+
+    function pixelColor(canvas, x, y, width, height) {
+        return canvas.getContext('2d').getImageData(x, y, width, height).data;
     }
 
     function matchPixelColor(pixelData, r, g, b, a) {
@@ -673,7 +570,7 @@ describe("composeImages", function() {
             return {
                 compare: function(actual, expected) {
                     if (expected === undefined) {
-                        expected = [-1000, -1000, -999, -999]; //no color should match these values
+                        expected = expected || [-1000, -1000, -999, -999]; //no color should match these values
                     }
 
                     var pixelData = actual,
@@ -692,7 +589,52 @@ describe("composeImages", function() {
                     return result;
                 }
             };
+        },
+
+        toMatchPixelColorWithError: function(util, customEqualityTesters) {
+            return {
+                compare: function(actual, expected) {
+                    if (expected === undefined) {
+                        expected = expected || [-1000, -1000, -999, -999, -1500]; //no color should match these values
+                    }
+
+                    var pixelData = actual,
+                        r = expected[0],
+                        g = expected[1],
+                        b = expected[2],
+                        a = expected[3],
+                        err = expected[4],
+
+                        result = {};
+                    result.pass = matchPixelColorWithError(pixelData, r, g, b, a, err);
+                    if (!result.pass) {
+                        result.message =
+                          'Expected [' + pixelData +
+                          '] to match [' + r + ',' + g + ',' + b + ',' + a + ']';
+                    }
+                    return result;
+                }
+            };
+        },
+
+        toMatchCanvasArea: function(util, customEqualityTesters) {
+            return {
+                compare: function(actual, expected) {
+                    if (expected === undefined) {
+                        expected = [];
+                    }
+
+                    var result = {};
+                    result.pass = matchPixelDataArrays(actual, expected);
+                    if (!result.pass) {
+                        result.message =
+                          'Expected actual[...]' +
+                          ' to match expected[...]';
+                    }
+                    return result;
+                }
+            };
         }
-    };
+    }
 
 });
