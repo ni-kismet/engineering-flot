@@ -1,5 +1,6 @@
 (function($) {
     "use strict";
+    const CGENERALFAILURECALLBACKERROR = -100; //simply a negative number
 
     function copyCanvasToImg(canvas, img) {
         img.src = canvas.toDataURL('image/png');
@@ -21,7 +22,7 @@
 
     function embedCSSRulesInSVG(rules, svg) {
         var text = [
-            '<svg width="' + svg.width.baseVal.value + '" height="' + svg.height.baseVal.value + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
+            '<svg width="' + svg.getAttribute('width') + '" height="' + svg.getAttribute('height') + '" viewBox="0 0 ' + svg.getAttribute('width') + ' ' + svg.getAttribute('height') + '" xmlns="http://www.w3.org/2000/svg">',
             '<style>',
             '/* <![CDATA[ */',
             rules.join('\n'),
@@ -99,8 +100,8 @@
                 destination.height = Math.round(maxY - minY);
 
                 for (i = 0; i < sources.length; i++) {
-                    sources[i]["xCompOffset"] = sources[i].genLeft - minX;
-                    sources[i]["yCompOffset"] = sources[i].genTop - minY;
+                    sources[i].xCompOffset = sources[i].genLeft - minX;
+                    sources[i].yCompOffset = sources[i].genTop - minY;
                 }
             }
         }
@@ -119,6 +120,13 @@
         return prepareImagesResult;
     }
 
+    function adnotateDestImgWithBoundingClientRect(srcCanvasOrSvg, destImg) {
+        destImg.genLeft = srcCanvasOrSvg.getBoundingClientRect().left;
+        destImg.genTop = srcCanvasOrSvg.getBoundingClientRect().top;
+        destImg.genRight = srcCanvasOrSvg.getBoundingClientRect().right;
+        destImg.genBottom = srcCanvasOrSvg.getBoundingClientRect().bottom;
+    }
+
     function generateTempImageFromCanvasOrSvg(srcCanvasOrSvg, destImg) {
         if (srcCanvasOrSvg.tagName === "CANVAS") {
             copyCanvasToImg(srcCanvasOrSvg, destImg);
@@ -128,11 +136,7 @@
             copySVGToImg(srcCanvasOrSvg, destImg);
         }
 
-        //destImg will be used as temp image, so add to it some properties about position on page.
-        destImg["genLeft"] = srcCanvasOrSvg.getBoundingClientRect().left;
-        destImg["genTop"] = srcCanvasOrSvg.getBoundingClientRect().top;
-        destImg["genRight"] = srcCanvasOrSvg.getBoundingClientRect().right;
-        destImg["genBottom"] = srcCanvasOrSvg.getBoundingClientRect().bottom;
+        adnotateDestImgWithBoundingClientRect(srcCanvasOrSvg, destImg);
     }
 
     function getExecuteImgComposition(tempImgs, destinationCanvas) {
@@ -142,9 +146,8 @@
         };
     }
 
-    function failureCallback(error) {
-        error = 0;
-        return -100; //a negative number
+    function failureCallback() {
+        return CGENERALFAILURECALLBACKERROR;
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
