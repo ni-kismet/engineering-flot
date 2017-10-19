@@ -286,8 +286,6 @@ describe("composeImages", function() {
 
         drawSomeLinesOnCanvas(originalCanvas);
 
-        expect(sources.length).toBe(2);
-
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(120); //124 - //120 + 2 * 2px_spacing
             expect(destinationCanvas.height).toBe(100);
@@ -328,8 +326,6 @@ describe("composeImages", function() {
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
         drawARectangleOnCanvas(originalCanvas2, "#00FF00");
 
-        expect(sources.length).toBe(2);
-
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(40); //44 - //2 * 20 + 2 * spacing
             expect(destinationCanvas.height).toBe(20);
@@ -367,8 +363,6 @@ describe("composeImages", function() {
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
         drawARectangleOnCanvas(originalCanvas2, "#00FF00");
-
-        expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(30); //34 - //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
@@ -408,7 +402,6 @@ describe("composeImages", function() {
         drawARectangleOnCanvas(originalCanvas2, "#00FF00");
 
         sources.reverse(); //make sure the images are composed in the inverse order
-        expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(30); //34 - //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
@@ -446,8 +439,6 @@ describe("composeImages", function() {
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
         drawARectangleOnCanvas(originalCanvas2, "#00FF00");
-
-        expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(100 - 0); //100 - 4
@@ -488,8 +479,6 @@ describe("composeImages", function() {
         var pixelData;//used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
-
-        expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(100);
@@ -536,8 +525,6 @@ describe("composeImages", function() {
         var pixelData;//used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
-
-        expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(250);
@@ -598,8 +585,6 @@ describe("composeImages", function() {
         var pixelData;//used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
-
-        expect(sources.length).toBe(2);
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(250);
