@@ -1,7 +1,13 @@
-## engineering-flot 1.0.0 ##
+# Changelog
+All notable changes to this project will be documented in this file.
+
+## [1.0.0]
 
 ### Changes ###
 
+- Edge and Safari support
+- PhantomJS and IE are no longer supported
+- the axis and tick labels are now rendered using SVG text and g nodes instead of div
 - autoscale option from axis API renamed autoScale
 - autoscaleMargin option for scale loose renamed autoScaleMargin
 - changelog NEWS.md renamed to CHANGELOG.md
@@ -1371,3 +1377,6 @@ Moved labelMargin option to grid from x/yaxis.
 ## Flot 0.1 ##
 
 First public release.
+
+
+[1.0.0]: https://github.com/ni-kismet/engineering-flot/compare/v0.6.0...v1.0.0
