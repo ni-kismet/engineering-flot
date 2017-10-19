@@ -7,10 +7,10 @@ describe("flot navigate plugin interactions", function () {
     var placeholder, plot, eventHolder;
     var options = {
         xaxes: [{
-            autoscale: 'exact'
+            autoScale: 'exact'
         }],
         yaxes: [{
-            autoscale: 'exact'
+            autoScale: 'exact'
         }],
         zoom: {
             interactive: true,
@@ -137,10 +137,10 @@ describe("flot navigate plugin interactions", function () {
             [10, 10]]
         ], {
         xaxes: [{
-            autoscale: 'exact'
+            autoScale: 'exact'
         }],
         yaxes: [{
-            autoscale: 'exact'
+            autoScale: 'exact'
         }],
         zoom: {
             interactive: false,
