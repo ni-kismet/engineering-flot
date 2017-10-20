@@ -8,7 +8,7 @@ module.exports = function(config) {
     'use strict';
 
     var browsersMatrix = {
-            'win': ['Edge', 'Firefox', 'Chrome'],
+            'win': ['Firefox', 'Chrome', 'Edge'],
             'linux': ['Firefox', 'Chrome'],
             'mac': ['Safari', 'Firefox', 'Chrome']
         },

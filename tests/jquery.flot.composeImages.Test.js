@@ -519,6 +519,88 @@ describe("composeImages", function() {
         }, null);
     });
 
+    it('should call composeImages on one dynamically created canvas as a source, without being able to compose', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '</div>' +
+        '<canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('#canvasSource').toArray();
+
+        var originalCanvas = document.createElement('canvas');
+        originalCanvas.width = 20;
+        originalCanvas.height = 20;
+        drawSomeLinesOnCanvas(originalCanvas);
+        sources.push(originalCanvas);
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(30);
+            expect(destinationCanvas.height).toBe(15);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on two dynamically created canvas as sources, without being able to compose', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '</div>' +
+        '<canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('#canvasSource').toArray();
+
+        var originalCanvas = document.createElement('canvas');
+        originalCanvas.width = 20;
+        originalCanvas.height = 20;
+        drawSomeLinesOnCanvas(originalCanvas);
+        sources.push(originalCanvas);
+
+        originalCanvas = document.createElement('canvas');
+        originalCanvas.width = 20;
+        originalCanvas.height = 20;
+        drawSomeLinesOnCanvas(originalCanvas);
+        sources.push(originalCanvas);
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(30);
+            expect(destinationCanvas.height).toBe(15);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on two dynamically created canvas as sources (with left/top properties set), without being able to compose', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '</div>' +
+        '<canvas id="myCanvas" width="30" height="15" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('#canvasSource').toArray();
+
+        var originalCanvas = document.createElement('canvas');
+        originalCanvas.width = 20;
+        originalCanvas.height = 20;
+        originalCanvas.left = 0;
+        originalCanvas.top = 0;
+        drawSomeLinesOnCanvas(originalCanvas);
+        sources.push(originalCanvas);
+
+        originalCanvas = document.createElement('canvas');
+        originalCanvas.width = 20;
+        originalCanvas.height = 20;
+        originalCanvas.left = 0;
+        originalCanvas.top = 0;
+        drawSomeLinesOnCanvas(originalCanvas);
+        sources.push(originalCanvas);
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(30);
+            expect(destinationCanvas.height).toBe(15);
+
+            done();
+        }, null);
+    });
+
 
     function drawSomeLinesOnCanvas(canvas) {
         var ctx = canvas.getContext('2d');

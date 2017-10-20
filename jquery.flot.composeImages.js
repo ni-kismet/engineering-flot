@@ -6,16 +6,36 @@
     const NEGATIVEIMAGESIZE = -2;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
-        var tempImgs = [];
-        var allImgCompositionPromises = [];
-        for (var i = 0; i < canvasOrSvgSources.length; i++) {
-            var currentTempImg = new Image();
-            tempImgs.push(currentTempImg);
-            var currentPromise = new Promise(getGenerateTempImg(currentTempImg, canvasOrSvgSources[i]));
-            allImgCompositionPromises.push(currentPromise);
-        }
-        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(tempImgs, destinationCanvas), failureCallback);
+        var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
+
+        var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
+            var tempImg = new Image();
+            var currentPromise = new Promise(getGenerateTempImg(tempImg, validCanvasOrSvgSource));
+            return currentPromise;
+        });
+
+        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(destinationCanvas), failureCallback);
         return lastPromise;
+    }
+
+    function isValidSource(canvasOrSvgSource) {
+        return window.getComputedStyle(canvasOrSvgSource).visibility === "visible";
+    }
+
+    function getGenerateTempImg(tempImg, canvasOrSvgSource) {
+        return function doGenerateTempImg(successCallbackFunc, failureCallbackFunc) {
+            tempImg.onload = function(evt) {
+                successCallbackFunc(tempImg);
+            };
+            generateTempImageFromCanvasOrSvg(canvasOrSvgSource, tempImg);
+        };
+    }
+
+    function getExecuteImgComposition(destinationCanvas) {
+        return function executeImgComposition(tempImgs) {
+            var compositionResult = copyImgsToCanvas(tempImgs, destinationCanvas);
+            return compositionResult;
+        };
     }
 
     function copyCanvasToImg(canvas, img) {
@@ -155,22 +175,8 @@
         adnotateDestImgWithBoundingClientRect(srcCanvasOrSvg, destImg);
     }
 
-    function getExecuteImgComposition(tempImgs, destinationCanvas) {
-        return function executeImgComposition(result) {
-            var compositionResult = copyImgsToCanvas(tempImgs, destinationCanvas);
-            return compositionResult;
-        };
-    }
-
     function failureCallback() {
         return GENERALFAILURECALLBACKERROR;
-    }
-
-    function getGenerateTempImg(tempImg, canvasOrSvgSource) {
-        return function doGenerateTempImg(successCallbackFunc, failureCallbackFunc) {
-            tempImg.onload = successCallbackFunc;
-            generateTempImageFromCanvasOrSvg(canvasOrSvgSource, tempImg);
-        };
     }
 
     $.plot.composeImages = composeImages;
