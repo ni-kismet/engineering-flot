@@ -5,7 +5,7 @@ var fs = require('fs');
 var concat = require('concat');
 var tmp = require('tmp');
 
-var distDir = './dist';
+var distDir = './dist/es5';
 var distFile = 'jquery.flot.js';
 
 if (!fs.existsSync(distDir)) {
@@ -19,7 +19,16 @@ function concatenateFiles(destinationPath, callback) {
         './jquery.flot.js',
         './jquery.flot.saturated.js',
         './jquery.flot.drawSeries.js',
-        './jquery.flot.uiConstants.js'
+        './jquery.flot.uiConstants.js',
+        './jquery.flot.logaxis.js',
+        './jquery.flot.symbol.js',
+        './jquery.flot.flatdata.js',
+        './jquery.flot.navigate.js',
+        './jquery.flot.touchNavigate.js',
+        './jquery.flot.touch.js',
+        './jquery.flot.absRelTime.js',
+        './jquery.flot.axislabels.js',
+        './jquery.flot.selection.js'
     ], destinationPath);
 }
 
@@ -31,7 +40,7 @@ if (args[0] === 'test') {
             var newBuild = fs.readFileSync(tmpobj.name, 'utf8');
 
             if (newBuild !== origBuild) {
-                console.log('The distribution file dist/jquery.flot.js is not up to date. Type "npm run build" to fix it !');
+                console.log('The distribution file dist/es5/jquery.flot.js is not up to date. Type "npm run build" to fix it !');
                 process.exitCode = 1;
                 return;
             }

@@ -2345,13 +2345,6 @@ Licensed under the MIT license.
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
             axis.tickSize = getAxisTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
 
-            // Time mode was moved to a plug-in in 0.8, and since so many people use it
-            // we'll add an especially friendly reminder to make sure they included it.
-
-            if (opts.mode === "time" && !axis.tickGenerator) {
-                throw new Error("Time mode requires the flot.time plugin.");
-            }
-
             // Flot supports base-10 axes; any other mode else is handled by a plug-in,
             // like flot.time.js.
 
@@ -4200,4 +4193,2852 @@ Licensed under the MIT license.
         TICK_LENGTH_CONSTANT: 10,
         ZOOM_DISTANCE_MARGIN: 25
     };
+})(jQuery);
+
+/* Pretty handling of log axes.
+
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
+Copyright (c) 2015 Ciprian Ceteras cipix2000@gmail.com.
+Licensed under the MIT license.
+
+Set axis.mode to "log" to enable.
+*/
+
+/* global jQuery*/
+
+(function ($) {
+    'use strict';
+
+    var options = {
+        xaxis: {}
+    };
+
+    var defaultTickFormatter,
+        expRepTickFormatter;
+
+    var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
+        EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
+
+    var logTransform = function (v) {
+        if (v < PREFERRED_LOG_TICK_VALUES[0]) {
+            v = PREFERRED_LOG_TICK_VALUES[0];
+        }
+
+        return Math.log(v);
+    };
+
+    var logInverseTransform = function (v) {
+        return Math.exp(v);
+    };
+
+    var linearTickGenerator = function (plot, min, max, noTicks) {
+        var size = plot.computeTickSize(min, max, noTicks);
+        var ticks = [],
+            start = $.plot.saturated.saturate(floorInBase(min, size)),
+            i = 0,
+            v = Number.NaN,
+            prev;
+
+        if (start === -Number.MAX_VALUE) {
+            ticks.push(start);
+            start = floorInBase(min + size, size);
+        }
+
+        do {
+            prev = v;
+            v = $.plot.saturated.multiplyAdd(size, i, start);
+            ticks.push(v);
+            ++i;
+        } while (v < max && v !== prev);
+        return ticks;
+    };
+
+    var logTickGenerator = function (plot, axis, noTicks) {
+        var ticks = [],
+            minIdx = -1,
+            maxIdx = -1,
+            surface = plot.getCanvas(),
+            logTickValues = PREFERRED_LOG_TICK_VALUES,
+            min = clampAxis(axis, plot),
+            max = axis.max;
+
+        if (!noTicks) {
+            noTicks = 0.3 * Math.sqrt(axis.direction === "x" ? surface.width : surface.height);
+        }
+
+        PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
+            if (val >= min) {
+                minIdx = i;
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        PREFERRED_LOG_TICK_VALUES.some(function (val, i) {
+            if (val >= max) {
+                maxIdx = i;
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        if (maxIdx === -1) {
+            maxIdx = PREFERRED_LOG_TICK_VALUES.length - 1;
+        }
+
+        if (maxIdx - minIdx <= noTicks / 4 && logTickValues.length !== EXTENDED_LOG_TICK_VALUES.length) {
+            //try with multiple of 5 for tick values
+            logTickValues = EXTENDED_LOG_TICK_VALUES;
+            minIdx *= 2;
+            maxIdx *= 2;
+        }
+
+        var lastDisplayed = null,
+            inverseNoTicks = 1 / noTicks,
+            tickValue, pixelCoord, tick;
+
+        // Count the number of tick values would appear, if we can get at least
+        // nTicks / 4 accept them.
+        if (maxIdx - minIdx >= noTicks / 4) {
+            for (var idx = maxIdx; idx >= minIdx; idx--) {
+                tickValue = logTickValues[idx];
+                pixelCoord = (Math.log(tickValue) - Math.log(min)) / (Math.log(max) - Math.log(min));
+                tick = tickValue;
+
+                if (lastDisplayed === null) {
+                    lastDisplayed = {
+                        pixelCoord: pixelCoord,
+                        idealPixelCoord: pixelCoord
+                    };
+                } else {
+                    if (Math.abs(pixelCoord - lastDisplayed.pixelCoord) >= inverseNoTicks) {
+                        lastDisplayed = {
+                            pixelCoord: pixelCoord,
+                            idealPixelCoord: lastDisplayed.idealPixelCoord - inverseNoTicks
+                        };
+                    } else {
+                        tick = null;
+                    }
+                }
+
+                if (tick) {
+                    ticks.push(tick);
+                }
+            }
+            // Since we went in backwards order.
+            ticks.reverse();
+        } else {
+            ticks = linearTickGenerator(plot, min, max, noTicks);
+        }
+
+        return ticks;
+    };
+
+    var clampAxis = function (axis, plot) {
+        var min = axis.min,
+            max = axis.max;
+
+        if (min <= 0) {
+            //for empty graph if axis.min is not strictly positive make it 0.1
+            if (axis.datamin === null) {
+                min = axis.min = 0.1;
+            } else {
+                min = processAxisOffset(plot, axis);
+            }
+
+            if (max < min) {
+                axis.max = axis.datamax !== null ? axis.datamax : axis.options.max;
+                axis.options.offset.below = 0;
+                axis.options.offset.above = 0;
+            }
+        }
+
+        return min;
+    }
+
+    var logTickFormatter = function (value, axis, precision) {
+        var tenExponent = value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0;
+
+        if (precision) {
+            if ((tenExponent >= -4) && (tenExponent <= 7)) {
+                return defaultTickFormatter(value, axis, precision);
+            } else {
+                return expRepTickFormatter(value, axis, precision);
+            }
+        }
+        if ((tenExponent >= -4) && (tenExponent <= 7)) {
+            //if we have float numbers, return a limited length string(ex: 0.0009 is represented as 0.000900001)
+            var formattedValue = tenExponent < 0 ? value.toFixed(-tenExponent) : value.toFixed(tenExponent + 2);
+            if (formattedValue.indexOf('.') !== -1) {
+                var lastZero = formattedValue.lastIndexOf('0');
+
+                while (lastZero === formattedValue.length - 1) {
+                    formattedValue = formattedValue.slice(0, -1);
+                    lastZero = formattedValue.lastIndexOf('0');
+                }
+
+                //delete the dot if is last
+                if (formattedValue.indexOf('.') === formattedValue.length - 1) {
+                    formattedValue = formattedValue.slice(0, -1);
+                }
+            }
+            return formattedValue;
+        } else {
+            return expRepTickFormatter(value, axis);
+        }
+    };
+
+    function processAxisOffset(plot, axis) {
+        var series = plot.getData(),
+            range = series
+                .filter(function(series) {
+                    return series.xaxis === axis || series.yaxis === axis;
+                })
+                .map(function(series) {
+                    return plot.computeRangeForDataSeries(series, null, isValid);
+                }),
+            min = axis.direction === 'x' ? Math.min(0.1, range[0].xmin) : Math.min(0.1, range[0].ymin);
+
+        axis.min = min;
+
+        return min;
+    }
+
+    function isValid(a) {
+        return a > 0;
+    }
+
+    function computePreferedLogTickValues(endLimit, rangeStep) {
+        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
+            log10Start = -log10End,
+            val, range, vals = [];
+
+        for (var power = log10Start; power <= log10End; power++) {
+            range = Math.pow(10, power);
+            for (var mult = 1; mult < 9; mult += rangeStep) {
+                val = range * mult;
+                vals.push(val);
+            }
+        }
+        return vals;
+    }
+
+    // round to nearby lower multiple of base
+    function floorInBase(n, base) {
+        return base * Math.floor(n / base);
+    }
+
+    function setDataminRange(plot, axis) {
+        if (axis.options.mode === 'log' && axis.datamin <= 0) {
+            if (axis.datamin === null) {
+                axis.datamin = 0.1;
+            } else {
+                axis.datamin = processAxisOffset(plot, axis);
+            }
+        }
+    }
+
+    function init(plot) {
+        plot.hooks.processOptions.push(function (plot) {
+            defaultTickFormatter = plot.defaultTickFormatter;
+            expRepTickFormatter = plot.expRepTickFormatter;
+
+            $.each(plot.getAxes(), function (axisName, axis) {
+                var opts = axis.options;
+                if (opts.mode === 'log') {
+                    axis.tickGenerator = function (axis) {
+                        var noTicks = 11;
+                        return logTickGenerator(plot, axis, noTicks);
+                    };
+                    if (typeof axis.options.tickFormatter !== 'function') {
+                        axis.options.tickFormatter = logTickFormatter;
+                    }
+                    axis.options.transform = logTransform;
+                    axis.options.inverseTransform = logInverseTransform;
+                    axis.options.autoScaleMargin = 0;
+                    plot.hooks.setRange.push(setDataminRange);
+                }
+            });
+        });
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        options: options,
+        name: 'log',
+        version: '0.1'
+    });
+
+    $.plot.logTicksGenerator = logTickGenerator;
+    $.plot.logTickFormatter = logTickFormatter;
+})(jQuery);
+
+/* Flot plugin that adds some extra symbols for plotting points.
+
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
+Licensed under the MIT license.
+
+The symbols are accessed as strings through the standard symbol options:
+
+    series: {
+        points: {
+            symbol: "square" // or "diamond", "triangle", "cross", "plus", "ellipse", "rectangle"
+        }
+    }
+
+*/
+
+(function ($) {
+    // we normalize the area of each symbol so it is approximately the
+    // same as a circle of the given radius
+
+    var square = function (ctx, x, y, radius, shadow) {
+            // pi * r^2 = (2s)^2  =>  s = r * sqrt(pi)/2
+            var size = radius * Math.sqrt(Math.PI) / 2;
+            ctx.rect(x - size, y - size, size + size, size + size);
+        },
+        rectangle = function (ctx, x, y, radius, shadow) {
+            // pi * r^2 = (2s)^2  =>  s = r * sqrt(pi)/2
+            var size = radius * Math.sqrt(Math.PI) / 2;
+            ctx.rect(x - size, y - size, size + size, size + size);
+        },
+        diamond = function (ctx, x, y, radius, shadow) {
+            // pi * r^2 = 2s^2  =>  s = r * sqrt(pi/2)
+            var size = radius * Math.sqrt(Math.PI / 2);
+            ctx.moveTo(x - size, y);
+            ctx.lineTo(x, y - size);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x, y + size);
+            ctx.lineTo(x - size, y);
+            ctx.lineTo(x, y - size);
+        },
+        triangle = function (ctx, x, y, radius, shadow) {
+            // pi * r^2 = 1/2 * s^2 * sin (pi / 3)  =>  s = r * sqrt(2 * pi / sin(pi / 3))
+            var size = radius * Math.sqrt(2 * Math.PI / Math.sin(Math.PI / 3));
+            var height = size * Math.sin(Math.PI / 3);
+            ctx.moveTo(x - size / 2, y + height / 2);
+            ctx.lineTo(x + size / 2, y + height / 2);
+            if (!shadow) {
+                ctx.lineTo(x, y - height / 2);
+                ctx.lineTo(x - size / 2, y + height / 2);
+                ctx.lineTo(x + size / 2, y + height / 2);
+            }
+        },
+        cross = function (ctx, x, y, radius, shadow) {
+            // pi * r^2 = (2s)^2  =>  s = r * sqrt(pi)/2
+            var size = radius * Math.sqrt(Math.PI) / 2;
+            ctx.moveTo(x - size, y - size);
+            ctx.lineTo(x + size, y + size);
+            ctx.moveTo(x - size, y + size);
+            ctx.lineTo(x + size, y - size);
+        },
+        ellipse = function(ctx, x, y, radius, shadow, fill) {
+            if (!shadow) {
+                ctx.moveTo(x + radius, y);
+                ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+            }
+        },
+        plus = function (ctx, x, y, radius, shadow) {
+            var size = radius * Math.sqrt(Math.PI / 2);
+            ctx.moveTo(x - size, y);
+            ctx.lineTo(x + size, y);
+            ctx.moveTo(x, y + size);
+            ctx.lineTo(x, y - size);
+        },
+        handlers = {
+            square: square,
+            rectangle: rectangle,
+            diamond: diamond,
+            triangle: triangle,
+            cross: cross,
+            ellipse: ellipse,
+            plus: plus
+        };
+
+    square.fill = true;
+    rectangle.fill = true;
+    diamond.fill = true;
+    triangle.fill = true;
+    ellipse.fill = true;
+
+    function init(plot) {
+        plot.drawSymbol = handlers;
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        name: 'symbols',
+        version: '1.0'
+    });
+})(jQuery);
+
+/* Support for flat 1D data series.
+
+A 1D flat data series is a data series in the form of a regular 1D array. The
+main reason for using a flat data series is that it performs better, consumes
+less memory and generates less garbage collection than the regular flot format.
+
+Example:
+
+    plot.setData([[[0,0], [1,1], [2,2], [3,3]]]); // regular flot format
+    plot.setData([{flatdata: true, data: [0, 1, 2, 3]}]); // flatdata format
+
+Set series.flatdata to true to enable this plugin.
+
+You can use series.start to specify the starting index of the series (default is 0)
+You can use series.step to specify the interval between consecutive indexes of the series (default is 1)
+*/
+
+/* global jQuery*/
+
+(function ($) {
+    'use strict';
+
+    function process1DRawData(plot, series, data, datapoints) {
+        if (series.flatdata === true) {
+            var start = series.start || 0;
+            var step = typeof series.step === 'number' ? series.step : 1;
+            datapoints.pointsize = 2;
+            for (var i = 0, j = 0; i < data.length; i++, j += 2) {
+                datapoints.points[j] = start + (i * step);
+                datapoints.points[j + 1] = data[i];
+            }
+            if (datapoints.points !== undefined) {
+                datapoints.points.length = data.length * 2;
+            } else {
+                datapoints.points = [];
+            }
+        }
+    }
+
+    $.plot.plugins.push({
+        init: function(plot) {
+            plot.hooks.processRawData.push(process1DRawData);
+        },
+        name: 'flatdata',
+        version: '0.0.2'
+    });
+})(jQuery);
+
+/* Flot plugin for adding the ability to pan and zoom the plot.
+
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
+Copyright (c) 2016 Ciprian Ceteras.
+Licensed under the MIT license.
+
+The default behaviour is scrollwheel up/down to zoom in, drag
+to pan. The plugin defines plot.zoom({ center }), plot.zoomOut() and
+plot.pan( offset ) so you easily can add custom controls. It also fires
+"plotpan" and "plotzoom" events, useful for synchronizing plots.
+
+The plugin supports these options:
+
+    zoom: {
+        interactive: false,
+        active: false,
+        amount: 1.5         // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+    }
+
+    pan: {
+        interactive: false,
+        active: false,
+        cursor: "move",     // CSS mouse cursor value used when dragging, e.g. "pointer"
+        frameRate: 20,
+        mode: "smart"       // enable smart pan mode
+    }
+
+    xaxis: {
+        axisZoom: true, //zoom axis when mouse over it is allowed
+        plotZoom: true, //zoom axis is allowed for plot zoom
+        axisPan: true, //pan axis when mouse over it is allowed
+        plotPan: true //pan axis is allowed for plot pan
+    }
+
+    yaxis: {
+        axisZoom: true, //zoom axis when mouse over it is allowed
+        plotZoom: true, //zoom axis is allowed for plot zoom
+        axisPan: true, //pan axis when mouse over it is allowed
+        plotPan: true //pan axis is allowed for plot pan
+    }
+
+"interactive" enables the built-in drag/click behaviour. If you enable
+interactive for pan, then you'll have a basic plot that supports moving
+around; the same for zoom.
+
+"active" is true after a touch tap on plot. This enables plot navigation.
+Once activated, zoom and pan cannot be deactivated.
+
+"amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
+the current viewport.
+
+"cursor" is a standard CSS mouse cursor string used for visual feedback to the
+user when dragging.
+
+"frameRate" specifies the maximum number of times per second the plot will
+update itself while the user is panning around on it (set to null to disable
+intermediate pans, the plot will then not update until the mouse button is
+released).
+
+Example API usage:
+
+    plot = $.plot(...);
+
+    // zoom default amount in on the pixel ( 10, 20 )
+    plot.zoom({ center: { left: 10, top: 20 } });
+
+    // zoom out again
+    plot.zoomOut({ center: { left: 10, top: 20 } });
+
+    // zoom 200% in on the pixel (10, 20)
+    plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
+
+    // pan 100 pixels to the left and 20 down
+    plot.pan({ left: -100, top: 20 })
+
+Here, "center" specifies where the center of the zooming should happen. Note
+that this is defined in pixel space, not the space of the data points (you can
+use the p2c helpers on the axes in Flot to help you convert between these).
+
+"amount" is the amount to zoom the viewport relative to the current range, so
+1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out). You
+can set the default in the options.
+
+/* eslint-enable */
+(function($) {
+    'use strict';
+
+    var options = {
+        zoom: {
+            interactive: false,
+            active: false,
+            amount: 1.5 // how much to zoom relative to current position, 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+        },
+        pan: {
+            interactive: false,
+            active: false,
+            cursor: "move",
+            frameRate: 60
+        },
+        xaxis: {
+            axisZoom: true, //zoom axis when mouse over it is allowed
+            plotZoom: true, //zoom axis is allowed for plot zoom
+            axisPan: true, //pan axis when mouse over it is allowed
+            plotPan: true //pan axis is allowed for plot pan
+        },
+        yaxis: {
+            axisZoom: true,
+            plotZoom: true,
+            axisPan: true,
+            plotPan: true
+        }
+    };
+
+    var saturated = $.plot.saturated;
+
+    function init(plot) {
+        var panAxes = null;
+
+        function onZoomClick(e, zoomOut) {
+            var c = plot.offset();
+            c.left = e.pageX - c.left;
+            c.top = e.pageY - c.top;
+
+            var ec = plot.getPlaceholder().offset();
+            ec.left = e.pageX - ec.left;
+            ec.top = e.pageY - ec.top;
+
+            var axes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+                var box = axis.box;
+                if (box !== undefined) {
+                    return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                        (ec.top > box.top) && (ec.top < box.top + box.height);
+                }
+            });
+
+            if (axes.length === 0) {
+                axes = undefined;
+            }
+
+            if (zoomOut) {
+                plot.zoomOut({
+                    center: c,
+                    axes: axes
+                });
+            } else {
+                plot.zoom({
+                    center: c,
+                    axes: axes
+                });
+            }
+        }
+
+        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
+        var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
+
+        function onMouseWheel(e, delta) {
+            if (plot.getOptions().zoom.active) {
+                e.preventDefault();
+                onZoomClick(e, delta < 0);
+                return false;
+            }
+        }
+
+        var prevCursor = 'default',
+            panHint = null,
+            panTimeout = null,
+            plotState;
+
+        plot.navigationState = function(startPageX, startPageY) {
+            var axes = this.getAxes();
+            var result = {};
+            Object.keys(axes).forEach(function(axisName) {
+                var axis = axes[axisName];
+                result[axisName] = {
+                    navigationOffset: { below: axis.options.offset.below || 0,
+                        above: axis.options.offset.above || 0},
+                    axisMin: axis.min,
+                    axisMax: axis.max,
+                    diagMode: false
+                }
+            });
+
+            result.startPageX = startPageX || 0;
+            result.startPageY = startPageY || 0;
+            return result;
+        }
+
+        function onDragStart(e) {
+            if (e.which !== 1) {
+                // only accept left-click
+                return false;
+            }
+
+            var ec = plot.getPlaceholder().offset();
+            ec.left = e.pageX - ec.left;
+            ec.top = e.pageY - ec.top;
+
+            panAxes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+                var box = axis.box;
+                if (box !== undefined) {
+                    return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                        (ec.top > box.top) && (ec.top < box.top + box.height);
+                }
+            });
+
+            if (panAxes.length === 0) {
+                panAxes = undefined;
+            }
+
+            var c = plot.getPlaceholder().css('cursor');
+            if (c) {
+                prevCursor = c;
+            }
+
+            plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
+            plotState = plot.navigationState(e.pageX, e.pageY);
+        }
+
+        function onDrag(e) {
+            var frameRate = plot.getOptions().pan.frameRate;
+
+            if (frameRate === -1) {
+                plot.smartPan({
+                    x: plotState.startPageX - e.pageX,
+                    y: plotState.startPageY - e.pageY
+                }, plotState, panAxes);
+
+                return;
+            }
+
+            if (panTimeout || !frameRate) return;
+
+            panTimeout = setTimeout(function() {
+                plot.smartPan({
+                    x: plotState.startPageX - e.pageX,
+                    y: plotState.startPageY - e.pageY
+                }, plotState, panAxes);
+
+                panTimeout = null;
+            }, 1 / frameRate * 1000);
+        }
+
+        function onDragEnd(e) {
+            if (panTimeout) {
+                clearTimeout(panTimeout);
+                panTimeout = null;
+            }
+
+            plot.getPlaceholder().css('cursor', prevCursor);
+            plot.smartPan({
+                x: plotState.startPageX - e.pageX,
+                y: plotState.startPageY - e.pageY
+            }, plotState, panAxes);
+            panHint = null;
+        }
+
+        function onDblClick(e) {
+            plot.getPlaceholder().trigger("re-center", e);
+        }
+
+        function onClick(e) {
+            var o = plot.getOptions();
+            if (!o.pan.active || !o.zoom.active) {
+                o.pan.active = true;
+                o.zoom.active = true;
+            }
+            return false;
+        }
+
+        function bindEvents(plot, eventHolder) {
+            var o = plot.getOptions();
+            if (o.zoom.interactive) {
+                eventHolder.mousewheel(onMouseWheel);
+            }
+
+            if (o.pan.interactive) {
+                eventHolder.bind("dragstart", {
+                    distance: 10
+                }, onDragStart);
+                eventHolder.bind("drag", onDrag);
+                eventHolder.bind("dragend", onDragEnd);
+            }
+
+            if (o.zoom.interactive || o.pan.interactive) {
+                eventHolder.dblclick(onDblClick);
+                eventHolder.click(onClick);
+            }
+        }
+
+        plot.zoomOut = function(args) {
+            if (!args) {
+                args = {};
+            }
+
+            if (!args.amount) {
+                args.amount = plot.getOptions().zoom.amount;
+            }
+
+            args.amount = 1 / args.amount;
+            plot.zoom(args);
+        };
+
+        plot.zoom = function(args) {
+            if (!args) {
+                args = {};
+            }
+
+            var c = args.center,
+                amount = args.amount || plot.getOptions().zoom.amount,
+                w = plot.width(),
+                h = plot.height(),
+                axes = args.axes || plot.getAxes();
+
+            if (!c) {
+                c = {
+                    left: w / 2,
+                    top: h / 2
+                };
+            }
+
+            var xf = c.left / w,
+                yf = c.top / h,
+                minmax = {
+                    x: {
+                        min: c.left - xf * w / amount,
+                        max: c.left + (1 - xf) * w / amount
+                    },
+                    y: {
+                        min: c.top - yf * h / amount,
+                        max: c.top + (1 - yf) * h / amount
+                    }
+                };
+
+            for (var key in axes) {
+                if (!axes.hasOwnProperty(key)) {
+                    continue;
+                }
+
+                var axis = axes[key],
+                    opts = axis.options,
+                    min = minmax[axis.direction].min,
+                    max = minmax[axis.direction].max,
+                    navigationOffset = axis.options.offset;
+
+                //skip axis without axisZoom when zooming only on certain axis or axis without plotZoom for zoom on entire plot
+                if ((!opts.axisZoom && args.axes) || (!args.axes && !opts.plotZoom)) {
+                    continue;
+                }
+
+                min = $.plot.saturated.saturate(axis.c2p(min));
+                max = $.plot.saturated.saturate(axis.c2p(max));
+                if (min > max) {
+                    // make sure min < max
+                    var tmp = min;
+                    min = max;
+                    max = tmp;
+                }
+
+                var offsetBelow = $.plot.saturated.saturate(navigationOffset.below - (axis.min - min));
+                var offsetAbove = $.plot.saturated.saturate(navigationOffset.above - (axis.max - max));
+                opts.offset = { below: offsetBelow, above: offsetAbove };
+            };
+
+            plot.setupGrid();
+            plot.draw();
+
+            if (!args.preventEvent) {
+                plot.getPlaceholder().trigger("plotzoom", [plot, args]);
+            }
+        };
+
+        plot.pan = function(args) {
+            var delta = {
+                x: +args.left,
+                y: +args.top
+            };
+
+            if (isNaN(delta.x)) delta.x = 0;
+            if (isNaN(delta.y)) delta.y = 0;
+
+            $.each(args.axes || plot.getAxes(), function(_, axis) {
+                var opts = axis.options,
+                    d = delta[axis.direction];
+
+                //skip axis without axisPan when panning only on certain axis or axis without plotPan for pan the entire plot
+                if ((!opts.axisPan && args.axes) || (!opts.plotPan && !args.axes)) {
+                    return;
+                }
+
+                if (d !== 0) {
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) - d) - axis.c2p(axis.p2c(axis.min))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) - d) - axis.c2p(axis.p2c(axis.max)));
+
+                    if (!isFinite(navigationOffsetBelow)) {
+                        navigationOffsetBelow = 0;
+                    }
+
+                    if (!isFinite(navigationOffsetAbove)) {
+                        navigationOffsetAbove = 0;
+                    }
+
+                    opts.offset = {
+                        below: saturated.saturate(navigationOffsetBelow + (opts.offset.below || 0)),
+                        above: saturated.saturate(navigationOffsetAbove + (opts.offset.above || 0))
+                    };
+                }
+            });
+
+            plot.setupGrid();
+            plot.draw();
+            if (!args.preventEvent) {
+                plot.getPlaceholder().trigger("plotpan", [plot, args]);
+            }
+        };
+
+        plot.recenter = function(args) {
+            $.each(args.axes || plot.getAxes(), function(_, axis) {
+                if (args.axes) {
+                    if (this.direction === 'x') {
+                        axis.options.offset = { below: 0 };
+                    } else if (this.direction === 'y') {
+                        axis.options.offset = { above: 0 };
+                    }
+                } else {
+                    axis.options.offset = { below: 0, above: 0 };
+                }
+            });
+            plot.setupGrid();
+            plot.draw();
+        };
+
+        var shouldSnap = function(delta) {
+            return (Math.abs(delta.y) < SNAPPING_CONSTANT && Math.abs(delta.x) >= SNAPPING_CONSTANT) ||
+                (Math.abs(delta.x) < SNAPPING_CONSTANT && Math.abs(delta.y) >= SNAPPING_CONSTANT);
+        }
+
+        // adjust delta so the pan action is constrained on the vertical or horizontal direction
+        // it the movements in the other direction are small
+        var adjustDeltaToSnap = function(delta) {
+            if (Math.abs(delta.x) < SNAPPING_CONSTANT && Math.abs(delta.y) >= SNAPPING_CONSTANT) {
+                return {x: 0, y: delta.y};
+            }
+
+            if (Math.abs(delta.y) < SNAPPING_CONSTANT && Math.abs(delta.x) >= SNAPPING_CONSTANT) {
+                return {x: delta.x, y: 0};
+            }
+
+            return delta;
+        }
+
+        var isDiagonalMode = function(delta) {
+            if (Math.abs(delta.x) > 0 && Math.abs(delta.y) > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        var restoreAxisOffset = function(axes, initialState, delta) {
+            var axis;
+            Object.keys(axes).forEach(function(axisName) {
+                axis = axes[axisName];
+                if (delta[axis.direction] === 0) {
+                    axis.options.offset.below = initialState[axisName].navigationOffset.below;
+                    axis.options.offset.above = initialState[axisName].navigationOffset.above;
+                }
+            });
+        }
+
+        var prevDelta = { x: 0, y: 0 };
+        plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
+            var snap = shouldSnap(delta),
+                axes = plot.getAxes(),
+                opts;
+            delta = adjustDeltaToSnap(delta);
+
+            if (isDiagonalMode(delta)) {
+                initialState.diagMode = true;
+            }
+
+            if (snap && initialState.diagMode === true) {
+                initialState.diagMode = false;
+                restoreAxisOffset(axes, initialState, delta);
+            }
+
+            if (snap) {
+                panHint = {
+                    start: {
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
+                    },
+                    end: {
+                        x: initialState.startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
+                    }
+                }
+            } else {
+                panHint = {
+                    start: {
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
+                    },
+                    end: false
+                }
+            }
+
+            if (isNaN(delta.x)) delta.x = 0;
+            if (isNaN(delta.y)) delta.y = 0;
+
+            if (panAxes) {
+                axes = panAxes;
+            }
+
+            var axis, axisMin, axisMax, p, d;
+            Object.keys(axes).forEach(function(axisName) {
+                axis = axes[axisName];
+                axisMin = axis.min;
+                axisMax = axis.max;
+                opts = axis.options;
+
+                d = delta[axis.direction];
+                p = prevDelta[axis.direction];
+
+                //skip axis without axisPan when panning only on certain axis or axis without plotPan for pan the entire plot
+                if ((!opts.axisPan && panAxes) || (!panAxes && !opts.plotPan)) {
+                    return;
+                }
+
+                if (d !== 0) {
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axisMin) - (p - d)) - axis.c2p(axis.p2c(axisMin))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axisMax) - (p - d)) - axis.c2p(axis.p2c(axisMax)));
+
+                    if (!isFinite(navigationOffsetBelow)) {
+                        navigationOffsetBelow = 0;
+                    }
+
+                    if (!isFinite(navigationOffsetAbove)) {
+                        navigationOffsetAbove = 0;
+                    }
+
+                    axis.options.offset.below = saturated.saturate(navigationOffsetBelow + (axis.options.offset.below || 0));
+                    axis.options.offset.above = saturated.saturate(navigationOffsetAbove + (axis.options.offset.above || 0));
+                }
+            });
+
+            prevDelta = delta;
+            plot.setupGrid();
+            plot.draw();
+
+            if (!preventEvent) {
+                plot.getPlaceholder().trigger("plotpan", [plot, delta]);
+            }
+        };
+
+        function shutdown(plot, eventHolder) {
+            eventHolder.unbind("mousewheel", onMouseWheel);
+            eventHolder.unbind("dragstart", onDragStart);
+            eventHolder.unbind("drag", onDrag);
+            eventHolder.unbind("dragend", onDragEnd);
+            eventHolder.unbind("dblclick", onDblClick);
+            eventHolder.unbind("click", onClick);
+
+            if (panTimeout) clearTimeout(panTimeout);
+        }
+
+        function drawOverlay(plot, ctx) {
+            if (panHint) {
+                ctx.strokeStyle = 'rgba(96, 160, 208, 0.7)';
+                ctx.lineWidth = 2;
+                ctx.lineJoin = "round";
+                var startx = Math.round(panHint.start.x),
+                    starty = Math.round(panHint.start.y),
+                    endx, endy;
+
+                if (panAxes) {
+                    if (panAxes[0].direction === 'x') {
+                        endy = Math.round(panHint.start.y);
+                        endx = Math.round(panHint.end.x);
+                    } else if (panAxes[0].direction === 'y') {
+                        endx = Math.round(panHint.start.x);
+                        endy = Math.round(panHint.end.y);
+                    }
+                } else {
+                    endx = Math.round(panHint.end.x);
+                    endy = Math.round(panHint.end.y);
+                }
+
+                ctx.beginPath();
+
+                if (panHint.end === false) {
+                    ctx.moveTo(startx, starty - PANHINT_LENGTH_CONSTANT);
+                    ctx.lineTo(startx, starty + PANHINT_LENGTH_CONSTANT);
+
+                    ctx.moveTo(startx + PANHINT_LENGTH_CONSTANT, starty);
+                    ctx.lineTo(startx - PANHINT_LENGTH_CONSTANT, starty);
+                } else {
+                    var dirX = starty === endy;
+
+                    ctx.moveTo(startx - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), starty - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                    ctx.lineTo(startx + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), starty + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+
+                    ctx.moveTo(startx, starty);
+                    ctx.lineTo(endx, endy);
+
+                    ctx.moveTo(endx - (dirX ? 0 : PANHINT_LENGTH_CONSTANT), endy - (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                    ctx.lineTo(endx + (dirX ? 0 : PANHINT_LENGTH_CONSTANT), endy + (dirX ? PANHINT_LENGTH_CONSTANT : 0));
+                }
+
+                ctx.stroke();
+            }
+        }
+
+        plot.hooks.drawOverlay.push(drawOverlay);
+        plot.hooks.bindEvents.push(bindEvents);
+        plot.hooks.shutdown.push(shutdown);
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        options: options,
+        name: 'navigate',
+        version: '1.3'
+    });
+})(jQuery);
+
+/* global jQuery */
+
+(function($) {
+    'use strict';
+
+    var options = {
+        pan: {
+            enableTouch: false
+        }
+    };
+
+    var ZOOM_DISTANCE_MARGIN = $.plot.uiConstants.ZOOM_DISTANCE_MARGIN;
+
+    function init(plot) {
+        plot.hooks.processOptions.push(initTouchNavigation);
+    }
+
+    function initTouchNavigation(plot, options) {
+        var gestureState = {
+                zoomEnable: false,
+                prevDistance: null,
+                prevTapTime: 0,
+                prevPanPosition: { x: 0, y: 0 },
+                prevTapPosition: { x: 0, y: 0 }
+            },
+            navigationState = {
+                prevTouchedAxis: 'none',
+                currentTouchedAxis: 'none',
+                touchedAxis: null,
+                navigationConstraint: 'unconstrained'
+            },
+            pan, pinch, doubleTap;
+
+        function bindEvents(plot, eventHolder) {
+            var o = plot.getOptions();
+
+            if (o.pan.interactive) {
+                eventHolder[0].addEventListener('panstart', pan.start, false);
+                eventHolder[0].addEventListener('pandrag', pan.drag, false);
+                eventHolder[0].addEventListener('panend', pan.end, false);
+                eventHolder[0].addEventListener('pinchstart', pinch.start, false);
+                eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
+                eventHolder[0].addEventListener('pinchend', pinch.end, false);
+                eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
+            }
+        }
+
+        function shutdown(plot, eventHolder) {
+            eventHolder[0].removeEventListener('panstart', pan.start);
+            eventHolder[0].removeEventListener('pandrag', pan.drag);
+            eventHolder[0].removeEventListener('panend', pan.end);
+            eventHolder[0].removeEventListener('pinchstart', pinch.start);
+            eventHolder[0].removeEventListener('pinchdrag', pinch.drag);
+            eventHolder[0].removeEventListener('pinchend', pinch.end);
+            eventHolder[0].removeEventListener('doubletap', doubleTap.recenterPlot);
+        }
+
+        pan = {
+            start: function(e) {
+                presetNavigationState(e, 'pan', gestureState);
+                updateData(e, 'pan', gestureState, navigationState);
+            },
+
+            drag: function(e) {
+                presetNavigationState(e, 'pan', gestureState);
+                plot.pan({
+                    left: delta(e, 'pan', gestureState).x,
+                    top: delta(e, 'pan', gestureState).y,
+                    axes: navigationState.touchedAxis
+                });
+                updatePrevPanPosition(e, 'pan', gestureState, navigationState);
+            },
+
+            end: function(e) {
+                presetNavigationState(e, 'pan', gestureState);
+                if (wasPinchEvent(e, gestureState)) {
+                    updateprevPanPosition(e, 'pan', gestureState, navigationState);
+                }
+            }
+        };
+
+        pinch = {
+            start: function(e) {
+                presetNavigationState(e, 'pinch', gestureState);
+                setPrevDistance(e, gestureState);
+                updateData(e, 'pinch', gestureState, navigationState);
+            },
+
+            drag: function(e) {
+                presetNavigationState(e, 'pinch', gestureState);
+                plot.pan({
+                    left: delta(e, 'pinch', gestureState).x,
+                    top: delta(e, 'pinch', gestureState).y,
+                    axes: navigationState.touchedAxis
+                });
+                updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
+
+                var dist = pinchDistance(e);
+
+                if (gestureState.zoomEnable || Math.abs(dist - gestureState.prevDistance) > ZOOM_DISTANCE_MARGIN) {
+                    zoomPlot(plot, e, gestureState, navigationState);
+
+                    //activate zoom mode
+                    gestureState.zoomEnable = true;
+                }
+            },
+
+            end: function(e) {
+                presetNavigationState(e, 'pinch', gestureState);
+                gestureState.prevDistance = null;
+            }
+        };
+
+        doubleTap = {
+            recenterPlot: function(e) {
+                recenterPlotOnDoubleTap(plot, e, gestureState, navigationState);
+            }
+        };
+
+        if (options.pan.enableTouch === true) {
+            plot.hooks.bindEvents.push(bindEvents);
+            plot.hooks.shutdown.push(shutdown);
+        }
+
+        function presetNavigationState(e, gesture, gestureState) {
+            navigationState.touchedAxis = getAxis(plot, e, gesture, navigationState);
+            if (noAxisTouched(navigationState)) {
+                navigationState.navigationConstraint = 'unconstrained';
+            } else {
+                navigationState.navigationConstraint = 'axisConstrained';
+            }
+        }
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        options: options,
+        name: 'navigateTouch',
+        version: '0.3'
+    });
+
+    function recenterPlotOnDoubleTap(plot, e, gestureState, navigationState) {
+        checkAxesForDoubleTap(plot, e, navigationState);
+        if ((navigationState.currentTouchedAxis === 'x' && navigationState.prevTouchedAxis === 'x') ||
+            (navigationState.currentTouchedAxis === 'y' && navigationState.prevTouchedAxis === 'y') ||
+            (navigationState.currentTouchedAxis === 'none' && navigationState.prevTouchedAxis === 'none')) {
+            plot.recenter({ axes: navigationState.touchedAxis });
+        }
+    }
+
+    function checkAxesForDoubleTap(plot, e, navigationState) {
+        var axis = getTouchedAxis(plot, e.detail.firstTouch.x, e.detail.firstTouch.y);
+        if (axis[0] !== undefined) {
+            navigationState.prevTouchedAxis = axis[0].direction;
+        }
+
+        axis = getTouchedAxis(plot, e.detail.secondTouch.x, e.detail.secondTouch.y);
+        if (axis[0] !== undefined) {
+            navigationState.touchedAxis = axis;
+            navigationState.currentTouchedAxis = axis[0].direction;
+        }
+
+        if (noAxisTouched(navigationState)) {
+            navigationState.touchedAxis = null;
+            navigationState.prevTouchedAxis = 'none';
+            navigationState.currentTouchedAxis = 'none';
+        }
+    }
+
+    function zoomPlot(plot, e, gestureState, navigationState) {
+        var offset = plot.offset(),
+            center = {
+                left: 0,
+                top: 0
+            },
+            zoomAmount = pinchDistance(e) / gestureState.prevDistance,
+            dist = pinchDistance(e);
+
+        center.left = getPoint(e, 'pinch').x - offset.left;
+        center.top = getPoint(e, 'pinch').y - offset.top;
+
+        // send the computed touched axis to the zoom function so that it only zooms on that one
+        plot.zoom({
+            center: center,
+            amount: zoomAmount,
+            axes: navigationState.touchedAxis
+        });
+        gestureState.prevDistance = dist;
+    }
+
+    function wasPinchEvent(e, gestureState) {
+        return (gestureState.zoomEnable && e.detail.touches.length === 1);
+    }
+
+    function getAxis(plot, e, gesture, navigationState) {
+        if (e.type === 'pinchstart') {
+            var axisTouch1 = getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+            var axisTouch2 = getTouchedAxis(plot, e.detail.touches[1].pageX, e.detail.touches[1].pageY);
+
+            if (axisTouch1.length === axisTouch2.length && axisTouch1.toString() === axisTouch2.toString()) {
+                return axisTouch1;
+            }
+        } else if (e.type === 'panstart') {
+            return getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+        } else if (e.type === 'pinchend') {
+            //update axis since instead on pinch, a pan event is made
+            return getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+        } else {
+            return navigationState.touchedAxis;
+        }
+    }
+
+    function noAxisTouched(navigationState) {
+        return (!navigationState.touchedAxis || navigationState.touchedAxis.length === 0);
+    }
+
+    function setPrevDistance(e, gestureState) {
+        gestureState.prevDistance = pinchDistance(e);
+    }
+
+    function updateData(e, gesture, gestureState, navigationState) {
+        var axisDir,
+            point = getPoint(e, gesture);
+
+        switch (navigationState.navigationConstraint) {
+            case 'unconstrained':
+                navigationState.touchedAxis = null;
+                gestureState.prevTapPosition = {
+                    x: gestureState.prevPanPosition.x,
+                    y: gestureState.prevPanPosition.y
+                };
+                gestureState.prevPanPosition = {
+                    x: point.x,
+                    y: point.y
+                };
+                break;
+            case 'axisConstrained':
+                axisDir = navigationState.touchedAxis[0].direction;
+                navigationState.currentTouchedAxis = axisDir;
+                gestureState.prevTapPosition[axisDir] = gestureState.prevPanPosition[axisDir];
+                gestureState.prevPanPosition[axisDir] = point[axisDir];
+                break;
+            default:
+                break;
+        }
+    }
+
+    function distance(x1, y1, x2, y2) {
+        return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+    }
+
+    function pinchDistance(e) {
+        var t1 = e.detail.touches[0],
+            t2 = e.detail.touches[1];
+        return distance(t1.pageX, t1.pageY, t2.pageX, t2.pageY);
+    }
+
+    function getTouchedAxis(plot, touchPointX, touchPointY) {
+        var ec = plot.getPlaceholder().offset();
+        ec.left = touchPointX - ec.left;
+        ec.top = touchPointY - ec.top;
+
+        var axis = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+            var box = axis.box;
+            if (box !== undefined) {
+                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                        (ec.top > box.top) && (ec.top < box.top + box.height);
+            }
+        });
+
+        return axis;
+    }
+
+    function updatePrevPanPosition(e, gesture, gestureState, navigationState) {
+        var point = getPoint(e, gesture);
+
+        switch (navigationState.navigationConstraint) {
+            case 'unconstrained':
+                gestureState.prevPanPosition.x = point.x;
+                gestureState.prevPanPosition.y = point.y;
+                break;
+            case 'axisConstrained':
+                gestureState.prevPanPosition[navigationState.currentTouchedAxis] =
+                point[navigationState.currentTouchedAxis];
+                break;
+            default:
+                break;
+        }
+    }
+
+    function delta(e, gesture, gestureState) {
+        var point = getPoint(e, gesture);
+
+        return {
+            x: point.x - gestureState.prevPanPosition.x,
+            y: point.y - gestureState.prevPanPosition.y
+        }
+    }
+
+    function getPoint(e, gesture) {
+        if (gesture === 'pinch') {
+            return {
+                x: (e.detail.touches[0].pageX + e.detail.touches[1].pageX) / 2,
+                y: (e.detail.touches[0].pageY + e.detail.touches[1].pageY) / 2
+            }
+        } else {
+            return {
+                x: e.detail.touches[0].pageX,
+                y: e.detail.touches[0].pageY
+            }
+        }
+    }
+})(jQuery);
+
+
+/* global jQuery */
+
+(function($) {
+    'use strict';
+
+    var options = {
+        pan: {
+            enableTouch: false
+        }
+    };
+
+    function init(plot) {
+        plot.hooks.processOptions.push(initTouchNavigation);
+    }
+
+    function initTouchNavigation(plot, options) {
+        var gestureState = {
+                twoTouches: false,
+                currentTapStart: { x: 0, y: 0 },
+                currentTapEnd: { x: 0, y: 0 },
+                prevTap: { x: 0, y: 0 },
+                currentTap: { x: 0, y: 0 },
+                interceptedLongTap: false,
+                allowEventPropagation: false,
+                prevTapTime: null,
+                tapStartTime: null,
+                longTapTriggerId: null
+            },
+            maxDistanceBetweenTaps = 20,
+            maxIntervalBetweenTaps = 500,
+            maxLongTapDistance = 20,
+            minLongTapDuration = 1500,
+            mainEventHolder;
+
+        function interpretGestures(e) {
+            var o = plot.getOptions();
+
+            if (!o.pan.active && !o.zoom.active) {
+                return;
+            }
+
+            updateOnMultipleTouches(e);
+
+            if (isPinchEvent(e)) {
+                executeAction(e, 'pinch');
+            } else {
+                executeAction(e, 'pan');
+                if (!wasPinchEvent(e)) {
+                    if (isDoubleTap(e)) {
+                        executeAction(e, 'doubleTap');
+                    }
+                    executeAction(e, 'longTap');
+                }
+            }
+        }
+
+        function executeAction(e, gesture) {
+            switch (gesture) {
+                case 'pan':
+                    pan[e.type](e);
+                    break;
+                case 'pinch':
+                    pinch[e.type](e);
+                    break;
+                case 'doubleTap':
+                    doubleTap.onDoubleTap(e);
+                    break;
+                case 'longTap':
+                    longTap[e.type](e);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function bindEvents(plot, eventHolder) {
+            mainEventHolder = eventHolder[0];
+            eventHolder[0].addEventListener('touchstart', interpretGestures, false);
+            eventHolder[0].addEventListener('touchmove', interpretGestures, false);
+            eventHolder[0].addEventListener('touchend', interpretGestures, false);
+        }
+
+        function shutdown(plot, eventHolder) {
+            eventHolder[0].removeEventListener('touchstart', interpretGestures);
+            eventHolder[0].removeEventListener('touchmove', interpretGestures);
+            eventHolder[0].removeEventListener('touchend', interpretGestures);
+            if (gestureState.longTapTriggerId) {
+                clearTimeout(gestureState.longTapTriggerId);
+                gestureState.longTapTriggerId = null;
+            }
+        }
+
+        var pan = {
+            touchstart: function(e) {
+                updatePrevForDoubleTap();
+                updateCurrentForDoubleTap(e);
+                updateStateForLongTapStart(e);
+
+                mainEventHolder.dispatchEvent(new CustomEvent('panstart', { detail: e }));
+            },
+
+            touchmove: function(e) {
+                preventEventPropagation(e);
+
+                updateCurrentForDoubleTap(e);
+                updateStateForLongTapEnd(e);
+
+                if (!gestureState.allowEventPropagation) {
+                    mainEventHolder.dispatchEvent(new CustomEvent('pandrag', { detail: e }));
+                }
+            },
+
+            touchend: function(e) {
+                preventEventPropagation(e);
+
+                if (wasPinchEvent(e)) {
+                    mainEventHolder.dispatchEvent(new CustomEvent('pinchend', { detail: e }));
+                    mainEventHolder.dispatchEvent(new CustomEvent('panstart', { detail: e }));
+                } else if (noTouchActive(e)) {
+                    mainEventHolder.dispatchEvent(new CustomEvent('panend', { detail: e }));
+                }
+            }
+        };
+
+        var pinch = {
+            touchstart: function(e) {
+                mainEventHolder.dispatchEvent(new CustomEvent('pinchstart', { detail: e }));
+            },
+
+            touchmove: function(e) {
+                preventEventPropagation(e);
+                gestureState.twoTouches = isPinchEvent(e);
+                if (!gestureState.allowEventPropagation) {
+                    mainEventHolder.dispatchEvent(new CustomEvent('pinchdrag', { detail: e }));
+                }
+            },
+
+            touchend: function(e) {
+                preventEventPropagation(e);
+            }
+        };
+
+        var doubleTap = {
+            onDoubleTap: function(e) {
+                preventEventPropagation(e);
+                mainEventHolder.dispatchEvent(new CustomEvent('doubletap', { detail: e }));
+            }
+        };
+
+        var longTap = {
+            touchstart: function(e) {
+                longTap.waitForLongTap(e);
+            },
+
+            touchmove: function(e) {
+            },
+
+            touchend: function(e) {
+                if (gestureState.longTapTriggerId) {
+                    clearTimeout(gestureState.longTapTriggerId);
+                    gestureState.longTapTriggerId = null;
+                }
+            },
+
+            isLongTap: function(e) {
+                var currentTime = new Date().getTime(),
+                    tapDuration = currentTime - gestureState.tapStartTime;
+                if (tapDuration >= minLongTapDuration && !gestureState.interceptedLongTap) {
+                    if (distance(gestureState.currentTapStart.x, gestureState.currentTapStart.y, gestureState.currentTapEnd.x, gestureState.currentTapEnd.y) < maxLongTapDistance) {
+                        gestureState.interceptedLongTap = true;
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            waitForLongTap: function(e) {
+                var longTapTrigger = function() {
+                    if (longTap.isLongTap(e)) {
+                        mainEventHolder.dispatchEvent(new CustomEvent('longtap', { detail: e }));
+                    }
+                    gestureState.longTapTriggerId = null;
+                };
+                if (!gestureState.longTapTriggerId) {
+                    gestureState.longTapTriggerId = setTimeout(longTapTrigger, minLongTapDuration);
+                }
+            }
+        };
+
+        if (options.pan.enableTouch === true) {
+            plot.hooks.bindEvents.push(bindEvents);
+            plot.hooks.shutdown.push(shutdown);
+        };
+
+        function updatePrevForDoubleTap() {
+            gestureState.prevTap = {
+                x: gestureState.currentTap.x,
+                y: gestureState.currentTap.y
+            };
+        };
+
+        function updateCurrentForDoubleTap(e) {
+            gestureState.currentTap = {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            };
+        }
+
+        function updateStateForLongTapStart(e) {
+            gestureState.tapStartTime = new Date().getTime();
+            gestureState.interceptedLongTap = false;
+            gestureState.currentTapStart = {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            };
+            gestureState.currentTapEnd = {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            };
+        };
+
+        function updateStateForLongTapEnd(e) {
+            gestureState.currentTapEnd = {
+                x: e.touches[0].pageX,
+                y: e.touches[0].pageY
+            };
+        };
+
+        function isDoubleTap(e) {
+            var currentTime = new Date().getTime(),
+                intervalBetweenTaps = currentTime - gestureState.prevTapTime;
+
+            if (intervalBetweenTaps >= 0 && intervalBetweenTaps < maxIntervalBetweenTaps) {
+                if (distance(gestureState.prevTap.x, gestureState.prevTap.y, gestureState.currentTap.x, gestureState.currentTap.y) < maxDistanceBetweenTaps) {
+                    e.firstTouch = gestureState.prevTap;
+                    e.secondTouch = gestureState.currentTap;
+                    return true;
+                }
+            }
+            gestureState.prevTapTime = currentTime;
+            return false;
+        }
+
+        function preventEventPropagation(e) {
+            if (!gestureState.allowEventPropagation) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+
+        function distance(x1, y1, x2, y2) {
+            return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        }
+
+        function noTouchActive(e) {
+            return (e.touches && e.touches.length === 0);
+        }
+
+        function wasPinchEvent(e) {
+            return (gestureState.twoTouches && e.touches.length === 1);
+        }
+
+        function updateOnMultipleTouches(e) {
+            if (e.touches.length >= 3) {
+                gestureState.allowEventPropagation = true;
+            } else {
+                gestureState.allowEventPropagation = false;
+            }
+        }
+
+        function isPinchEvent(e) {
+            if (e.touches && e.touches.length >= 2) {
+                if (e.touches[0].target === plot.getEventHolder() &&
+                    e.touches[1].target === plot.getEventHolder()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        options: options,
+        name: 'navigateTouch',
+        version: '0.3'
+    });
+})(jQuery);
+
+/* Pretty handling of time axes.
+
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
+Licensed under the MIT license.
+
+Set axis.format to "time" to enable. See the section "Time series data" in
+API.txt for details.
+*/
+
+/* global timezoneJS */
+
+(function($) {
+    'use strict';
+
+    var options = {
+        xaxis: {
+            timezone: null, // "browser" for local to the client or timezone for timezone-js
+            timeformat: null, // format string to use
+            twelveHourClock: false, // 12 or 24 time in time mode
+            monthNames: null // list of names of months
+        }
+    };
+
+    // round to nearby lower multiple of base
+
+    function floorInBase(n, base) {
+        return base * Math.floor(n / base);
+    }
+
+    // Returns a string with the date d formatted according to fmt.
+    // A subset of the Open Group's strftime format is supported.
+
+    function formatDate(d, fmt, monthNames, dayNames, showMilliseconds, axis) {
+        if (typeof d.strftime === "function") {
+            return d.strftime(fmt);
+        }
+
+        var leftPad = function(n, pad) {
+            n = "" + n;
+            if (pad) pad = "" + pad;
+            else pad = "0";
+
+            return n.length === 1 ? pad + n : n;
+        };
+
+        var leftPadNTimes = function(n, pad, nTimes) {
+            n = "" + n;
+            if (pad) pad = "" + pad;
+            else pad = "0";
+
+            while (n.length < nTimes) {
+                n = pad + n;
+            }
+            return n;
+        };
+
+        function addMilliseconds(date, ms) {
+            var parts = date.split(' ');
+            if (parts.length > 1) {
+                var sufix = parts[parts.length - 1];
+                parts.splice(parts.length - 1, 1);
+
+                return parts.join(' ') + ms + ' ' + sufix;
+            } else {
+                return date + ms;
+            }
+        }
+
+        function formatLanguage() {
+            // horrible hack
+            if (window.NIEmbeddedBrowser && window.NIEmbeddedBrowser.formatLanguage) {
+                return window.NIEmbeddedBrowser.formatLanguage;
+            }
+
+            return navigator.locale || 'en-US';
+        }
+
+        function toAbsoluteTimeStr(date, showMilliseconds) {
+            var unixToAbsoluteEpochDiff = 62135596800000,
+                minDateValue = -8640000000000000,
+                d = date.valueOf(),
+                ms = Math.floor(d % 1000);
+
+            if (ms < 0) {
+                ms = 1000 + ms;
+            }
+
+            if (date < minDateValue + unixToAbsoluteEpochDiff) {
+                date = minDateValue + unixToAbsoluteEpochDiff;
+            }
+
+            var gregorianDate = makeUtcWrapper(new Date(date - unixToAbsoluteEpochDiff)).date;
+
+            var msString = showMilliseconds ? '.' + leftPadNTimes(ms, '0', 3) : '';
+            var time = Globalize.format(gregorianDate, "T", formatLanguage());
+            var absTimeString = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
+            absTimeString = absTimeString.replace(/\s/g, '&nbsp;');
+            return absTimeString;
+        }
+
+        function toRelativeTimeStr(date, showMilliseconds) {
+            var result = '';
+
+            var dateValue = date.valueOf(),
+                d = dateValue - (axis.valueOfFirstData === undefined ? 0 : axis.valueOfFirstData);
+
+            if (d < 0) {
+                d = -d;
+                result += '-';
+            }
+            var dateInSeconds = Math.floor(d / 1000);
+            var milliseconds = Math.floor(d % 1000);
+            var seconds = dateInSeconds % 60;
+            var dateInMinutes = Math.floor(dateInSeconds / 60);
+            var minutes = dateInMinutes % 60;
+            var dateInHours = Math.floor(dateInMinutes / 60);
+            var hours = dateInHours % 24;
+            var days = Math.floor(dateInHours / 24);
+
+            if (days) {
+                result += days + '.';
+            }
+            result += leftPad(hours) + ':';
+            result += leftPad(minutes) + ':';
+            result += leftPad(seconds);
+            if (showMilliseconds) {
+                result += '.' + leftPadNTimes(milliseconds, "0", 3);
+            }
+
+            return result;
+        }
+
+        var r = [];
+        var escape = false;
+
+        if (!monthNames) {
+            monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        }
+
+        if (!dayNames) {
+            dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        }
+
+        for (var i = 0; i < fmt.length; ++i) {
+            var c = fmt.charAt(i);
+            if (escape) {
+                switch (c) {
+                    case 'r': c = toRelativeTimeStr(d.date, showMilliseconds); break;
+                    case 'A': c = toAbsoluteTimeStr(d.date, showMilliseconds); break;
+                }
+                r.push(c);
+                escape = false;
+            } else {
+                if (c === "%") {
+                    escape = true;
+                } else {
+                    r.push(c);
+                }
+            }
+        }
+
+        return r.join("");
+    }
+
+    // To have a consistent view of time-based data independent of which time
+    // zone the client happens to be in we need a date-like object independent
+    // of time zones.  This is done through a wrapper that only calls the UTC
+    // versions of the accessor methods.
+
+    function makeUtcWrapper(d) {
+        function addProxyMethod(sourceObj, sourceMethod, targetObj, targetMethod) {
+            sourceObj[sourceMethod] = function() {
+                return targetObj[targetMethod].apply(targetObj, arguments);
+            };
+        }
+
+        var utc = {
+            date: d
+        };
+
+        // support strftime, if found
+        if (d.strftime !== undefined) {
+            addProxyMethod(utc, "strftime", d, "strftime");
+        }
+
+        addProxyMethod(utc, "getTime", d, "getTime");
+        addProxyMethod(utc, "setTime", d, "setTime");
+
+        var props = ["Date", "Day", "FullYear", "Hours", "Milliseconds", "Minutes", "Month", "Seconds"];
+
+        for (var p = 0; p < props.length; p++) {
+            addProxyMethod(utc, "get" + props[p], d, "getUTC" + props[p]);
+            addProxyMethod(utc, "set" + props[p], d, "setUTC" + props[p]);
+        }
+
+        return utc;
+    }
+
+    // select time zone strategy.  This returns a date-like object tied to the
+    // desired timezone
+    function dateGenerator(ts, opts) {
+        var maxDateValue = 8640000000000000;
+
+        ts *= 1000;
+
+        if (ts > maxDateValue) {
+            ts = maxDateValue;
+        } else if (ts < -maxDateValue) {
+            ts = -maxDateValue;
+        }
+
+        if (opts.timezone === "browser") {
+            return new Date(ts);
+        } else if (!opts.timezone || opts.timezone === "utc") {
+            return makeUtcWrapper(new Date(ts));
+        } else if (typeof timezoneJS !== "undefined" && typeof timezoneJS.Date !== "undefined") {
+            var d = new timezoneJS.Date();
+            // timezone-js is fickle, so be sure to set the time zone before
+            // setting the time.
+            d.setTimezone(opts.timezone);
+            d.setTime(ts);
+            return d;
+        } else {
+            return makeUtcWrapper(new Date(ts));
+        }
+    }
+
+    // map of app. size of time units in milliseconds
+    var timeUnitSize = {
+        "millisecond": 0.001,
+        "second": 1,
+        "minute": 60,
+        "hour": 60 * 60,
+        "day": 24 * 60 * 60,
+        "month": 30 * 24 * 60 * 60,
+        "quarter": 3 * 30 * 24 * 60 * 60,
+        "year": 365.2425 * 24 * 60 * 60
+    };
+
+    // the allowed tick sizes, after 1 year we use
+    // an integer algorithm
+
+    var baseSpec = [
+        [1, "millisecond"], [2, "millisecond"], [5, "millisecond"], [10, "millisecond"],
+        [25, "millisecond"], [50, "millisecond"], [100, "millisecond"], [250, "millisecond"], [500, "millisecond"],
+        [1, "second"], [2, "second"], [5, "second"], [10, "second"],
+        [30, "second"],
+        [1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
+        [30, "minute"],
+        [1, "hour"], [2, "hour"], [4, "hour"],
+        [8, "hour"], [12, "hour"],
+        [1, "day"], [2, "day"], [3, "day"],
+        [0.25, "month"], [0.5, "month"], [1, "month"],
+        [2, "month"]
+    ];
+
+    // we don't know which variant(s) we'll need yet, but generating both is
+    // cheap
+
+    var specMonths = baseSpec.concat([[3, "month"], [6, "month"],
+        [1, "year"]]);
+    var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
+        [1, "year"]]);
+
+    function updateAxisFirstData(plot, axis) {
+        var plotData = plot.getData();
+        if (plotData.length > 0 && (plotData[0].data.length > 0 || plotData[0].datapoints.points.length > 0)) {
+            var i, firstPlotData, minFirstPlotData, datapoints = plotData[0].datapoints;
+            if (datapoints.points.length !== 0) {
+                if (plotData[0].xaxis === axis || plotData[0].yaxis === axis) {
+                    minFirstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+                } else { minFirstPlotData = axis.max; }
+            } else { minFirstPlotData = axis.min; }
+
+            for (i = 1; i < plotData.length; i++) {
+                datapoints = plotData[i].datapoints;
+                if (plotData[i].xaxis === axis || plotData[i].yaxis === axis) {
+                    firstPlotData = axis.direction === "x" ? datapoints.points[0] : datapoints.points[1];
+                    if (minFirstPlotData > firstPlotData) {
+                        minFirstPlotData = firstPlotData;
+                    }
+                }
+            }
+
+            axis.valueOfFirstData = minFirstPlotData * 1000;
+        }
+    }
+
+    function init(plot) {
+        plot.hooks.processOptions.push(function (plot) {
+            $.each(plot.getAxes(), function(axisName, axis) {
+                var opts = axis.options;
+                if (opts.format === "time") {
+                    axis.tickGenerator = function(axis) {
+                        var ticks = [],
+                            d = dateGenerator(axis.min, opts),
+                            minSize = 0;
+
+                        if (axis.valueOfFirstData === undefined) {
+                            updateAxisFirstData(plot, axis);
+                        }
+
+                        // make quarter use a possibility if quarters are
+                        // mentioned in either of these options
+                        var spec = (opts.tickSize && opts.tickSize[1] ===
+                            "quarter") ||
+                            (opts.minTickSize && opts.minTickSize[1] ===
+                            "quarter") ? specQuarters : specMonths;
+
+                        if (opts.minTickSize !== null && opts.minTickSize !== undefined) {
+                            if (typeof opts.tickSize === "number") {
+                                minSize = opts.tickSize;
+                            } else {
+                                minSize = opts.minTickSize[0] * timeUnitSize[opts.minTickSize[1]];
+                            }
+                        }
+
+                        var delta = axis.delta * 2;
+                        for (var i = 0; i < spec.length - 1; ++i) {
+                            if (delta < (spec[i][0] * timeUnitSize[spec[i][1]] +
+                                spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2 &&
+                                spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
+                                break;
+                            }
+                        }
+
+                        var size = spec[i][0];
+                        var unit = spec[i][1];
+                        // special-case the possibility of several years
+                        if (unit === "year") {
+                            // if given a minTickSize in years, just use it,
+                            // ensuring that it's an integer
+
+                            if (opts.minTickSize !== null && opts.minTickSize !== undefined && opts.minTickSize[1] === "year") {
+                                size = Math.floor(opts.minTickSize[0]);
+                            } else {
+                                var magn = Math.pow(10, Math.floor(Math.log(axis.delta / timeUnitSize.year) / Math.LN10));
+                                var norm = (axis.delta / timeUnitSize.year) / magn;
+
+                                if (norm < 1.5) {
+                                    size = 1;
+                                } else if (norm < 3) {
+                                    size = 2;
+                                } else if (norm < 7.5) {
+                                    size = 5;
+                                } else {
+                                    size = 10;
+                                }
+
+                                size *= magn;
+                            }
+
+                            // minimum size for years is 1
+
+                            if (size < 1) {
+                                size = 1;
+                            }
+                        }
+
+                        axis.tickSize = opts.tickSize || [size, unit];
+                        var tickSize = axis.tickSize[0];
+                        unit = axis.tickSize[1];
+
+                        var step = tickSize * timeUnitSize[unit];
+
+                        if (unit === "millisecond") {
+                            d.setMilliseconds(floorInBase(d.getMilliseconds(), tickSize));
+                        } else if (unit === "second") {
+                            d.setSeconds(floorInBase(d.getSeconds(), tickSize));
+                        } else if (unit === "minute") {
+                            d.setMinutes(floorInBase(d.getMinutes(), tickSize));
+                        } else if (unit === "hour") {
+                            d.setHours(floorInBase(d.getHours(), tickSize));
+                        } else if (unit === "month") {
+                            d.setMonth(floorInBase(d.getMonth(), tickSize));
+                        } else if (unit === "quarter") {
+                            d.setMonth(3 * floorInBase(d.getMonth() / 3,
+                                tickSize));
+                        } else if (unit === "year") {
+                            d.setFullYear(floorInBase(d.getFullYear(), tickSize));
+                        }
+
+                        // reset smaller components
+
+                        if (step >= timeUnitSize.second) {
+                            d.setMilliseconds(0);
+                        }
+
+                        if (step >= timeUnitSize.minute) {
+                            d.setSeconds(0);
+                        }
+                        if (step >= timeUnitSize.hour) {
+                            d.setMinutes(0);
+                        }
+                        if (step >= timeUnitSize.day) {
+                            d.setHours(0);
+                        }
+                        if (step >= timeUnitSize.day * 4) {
+                            d.setDate(1);
+                        }
+                        if (step >= timeUnitSize.month * 2) {
+                            d.setMonth(floorInBase(d.getMonth(), 3));
+                        }
+                        if (step >= timeUnitSize.quarter * 2) {
+                            d.setMonth(floorInBase(d.getMonth(), 6));
+                        }
+                        if (step >= timeUnitSize.year) {
+                            d.setMonth(0);
+                        }
+
+                        var carry = 0;
+                        var v = Number.NaN;
+                        var v1000;
+                        var prev;
+                        do {
+                            prev = v;
+                            v1000 = d.getTime();
+                            v = v1000 / 1000;
+                            ticks.push(v);
+
+                            if (unit === "month" || unit === "quarter") {
+                                if (tickSize < 1) {
+                                    // a bit complicated - we'll divide the
+                                    // month/quarter up but we need to take
+                                    // care of fractions so we don't end up in
+                                    // the middle of a day
+                                    d.setDate(1);
+                                    var start = d.getTime();
+                                    d.setMonth(d.getMonth() +
+                                        (unit === "quarter" ? 3 : 1));
+                                    var end = d.getTime();
+                                    d.setTime((v + carry * timeUnitSize.hour + (end - start) * tickSize));
+                                    carry = d.getHours();
+                                    d.setHours(0);
+                                } else {
+                                    d.setMonth(d.getMonth() +
+                                        tickSize * (unit === "quarter" ? 3 : 1));
+                                }
+                            } else if (unit === "year") {
+                                d.setFullYear(d.getFullYear() + tickSize);
+                            } else {
+                                d.setTime((v + step) * 1000);
+                            }
+                        } while (v < axis.max && v !== prev);
+
+                        return ticks;
+                    };
+
+                    axis.tickFormatter = function (v, axis) {
+                        var d = dateGenerator(v, axis.options);
+                        // first check global format
+                        if (opts.timeformat !== null && opts.timeformat !== undefined) {
+                            return formatDate(d, opts.timeformat, opts.monthNames, opts.dayNames, axis.tickSize[1] === 'millisecond', axis);
+                        }
+                    };
+                }
+            });
+        });
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        options: options,
+        name: 'time',
+        version: '1.0'
+    });
+
+    // Time-axis support used to be in Flot core, which exposed the
+    // formatDate function on the plot object.  Various plugins depend
+    // on the function, so we need to re-expose it here.
+
+    $.plot.formatDate = formatDate;
+    $.plot.dateGenerator = dateGenerator;
+})(jQuery);
+
+/*
+Axis label plugin for engineering-flot
+
+Derived from:
+Axis Labels Plugin for flot.
+http://github.com/markrcote/flot-axislabels
+
+Original code is Copyright (c) 2010 Xuan Luo.
+Original code was released under the GPLv3 license by Xuan Luo, September 2010.
+Original code was rereleased under the MIT license by Xuan Luo, April 2012.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+(function($) {
+    "use strict";
+
+    var options = {
+        axisLabels: {
+            show: true
+        }
+    };
+
+    function AxisLabel(axisName, position, padding, placeholder, axisLabel, surface) {
+        this.axisName = axisName;
+        this.position = position;
+        this.padding = padding;
+        this.placeholder = placeholder;
+        this.axisLabel = axisLabel;
+        this.surface = surface;
+        this.width = 0;
+        this.height = 0;
+        this.elem = null;
+    }
+
+    AxisLabel.prototype.calculateSize = function() {
+        var axisId = this.axisName + 'Label',
+            layerId = axisId + 'Layer',
+            className = axisId + ' axisLabels';
+
+        var info = this.surface.getTextInfo(layerId, this.axisLabel, className);
+        this.labelWidth = info.width;
+        this.labelHeight = info.height;
+
+        if (this.position === 'left' || this.position === 'right') {
+            this.width = this.labelHeight + this.padding;
+            this.height = 0;
+        } else {
+            this.width = 0;
+            this.height = this.labelHeight + this.padding;
+        }
+    };
+
+    AxisLabel.prototype.transforms = function(degrees, x, y, svgLayer) {
+        var transforms = [], translate, rotate;
+        if (x !== 0 || y !== 0) {
+            translate = svgLayer.createSVGTransform();
+            translate.setTranslate(x, y);
+            transforms.push(translate);
+        }
+        if (degrees !== 0) {
+            rotate = svgLayer.createSVGTransform();
+            var centerX = Math.round(this.labelWidth / 2),
+                centerY = 0;
+            rotate.setRotate(degrees, centerX, centerY);
+            transforms.push(rotate);
+        }
+
+        return transforms;
+    };
+
+    AxisLabel.prototype.calculateOffsets = function(box) {
+        var offsets = {
+            x: 0,
+            y: 0,
+            degrees: 0
+        };
+        if (this.position === 'bottom') {
+            offsets.x = box.left + box.width / 2 - this.labelWidth / 2;
+            offsets.y = box.top + box.height - this.labelHeight;
+        } else if (this.position === 'top') {
+            offsets.x = box.left + box.width / 2 - this.labelWidth / 2;
+            offsets.y = box.top;
+        } else if (this.position === 'left') {
+            offsets.degrees = -90;
+            offsets.x = box.left - this.labelWidth / 2;
+            offsets.y = box.height / 2 + box.top;
+        } else if (this.position === 'right') {
+            offsets.degrees = 90;
+            offsets.x = box.left + box.width - this.labelWidth / 2;
+            offsets.y = box.height / 2 + box.top;
+        }
+        offsets.x = Math.round(offsets.x);
+        offsets.y = Math.round(offsets.y);
+
+        return offsets;
+    };
+
+    AxisLabel.prototype.cleanup = function() {
+        var axisId = this.axisName + 'Label',
+            layerId = axisId + 'Layer',
+            className = axisId + ' axisLabels';
+        this.surface.removeText(layerId, 0, 0, this.axisLabel, className);
+    };
+
+    AxisLabel.prototype.draw = function(box) {
+        var axisId = this.axisName + 'Label',
+            layerId = axisId + 'Layer',
+            className = axisId + ' axisLabels',
+            offsets = this.calculateOffsets(box),
+            style = $.extend({
+                position: 'absolute',
+                bottom: '',
+                right: '',
+                display: 'inline-block',
+                'white-space': 'nowrap'
+            });
+
+        var layer = this.surface.getSVGLayer(layerId);
+        var transforms = this.transforms(offsets.degrees, offsets.x, offsets.y, layer.parentNode);
+
+        this.surface.addText(layerId, 0, 0, this.axisLabel, className, undefined, undefined, undefined, undefined, transforms);
+        this.surface.render();
+        Object.keys(style).forEach(function(key) {
+            layer.style[key] = style[key];
+        });
+    };
+
+    function init(plot) {
+        plot.hooks.processOptions.push(function(plot, options) {
+            if (!options.axisLabels.show) {
+                return;
+            }
+
+            var axisLabels = {};
+            var defaultPadding = 2; // padding between axis and tick labels
+
+            plot.hooks.axisReserveSpace.push(function(plot, axis) {
+                var opts = axis.options;
+                var axisName = axis.direction + axis.n;
+
+                axis.labelHeight += axis.boxPosition.centerY;
+                axis.labelWidth += axis.boxPosition.centerX;
+
+                if (!opts || !opts.axisLabel || !axis.show) {
+                    return;
+                }
+
+                var padding = opts.axisLabelPadding === undefined
+                    ? defaultPadding
+                    : opts.axisLabelPadding;
+
+                var axisLabel = axisLabels[axisName];
+                if (!axisLabel) {
+                    axisLabel = new AxisLabel(axisName,
+                        opts.position, padding,
+                        plot.getPlaceholder()[0], opts.axisLabel, plot.getSurface());
+                    axisLabels[axisName] = axisLabel;
+                }
+
+                axisLabel.calculateSize();
+
+                // Incrementing the sizes of the tick labels.
+                axis.labelHeight += axisLabel.height;
+                axis.labelWidth += axisLabel.width;
+            });
+
+            // TODO - use the drawAxis hook
+            plot.hooks.draw.push(function(plot, ctx) {
+                $.each(plot.getAxes(), function(flotAxisName, axis) {
+                    var opts = axis.options;
+                    if (!opts || !opts.axisLabel || !axis.show) {
+                        return;
+                    }
+
+                    var axisName = axis.direction + axis.n;
+                    axisLabels[axisName].draw(axis.box);
+                });
+            });
+
+            plot.hooks.shutdown.push(function(plot, eventHolder) {
+                for (var axisName in axisLabels) {
+                    axisLabels[axisName].cleanup();
+                }
+            });
+        });
+    };
+
+    $.plot.plugins.push({
+        init: init,
+        options: options,
+        name: 'axisLabels',
+        version: '3.0'
+    });
+})(jQuery);
+
+/* Flot plugin for selecting regions of a plot.
+
+Copyright (c) 2007-2014 IOLA and Ole Laursen.
+Licensed under the MIT license.
+
+The plugin supports these options:
+
+selection: {
+    mode: null or "x" or "y" or "xy" or "smart",
+    color: color,
+    shape: "round" or "miter" or "bevel",
+    minSize: number of pixels
+}
+
+Selection support is enabled by setting the mode to one of "x", "y" or "xy".
+In "x" mode, the user will only be able to specify the x range, similarly for
+"y" mode. For "xy", the selection becomes a rectangle where both ranges can be
+specified. "color" is color of the selection (if you need to change the color
+later on, you can get to it with plot.getOptions().selection.color). "shape"
+is the shape of the corners of the selection.
+
+"minSize" is the minimum size a selection can be in pixels. This value can
+be customized to determine the smallest size a selection can be and still
+have the selection rectangle be displayed. When customizing this value, the
+fact that it refers to pixels, not axis units must be taken into account.
+Thus, for example, if there is a bar graph in time mode with BarWidth set to 1
+minute, setting "minSize" to 1 will not make the minimum selection size 1
+minute, but rather 1 pixel. Note also that setting "minSize" to 0 will prevent
+"plotunselected" events from being fired when the user clicks the mouse without
+dragging.
+
+When selection support is enabled, a "plotselected" event will be emitted on
+the DOM element you passed into the plot function. The event handler gets a
+parameter with the ranges selected on the axes, like this:
+
+    placeholder.bind( "plotselected", function( event, ranges ) {
+        alert("You selected " + ranges.xaxis.from + " to " + ranges.xaxis.to)
+        // similar for yaxis - with multiple axes, the extra ones are in
+        // x2axis, x3axis, ...
+    });
+
+The "plotselected" event is only fired when the user has finished making the
+selection. A "plotselecting" event is fired during the process with the same
+parameters as the "plotselected" event, in case you want to know what's
+happening while it's happening,
+
+A "plotunselected" event with no arguments is emitted when the user clicks the
+mouse to remove the selection. As stated above, setting "minSize" to 0 will
+destroy this behavior.
+
+The plugin allso adds the following methods to the plot object:
+
+- setSelection( ranges, preventEvent )
+
+  Set the selection rectangle. The passed in ranges is on the same form as
+  returned in the "plotselected" event. If the selection mode is "x", you
+  should put in either an xaxis range, if the mode is "y" you need to put in
+  an yaxis range and both xaxis and yaxis if the selection mode is "xy", like
+  this:
+
+    setSelection({ xaxis: { from: 0, to: 10 }, yaxis: { from: 40, to: 60 } });
+
+  setSelection will trigger the "plotselected" event when called. If you don't
+  want that to happen, e.g. if you're inside a "plotselected" handler, pass
+  true as the second parameter. If you are using multiple axes, you can
+  specify the ranges on any of those, e.g. as x2axis/x3axis/... instead of
+  xaxis, the plugin picks the first one it sees.
+
+- clearSelection( preventEvent )
+
+  Clear the selection rectangle. Pass in true to avoid getting a
+  "plotunselected" event.
+
+- getSelection()
+
+  Returns the current selection in the same format as the "plotselected"
+  event. If there's currently no selection, the function returns null.
+
+*/
+
+(function ($) {
+    function init(plot) {
+        var selection = {
+            first: {x: -1, y: -1},
+            second: {x: -1, y: -1},
+            show: false,
+            currentMode: 'xy',
+            active: false
+        };
+
+        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
+
+        // FIXME: The drag handling implemented here should be
+        // abstracted out, there's some similar code from a library in
+        // the navigation plugin, this should be massaged a bit to fit
+        // the Flot cases here better and reused. Doing this would
+        // make this plugin much slimmer.
+        var savedhandlers = {};
+
+        var mouseUpHandler = null;
+
+        function onMouseMove(e) {
+            if (selection.active) {
+                updateSelection(e);
+
+                plot.getPlaceholder().trigger("plotselecting", [ getSelection() ]);
+            }
+        }
+
+        function onMouseDown(e) {
+            // only accept left-click
+            if (e.which !== 1) return;
+
+            // cancel out any text selections
+            document.body.focus();
+
+            // prevent text selection and drag in old-school browsers
+            if (document.onselectstart !== undefined && savedhandlers.onselectstart == null) {
+                savedhandlers.onselectstart = document.onselectstart;
+                document.onselectstart = function () { return false; };
+            }
+            if (document.ondrag !== undefined && savedhandlers.ondrag == null) {
+                savedhandlers.ondrag = document.ondrag;
+                document.ondrag = function () { return false; };
+            }
+
+            setSelectionPos(selection.first, e);
+
+            selection.active = true;
+
+            // this is a bit silly, but we have to use a closure to be
+            // able to whack the same handler again
+            mouseUpHandler = function (e) { onMouseUp(e); };
+
+            $(document).one("mouseup", mouseUpHandler);
+        }
+
+        function onMouseUp(e) {
+            mouseUpHandler = null;
+
+            // revert drag stuff for old-school browsers
+            if (document.onselectstart !== undefined) {
+                document.onselectstart = savedhandlers.onselectstart;
+            }
+
+            if (document.ondrag !== undefined) {
+                document.ondrag = savedhandlers.ondrag;
+            }
+
+            // no more dragging
+            selection.active = false;
+            updateSelection(e);
+
+            if (selectionIsSane()) {
+                triggerSelectedEvent();
+            } else {
+                // this counts as a clear
+                plot.getPlaceholder().trigger("plotunselected", [ ]);
+                plot.getPlaceholder().trigger("plotselecting", [ null ]);
+            }
+
+            return false;
+        }
+
+        function getSelection() {
+            if (!selectionIsSane()) return null;
+
+            if (!selection.show) return null;
+
+            var r = {},
+                c1 = {x: selection.first.x, y: selection.first.y},
+                c2 = {x: selection.second.x, y: selection.second.y};
+
+            if (selectionDirection(plot) === 'x') {
+                c1.y = 0;
+                c2.y = plot.height();
+            }
+
+            if (selectionDirection(plot) === 'y') {
+                c1.x = 0;
+                c2.x = plot.width();
+            }
+
+            $.each(plot.getAxes(), function (name, axis) {
+                if (axis.used) {
+                    var p1 = axis.c2p(c1[axis.direction]), p2 = axis.c2p(c2[axis.direction]);
+                    r[name] = { from: Math.min(p1, p2), to: Math.max(p1, p2) };
+                }
+            });
+            return r;
+        }
+
+        function triggerSelectedEvent() {
+            var r = getSelection();
+
+            plot.getPlaceholder().trigger("plotselected", [ r ]);
+
+            // backwards-compat stuff, to be removed in future
+            if (r.xaxis && r.yaxis) {
+                plot.getPlaceholder().trigger("selected", [ { x1: r.xaxis.from, y1: r.yaxis.from, x2: r.xaxis.to, y2: r.yaxis.to } ]);
+            }
+        }
+
+        function clamp(min, value, max) {
+            return value < min ? min : (value > max ? max : value);
+        }
+
+        function selectionDirection(plot) {
+            var o = plot.getOptions();
+
+            if (o.selection.mode === 'smart') {
+                return selection.currentMode;
+            } else {
+                return o.selection.mode;
+            }
+        }
+
+        function updateMode(pos) {
+            if (selection.first) {
+                var delta = {
+                    x: pos.x - selection.first.x,
+                    y: pos.y - selection.first.y
+                };
+
+                if (Math.abs(delta.x) < SNAPPING_CONSTANT) {
+                    selection.currentMode = 'y';
+                } else if (Math.abs(delta.y) < SNAPPING_CONSTANT) {
+                    selection.currentMode = 'x';
+                } else {
+                    selection.currentMode = 'xy';
+                }
+            }
+        }
+
+        function setSelectionPos(pos, e) {
+            var offset = plot.getPlaceholder().offset();
+            var plotOffset = plot.getPlotOffset();
+            pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plot.width());
+            pos.y = clamp(0, e.pageY - offset.top - plotOffset.top, plot.height());
+
+            if (pos !== selection.first) updateMode(pos);
+
+            if (selectionDirection(plot) === "y") {
+                pos.x = pos === selection.first ? 0 : plot.width();
+            }
+
+            if (selectionDirection(plot) === "x") {
+                pos.y = pos === selection.first ? 0 : plot.height();
+            }
+        }
+
+        function updateSelection(pos) {
+            if (pos.pageX == null) return;
+
+            setSelectionPos(selection.second, pos);
+            if (selectionIsSane()) {
+                selection.show = true;
+                plot.triggerRedrawOverlay();
+            } else clearSelection(true);
+        }
+
+        function clearSelection(preventEvent) {
+            if (selection.show) {
+                selection.show = false;
+                selection.currentMode = '';
+                plot.triggerRedrawOverlay();
+                if (!preventEvent) {
+                    plot.getPlaceholder().trigger("plotunselected", [ ]);
+                }
+            }
+        }
+
+        // function taken from markings support in Flot
+        function extractRange(ranges, coord) {
+            var axis, from, to, key, axes = plot.getAxes();
+
+            for (var k in axes) {
+                axis = axes[k];
+                if (axis.direction === coord) {
+                    key = coord + axis.n + "axis";
+                    if (!ranges[key] && axis.n === 1) {
+                        // support x1axis as xaxis
+                        key = coord + "axis";
+                    }
+
+                    if (ranges[key]) {
+                        from = ranges[key].from;
+                        to = ranges[key].to;
+                        break;
+                    }
+                }
+            }
+
+            // backwards-compat stuff - to be removed in future
+            if (!ranges[key]) {
+                axis = coord === "x" ? plot.getXAxes()[0] : plot.getYAxes()[0];
+                from = ranges[coord + "1"];
+                to = ranges[coord + "2"];
+            }
+
+            // auto-reverse as an added bonus
+            if (from != null && to != null && from > to) {
+                var tmp = from;
+                from = to;
+                to = tmp;
+            }
+
+            return { from: from, to: to, axis: axis };
+        }
+
+        function setSelection(ranges, preventEvent) {
+            var range;
+
+            if (selectionDirection(plot) === "y") {
+                selection.first.x = 0;
+                selection.second.x = plot.width();
+            } else {
+                range = extractRange(ranges, "x");
+                selection.first.x = range.axis.p2c(range.from);
+                selection.second.x = range.axis.p2c(range.to);
+            }
+
+            if (selectionDirection(plot) === "x") {
+                selection.first.y = 0;
+                selection.second.y = plot.height();
+            } else {
+                range = extractRange(ranges, "y");
+                selection.first.y = range.axis.p2c(range.from);
+                selection.second.y = range.axis.p2c(range.to);
+            }
+
+            selection.show = true;
+            plot.triggerRedrawOverlay();
+            if (!preventEvent && selectionIsSane()) {
+                triggerSelectedEvent();
+            }
+        }
+
+        function selectionIsSane() {
+            var minSize = plot.getOptions().selection.minSize;
+            return Math.abs(selection.second.x - selection.first.x) >= minSize &&
+                Math.abs(selection.second.y - selection.first.y) >= minSize;
+        }
+
+        plot.clearSelection = clearSelection;
+        plot.setSelection = setSelection;
+        plot.getSelection = getSelection;
+
+        plot.hooks.bindEvents.push(function(plot, eventHolder) {
+            var o = plot.getOptions();
+            if (o.selection.mode != null) {
+                eventHolder.mousemove(onMouseMove);
+                eventHolder.mousedown(onMouseDown);
+            }
+        });
+
+        function drawSelectionDecorations(ctx, x, y, w, h, oX, oY, mode) {
+            var spacing = 3;
+            var fullEarWidth = 15;
+            var earWidth = Math.max(0, Math.min(fullEarWidth, w / 2 - 2, h / 2 - 2));
+            ctx.fillStyle = '#ffffff';
+
+            if (mode === 'xy') {
+                ctx.beginPath();
+                ctx.moveTo(x, y + earWidth);
+                ctx.lineTo(x - 3, y + earWidth);
+                ctx.lineTo(x - 3, y - 3);
+                ctx.lineTo(x + earWidth, y - 3);
+                ctx.lineTo(x + earWidth, y);
+                ctx.lineTo(x, y);
+                ctx.closePath();
+
+                ctx.moveTo(x, y + h - earWidth);
+                ctx.lineTo(x - 3, y + h - earWidth);
+                ctx.lineTo(x - 3, y + h + 3);
+                ctx.lineTo(x + earWidth, y + h + 3);
+                ctx.lineTo(x + earWidth, y + h);
+                ctx.lineTo(x, y + h);
+                ctx.closePath();
+
+                ctx.moveTo(x + w, y + earWidth);
+                ctx.lineTo(x + w + 3, y + earWidth);
+                ctx.lineTo(x + w + 3, y - 3);
+                ctx.lineTo(x + w - earWidth, y - 3);
+                ctx.lineTo(x + w - earWidth, y);
+                ctx.lineTo(x + w, y);
+                ctx.closePath();
+
+                ctx.moveTo(x + w, y + h - earWidth);
+                ctx.lineTo(x + w + 3, y + h - earWidth);
+                ctx.lineTo(x + w + 3, y + h + 3);
+                ctx.lineTo(x + w - earWidth, y + h + 3);
+                ctx.lineTo(x + w - earWidth, y + h);
+                ctx.lineTo(x + w, y + h);
+                ctx.closePath();
+
+                ctx.stroke();
+                ctx.fill();
+            }
+
+            x = oX;
+            y = oY;
+
+            if (mode === 'x') {
+                ctx.beginPath();
+                ctx.moveTo(x, y + fullEarWidth);
+                ctx.lineTo(x, y - fullEarWidth);
+                ctx.lineTo(x - spacing, y - fullEarWidth);
+                ctx.lineTo(x - spacing, y + fullEarWidth);
+                ctx.closePath();
+
+                ctx.moveTo(x + w, y + fullEarWidth);
+                ctx.lineTo(x + w, y - fullEarWidth);
+                ctx.lineTo(x + w + spacing, y - fullEarWidth);
+                ctx.lineTo(x + w + spacing, y + fullEarWidth);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+            }
+
+            if (mode === 'y') {
+                ctx.beginPath();
+
+                ctx.moveTo(x - fullEarWidth, y);
+                ctx.lineTo(x + fullEarWidth, y);
+                ctx.lineTo(x + fullEarWidth, y - spacing);
+                ctx.lineTo(x - fullEarWidth, y - spacing);
+                ctx.closePath();
+
+                ctx.moveTo(x - fullEarWidth, y + h);
+                ctx.lineTo(x + fullEarWidth, y + h);
+                ctx.lineTo(x + fullEarWidth, y + h + spacing);
+                ctx.lineTo(x - fullEarWidth, y + h + spacing);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+            }
+        }
+
+        plot.hooks.drawOverlay.push(function (plot, ctx) {
+            // draw selection
+            if (selection.show && selectionIsSane()) {
+                var plotOffset = plot.getPlotOffset();
+                var o = plot.getOptions();
+
+                ctx.save();
+                ctx.translate(plotOffset.left, plotOffset.top);
+
+                var c = $.color.parse(o.selection.color);
+
+                ctx.strokeStyle = c.scale('a', 1).toString();
+                ctx.lineWidth = 1;
+                ctx.lineJoin = o.selection.shape;
+                ctx.fillStyle = c.scale('a', 0.4).toString();
+
+                var x = Math.min(selection.first.x, selection.second.x) + 0.5,
+                    oX = x,
+                    y = Math.min(selection.first.y, selection.second.y) + 0.5,
+                    oY = y,
+                    w = Math.abs(selection.second.x - selection.first.x) - 1,
+                    h = Math.abs(selection.second.y - selection.first.y) - 1;
+
+                if (selectionDirection(plot) === 'x') {
+                    h += y;
+                    y = 0;
+                }
+
+                if (selectionDirection(plot) === 'y') {
+                    w += x;
+                    x = 0;
+                }
+
+                ctx.fillRect(0, 0, plot.width(), plot.height());
+                ctx.clearRect(x, y, w, h);
+                drawSelectionDecorations(ctx, x, y, w, h, oX, oY, selectionDirection(plot));
+
+                ctx.restore();
+            }
+        });
+
+        plot.hooks.shutdown.push(function (plot, eventHolder) {
+            eventHolder.unbind("mousemove", onMouseMove);
+            eventHolder.unbind("mousedown", onMouseDown);
+
+            if (mouseUpHandler) {
+                $(document).unbind("mouseup", mouseUpHandler);
+            }
+        });
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        options: {
+            selection: {
+                mode: null, // one of null, "x", "y" or "xy"
+                color: "#888888",
+                shape: "round", // one of "round", "miter", or "bevel"
+                minSize: 5 // minimum number of pixels
+            }
+        },
+        name: 'selection',
+        version: '1.1'
+    });
 })(jQuery);

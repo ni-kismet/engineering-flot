@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changes ###
 
+- single file distribution: dist/es5/jquery.flot.js
 - Edge and Safari support
 - PhantomJS and IE are no longer supported
 - the axis and tick labels are now rendered using SVG text and g nodes instead of div

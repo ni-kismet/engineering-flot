@@ -1636,13 +1636,6 @@ Licensed under the MIT license.
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
             axis.tickSize = getAxisTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
 
-            // Time mode was moved to a plug-in in 0.8, and since so many people use it
-            // we'll add an especially friendly reminder to make sure they included it.
-
-            if (opts.mode === "time" && !axis.tickGenerator) {
-                throw new Error("Time mode requires the flot.time plugin.");
-            }
-
             // Flot supports base-10 axes; any other mode else is handled by a plug-in,
             // like flot.time.js.
 
