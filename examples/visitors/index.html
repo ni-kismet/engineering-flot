@@ -5,9 +5,8 @@
 	<title>Flot Examples: Visitors</title>
 	<link href="../examples.css" rel="stylesheet" type="text/css">
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
-	<script language="javascript" type="text/javascript" src="../../jquery.colorhelpers.js"></script>
-	<script language="javascript" type="text/javascript" src="../../dist/jquery.flot.js"></script>
-	<script language="javascript" type="text/javascript" src="../../jquery.flot.selection.js"></script>
+	<script language="javascript" type="text/javascript" src="../../lib/globalize.js"></script>
+	<script language="javascript" type="text/javascript" src="../../dist/es5/jquery.flot.js"></script>
 	<script type="text/javascript">
 
 	$(function() {
@@ -51,7 +50,8 @@
 
 		var options = {
 			xaxis: {
-				mode: "time",
+				format: "time",
+				timeformat: "%A",
 				tickLength: 5
 			},
 			selection: {
