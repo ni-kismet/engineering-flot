@@ -185,8 +185,6 @@ describe("composeImages", function() {
 
         var originalCanvas = document.getElementById("canvasSource");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas2_Data; //used later
 
         drawSomeLinesOnCanvas(originalCanvas);
 
@@ -194,9 +192,8 @@ describe("composeImages", function() {
             expect(destinationCanvas.width).toBe(20);
             expect(destinationCanvas.height).toBe(20);
 
-            canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            expect(canvas1_Data).toMatchCanvasArea(canvas2_Data);
+            expect(pixelColor(originalCanvas, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 0, 0, 20, 20));
 
             done();
         }, null);
@@ -216,8 +213,6 @@ describe("composeImages", function() {
 
         var originalCanvas = document.getElementById("canvasSource");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas2_Data; //used later
 
         drawSomeLinesOnCanvas(originalCanvas);
 
@@ -225,9 +220,8 @@ describe("composeImages", function() {
             expect(destinationCanvas.width).toBe(120); //124 - //120 + 2 * 2px_spacing
             expect(destinationCanvas.height).toBe(100);
 
-            canvas1_Data = originalCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas2_Data = destinationCanvas.getContext('2d').getImageData(0, 80, 20, 20).data;
-            expect(canvas1_Data).toMatchCanvasArea(canvas2_Data);
+            expect(pixelColor(originalCanvas, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 0, 80, 20, 20));
 
             expect(pixelColor(destinationCanvas, 20 + 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]); //24 + 10
             expect(pixelColor(destinationCanvas, 20 + 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]); //24 + 30
@@ -248,9 +242,6 @@ describe("composeImages", function() {
         var originalCanvas1 = document.getElementById("canvasSource1");
         var originalCanvas2 = document.getElementById("canvasSource2");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas2_Data; //used later
-        var canvas3_Data; //used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
         drawARectangleOnCanvas(originalCanvas2, "#00FF00");
@@ -259,13 +250,11 @@ describe("composeImages", function() {
             expect(destinationCanvas.width).toBe(40); //44 - //2 * 20 + 2 * spacing
             expect(destinationCanvas.height).toBe(20);
 
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas1, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 0, 0, 20, 20));
 
-            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 0, 0, 20, 20).data; //20 + 4
-            expect(canvas2_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas2, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 20 + 0, 0, 20, 20)); //20 + 4
 
             done();
         }, null);
@@ -285,9 +274,6 @@ describe("composeImages", function() {
         var originalCanvas1 = document.getElementById("canvasSource1");
         var originalCanvas2 = document.getElementById("canvasSource2");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas2_Data; //used later
-        var canvas3_Data; //used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
         drawARectangleOnCanvas(originalCanvas2, "#00FF00");
@@ -296,13 +282,11 @@ describe("composeImages", function() {
             expect(destinationCanvas.width).toBe(30); //34 - //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
             expect(destinationCanvas.height).toBe(20);
 
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 10, 20).data; //14
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 10, 20).data; //14
-            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas1, 0, 0, 10, 20)) //14
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 0, 0, 10, 20)); //14
 
-            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20 + 0 - 10, 0, 20, 20).data; //20 + 4 - 10
-            expect(canvas2_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas2, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 20 + 0 - 10, 0, 20, 20)); //20 + 10 - 4
 
             done();
         }, null);
@@ -322,9 +306,6 @@ describe("composeImages", function() {
         var originalCanvas1 = document.getElementById("canvasSource1");
         var originalCanvas2 = document.getElementById("canvasSource2");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas2_Data; //used later
-        var canvas3_Data; //used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
         drawARectangleOnCanvas(originalCanvas2, "#00FF00");
@@ -335,13 +316,11 @@ describe("composeImages", function() {
             expect(destinationCanvas.width).toBe(30); //34 - //2 * 20 + 2 * spacing - 10    //10px is the offset of the second canvas, defined in style
             expect(destinationCanvas.height).toBe(20);
 
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas1, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 0, 0, 20, 20));
 
-            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20 - 10 + 0, 20).data; //20 - 10 + 4
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(20, 0, 20 - 10 + 0, 20).data; //20 - 10 + 4
-            expect(canvas2_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas2, 0, 0, 20 - 10 + 0, 20)) //20 - 10 + 4
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 20, 0, 20 - 10 + 0, 20)); //20 - 10 + 4
 
             done();
         }, null);
@@ -361,9 +340,6 @@ describe("composeImages", function() {
         var originalCanvas1 = document.getElementById("canvasSource1");
         var originalCanvas2 = document.getElementById("canvasSource2");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas2_Data; //used later
-        var canvas3_Data; //used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
         drawARectangleOnCanvas(originalCanvas2, "#00FF00");
@@ -372,13 +348,11 @@ describe("composeImages", function() {
             expect(destinationCanvas.width).toBe(100 - 0); //100 - 4
             expect(destinationCanvas.height).toBe(20);
 
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 20 - 0, 0, 20, 20).data; //100 - 20 - 10 + 6
-            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas1, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 100 - 20 - 0, 0, 20, 20)); //100 - 20 - 10 + 6
 
-            canvas2_Data = originalCanvas2.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(0, 0, 20, 20).data;
-            expect(canvas2_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas2, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 0, 0, 20, 20));
 
             done();
         }, null);
@@ -402,8 +376,6 @@ describe("composeImages", function() {
 
         var originalCanvas1 = document.getElementById("canvasSource1");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas3_Data; //used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
 
@@ -411,9 +383,8 @@ describe("composeImages", function() {
             expect(destinationCanvas.width).toBe(100);
             expect(destinationCanvas.height).toBe(100);
 
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(100 - 40 + 0, 0, 20, 20).data; //100 - 40 + 4
-            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas1, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 100 - 40 + 0, 0, 20, 20)); //100 - 40 + 4
 
             expect(pixelColor(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
             expect(pixelColor(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
@@ -441,8 +412,6 @@ describe("composeImages", function() {
 
         var originalCanvas1 = document.getElementById("canvasSource1");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas3_Data; //used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
 
@@ -450,10 +419,8 @@ describe("composeImages", function() {
             expect(destinationCanvas.width).toBe(250);
             expect(destinationCanvas.height).toBe(150);
 
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(250 - 180 + 0, 150 - 10 - 20, 20, 20).data; //250 - 180 + 4
-            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
-
+            expect(pixelColor(originalCanvas1, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 250 - 180 + 0, 150 - 10 - 20, 20, 20)); //250 - 180 + 4
 
             //circle centers
             expect(pixelColor(destinationCanvas, 230, 20, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
@@ -489,18 +456,14 @@ describe("composeImages", function() {
 
         var originalCanvas1 = document.getElementById("canvasSource1");
         var destinationCanvas = document.getElementById("myCanvas");
-        var canvas1_Data; //used later
-        var canvas3_Data; //used later
 
         drawARectangleOnCanvas(originalCanvas1, "#FF0000");
 
         composeImages(sources, destinationCanvas).then(function() {
             expect(destinationCanvas.width).toBe(250);
             expect(destinationCanvas.height).toBe(150);
-
-            canvas1_Data = originalCanvas1.getContext('2d').getImageData(0, 0, 20, 20).data;
-            canvas3_Data = destinationCanvas.getContext('2d').getImageData(250 - 180 + 0, 150 - 10 - 20, 20, 20).data; //250 - 180 + 4
-            expect(canvas1_Data).toMatchCanvasArea(canvas3_Data);
+            expect(pixelColor(originalCanvas1, 0, 0, 20, 20))
+                .toMatchCanvasArea(pixelColor(destinationCanvas, 250 - 180 + 0, 150 - 10 - 20, 20, 20)); //250 - 180 + 4
 
             //circle centers
             expect(pixelColor(destinationCanvas, 230, 20, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
