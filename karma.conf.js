@@ -19,21 +19,22 @@ module.exports = function(config) {
         currentOSBrowsers = browsersMatrix[currentOSType];
 
     var coverage_sources = [
-        'jquery.canvaswrapper.js',
         'jquery.colorhelpers.js',
+        'jquery.canvaswrapper.js',
         'jquery.flot.js',
         'jquery.flot.saturated.js',
+        'jquery.flot.drawSeries.js',
         'jquery.flot.uiConstants.js',
         'jquery.flot.logaxis.js',
         'jquery.flot.symbol.js',
         'jquery.flot.flatdata.js',
-        'jquery.flot.drawSeries.js',
         'jquery.flot.navigate.js',
         'jquery.flot.touchNavigate.js',
         'jquery.flot.touch.js',
         'jquery.flot.absRelTime.js',
         'jquery.flot.axislabels.js',
-        'jquery.flot.composeImages.js'
+        'jquery.flot.composeImages.js',
+        'jquery.flot.selection.js'
     ];
 
     var sources = [
