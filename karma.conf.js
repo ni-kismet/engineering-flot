@@ -56,7 +56,7 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
-            'node_modules/webcharts-development-settings/testsUtils/utils/*.js',
+            'node_modules/webcharts-development-settings/testsUtils/*.js',
             { pattern: 'tests/svgstyle.css', included: true, served: true },
             'tests/*.Test.js'
         ]),
