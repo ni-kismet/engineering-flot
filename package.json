@@ -35,6 +35,6 @@
     "karma-spec-reporter": "0.0.31",
     "three": "^0.87.1",
     "tmp": "0.0.33",
-    "webcharts-development-settings": "0.0.8"
+    "webcharts-development-settings": "1.0.0"
   }
 }
