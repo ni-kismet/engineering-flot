@@ -8,7 +8,7 @@ module.exports = function(config) {
     'use strict';
 
     var browsersMatrix = {
-            'win': ['Edge', 'Firefox', 'Chrome'],
+            'win': ['Firefox', 'Chrome', 'Edge'],
             'linux': ['Firefox', 'Chrome'],
             'mac': ['Safari', 'Firefox', 'Chrome']
         },
@@ -33,6 +33,7 @@ module.exports = function(config) {
         'jquery.flot.touch.js',
         'jquery.flot.absRelTime.js',
         'jquery.flot.axislabels.js',
+        'jquery.flot.composeImages.js',
         'jquery.flot.selection.js'
     ];
 
@@ -56,6 +57,7 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: sources.concat([
             'node_modules/webcharts-development-settings/testsUtils/utils/*.js',
+            { pattern: 'tests/svgstyle.css', included: true, served: true },
             'tests/*.Test.js'
         ]),
 

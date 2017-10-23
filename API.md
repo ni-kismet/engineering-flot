@@ -24,7 +24,7 @@
 Consider a call to the plot function:
 
 ```js
-var plot = $.plot(placeholder, data, options)
+var plot = $.plot(placeholder, data, options);
 ```
 
 The placeholder is a jQuery object or DOM element or jQuery expression
@@ -1204,7 +1204,7 @@ can call:
     ```js
       o = pointOffset({ x: xpos, y: ypos, xaxis: 2, yaxis: 3 })
       // o.left and o.top now contains the offset within the div
-    ````
+    ```
 
  - resize()
 
@@ -1347,6 +1347,49 @@ Flot to keep track of its state, so be careful.
     will decrease the minimum and increase the maximum to make sure the
     first and the last bar will have enough space.
 
+
+## Utils ##
+There are some features, which may not fall explicitly into plugins category.
+
+  - ComposeImages
+
+ComposeImages allows you pass to it several canvases and SVGs as part of the
+plots themselves, and overlaps them to create a downloadable image.
+*composeImages* is a function, which takes as input an array of canvases
+and SVGs, and outputs a canvas which contains the overlapped inputs, in the same
+order they exist in the array. The output canvas can be externally converted to
+a downloadable image. Some browser even support downloading canvases.
+
+How to use *composeImages* function:
+```js
+//The destination canvas can be dynamically generated if required.
+var destinationCanvas = document.getElementById('destinationCanvas'),
+    destinationImage = document.getElementById('destinationImage');
+
+function asyncProcessAllImagesForComposition() {
+    var sources = [myCanvas, mySvg, otherSvg, otherCanvas2, anotherCanvas];
+    var asynResult = composeImages(sources, destinationCanvas);
+    asynResult.then(getCopyCanvasToImg(destinationCanvas, destinationImage), failureCallback);
+}
+
+//for example, put a button which calls composeImages using promises:
+function composeImagesOnClick() {
+    asyncProcessAllImagesForComposition();
+}
+
+function copyCanvasToImg(canvas, img) {
+    img.src = canvas.toDataURL('image/png');
+}
+
+function getCopyCanvasToImg(canvas, img) {
+    return function copyCanvasToImgOuter(result) {
+        img.width = canvas.width;
+        img.height = canvas.height;
+        copyCanvasToImg(canvas, img);
+        return 0;
+    }
+}
+```
 
 ## Hooks ##
 
