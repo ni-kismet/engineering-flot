@@ -564,6 +564,30 @@ describe("composeImages", function() {
         }, null);
     });
 
+    it('should call composeImages on one canvas as a source and a dynamically generated destination Canvas', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '<canvas id="canvasSource" width="20" height="20" title="canvasSource"></canvas>' +
+        '</div>'
+        ).find('#canvasSource').toArray();
+
+        var originalCanvas = document.getElementById("canvasSource");
+        var destinationCanvas = document.createElement("canvas");
+        destinationCanvas.width = 30;
+        destinationCanvas.height = 15;
+
+        drawSomeLinesOnCanvas(originalCanvas);
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(20);
+            expect(destinationCanvas.height).toBe(20);
+
+            expect(canvasData(originalCanvas, 0, 0, 20, 20))
+                .toMatchCanvasArea(canvasData(destinationCanvas, 0, 0, 20, 20));
+
+            done();
+        }, null);
+    });
+
 
     function drawSomeLinesOnCanvas(canvas) {
         var ctx = canvas.getContext('2d');
