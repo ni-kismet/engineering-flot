@@ -24,7 +24,7 @@
 Consider a call to the plot function:
 
 ```js
-var plot = $.plot(placeholder, data, options)
+var plot = $.plot(placeholder, data, options);
 ```
 
 The placeholder is a jQuery object or DOM element or jQuery expression
@@ -255,9 +255,9 @@ xaxis, yaxis: {
 
     min: null or number
     max: null or number
-    autoscaleMargin: null or number
+    autoScaleMargin: null or number
     windowSize: null or number
-    autoscale: "none" or "loose" or "exact" or "sliding-window"
+    autoScale: "none" or "loose" or "exact" or "sliding-window"
     growOnly: null or boolean
 
     transform: null or fn: number -> number
@@ -351,27 +351,27 @@ always examines all the data values you feed to it, even if a
 restriction on another axis may make some of them invisible (this
 makes interactive use more stable).
 
-The "autoscaleMargin" is a bit esoteric: it's the fraction of margin
+The "autoScaleMargin" is a bit esoteric: it's the fraction of margin
 that the scaling algorithm will add to avoid that the outermost points
 ends up on the grid border. Note that this margin is only applied when
-autoscale option is set to "loose". If a margin is specified,
+autoScale option is set to "loose". If a margin is specified,
 the plot will furthermore extend the axis end-point to the nearest
 whole tick. The default value is "null" for the x axes and 0.02 for y
 axes which seems appropriate for most cases.
 
-The "windowSize" is the range of the plot that will be visible on "sliding-window" autoscale.
-If autoscale is not "sliding-window" this option will be ignored. Default value is 100.
+The "windowSize" is the range of the plot that will be visible on "sliding-window" autoScale.
+If autoScale is not "sliding-window" this option will be ignored. Default value is 100.
 
-The "autoscale" option is used to automatically set the end-points of the axis. There
+The "autoScale" option is used to automatically set the end-points of the axis. There
 are three options available: "none" will set the end-points to the "min"/"max" values,
 "exact" will set the end-points to minimum/maximum values in the visible area of the plot, and
-"loose" will add a margin to the "exact" mode based on the "autoscaleMargin" value. The "sliding-window"
-autoscale will always keep a "windowSize" range between axis.min and axis.max. The autoscaling behaviour is also affected by the growOnly flag, described below.
-The default autoscale value is "none" for the x axes, and "loose" for y axes.
+"loose" will add a margin to the "exact" mode based on the "autoScaleMargin" value. The "sliding-window"
+autoScale will always keep a "windowSize" range between axis.min and axis.max. The autoscaling behaviour is also affected by the growOnly flag, described below.
+The default autoScale value is "none" for the x axes, and "loose" for y axes.
 
 The "growOnly" option is useful when you want to have a smoother auto-scaling
 behavior. If true the scale range will grow to adapt to the data range but won't
-shrink back. This will be ignored if autoscale value is "none" or "sliding-window". The default value is false.
+shrink back. This will be ignored if autoScale value is "none" or "sliding-window". The default value is false.
 
 "transform" and "inverseTransform" are callbacks you can put in to
 change the way the data is drawn. You can design a function to
@@ -1204,7 +1204,7 @@ can call:
     ```js
       o = pointOffset({ x: xpos, y: ypos, xaxis: 2, yaxis: 3 })
       // o.left and o.top now contains the offset within the div
-    ````
+    ```
 
  - resize()
 
@@ -1334,11 +1334,11 @@ Flot to keep track of its state, so be careful.
   - computeRangeForDataSeries(series, force)
 
     Computes the minimum and the maximum values of the specified series.
-    If the autoscale of the x axis is set to 'none' then the corresponding
+    If the autoScale of the x axis is set to 'none' then the corresponding
     minimum and maximum will be Infinity and -Infinity respectively.
-    The computation will be skiped for the y axis as well when autoscale
+    The computation will be skiped for the y axis as well when autoScale
     of this axis is set to 'none'. Pass true to the force argument
-    to force the computation regardless the autoscale value of the axis.
+    to force the computation regardless the autoScale value of the axis.
 
   - adjustSeriesDataRange(series, range)
 
@@ -1347,6 +1347,49 @@ Flot to keep track of its state, so be careful.
     will decrease the minimum and increase the maximum to make sure the
     first and the last bar will have enough space.
 
+
+## Utils ##
+There are some features, which may not fall explicitly into plugins category.
+
+  - ComposeImages
+
+ComposeImages allows you pass to it several canvases and SVGs as part of the
+plots themselves, and overlaps them to create a downloadable image.
+*composeImages* is a function, which takes as input an array of canvases
+and SVGs, and outputs a canvas which contains the overlapped inputs, in the same
+order they exist in the array. The output canvas can be externally converted to
+a downloadable image. Some browser even support downloading canvases.
+
+How to use *composeImages* function:
+```js
+//The destination canvas can be dynamically generated if required.
+var destinationCanvas = document.getElementById('destinationCanvas'),
+    destinationImage = document.getElementById('destinationImage');
+
+function asyncProcessAllImagesForComposition() {
+    var sources = [myCanvas, mySvg, otherSvg, otherCanvas2, anotherCanvas];
+    var asynResult = composeImages(sources, destinationCanvas);
+    asynResult.then(getCopyCanvasToImg(destinationCanvas, destinationImage), failureCallback);
+}
+
+//for example, put a button which calls composeImages using promises:
+function composeImagesOnClick() {
+    asyncProcessAllImagesForComposition();
+}
+
+function copyCanvasToImg(canvas, img) {
+    img.src = canvas.toDataURL('image/png');
+}
+
+function getCopyCanvasToImg(canvas, img) {
+    return function copyCanvasToImgOuter(result) {
+        img.width = canvas.width;
+        img.height = canvas.height;
+        copyCanvasToImg(canvas, img);
+        return 0;
+    }
+}
+```
 
 ## Hooks ##
 
@@ -1425,7 +1468,7 @@ hooks in the plugins bundled with Flot.
         number: boolean,
         required: boolean,
         defaultValue: value,
-        autoscale: boolean
+        autoScale: boolean
     }
     ```
 
@@ -1454,7 +1497,7 @@ hooks in the plugins bundled with Flot.
     point as a whole to be valid. If no value is provided, then the entire
     point is cleared out with nulls, turning it into a gap in the series.
 
-    "autoscale" determines whether the value is considered when calculating an
+    "autoScale" determines whether the value is considered when calculating an
     automatic min-max range for the axes that the value is plotted against.
 
  - processDatapoints  [phase 3]

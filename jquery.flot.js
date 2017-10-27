@@ -57,8 +57,8 @@ Licensed under the MIT license.
                     inverseTransform: null, // if transform is set, this should be the inverse function
                     min: null, // min. value to show, null means set automatically
                     max: null, // max. value to show, null means set automatically
-                    autoscaleMargin: null, // margin in % to add if autoscale option is on "loose" mode,
-                    autoscale: "exact", // Available modes: "none", "loose", "exact", "sliding-window"
+                    autoScaleMargin: null, // margin in % to add if autoScale option is on "loose" mode,
+                    autoScale: "exact", // Available modes: "none", "loose", "exact", "sliding-window"
                     windowSize: null, // null or number. This is the size of sliding-window.
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     ticks: null, // either [1, 3] or [[1, "a"], 3] or (fn: axis info -> ticks) or app. number of ticks for auto-ticks
@@ -79,8 +79,8 @@ Licensed under the MIT license.
                     boxPosition: { centerX: 0, centerY: 0 } //position of the axis on the corresponding axis box
                 },
                 yaxis: {
-                    autoscaleMargin: 0.02, // margin in % to add if autoscale option is on "loose" mode
-                    autoscale: "loose", // Available modes: "none", "loose", "exact"
+                    autoScaleMargin: 0.02, // margin in % to add if autoScale option is on "loose" mode
+                    autoScale: "loose", // Available modes: "none", "loose", "exact"
                     growOnly: null, // grow only, useful for smoother auto-scale, the scales will grow to accomodate data but won't shrink back.
                     position: "left", // or "right"
                     showTickLabels: "major", // "none", "endpoints", "major", "all"
@@ -748,7 +748,7 @@ Licensed under the MIT license.
                         y: false,
                         number: true,
                         required: true,
-                        computeRange: s.xaxis.options.autoscale !== 'none',
+                        computeRange: s.xaxis.options.autoScale !== 'none',
                         defaultValue: null
                     });
 
@@ -757,7 +757,7 @@ Licensed under the MIT license.
                         y: true,
                         number: true,
                         required: true,
-                        computeRange: s.yaxis.options.autoscale !== 'none',
+                        computeRange: s.yaxis.options.autoScale !== 'none',
                         defaultValue: null
                     });
 
@@ -769,7 +769,7 @@ Licensed under the MIT license.
                                 y: true,
                                 number: true,
                                 required: false,
-                                computeRange: s.yaxis.options.autoscale !== 'none',
+                                computeRange: s.yaxis.options.autoScale !== 'none',
                                 defaultValue: 0
                             });
                         }
@@ -1389,7 +1389,7 @@ Licensed under the MIT license.
             };
         }
 
-        function autoscaleAxis(axis) {
+        function autoScaleAxis(axis) {
             var opts = axis.options,
                 min = opts.min,
                 max = opts.max,
@@ -1397,7 +1397,7 @@ Licensed under the MIT license.
                 datamax = axis.datamax,
                 delta;
 
-            switch (opts.autoscale) {
+            switch (opts.autoScale) {
                 case "none":
                     min = +(opts.min != null ? opts.min : datamin);
                     max = +(opts.max != null ? opts.max : datamax);
@@ -1407,7 +1407,7 @@ Licensed under the MIT license.
                         min = datamin;
                         max = datamax;
                         delta = $.plot.saturated.saturate(max - min);
-                        var margin = ((typeof opts.autoscaleMargin === 'number') ? opts.autoscaleMargin : 0.02);
+                        var margin = ((typeof opts.autoScaleMargin === 'number') ? opts.autoScaleMargin : 0.02);
                         min = $.plot.saturated.saturate(min - delta * margin);
                         max = $.plot.saturated.saturate(max + delta * margin);
 
@@ -1439,20 +1439,20 @@ Licensed under the MIT license.
             max = widenedMinMax.max;
 
             // grow loose or grow exact supported
-            if (opts.growOnly === true && opts.autoscale !== "none" && opts.autoscale !== "sliding-window") {
+            if (opts.growOnly === true && opts.autoScale !== "none" && opts.autoScale !== "sliding-window") {
                 min = (min < datamin) ? min : (datamin !== null ? datamin : min);
                 max = (max > datamax) ? max : (datamax !== null ? datamax : max);
             }
 
-            axis.autoscaledMin = min;
-            axis.autoscaledMax = max;
+            axis.autoScaledMin = min;
+            axis.autoScaledMax = max;
         }
 
         function setRange(axis) {
-            autoscaleAxis(axis);
+            autoScaleAxis(axis);
 
-            var min = axis.autoscaledMin,
-                max = axis.autoscaledMax,
+            var min = axis.autoScaledMin,
+                max = axis.autoScaledMax,
                 plotOffset = axis.options.offset;
 
             min = (min != null ? min : -1) + (plotOffset.below || 0);
@@ -1636,13 +1636,6 @@ Licensed under the MIT license.
             axis.tickDecimals = Math.max(0, opts.tickDecimals != null ? opts.tickDecimals : precision);
             axis.tickSize = getAxisTickSize(axis.min, axis.max, axis.direction, opts, opts.tickDecimals);
 
-            // Time mode was moved to a plug-in in 0.8, and since so many people use it
-            // we'll add an especially friendly reminder to make sure they included it.
-
-            if (opts.mode === "time" && !axis.tickGenerator) {
-                throw new Error("Time mode requires the flot.time plugin.");
-            }
-
             // Flot supports base-10 axes; any other mode else is handled by a plug-in,
             // like flot.time.js.
 
@@ -1750,7 +1743,7 @@ Licensed under the MIT license.
         }
 
         function snapRangeToTicks(axis, ticks) {
-            if (axis.options.autoscale === "loose" && ticks.length > 0) {
+            if (axis.options.autoScale === "loose" && ticks.length > 0) {
                 // snap to ticks
                 axis.min = Math.min(axis.min, ticks[0].v);
                 axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
@@ -2457,7 +2450,7 @@ Licensed under the MIT license.
 
                 // make sure the 0 point is included in the computed y range when requested
                 if (ps <= 2) {
-                    /*if ps > 0 the points were already taken into account for autoscale */
+                    /*if ps > 0 the points were already taken into account for autoScale */
                     range.ymin = Math.min(0, range.ymin);
                     range.ymax = Math.max(0, range.ymax);
                 }

@@ -7,21 +7,34 @@ var module;
 module.exports = function(config) {
     'use strict';
 
+    var browsersMatrix = {
+            'win': ['Firefox', 'Chrome', 'Edge'],
+            'linux': ['Firefox', 'Chrome'],
+            'mac': ['Safari', 'Firefox', 'Chrome']
+        },
+        isWin = /^win/.test(process.platform),
+        isLinux = /^linux/.test(process.platform),
+        isMac = /^darwin/.test(process.platform),
+        currentOSType = isWin ? 'win' : (isLinux ? 'linux' : 'mac'),
+        currentOSBrowsers = browsersMatrix[currentOSType];
+
     var coverage_sources = [
-        'jquery.canvaswrapper.js',
         'jquery.colorhelpers.js',
+        'jquery.canvaswrapper.js',
         'jquery.flot.js',
         'jquery.flot.saturated.js',
+        'jquery.flot.drawSeries.js',
         'jquery.flot.uiConstants.js',
         'jquery.flot.logaxis.js',
         'jquery.flot.symbol.js',
         'jquery.flot.flatdata.js',
-        'jquery.flot.drawSeries.js',
         'jquery.flot.navigate.js',
         'jquery.flot.touchNavigate.js',
         'jquery.flot.touch.js',
         'jquery.flot.absRelTime.js',
-        'jquery.flot.axislabels.js'
+        'jquery.flot.axislabels.js',
+        'jquery.flot.composeImages.js',
+        'jquery.flot.selection.js'
     ];
 
     var sources = [
@@ -43,8 +56,8 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: sources.concat([
-            'node_modules/phantomjs-polyfill-find/find-polyfill.js',
-            'node_modules/webcharts-development-settings/testsUtils/utils/*.js',
+            'node_modules/webcharts-development-settings/testsUtils/*.js',
+            { pattern: 'tests/svgstyle.css', included: true, served: true },
             'tests/*.Test.js'
         ]),
 
@@ -59,7 +72,7 @@ module.exports = function(config) {
         },
 
         eslint: {
-            stopOnError: true,
+            stopOnError: config.stopOnEsLintError ? true : false,
             showWarnings: true,
             engine: {
                 configFile: 'node_modules/webcharts-development-settings/.eslintrc.json',
@@ -93,7 +106,7 @@ module.exports = function(config) {
 
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-        browsers: ['PhantomJS', 'Firefox', 'Chrome'],
+        browsers: currentOSBrowsers,
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
@@ -115,7 +128,7 @@ module.exports = function(config) {
 
         settings.reporters.push('coverage');
         settings.reporters.push('coveralls');
-        settings.browsers = ['PhantomJS'];
+        settings.browsers = ['Chrome'];
     }
 
     config.set(settings);

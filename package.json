@@ -1,9 +1,9 @@
 {
   "name": "engineering-flot",
-  "version": "0.6.0",
-  "main": "dist/jquery.flot.js",
+  "version": "1.0.0",
+  "main": "dist/es5/jquery.flot.js",
   "scripts": {
-    "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 && npm run build-test",
+    "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 --stopOnEsLintError && npm run build-test",
     "coverage": "node node_modules/karma/bin/karma start --single-run --coverage --no-auto-watch --concurrency=1",
     "build": "node build",
     "build-test": "npm --silent run build test",
@@ -25,16 +25,15 @@
     "karma-chrome-launcher": "^2.0.0",
     "karma-coverage": "^1.1.1",
     "karma-coveralls": "^1.1.2",
+    "karma-edge-launcher": "^0.4.2",
     "karma-eslint": "^2.2.0",
     "karma-firefox-launcher": "^1.0.0",
     "karma-jasmine": "^1.0.2",
     "karma-jasmine-html-reporter": "^0.2.2",
     "karma-jasmine-jquery": "^0.1.1",
-    "karma-phantomjs-launcher": "^1.0.2",
+    "karma-safari-launcher": "^1.0.0",
     "karma-spec-reporter": "0.0.31",
-    "phantomjs-polyfill-find": "0.0.1",
-    "three": "^0.87.1",
     "tmp": "0.0.33",
-    "webcharts-development-settings": "0.0.8"
+    "webcharts-development-settings": "1.0.0"
   }
 }
