@@ -4761,15 +4761,20 @@ can set the default in the options.
                 axes = undefined;
             }
 
+            var isMacScroll = Math.abs(e.originalEvent.deltaY) <= 10,
+                defaultNonMacScrollAmount = undefined,
+                amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / 10 : defaultNonMacScrollAmount;
             if (zoomOut) {
                 plot.zoomOut({
                     center: c,
-                    axes: axes
+                    axes: axes,
+                    amount: amount
                 });
             } else {
                 plot.zoom({
                     center: c,
-                    axes: axes
+                    axes: axes,
+                    amount: amount
                 });
             }
         }
