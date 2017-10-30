@@ -28,7 +28,8 @@ function concatenateFiles(destinationPath, callback) {
         './jquery.flot.touch.js',
         './jquery.flot.absRelTime.js',
         './jquery.flot.axislabels.js',
-        './jquery.flot.selection.js'
+        './jquery.flot.selection.js',
+        './jquery.flot.composeImages.js'
     ], destinationPath);
 }
 
