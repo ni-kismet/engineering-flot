@@ -7,7 +7,9 @@
 	<script language="javascript" type="text/javascript" src="../../jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="../../lib/jquery.mousewheel.js"></script>
 	<script language="javascript" type="text/javascript" src="../../dist/es5/jquery.flot.js"></script>
-	<script type="text/javascript">
+    <script language="javascript" type="text/javascript" src="../../jquery.flot.legend.js"></script>
+    
+    <script type="text/javascript">
 
 	$(function() {
 
@@ -27,7 +29,12 @@
 			ctx.stroke();
 		}
 
-		var data1 = [
+        var data1 = [];
+		for (var i = 0; i < 3; i += 0.005) {
+			data1.push([i, 1.2 + Math.sin(i*10)]);
+        }
+        
+		var data2 = [
 			[1,1,.5,.1,.3],
 			[2,2,.3,.5,.2],
 			[3,3,.9,.5,.2],
@@ -36,7 +43,7 @@
 			[2.5,-1.,.5,.1,.3]
 		];
 
-		var data1_points = {
+		var data2_points = {
 			show: true,
 			radius: 5,
 			fillColor: "blue",
@@ -45,55 +52,58 @@
 			yerr: {show: true, color: "red", upperCap: "-"}
 		};
 
-		var data2 = [
+		var data3 = [
 			[.7,3,.2,.4],
 			[1.5,2.2,.3,.4],
 			[2.3,1,.5,.2]
 		];
 
-		var data2_points = {
+		var data3_points = {
 			show: true,
 			radius: 5,
 			errorbars: "y",
 			yerr: {show:true, asymmetric:true, upperCap: drawArrow, lowerCap: drawSemiCircle}
 		};
 
-		var data3 = [
+		var data4 = [
 			[1,2,.4],
 			[2,0.5,.3],
 			[2.7,2,.5]
 		];
 
-		var data3_points = {
-			//do not show points
-			radius: 0,
+		var data4_points = {
+            //do not show points
+            show: false,
+            radius: 5,
+            fillColor: "white",
 			errorbars: "y",
 			yerr: {show:true, upperCap: "-", lowerCap: "-", radius: 5}
 		};
 
-		var data4 = [
+		var data5 = [
 			[1.3, 1],
 			[1.75, 2.5],
 			[2.5, 0.5]
 		];
 
-		var data4_errors = [0.1, 0.4, 0.2];
-		for (var i = 0; i < data4.length; i++) {
-			data4_errors[i] = data4[i].concat(data4_errors[i])
-		}
+		var data5_errors = [0.1, 0.4, 0.2];
+		for (var i = 0; i < data5.length; i++) {
+			data5_errors[i] = data5[i].concat(data5_errors[i])
+        }
+        
 
 		var data = [
-			{color: "blue", points: data1_points, data: data1, label: "data1"},
-			{color: "red",  points: data2_points, data: data2, label: "data2"},
-			{color: "green", lines: {show: true}, points: data3_points, data: data3, label: "data3"},
+            {color: "cyan", lines: {show: true, fill: true}, data: data1, label: "Area"},
+			{color: "blue", points: data2_points, data: data2, label: "Points"},
+			{color: "red",  lines: {show: true, lineWidth:2}, points: data3_points, data: data3, label: "Lines & Points"},
+			{color: "green", lines: {show: true, lineWidth: 4}, points: data4_points, data: data4, label: "Lines"},
 			// bars with errors
-			{color: "orange", bars: {show: true, align: "center", barWidth: 0.25}, data: data4, label: "data4"},
-			{color: "orange", points: data3_points, data: data4_errors}
+			{color: "orange", bars: {show: true, align: "center", barWidth: 0.25}, data: data5, label: "Bars"},
 		];
 
 		$.plot($("#placeholder"), data , {
 			legend: {
-				position: "sw",
+				position: "se",
 				show: true
 			},
 			series: {

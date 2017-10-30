@@ -76,24 +76,25 @@
 
         // Generate markup for the list of entries, in their final order
         var html = [],
+            maxLabelLength = 0,
             j = 0;
-        html[j++] = '<svg class="legendLayer" width="100%">';// viewBox="0 0 160 250" preserveAspectRatio="none">';
+        html[j++] = '<svg class="legendLayer" style="width:inherit;height:inherit">';
         html[j++] = svgShapeDefs;
-        var maxLabelLength = 0;
         for (i = 0; i < entries.length; ++i) {
-            var entry = entries[i];
-            var entryHtml = '';
-            var shapeHtml = '';
-            var labelHtml = '';
-            var xpos = "0em";
-            var ypos = i * 1.5 + "em";
-            var shape = { 
+            var entry = entries[i],
+                entryHtml = '',
+                shapeHtml = '',
+                labelHtml = '',
+                xpos = "0em",
+                ypos = i * 1.5 + "em",
+                shape = { 
                     label: entry.label,
                     position: {
                         x: xpos,
                         y: ypos
                     }
                 };
+            // lines
             if (entry.style.lines.show && !entry.style.lines.fill) {
                 shape.name = "lines";
                 shape.position = { 
@@ -104,6 +105,7 @@
                 shape.strokeWidth = entry.style.lines.lineWidth;
                 shapeHtml += getEntryHtml(shape);
             }
+            // points
             if (entry.style.points.show) {
                 shape.name = entry.style.points.symbol;
                 shape.position = { 
@@ -115,6 +117,7 @@
                 shape.strokeWidth = entry.style.points.lineWidth;
                 shapeHtml += getEntryHtml(shape);
             }
+            // bars
             if (entry.style.bars.show) {
                 shape.name = "bar";
                 shape.position = { 
@@ -124,7 +127,7 @@
                 shape.fillColor = entry.color;
                 shapeHtml += getEntryHtml(shape);
             }
-            // area?
+            // area
             if (entry.style.lines.show && entry.style.lines.fill) {
                 shape.name = "area";
                 shape.position = { 
@@ -254,7 +257,7 @@
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' + 
-                    'width="25" height="25"' +
+                    'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "diamond":
@@ -264,7 +267,7 @@
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' +
-                    'width="25" height="25"' +
+                    'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "cross":
@@ -274,7 +277,7 @@
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' +
-                    'width="25" height="25"' + 
+                    'width="1.5em" height="1.5em"' + 
                     '/>';
                 break;
             case "square":
@@ -284,7 +287,7 @@
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' +
-                    'width="25" height="25"' + 
+                    'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "plus":
@@ -294,7 +297,7 @@
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' + 
-                    'width="25" height="25"' +
+                    'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "bar":
@@ -304,7 +307,7 @@
                     'fill="' + fill + '" ' +
                     // 'stroke="' + stroke + '" ' +
                     // 'stroke-width="' + width + '" ' + 
-                    'width="25" height="25"' +
+                    'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "area":
@@ -314,7 +317,7 @@
                     'fill="' + fill + '" ' +
                     // 'stroke="' + stroke + '" ' +
                     // 'stroke-width="' + width + '" ' + 
-                    'width="25" height="25"' +
+                    'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "line":
@@ -324,7 +327,7 @@
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' + 
-                    'width="25" height="25"' +
+                    'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             default:
@@ -335,7 +338,7 @@
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' + 
-                    'width="25" height="25"' +
+                    'width="1.5em" height="1.5em"' +
                     '/>';
         }
 
