@@ -77,8 +77,9 @@
         // Generate markup for the list of entries, in their final order
         var html = [],
             j = 0;
-        html[j++] = '<svg class="legendLayer" width="100%" height="100%">';// viewBox="0 0 160 250" preserveAspectRatio="none">';
+        html[j++] = '<svg class="legendLayer" width="100%">';// viewBox="0 0 160 250" preserveAspectRatio="none">';
         html[j++] = svgShapeDefs;
+        var maxLabelLength = 0;
         for (i = 0; i < entries.length; ++i) {
             var entry = entries[i];
             var entryHtml = '';
@@ -93,7 +94,7 @@
                         y: ypos
                     }
                 };
-            if (entry.style.lines.show) {
+            if (entry.style.lines.show && !entry.style.lines.fill) {
                 shape.name = "lines";
                 shape.position = { 
                         x: "0em", 
@@ -124,7 +125,7 @@
                 shapeHtml += getEntryHtml(shape);
             }
             // area?
-            if (false) {
+            if (entry.style.lines.show && entry.style.lines.fill) {
                 shape.name = "area";
                 shape.position = { 
                         x: "0em", 
@@ -133,7 +134,8 @@
                 shape.fillColor = entry.color;
                 shapeHtml += getEntryHtml(shape);
             }
-            labelHtml = '<text x="' + xpos + '" y="' + ypos +'" text-anchor="start"><tspan dx="2em" dy="1em">' + shape.label + '</tspan></text>'
+            maxLabelLength = maxLabelLength < entry.label.length ? entry.label.length : maxLabelLength;
+            labelHtml = '<text x="' + xpos + '" y="' + ypos +'" text-anchor="start"><tspan dx="2em" dy="1.2em">' + shape.label + '</tspan></text>'
             html[j++] = '<g>' + shapeHtml + labelHtml + '</g>';
         }
 
@@ -177,13 +179,11 @@
                     c.a = 1;
                     c = c.toString();
                 }
-                var div = legendEl.children();
-                // $('<div style="position:absolute;width:' +
-                //     div.width() + 'px;height:' +
-                //     div.height() + 'px;' +
-                //     pos + 'background-color:' +
-                //     c + ';"> </div>')
-                // .prependTo(legendEl).css('opacity', options.legend.backgroundOpacity);
+
+                legendEl.css('width', 2 + maxLabelLength / 2 + 'em');
+                legendEl.css('height', entries.length*1.6  + 'em');
+                legendEl.css('background-color', c); 
+                legendEl.css('opacity', options.legend.backgroundOpacity);
             }
         }
     }
