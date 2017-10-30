@@ -4740,7 +4740,7 @@ can set the default in the options.
     function init(plot) {
         var panAxes = null;
 
-        function onZoomClick(e, zoomOut) {
+        function onZoomClick(e, zoomOut, amount) {
             var c = plot.offset();
             c.left = e.pageX - c.left;
             c.top = e.pageY - c.top;
@@ -4761,9 +4761,6 @@ can set the default in the options.
                 axes = undefined;
             }
 
-            var isMacScroll = Math.abs(e.originalEvent.deltaY) <= 10,
-                defaultNonMacScrollAmount = undefined,
-                amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / 10 : defaultNonMacScrollAmount;
             if (zoomOut) {
                 plot.zoomOut({
                     center: c,
@@ -4783,9 +4780,13 @@ can set the default in the options.
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
+            var maxDeltaOnMac = 10,
+                isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxDeltaOnMac,
+                defaultNonMacScrollAmount = null,
+                amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / maxDeltaOnMac : defaultNonMacScrollAmount;
             if (plot.getOptions().zoom.active) {
                 e.preventDefault();
-                onZoomClick(e, delta < 0);
+                onZoomClick(e, delta < 0, amount);
                 return false;
             }
         }

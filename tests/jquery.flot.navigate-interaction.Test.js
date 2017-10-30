@@ -26,6 +26,11 @@ describe("flot navigate plugin interactions", function () {
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
+        jasmine.clock().install().mockDate();
+    });
+
+    afterEach(function() {
+        jasmine.clock().uninstall();
     });
 
     it('pans on mouse drag', function () {
@@ -63,7 +68,7 @@ describe("flot navigate plugin interactions", function () {
         var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
 
         eventHolder = plot.getEventHolder();
-        simulate.mouseWheel(eventHolder, clientX, clientY, 3);
+        simulate.mouseWheel(eventHolder, clientX, clientY, 0, 3);
 
         /*
             I would really like better precission but:
@@ -93,7 +98,7 @@ describe("flot navigate plugin interactions", function () {
         var clientY = plot.getPlotOffset().top + yaxis.p2c(0);
 
         eventHolder = plot.getEventHolder();
-        simulate.mouseWheel(eventHolder, clientX, clientY, -3);
+        simulate.mouseWheel(eventHolder, clientX, clientY, 0, -3);
 
         /*
             I would really like better precission but:
@@ -123,13 +128,59 @@ describe("flot navigate plugin interactions", function () {
         var clientY = xaxis.box.top + xaxis.box.height/2;
 
         eventHolder = plot.getEventHolder();
-        simulate.mouseWheel(eventHolder, clientX, clientY, -3);
+        simulate.mouseWheel(eventHolder, clientX, clientY, 0, -3);
 
         expect(xaxis.min).toBeCloseTo(0, 1);
         expect(xaxis.max).toBeCloseTo(1, 1);
         expect(yaxis.min).toBeCloseTo(0, 1);
         expect(yaxis.max).toBeCloseTo(10, 1);
     });
+
+    it('zooms out proportional with the deltaY on Mac platforms', function () {
+        var smallAmount = 0.4,
+            largerAmount = 0.8,
+            plot1Ranges = plotAndScroll(smallAmount),
+            plot2Ranges = plotAndScroll(largerAmount);
+        expect(plot2Ranges.xaxisMin).toBeLessThan(plot1Ranges.xaxisMin);
+        expect(plot2Ranges.xaxisMax).toBeGreaterThan(plot1Ranges.xaxisMax);
+        expect(plot2Ranges.yaxisMin).toBeLessThan(plot1Ranges.yaxisMin);
+        expect(plot2Ranges.yaxisMax).toBeGreaterThan(plot1Ranges.yaxisMax);
+    });
+
+    it('zooms out regardless the deltaY value on non Mac platforms', function () {
+        var smallAmount = 40,
+            largerAmount = 80,
+            plot1Ranges = plotAndScroll(smallAmount),
+            plot2Ranges = plotAndScroll(largerAmount);
+        expect(plot2Ranges.xaxisMin).toBeCloseTo(plot1Ranges.xaxisMin);
+        expect(plot2Ranges.xaxisMax).toBeCloseTo(plot1Ranges.xaxisMax);
+        expect(plot2Ranges.yaxisMin).toBeCloseTo(plot1Ranges.yaxisMin);
+        expect(plot2Ranges.yaxisMax).toBeCloseTo(plot1Ranges.yaxisMax);
+    });
+
+    function plotAndScroll(amount) {
+        plot = $.plot(placeholder, [
+            [[0, 0],
+            [10, 10]]
+        ], options);
+
+        var xaxis = plot.getXAxes()[0];
+        var yaxis = plot.getYAxes()[0];
+
+        var clientX = plot.getPlotOffset().left + xaxis.p2c(5);
+        var clientY = plot.getPlotOffset().top + yaxis.p2c(5);
+
+        eventHolder = plot.getEventHolder();
+        simulate.mouseWheel(eventHolder, clientX, clientY, 0, amount);
+        jasmine.clock().tick(200);
+
+        return {
+            xaxisMin: xaxis.min,
+            xaxisMax: xaxis.max,
+            yaxisMin: yaxis.min,
+            yaxisMax: yaxis.max
+        };
+    }
 
     it('zooms mode handles event on mouse dblclick', function () {
         plot = $.plot(placeholder, [
