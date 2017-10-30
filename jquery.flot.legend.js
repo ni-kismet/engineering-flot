@@ -75,101 +75,170 @@
         }
 
         // Generate markup for the list of entries, in their final order
-        var html = '<svg class="legend" width="100%" height="100%">';// viewBox="0 0 160 250" preserveAspectRatio="none">';
-        html += svgShapeDefs;
+        var html = [],
+            j = 0;
+        html[j++] = '<svg class="legendLayer" width="100%" height="100%">';// viewBox="0 0 160 250" preserveAspectRatio="none">';
+        html[j++] = svgShapeDefs;
         for (i = 0; i < entries.length; ++i) {
             var entry = entries[i];
             var entryHtml = '';
-            var shape = { label: entry.label };
+            var shapeHtml = '';
+            var labelHtml = '';
+            var xpos = "0em";
+            var ypos = i * 1.5 + "em";
+            var shape = { 
+                    label: entry.label,
+                    position: {
+                        x: xpos,
+                        y: ypos
+                    }
+                };
             if (entry.style.lines.show) {
                 shape.name = "lines";
-                shape.position = { x:0, y:0 };
+                shape.position = { 
+                        x: "0em", 
+                        y: i * 1.5 + "em" 
+                    };
                 shape.strokeColor = entry.color;
-                shape.strokeWidth = entry.shape.lines.lineWidth;
-                entryHtml += getShapeHtml(shape);
+                shape.strokeWidth = entry.style.lines.lineWidth;
+                shapeHtml += getEntryHtml(shape);
             }
             if (entry.style.points.show) {
                 shape.name = entry.style.points.symbol;
-                shape.position = { x:0, y:0 };
+                shape.position = { 
+                        x: "0em", 
+                        y: i * 1.5 + "em" 
+                    };
                 shape.strokeColor = entry.color;
-                shape.fillColor = entry.shape.points.fillColor;
-                shape.strokeWidth = entry.shape.points.lineWidth;
-                entryHtml += getShapeHtml(shape);
+                shape.fillColor = entry.style.points.fillColor;
+                shape.strokeWidth = entry.style.points.lineWidth;
+                shapeHtml += getEntryHtml(shape);
             }
             if (entry.style.bars.show) {
                 shape.name = "bar";
-                shape.position = { x:0, y:0 };
+                shape.position = { 
+                        x: "0em", 
+                        y: i * 1.5 + "em" 
+                    };
                 shape.fillColor = entry.color;
-                entryHtml += getShapeHtml(shape);
+                shapeHtml += getEntryHtml(shape);
             }
             // area?
             if (false) {
                 shape.name = "area";
-                shape.position = { x:0, y:0 };
+                shape.position = { 
+                        x: "0em", 
+                        y: i * 1.5 + "em" 
+                    };
                 shape.fillColor = entry.color;
-                entryHtml += getShapeHtml(shape);
+                shapeHtml += getEntryHtml(shape);
             }
-
-            html += entryHtml;
+            labelHtml = '<text x="' + xpos + '" y="' + ypos +'" text-anchor="start"><tspan dx="2em" dy="1em">' + shape.label + '</tspan></text>'
+            html[j++] = '<g>' + shapeHtml + labelHtml + '</g>';
         }
 
-        html += '</svg>';
+        html[j++] = '</svg>';
         if (options.legend.container != null) {
-            $(options.legend.container).html(html);
+            $(options.legend.container).html(html.join(''));
+        } else {
+            var pos = "",
+            p = options.legend.position,
+            m = options.legend.margin;
+            if (m[0] == null) {
+                m = [m, m];
+            }
+
+            if (p.charAt(0) === "n") {
+                pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
+            } else if (p.charAt(0) === "s") {
+                pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
+            }
+
+            if (p.charAt(1) === "e") {
+                pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
+            } else if (p.charAt(1) === "w") {
+                pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
+            }
+
+            var legendEl = $('<div class="legend" style="position:absolute;' + pos +'">' + html.join('') + '</div>').appendTo(placeholder);
+            if (options.legend.backgroundOpacity !== 0.0) {
+                // put in the transparent background
+                // separately to avoid blended labels and
+                // label boxes
+                var c = options.legend.backgroundColor;
+                if (c == null) {
+                    c = options.grid.backgroundColor;
+                    if (c && typeof c === "string") {
+                        c = $.color.parse(c);
+                    } else {
+                        c = $.color.extract(legendEl, 'background-color');
+                    }
+
+                    c.a = 1;
+                    c = c.toString();
+                }
+                var div = legendEl.children();
+                // $('<div style="position:absolute;width:' +
+                //     div.width() + 'px;height:' +
+                //     div.height() + 'px;' +
+                //     pos + 'background-color:' +
+                //     c + ';"> </div>')
+                // .prependTo(legendEl).css('opacity', options.legend.backgroundOpacity);
+            }
         }
     }
 
     var svgShapeDefs = `
         <defs>
-            <g id="line" fill="none">
+            <symbol id="line" fill="none" viewBox="-5 -5 25 25">
                 <polyline points="0,15 5,5 10,10 15,0"/>
-            </g>
-            
-            <g id="area" stroke-width="0">
+            </symbol>
+
+            <symbol id="area" stroke-width="1" viewBox="-5 -5 25 25">
                 <polyline points="0,15 5,5 10,10 15,0, 15,15, 0,15"/>
-            </g>
-            
-            <g id="bars" stroke-width="0">
+            </symbol>
+
+            <symbol id="bars" stroke-width="1" viewBox="-5 -5 25 25">
                 <polyline points="1.5,15.5 1.5,12.5, 4.5,12.5 4.5,15.5 6.5,15.5 6.5,3.5, 9.5,3.5 9.5,15.5 11.5,15.5 11.5,7.5 14.5,7.5 14.5,15.5 1.5,15.5"/>
-            </g>
-            
-            <g id="circle">
-                <circle cx="0" cy="15" r="3"/>
-                <circle cx="5" cy="5" r="3"/>
-                <circle cx="10" cy="10" r="3"/>
-                <circle cx="15" cy="0" r="3"/>
-            </g>
-            
-            <g id="rectangle">
+            </symbol>
+
+            <symbol id="circle" viewBox="-5 -5 25 25">
+                <circle cx="0" cy="15" r="2.5"/>
+                <circle cx="5" cy="5" r="2.5"/>
+                <circle cx="10" cy="10" r="2.5"/>
+                <circle cx="15" cy="0" r="2.5"/>
+            </symbol>
+
+            <symbol id="rectangle" viewBox="-5 -5 25 25">
                 <rect x="-2.1" y="12.9" width="4.2" height="4.2"/>
                 <rect x="2.9" y="2.9" width="4.2" height="4.2"/>
                 <rect x="7.9" y="7.9" width="4.2" height="4.2"/>
                 <rect x="12.9" y="-2.1" width="4.2" height="4.2"/>
-            </g>
-            
-            <g id="diamond">
+            </symbol>
+
+            <symbol id="diamond" viewBox="-5 -5 25 25">
                 <path d="M-3,15 L0,12 L3,15, L0,18 Z"/>
                 <path d="M2,5 L5,2 L8,5, L5,8 Z"/>
                 <path d="M7,10 L10,7 L13,10, L10,13 Z"/>
                 <path d="M12,0 L15,-3 L18,0, L15,3 Z"/>
-            </g>
-            
-            <g id="cross" fill="none">
+            </symbol>
+
+            <symbol id="cross" fill="none" viewBox="-5 -5 25 25">
                 <path d="M-2.1,12.9 L2.1,17.1, M2.1,12.9 L-2.1,17.1 Z"/>
                 <path d="M2.9,2.9 L7.1,7.1 M7.1,2.9 L2.9,7.1 Z"/>
                 <path d="M7.9,7.9 L12.1,12.1 M12.1,7.9 L7.9,12.1 Z"/>
                 <path d="M12.9,-2.1 L17.1,2.1 M17.1,-2.1 L12.9,2.1 Z"/>
-            </g>
-            
-            <g id="plus" fill="none">
+            </symbol>
+
+            <symbol id="plus" fill="none" viewBox="-5 -5 25 25">
                 <path d="M0,12 L0,18, M-3,15 L3,15 Z"/>
                 <path d="M5,2 L5,8 M2,5 L8,5 Z"/>
                 <path d="M10,7 L10,13 M7,10 L13,10 Z"/>
                 <path d="M15,-3 L15,3 M12,0 L18,0 Z"/>
-            </g>
+            </symbol>
         </defs>`;
 
-    function getShapeHtml(shape) {
+    function getEntryHtml(shape) {
         var html = '',
             name = shape.name,
             x = shape.position.x,
@@ -185,6 +254,7 @@
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' + 
+                    'width="25" height="25"' +
                     '/>';
                 break;
             case "diamond":
@@ -193,7 +263,8 @@
                     'y="' + y + '" ' +
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
-                    'stroke-width="' + width + '" ' + 
+                    'stroke-width="' + width + '" ' +
+                    'width="25" height="25"' +
                     '/>';
                 break;
             case "cross":
@@ -202,7 +273,8 @@
                     'y="' + y + '" ' +
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
-                    'stroke-width="' + width + '" ' + 
+                    'stroke-width="' + width + '" ' +
+                    'width="25" height="25"' + 
                     '/>';
                 break;
             case "square":
@@ -211,7 +283,8 @@
                     'y="' + y + '" ' +
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
-                    'stroke-width="' + width + '" ' + 
+                    'stroke-width="' + width + '" ' +
+                    'width="25" height="25"' + 
                     '/>';
                 break;
             case "plus":
@@ -221,6 +294,7 @@
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' + 
+                    'width="25" height="25"' +
                     '/>';
                 break;
             case "bar":
@@ -230,6 +304,7 @@
                     'fill="' + fill + '" ' +
                     // 'stroke="' + stroke + '" ' +
                     // 'stroke-width="' + width + '" ' + 
+                    'width="25" height="25"' +
                     '/>';
                 break;
             case "area":
@@ -239,6 +314,7 @@
                     'fill="' + fill + '" ' +
                     // 'stroke="' + stroke + '" ' +
                     // 'stroke-width="' + width + '" ' + 
+                    'width="25" height="25"' +
                     '/>';
                 break;
             case "line":
@@ -248,6 +324,7 @@
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' + 
+                    'width="25" height="25"' +
                     '/>';
                 break;
             default:
@@ -258,14 +335,11 @@
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' + 
+                    'width="25" height="25"' +
                     '/>';
         }
 
-        return '<g>' + html + '<text class="legendLabel" x="' + (x + 30) + '" y="' + (y + 15) + '">' + shape.label + '</text></g>';
-    }
-
-    function getLabelHtml() {
-
+        return html;
     }
 
     function init(plot) {
