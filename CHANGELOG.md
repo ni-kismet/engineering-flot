@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.1]
+### Changes ###
+
+- Added jquery.flot.composeImages.js to distribution
+
+
 ## [1.0.0]
 
 ### Changes ###
@@ -1381,3 +1387,4 @@ First public release.
 
 
 [1.0.0]: https://github.com/ni-kismet/engineering-flot/compare/v0.6.0...v1.0.0
+[1.0.1]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.0...v1.0.1
