@@ -1351,7 +1351,7 @@ Flot to keep track of its state, so be careful.
 ## Utils ##
 There are some features, which may not fall explicitly into plugins category.
 
-  - ComposeImages
+  - composeImages(sources, destinationCanvas)
 
 ComposeImages allows you pass to it several canvases and SVGs as part of the
 plots themselves, and overlaps them to create a downloadable image.
@@ -1368,7 +1368,7 @@ var destinationCanvas = document.getElementById('destinationCanvas'),
 
 function asyncProcessAllImagesForComposition() {
     var sources = [myCanvas, mySvg, otherSvg, otherCanvas2, anotherCanvas];
-    var asynResult = composeImages(sources, destinationCanvas);
+    var asynResult = myPlot.composeImages(sources, destinationCanvas);
     asynResult.then(getCopyCanvasToImg(destinationCanvas, destinationImage), failureCallback);
 }
 
