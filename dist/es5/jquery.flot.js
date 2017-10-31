@@ -4780,10 +4780,11 @@ can set the default in the options.
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
-            var maxDeltaOnMac = 10,
-                isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxDeltaOnMac,
+            var maxAbsoluteDeltaOnMac = 1,
+                isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxAbsoluteDeltaOnMac,
                 defaultNonMacScrollAmount = null,
-                amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / maxDeltaOnMac : defaultNonMacScrollAmount;
+                macMagicRatio = 50,
+                amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / macMagicRatio : defaultNonMacScrollAmount;
             if (plot.getOptions().zoom.active) {
                 e.preventDefault();
                 onZoomClick(e, delta < 0, amount);

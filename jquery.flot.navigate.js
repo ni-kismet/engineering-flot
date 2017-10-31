@@ -159,7 +159,7 @@ can set the default in the options.
             var maxAbsoluteDeltaOnMac = 1,
                 isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxAbsoluteDeltaOnMac,
                 defaultNonMacScrollAmount = null,
-                macMagicRatio = 25,
+                macMagicRatio = 50,
                 amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / macMagicRatio : defaultNonMacScrollAmount;
             if (plot.getOptions().zoom.active) {
                 e.preventDefault();
