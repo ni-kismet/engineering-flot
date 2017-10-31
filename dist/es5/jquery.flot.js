@@ -7231,5 +7231,17 @@ The plugin allso adds the following methods to the plot object:
         return GENERALFAILURECALLBACKERROR;
     }
 
+    // used for testing
     $.plot.composeImages = composeImages;
+
+    function init(plot) {
+        // used to extend the public API of the plot
+        plot.composeImages = composeImages;
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        name: 'composeImages',
+        version: '1.0'
+    });
 })(jQuery);

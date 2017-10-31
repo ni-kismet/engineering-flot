@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.2]
+### Changes ###
+
+- Expose the composeImages as part of the plot instance
+
+### Bug fixes ###
+- The speed of the zoom made on the Mac track pad
+- Invalid SVG width and height values red by composeImages on Firefox
+
+
 ## [1.0.1]
 ### Changes ###
 
