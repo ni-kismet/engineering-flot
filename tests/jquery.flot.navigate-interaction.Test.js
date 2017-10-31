@@ -26,11 +26,6 @@ describe("flot navigate plugin interactions", function () {
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
-        //jasmine.clock().install().mockDate();
-    });
-
-    afterEach(function() {
-        //jasmine.clock().uninstall();
     });
 
     it('pans on mouse drag', function () {
@@ -172,7 +167,6 @@ describe("flot navigate plugin interactions", function () {
 
         eventHolder = plot.getEventHolder();
         simulate.mouseWheel(eventHolder, clientX, clientY, 0, amount);
-        //jasmine.clock().tick(200);
 
         return {
             xaxisMin: xaxis.min,
