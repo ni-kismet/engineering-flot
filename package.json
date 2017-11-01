@@ -1,6 +1,6 @@
 {
   "name": "engineering-flot",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "dist/es5/jquery.flot.js",
   "scripts": {
     "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 --stopOnEsLintError && npm run build-test",
@@ -34,6 +34,6 @@
     "karma-safari-launcher": "^1.0.0",
     "karma-spec-reporter": "0.0.31",
     "tmp": "0.0.33",
-    "webcharts-development-settings": "1.0.0"
+    "webcharts-development-settings": "1.0.1"
   }
 }

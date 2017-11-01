@@ -58,7 +58,7 @@
 
     function embedCSSRulesInSVG(rules, svg) {
         var text = [
-            '<svg width="' + svg.getAttribute('width') + '" height="' + svg.getAttribute('height') + '" viewBox="0 0 ' + svg.getAttribute('width') + ' ' + svg.getAttribute('height') + '" xmlns="http://www.w3.org/2000/svg">',
+            '<svg width="' + svg.width.baseVal.value + '" height="' + svg.height.baseVal.value + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
             '<style>',
             '/* <![CDATA[ */',
             rules.join('\n'),
@@ -179,5 +179,17 @@
         return GENERALFAILURECALLBACKERROR;
     }
 
+    // used for testing
     $.plot.composeImages = composeImages;
+
+    function init(plot) {
+        // used to extend the public API of the plot
+        plot.composeImages = composeImages;
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        name: 'composeImages',
+        version: '1.0'
+    });
 })(jQuery);
