@@ -22,12 +22,15 @@
 
     function insertLegend(plot) {
         var series = plot.getData(),
-            plotOffset = plot.getPlotOffset();
+            plotOffset = plot.getPlotOffset(),
+            container;
             
         if (options.legend.container != null) {
             $(options.legend.container).html("");
+            container = options.legend.container;
         } else {
             placeholder.find(".legend").remove();
+            container = placeholder;
         }
 
         if (!options.legend.show) {
@@ -36,10 +39,10 @@
 
         var entries = [],
             lf = options.legend.labelFormatter,
-            s, label;
+            s, label, i;
 
         // Build a list of legend entries, with each having a label and a color
-        for (var i = 0; i < series.length; ++i) {
+        for (i = 0; i < series.length; ++i) {
             s = series[i];
             if (s.label) {
                 label = lf ? lf(s.label, s) : s.label;
@@ -47,7 +50,7 @@
                     entries.push({
                         label: label,
                         color: s.color,
-                        style: {
+                        options: {
                             lines: s.lines,
                             points: s.points,
                             bars: s.bars
@@ -74,102 +77,90 @@
             }
         }
 
-        // Generate markup for the list of entries, in their final order
         var html = [],
+            entry, labelHtml, shapeHtml,
             maxLabelLength = 0,
-            j = 0;
+            j = 0,
+            pos = "",
+            p = options.legend.position,
+            m = options.legend.margin,
+            shape = {
+                name: '',
+                label: '',
+                xPos: '',
+                yPos: ''
+            };
+
         html[j++] = '<svg class="legendLayer" style="width:inherit;height:inherit">';
         html[j++] = svgShapeDefs;
+
+        // Generate <use> elements for the list of entries, in their final order
         for (i = 0; i < entries.length; ++i) {
-            var entry = entries[i],
-                entryHtml = '',
-                shapeHtml = '',
-                labelHtml = '',
-                xpos = "0em",
-                ypos = i * 1.5 + "em",
-                shape = { 
-                    label: entry.label,
-                    position: {
-                        x: xpos,
-                        y: ypos
-                    }
-                };
-            // lines
-            if (entry.style.lines.show && !entry.style.lines.fill) {
-                shape.name = "lines";
-                shape.position = { 
-                        x: "0em", 
-                        y: i * 1.5 + "em" 
-                    };
-                shape.strokeColor = entry.color;
-                shape.strokeWidth = entry.style.lines.lineWidth;
-                shapeHtml += getEntryHtml(shape);
-            }
-            // points
-            if (entry.style.points.show) {
-                shape.name = entry.style.points.symbol;
-                shape.position = { 
-                        x: "0em", 
-                        y: i * 1.5 + "em" 
-                    };
-                shape.strokeColor = entry.color;
-                shape.fillColor = entry.style.points.fillColor;
-                shape.strokeWidth = entry.style.points.lineWidth;
+            entry = entries[i];
+            shapeHtml = '';
+            shape.label = entry.label;
+            shape.xPos = "0em";
+            shape.yPos = i * 1.5 + "em";
+            // area
+            if (entry.options.lines.show && entry.options.lines.fill) {
+                shape.name = "area";
+                shape.fillColor = entry.color;
                 shapeHtml += getEntryHtml(shape);
             }
             // bars
-            if (entry.style.bars.show) {
+            if (entry.options.bars.show) {
                 shape.name = "bar";
-                shape.position = { 
-                        x: "0em", 
-                        y: i * 1.5 + "em" 
-                    };
                 shape.fillColor = entry.color;
                 shapeHtml += getEntryHtml(shape);
             }
-            // area
-            if (entry.style.lines.show && entry.style.lines.fill) {
-                shape.name = "area";
-                shape.position = { 
-                        x: "0em", 
-                        y: i * 1.5 + "em" 
-                    };
-                shape.fillColor = entry.color;
+            // lines
+            if (entry.options.lines.show && !entry.options.lines.fill) {
+                shape.name = "lines";
+                shape.strokeColor = entry.color;
+                shape.strokeWidth = entry.options.lines.lineWidth;
                 shapeHtml += getEntryHtml(shape);
             }
-            maxLabelLength = maxLabelLength < entry.label.length ? entry.label.length : maxLabelLength;
-            labelHtml = '<text x="' + xpos + '" y="' + ypos +'" text-anchor="start"><tspan dx="2em" dy="1.2em">' + shape.label + '</tspan></text>'
+            // points
+            if (entry.options.points.show) {
+                shape.name = entry.options.points.symbol;
+                shape.strokeColor = entry.color;
+                shape.fillColor = entry.options.points.fillColor;
+                shape.strokeWidth = entry.options.points.lineWidth;
+                shapeHtml += getEntryHtml(shape);
+            }
+
+            maxLabelLength = maxLabelLength < shape.label.length ? shape.label.length : maxLabelLength;
+            labelHtml = '<text x="' + shape.xPos + '" y="' + shape.yPos +'" text-anchor="start"><tspan dx="2em" dy="1.2em">' + shape.label + '</tspan></text>'
             html[j++] = '<g>' + shapeHtml + labelHtml + '</g>';
         }
 
         html[j++] = '</svg>';
-        if (options.legend.container != null) {
-            $(options.legend.container).html(html.join(''));
-        } else {
-            var pos = "",
-            p = options.legend.position,
-            m = options.legend.margin;
-            if (m[0] == null) {
-                m = [m, m];
-            }
+        if (m[0] == null) {
+            m = [m, m];
+        }
 
-            if (p.charAt(0) === "n") {
-                pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
-            } else if (p.charAt(0) === "s") {
-                pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
-            }
+        if (p.charAt(0) === "n") {
+            pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
+        } else if (p.charAt(0) === "s") {
+            pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
+        }
 
-            if (p.charAt(1) === "e") {
-                pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
-            } else if (p.charAt(1) === "w") {
-                pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
-            }
+        if (p.charAt(1) === "e") {
+            pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
+        } else if (p.charAt(1) === "w") {
+            pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
+        }
 
-            var legendEl = $('<div class="legend" style="position:absolute;' + pos +'">' + html.join('') + '</div>').appendTo(placeholder);
+        var legendEl, viewBox,
+            width = 2 + maxLabelLength / 2,
+            height = entries.length * 1.6,
+            fontSize;
+        if (!options.legend.container) {
+            legendEl = $('<div class="legend" style="position:absolute;' + pos +'">' + html.join('') + '</div>').appendTo(placeholder);
+            legendEl.css('width', width + 'em');
+            legendEl.css('height', height + 'em');
+            // put the transparent background only when drawing the legend over graph
             if (options.legend.backgroundOpacity !== 0.0) {
-                // put in the transparent background
-                // separately to avoid blended labels and
-                // label boxes
                 var c = options.legend.backgroundColor;
                 if (c == null) {
                     c = options.grid.backgroundColor;
@@ -183,14 +174,17 @@
                     c = c.toString();
                 }
 
-                legendEl.css('width', 2 + maxLabelLength / 2 + 'em');
-                legendEl.css('height', entries.length*1.6  + 'em');
                 legendEl.css('background-color', c); 
                 legendEl.css('opacity', options.legend.backgroundOpacity);
             }
+        } else {
+            legendEl = $(html.join('')).appendTo(options.legend.container)[0];
+            options.legend.container.style.width = width + 'em';
+            options.legend.container.style.height = height + 'em';
         }
     }
 
+    // Define the shapes
     var svgShapeDefs = `
         <defs>
             <symbol id="line" fill="none" viewBox="-5 -5 25 25">
@@ -244,25 +238,25 @@
     function getEntryHtml(shape) {
         var html = '',
             name = shape.name,
-            x = shape.position.x,
-            y = shape.position.y,
+            x = shape.xPos,
+            y = shape.yPos,
             fill = shape.fillColor,
             stroke = shape.strokeColor,
             width = shape.strokeWidth;
         switch(name) {
             case "circle":
                 html = '<use xlink:href="#circle" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
-                    'stroke-width="' + width + '" ' + 
+                    'stroke-width="' + width + '" ' +
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "diamond":
                 html = '<use xlink:href="#diamond" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
@@ -272,17 +266,17 @@
                 break;
             case "cross":
                 html = '<use xlink:href="#cross" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' +
-                    'width="1.5em" height="1.5em"' + 
+                    'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "square":
                 html = '<use xlink:href="#rectangle" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
@@ -292,52 +286,52 @@
                 break;
             case "plus":
                 html = '<use xlink:href="#plus" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
-                    'stroke-width="' + width + '" ' + 
+                    'stroke-width="' + width + '" ' +
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "bar":
                 html = '<use xlink:href="#bars" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     'fill="' + fill + '" ' +
                     // 'stroke="' + stroke + '" ' +
-                    // 'stroke-width="' + width + '" ' + 
+                    // 'stroke-width="' + width + '" ' +
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "area":
                 html = '<use xlink:href="#area" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     'fill="' + fill + '" ' +
                     // 'stroke="' + stroke + '" ' +
-                    // 'stroke-width="' + width + '" ' + 
+                    // 'stroke-width="' + width + '" ' +
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             case "line":
                 html = '<use xlink:href="#line" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
-                    'stroke-width="' + width + '" ' + 
+                    'stroke-width="' + width + '" ' +
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
             default:
                 // default is line
                 html = '<use xlink:href="#line" class="legendIcon" ' +
-                    'x="' + x + '" ' + 
+                    'x="' + x + '" ' +
                     'y="' + y + '" ' +
                     // 'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
-                    'stroke-width="' + width + '" ' + 
+                    'stroke-width="' + width + '" ' +
                     'width="1.5em" height="1.5em"' +
                     '/>';
         }
