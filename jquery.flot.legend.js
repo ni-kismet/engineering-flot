@@ -8,9 +8,9 @@
     var options = {
         legend: {
             show: true,
-            noColumns: 1, // number of colums in legend table
-            labelFormatter: null, // fn: string -> string
-            labelBoxBorderColor: "#ccc", // border color for the little label boxes
+            // noColumns: 1, // number of colums in legend table
+            // labelFormatter: null, // fn: string -> string
+            // labelBoxBorderColor: "#ccc", // border color for the little label boxes
             container: null, // container (as jQuery object) to put legend in, null means default on top of graph
             position: "ne", // position of default legend container within plot
             margin: 5, // distance from grid edge to default legend container within plot
@@ -22,15 +22,12 @@
 
     function insertLegend(plot) {
         var series = plot.getData(),
-            plotOffset = plot.getPlotOffset(),
-            container;
+            plotOffset = plot.getPlotOffset();
             
         if (options.legend.container != null) {
             $(options.legend.container).html("");
-            container = options.legend.container;
         } else {
             placeholder.find(".legend").remove();
-            container = placeholder;
         }
 
         if (!options.legend.show) {
@@ -151,10 +148,9 @@
             pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
         }
 
-        var legendEl, viewBox,
+        var legendEl,
             width = 2 + maxLabelLength / 2,
-            height = entries.length * 1.6,
-            fontSize;
+            height = entries.length * 1.6;
         if (!options.legend.container) {
             legendEl = $('<div class="legend" style="position:absolute;' + pos +'">' + html.join('') + '</div>').appendTo(placeholder);
             legendEl.css('width', width + 'em');
@@ -352,6 +348,6 @@
         init: init,
         options: options,
         name: "legend",
-        version: "0.1"
+        version: "1.0"
     });
 })(jQuery);
