@@ -3,7 +3,7 @@
 */
 
 (function($) {
-    var placeholder, options;
+    var placeholder;
 
     var options = {
         legend: {
@@ -23,7 +23,7 @@
     function insertLegend(plot) {
         var series = plot.getData(),
             plotOffset = plot.getPlotOffset();
-            
+
         if (options.legend.container != null) {
             $(options.legend.container).html("");
         } else {
@@ -127,7 +127,7 @@
             }
 
             maxLabelLength = maxLabelLength < shape.label.length ? shape.label.length : maxLabelLength;
-            labelHtml = '<text x="' + shape.xPos + '" y="' + shape.yPos +'" text-anchor="start"><tspan dx="2em" dy="1.2em">' + shape.label + '</tspan></text>'
+            labelHtml = '<text x="' + shape.xPos + '" y="' + shape.yPos + '" text-anchor="start"><tspan dx="2em" dy="1.2em">' + shape.label + '</tspan></text>'
             html[j++] = '<g>' + shapeHtml + labelHtml + '</g>';
         }
 
@@ -152,7 +152,7 @@
             width = 2 + maxLabelLength / 2,
             height = entries.length * 1.6;
         if (!options.legend.container) {
-            legendEl = $('<div class="legend" style="position:absolute;' + pos +'">' + html.join('') + '</div>').appendTo(placeholder);
+            legendEl = $('<div class="legend" style="position:absolute;' + pos + '">' + html.join('') + '</div>').appendTo(placeholder);
             legendEl.css('width', width + 'em');
             legendEl.css('height', height + 'em');
             // put the transparent background only when drawing the legend over graph
@@ -170,7 +170,7 @@
                     c = c.toString();
                 }
 
-                legendEl.css('background-color', c); 
+                legendEl.css('background-color', c);
                 legendEl.css('opacity', options.legend.backgroundOpacity);
             }
         } else {
@@ -239,7 +239,7 @@
             fill = shape.fillColor,
             stroke = shape.strokeColor,
             width = shape.strokeWidth;
-        switch(name) {
+        switch (name) {
             case "circle":
                 html = '<use xlink:href="#circle" class="legendIcon" ' +
                     'x="' + x + '" ' +
