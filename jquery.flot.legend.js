@@ -36,15 +36,15 @@
 
         // Build a list of legend entries, with each having a label, a color, and icon options
         var entries = series.map(function(s, i) {
-                return {
-                    label: (lf ? lf(s.label, s) : s.label) || 'Plot ' + (i + 1),
-                    color: s.color,
-                    options: {
-                        lines: s.lines,
-                        points: s.points,
-                        bars: s.bars
-                    }
-                };
+            return {
+                label: (lf ? lf(s.label, s) : s.label) || 'Plot ' + (i + 1),
+                color: s.color,
+                options: {
+                    lines: s.lines,
+                    points: s.points,
+                    bars: s.bars
+                }
+            };
         });
 
         // Sort the legend using either the default or a custom comparator
@@ -311,11 +311,11 @@
                     '/>';
                 break;
             default:
-                // default is line
-                html = '<use xlink:href="#line" class="legendIcon" ' +
+                // default is circle
+                html = '<use xlink:href="#circle" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
-                    // 'fill="' + fill + '" ' +
+                    'fill="' + fill + '" ' +
                     'stroke="' + stroke + '" ' +
                     'stroke-width="' + width + '" ' +
                     'width="1.5em" height="1.5em"' +
