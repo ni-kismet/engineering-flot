@@ -10,7 +10,7 @@
             show: true,
             labelFormatter: null, // fn: string -> string
             container: null, // container (as jQuery object) to put legend in, null means default on top of graph
-            position: "ne", // position of default legend container within plot
+            position: 'ne', // position of default legend container within plot
             margin: 5, // distance from grid edge to default legend container within plot
             backgroundColor: null, // null means auto-detect
             backgroundOpacity: 0.85, // set to 0 to avoid background
@@ -23,9 +23,9 @@
             plotOffset = plot.getPlotOffset();
 
         if (options.legend.container != null) {
-            $(options.legend.container).html("");
+            $(options.legend.container).html('');
         } else {
-            placeholder.find(".legend").remove();
+            placeholder.find('.legend').remove();
         }
 
         if (!options.legend.show) {
@@ -102,7 +102,7 @@
             }
             // lines
             if (entry.options.lines.show && !entry.options.lines.fill) {
-                shape.name = 'lines';
+                shape.name = 'line';
                 shape.strokeColor = entry.color;
                 shape.strokeWidth = entry.options.lines.lineWidth;
                 shapeHtml += getEntryHtml(shape);

@@ -27,7 +27,7 @@ describe("flot legend plugin", function() {
 
     var positions = ['nw', 'ne', 'sw', 'se'];
     positions.forEach(function (pos) {
-        it ('shold draw a legend over graph at cardinal position: ' + pos + ' if a container is not provided', function () {
+        it ('shold draw a legend over graph at cardinal position: ' + pos + ', if a container is not provided', function () {
             options.legend.position = pos;
             plot = $.plot(placeholder, [[1, 3, 5, 6]], options);
 
@@ -91,5 +91,14 @@ describe("flot legend plugin", function() {
         var legendSvg = document.getElementsByClassName('legendLayer')[0];
         
         expect(legendSvg.children[1].children[1].textContent).toBe(label);
+    });
+
+    it('should take into account the show option', function() {
+        options.legend.show = false;
+        plot = $.plot(placeholder, [[1, 3, 5, 6]], options);
+        
+        var legendSvg = document.getElementsByClassName('legendLayer')[0];
+        
+        expect(legendSvg).toBe(undefined);
     });
 });
