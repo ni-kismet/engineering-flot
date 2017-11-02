@@ -7,19 +7,17 @@ describe("flot legend plugin", function() {
 
     beforeEach(function() {
         var legendSettings = {
-				position: "nw",
+                position: "nw",
                 show: true,
                 container: null
             };
-        
+
         options = {
             legend: legendSettings,
             series: {
                 shadowSize: 0, // don't draw shadows
             }
         };
-
-       
 
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
             .find('#test-container');
@@ -32,7 +30,7 @@ describe("flot legend plugin", function() {
             plot = $.plot(placeholder, [[1, 3, 5, 6]], options);
 
             var legend = document.getElementsByClassName('legend')[0];
-      
+
             expect(legend.style.position).toBe('absolute');
             switch (pos) {
                 case "nw":
@@ -96,9 +94,10 @@ describe("flot legend plugin", function() {
     it('should take into account the show option', function() {
         options.legend.show = false;
         plot = $.plot(placeholder, [[1, 3, 5, 6]], options);
-        
+
         var legendSvg = document.getElementsByClassName('legendLayer')[0];
-        
+
         expect(legendSvg).toBe(undefined);
     });
 });
+
