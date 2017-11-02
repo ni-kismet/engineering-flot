@@ -8,9 +8,7 @@
     var options = {
         legend: {
             show: true,
-            // noColumns: 1, // number of colums in legend table
-            // labelFormatter: null, // fn: string -> string
-            // labelBoxBorderColor: "#ccc", // border color for the little label boxes
+            labelFormatter: null, // fn: string -> string
             container: null, // container (as jQuery object) to put legend in, null means default on top of graph
             position: "ne", // position of default legend container within plot
             margin: 5, // distance from grid edge to default legend container within plot
@@ -34,37 +32,29 @@
             return;
         }
 
-        var entries = [],
-            lf = options.legend.labelFormatter,
-            s, label, i;
+        var lf = options.legend.labelFormatter;
 
-        // Build a list of legend entries, with each having a label and a color
-        for (i = 0; i < series.length; ++i) {
-            s = series[i];
-            if (s.label) {
-                label = lf ? lf(s.label, s) : s.label;
-                if (label) {
-                    entries.push({
-                        label: label,
-                        color: s.color,
-                        options: {
-                            lines: s.lines,
-                            points: s.points,
-                            bars: s.bars
-                        }
-                    });
-                }
-            }
-        }
+        // Build a list of legend entries, with each having a label, a color, and icon options
+        var entries = series.map(function(s, i) {
+                return {
+                    label: (lf ? lf(s.label, s) : s.label) || 'Plot ' + (i + 1),
+                    color: s.color,
+                    options: {
+                        lines: s.lines,
+                        points: s.points,
+                        bars: s.bars
+                    }
+                };
+        });
 
         // Sort the legend using either the default or a custom comparator
         if (options.legend.sorted) {
             if ($.isFunction(options.legend.sorted)) {
                 entries.sort(options.legend.sorted);
-            } else if (options.legend.sorted === "reverse") {
+            } else if (options.legend.sorted === 'reverse') {
                 entries.reverse();
             } else {
-                var ascending = options.legend.sorted !== "descending";
+                var ascending = options.legend.sorted !== 'descending';
                 entries.sort(function(a, b) {
                     return a.label === b.label
                         ? 0
@@ -92,27 +82,27 @@
         html[j++] = svgShapeDefs;
 
         // Generate <use> elements for the list of entries, in their final order
-        for (i = 0; i < entries.length; ++i) {
+        for (var i = 0; i < entries.length; ++i) {
             entry = entries[i];
             shapeHtml = '';
             shape.label = entry.label;
-            shape.xPos = "0em";
-            shape.yPos = i * 1.5 + "em";
+            shape.xPos = '0em';
+            shape.yPos = i * 1.5 + 'em';
             // area
             if (entry.options.lines.show && entry.options.lines.fill) {
-                shape.name = "area";
+                shape.name = 'area';
                 shape.fillColor = entry.color;
                 shapeHtml += getEntryHtml(shape);
             }
             // bars
             if (entry.options.bars.show) {
-                shape.name = "bar";
+                shape.name = 'bar';
                 shape.fillColor = entry.color;
                 shapeHtml += getEntryHtml(shape);
             }
             // lines
             if (entry.options.lines.show && !entry.options.lines.fill) {
-                shape.name = "lines";
+                shape.name = 'lines';
                 shape.strokeColor = entry.color;
                 shape.strokeWidth = entry.options.lines.lineWidth;
                 shapeHtml += getEntryHtml(shape);
@@ -136,15 +126,15 @@
             m = [m, m];
         }
 
-        if (p.charAt(0) === "n") {
+        if (p.charAt(0) === 'n') {
             pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
-        } else if (p.charAt(0) === "s") {
+        } else if (p.charAt(0) === 's') {
             pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
         }
 
-        if (p.charAt(1) === "e") {
+        if (p.charAt(1) === 'e') {
             pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
-        } else if (p.charAt(1) === "w") {
+        } else if (p.charAt(1) === 'w') {
             pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
         }
 
@@ -160,7 +150,7 @@
                 var c = options.legend.backgroundColor;
                 if (c == null) {
                     c = options.grid.backgroundColor;
-                    if (c && typeof c === "string") {
+                    if (c && typeof c === 'string') {
                         c = $.color.parse(c);
                     } else {
                         c = $.color.extract(legendEl, 'background-color');
@@ -240,7 +230,7 @@
             stroke = shape.strokeColor,
             width = shape.strokeWidth;
         switch (name) {
-            case "circle":
+            case 'circle':
                 html = '<use xlink:href="#circle" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
@@ -250,7 +240,7 @@
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
-            case "diamond":
+            case 'diamond':
                 html = '<use xlink:href="#diamond" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
@@ -260,7 +250,7 @@
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
-            case "cross":
+            case 'cross':
                 html = '<use xlink:href="#cross" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
@@ -270,7 +260,7 @@
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
-            case "square":
+            case 'square':
                 html = '<use xlink:href="#rectangle" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
@@ -280,7 +270,7 @@
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
-            case "plus":
+            case 'plus':
                 html = '<use xlink:href="#plus" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
@@ -290,7 +280,7 @@
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
-            case "bar":
+            case 'bar':
                 html = '<use xlink:href="#bars" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
@@ -300,7 +290,7 @@
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
-            case "area":
+            case 'area':
                 html = '<use xlink:href="#area" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
@@ -310,7 +300,7 @@
                     'width="1.5em" height="1.5em"' +
                     '/>';
                 break;
-            case "line":
+            case 'line':
                 html = '<use xlink:href="#line" class="legendIcon" ' +
                     'x="' + x + '" ' +
                     'y="' + y + '" ' +
@@ -347,7 +337,7 @@
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: "legend",
-        version: "1.0"
+        name: 'legend',
+        version: '1.0'
     });
 })(jQuery);
