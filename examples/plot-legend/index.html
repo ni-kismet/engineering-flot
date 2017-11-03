@@ -12,7 +12,7 @@
     <script type="text/javascript">
 
 	$(function() {
-
+        var plot;
 		function drawArrow(ctx, x, y, radius){
 			ctx.beginPath();
 			ctx.moveTo(x + radius, y + radius);
@@ -92,8 +92,6 @@
             {color: "indigo", points: data2_points, data: data2, label: "Points"},
             // lines + points
 			{color: "red",  lines: {show: true, lineWidth:2}, points: data3_points, data: data3, label: "Lines & Points"},
-			
-			
         ];
 
         var legendContainer = document.getElementById("legendContainer");
@@ -101,12 +99,9 @@
 				position: "nw",
                 show: true,
                 container: legendContainer
-            };
-        drawGraph();
-        
+            };        
         $('#myForm input').on('change', function() {
             var val = $('input[name="myRadio"]:checked', '#myForm').val();
-            var fontSize = $('input[name="fontSize"]', '#myForm').val();
 
             $(legendContainer).html('');
             switch (val) {
@@ -127,15 +122,17 @@
                     legendSettings.container = null;
                     break;
                 case 'container':
-                    legendContainer.style.fontSize = fontSize + 'px';
                     legendSettings.container = legendContainer;
                     break;
-            }        
-            drawGraph();
+            }    
+            setupGraph();   
         });
 
-        function drawGraph() {
-            $.plot($("#placeholder"), data , {
+        setupGraph();
+        drawGraph();
+
+        function setupGraph() {
+           plot = $.plot($("#placeholder"), data , {
                 legend: legendSettings,
                 series: {
                     lines: {
@@ -160,6 +157,14 @@
                 }
             });
         }
+
+        function drawGraph() {
+            plot.setData(data);
+            plot.setupGrid(); 
+            plot.draw();
+            requestAnimationFrame(drawGraph);
+        }
+
 		// Add the Flot version string to the footer
 
 		$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
@@ -188,7 +193,7 @@
                 <input type="radio" name="myRadio" value="sw"> SW - Over Graph <br>
                 <input type="radio" name="myRadio" value="ne"> NE - Over Graph <br>
                 <input type="radio" name="myRadio" value="nw"> NW - Over Graph <br>
-                <input type="radio" name="myRadio" value="container" checked="checked"> Container (Font Size: <input type="text" name="fontSize" value="18" style="text-align: right; width:5em"> px)<br>
+                <input type="radio" name="myRadio" value="container" checked="checked"> Container <br>
             </fieldset>
         </div>
 	</div>

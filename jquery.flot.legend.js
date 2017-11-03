@@ -18,10 +18,8 @@
         }
     };
 
-    function insertLegend(plot) {
-        var series = plot.getData(),
-            plotOffset = plot.getPlotOffset();
-
+    function insertLegend(plot, legendEntries) {
+        // clear before redraw
         if (options.legend.container != null) {
             $(options.legend.container).html('');
         } else {
@@ -32,40 +30,11 @@
             return;
         }
 
-        var lf = options.legend.labelFormatter;
-
-        // Build a list of legend entries, with each having a label, a color, and icon options
-        var entries = series.map(function(s, i) {
-            return {
-                label: (lf ? lf(s.label, s) : s.label) || 'Plot ' + (i + 1),
-                color: s.color,
-                options: {
-                    lines: s.lines,
-                    points: s.points,
-                    bars: s.bars
-                }
-            };
-        });
-
-        // Sort the legend using either the default or a custom comparator
-        if (options.legend.sorted) {
-            if ($.isFunction(options.legend.sorted)) {
-                entries.sort(options.legend.sorted);
-            } else if (options.legend.sorted === 'reverse') {
-                entries.reverse();
-            } else {
-                var ascending = options.legend.sorted !== 'descending';
-                entries.sort(function(a, b) {
-                    return a.label === b.label
-                        ? 0
-                        : ((a.label < b.label) !== ascending ? 1 : -1 // Logical XOR
-                        );
-                });
-            }
-        }
-
-        var html = [],
-            entry, labelHtml, shapeHtml,
+        // Save the legend entries in legend options
+        var entries = options.legend.legendEntries = legendEntries,
+            plotOffset = plot.getPlotOffset(),
+            html = [],
+            entry, labelHtml, iconHtml,
             maxLabelLength = 0,
             j = 0,
             pos = "",
@@ -78,13 +47,13 @@
                 yPos: ''
             };
 
-        html[j++] = '<svg class="legendLayer" style="width:inherit;height:inherit">';
+        html[j++] = '<svg class="legendLayer" style="width:inherit;height:inherit;">';
         html[j++] = svgShapeDefs;
 
-        // Generate <use> elements for the list of entries, in their final order
+        // Generate html for icons and labels from a list of entries
         for (var i = 0; i < entries.length; ++i) {
             entry = entries[i];
-            shapeHtml = '';
+            iconHtml = '';
             shape.label = entry.label;
             shape.xPos = '0em';
             shape.yPos = i * 1.5 + 'em';
@@ -92,20 +61,20 @@
             if (entry.options.lines.show && entry.options.lines.fill) {
                 shape.name = 'area';
                 shape.fillColor = entry.color;
-                shapeHtml += getEntryHtml(shape);
+                iconHtml += getEntryIconHtml(shape);
             }
             // bars
             if (entry.options.bars.show) {
                 shape.name = 'bar';
                 shape.fillColor = entry.color;
-                shapeHtml += getEntryHtml(shape);
+                iconHtml += getEntryIconHtml(shape);
             }
             // lines
             if (entry.options.lines.show && !entry.options.lines.fill) {
                 shape.name = 'line';
                 shape.strokeColor = entry.color;
                 shape.strokeWidth = entry.options.lines.lineWidth;
-                shapeHtml += getEntryHtml(shape);
+                iconHtml += getEntryIconHtml(shape);
             }
             // points
             if (entry.options.points.show) {
@@ -113,12 +82,12 @@
                 shape.strokeColor = entry.color;
                 shape.fillColor = entry.options.points.fillColor;
                 shape.strokeWidth = entry.options.points.lineWidth;
-                shapeHtml += getEntryHtml(shape);
+                iconHtml += getEntryIconHtml(shape);
             }
 
             maxLabelLength = maxLabelLength < shape.label.length ? shape.label.length : maxLabelLength;
             labelHtml = '<text x="' + shape.xPos + '" y="' + shape.yPos + '" text-anchor="start"><tspan dx="2em" dy="1.2em">' + shape.label + '</tspan></text>'
-            html[j++] = '<g>' + shapeHtml + labelHtml + '</g>';
+            html[j++] = '<g>' + iconHtml + labelHtml + '</g>';
         }
 
         html[j++] = '</svg>';
@@ -145,6 +114,7 @@
             legendEl = $('<div class="legend" style="position:absolute;' + pos + '">' + html.join('') + '</div>').appendTo(placeholder);
             legendEl.css('width', width + 'em');
             legendEl.css('height', height + 'em');
+            legendEl.css('pointerEvents', 'none');
             // put the transparent background only when drawing the legend over graph
             if (options.legend.backgroundOpacity !== 0.0) {
                 var c = options.legend.backgroundColor;
@@ -170,7 +140,7 @@
         }
     }
 
-    // Define the shapes
+    // Define svg symbols for shapes
     var svgShapeDefs = `
         <defs>
             <symbol id="line" fill="none" viewBox="-5 -5 25 25">
@@ -221,7 +191,8 @@
             </symbol>
         </defs>`;
 
-    function getEntryHtml(shape) {
+    // Generate html for a shape
+    function getEntryIconHtml(shape) {
         var html = '',
             name = shape.name,
             x = shape.xPos,
@@ -325,12 +296,115 @@
         return html;
     }
 
+    // Generate a list of legend entries in their final order
+    function getLegendEntries(series, labelFormatter, sorted) {
+        var lf = labelFormatter,
+            legendEntries = series.map(function(s, i) {
+                return {
+                    label: (lf ? lf(s.label, s) : s.label) || 'Plot ' + (i + 1),
+                    color: s.color,
+                    options: {
+                        lines: s.lines,
+                        points: s.points,
+                        bars: s.bars
+                    }
+                };
+            });
+
+        // Sort the legend using either the default or a custom comparator
+        if (sorted) {
+            if ($.isFunction(sorted)) {
+                legendEntries.sort(sorted);
+            } else if (sorted === 'reverse') {
+                legendEntries.reverse();
+            } else {
+                var ascending = (sorted !== 'descending');
+                legendEntries.sort(function(a, b) {
+                    return a.label === b.label
+                        ? 0
+                        : ((a.label < b.label) !== ascending ? 1 : -1 // Logical XOR
+                        );
+                });
+            }
+        }
+
+        return legendEntries;
+    }
+
+    // Compare two lists of legend entries
+    function shouldRedraw(oldEntries, newEntries) {
+        // return false if opts1 same as opts2
+        function checkOptions(opts1, opts2) {
+            for (var prop in opts1) {
+                if (opts1.hasOwnProperty(prop)) {
+                    if (opts1[prop] !== opts2[prop]) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        if (!oldEntries || !newEntries) {
+            return true;
+        }
+
+        if (oldEntries.length !== newEntries.length) {
+            return true;
+        }
+        var i, newEntry, oldEntry, newOpts, oldOpts;
+        for (i = 0; i < newEntries.length; i++) {
+            newEntry = newEntries[i];
+            oldEntry = oldEntries[i];
+
+            if (newEntry.label !== oldEntry.label) {
+                return true;
+            }
+
+            if (newEntry.color !== oldEntry.color) {
+                return true;
+            }
+
+            // check for changes in lines options
+            newOpts = newEntry.options.lines;
+            oldOpts = oldEntry.options.lines;
+            if (checkOptions(newOpts, oldOpts)) {
+                return true;
+            }
+
+            // check for changes in points options
+            newOpts = newEntry.options.points;
+            oldOpts = oldEntry.options.points;
+            if (checkOptions(newOpts, oldOpts)) {
+                return true;
+            }
+
+            // check for changes in bars options
+            newOpts = newEntry.options.bars;
+            oldOpts = oldEntry.options.bars;
+            if (checkOptions(newOpts, oldOpts)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function init(plot) {
         placeholder = plot.getPlaceholder();
         options = plot.getOptions();
 
         plot.hooks.setupGrid.push(function (plot) {
-            insertLegend(plot);
+            if (options.legend.show) {
+                var series = plot.getData(),
+                    labelFormatter = options.legend.labelFormatter,
+                    oldEntries = options.legend.legendEntries,
+                    newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted);
+
+                if (shouldRedraw(oldEntries, newEntries)) {
+                    insertLegend(plot, newEntries);
+                }
+            }
         });
     }
 
