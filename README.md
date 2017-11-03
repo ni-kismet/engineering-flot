@@ -70,4 +70,4 @@ About how the plugins work: [Plugins](PLUGINS.md)
 
 High level overview on how touch interactions are handled internally: [Touch interactions](touchInteractions.md)
 
-Examples are included in the examples folder of this repository, but they can be tried out on line as well: [Examples](https://rawgit.com/ni-kismet/engineering-flot/master/examples/index.html)
+Examples are included in the examples folder of this repository, but they can be tried out online as well: [Examples](https://rawgit.com/ni-kismet/engineering-flot/master/examples/index.html)

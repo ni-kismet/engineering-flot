@@ -707,7 +707,7 @@
     window.Flot.Canvas = Canvas;
 })();
 
-/* Javascript plotting library for jQuery, version 0.8.3.
+/* Javascript plotting library for jQuery, version 1.0.3.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Licensed under the MIT license.
@@ -3588,7 +3588,7 @@ Licensed under the MIT license.
         return plot;
     };
 
-    $.plot.version = "0.8.3";
+    $.plot.version = "1.0.3";
 
     $.plot.plugins = [];
 
