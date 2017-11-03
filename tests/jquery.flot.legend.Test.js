@@ -78,7 +78,7 @@ describe("flot legend plugin", function() {
 
         var legendSvg = document.getElementsByClassName('legendLayer')[0];
         
-        expect(legendSvg.children[1].children[1].textContent).toBe('Plot 1');
+        expect(legendSvg.childNodes[2].childNodes[1].textContent).toBe('Plot 1');
     });
 
     it('should display the plot label', function(){
@@ -88,7 +88,7 @@ describe("flot legend plugin", function() {
 
         var legendSvg = document.getElementsByClassName('legendLayer')[0];
         
-        expect(legendSvg.children[1].children[1].textContent).toBe(label);
+        expect(legendSvg.childNodes[2].childNodes[1].textContent).toBe(label);
     });
 
     it('should take into account the show option', function() {
