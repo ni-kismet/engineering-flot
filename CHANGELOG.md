@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 ### Changes ###
 
 - Added jquery.flot.composeImages.js to distribution
+- Added jquery.flot.legend.js to distribution
 
 
 ## [1.0.0]
