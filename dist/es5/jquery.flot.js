@@ -2966,6 +2966,7 @@ Licensed under the MIT license.
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
                     i, x, y, halign, valign, info,
+                    margin = 3,
                     nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, labelBoxes = [],
                     overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
                         return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
@@ -2994,7 +2995,7 @@ Licensed under the MIT license.
                                 y = box.top + box.height - box.padding + axis.boxPosition.centerY;
                                 valign = "bottom";
                             }
-                            newLabelBox = {x: x - info.width / 2, y: y, width: info.width, height: info.height}
+                            newLabelBox = {x: x - info.width / 2 - margin, y: y - margin, width: info.width + 2 * margin, height: info.height + 2 * margin};
                         } else {
                             valign = "middle";
                             y = plotOffset.top + axis.p2c(tick.v);
@@ -3004,7 +3005,7 @@ Licensed under the MIT license.
                             } else {
                                 x = box.left + box.padding + axis.boxPosition.centerX;
                             }
-                            newLabelBox = {x: x, y: y - info.height / 2, width: info.width, height: info.height}
+                            newLabelBox = {x: x - info.width / 2 - margin, y: y - margin, width: info.width + 2 * margin, height: info.height + 2 * margin};
                         }
 
                         if (overlapsOtherLabels(newLabelBox, labelBoxes)) {
