@@ -113,7 +113,7 @@ fieldset {
 		padding: 10px;
 }
 
-legend {
+.legend {
 		display: block;
 		-webkit-padding-start: 2px;
 		-webkit-padding-end: 2px;
