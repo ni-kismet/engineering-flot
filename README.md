@@ -2,7 +2,7 @@
 
 ## About ##
 
-engineering-flot is a Javascript plotting library for engineering and scientific
+engineering-flot is a JavaScript plotting library for engineering and scientific
 applications derived from Flot: <http://www.flotcharts.org/>
 
 Take a look at the the examples in examples/index.html; they should give a good
@@ -12,11 +12,9 @@ the fastest way to learn how to use engineering-flot.
 
 ## Installation ##
 
-Just include the Javascript file after you've included jQuery.
+Just include the JavaScript file after you've included jQuery.
 
 Generally, all modern browsers are supported.
-
-Internet Explorer < 9 is not supported.
 
 You need at least jQuery 1.2.6, but try at least 1.3.2 for interactive
 charts because of performance improvements in event handling.
@@ -68,4 +66,8 @@ object with a couple of methods.
 
 API Documentation is available here: [API reference](API.md)
 
-Examples are included in the examples folder of this repository.
+About how the plugins work: [Plugins](PLUGINS.md)
+
+High level overview on how touch interactions are handled internally: [Touch interactions](touchInteractions.md)
+
+Examples are included in the examples folder of this repository, but they can be tried out online as well: [Examples](https://rawgit.com/ni-kismet/engineering-flot/master/examples/index.html)
