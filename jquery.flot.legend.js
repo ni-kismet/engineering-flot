@@ -7,7 +7,7 @@
 
     var options = {
         legend: {
-            show: true,
+            show: false,
             labelFormatter: null, // fn: string -> string
             container: null, // container (as jQuery object) to put legend in, null means default on top of graph
             position: 'ne', // position of default legend container within plot
