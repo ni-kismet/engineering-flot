@@ -26,8 +26,6 @@ All notable changes to this project will be documented in this file.
 ### Changes ###
 
 - Added jquery.flot.composeImages.js to distribution
-- Change jquery.flot.legend.js to use SVG and add it to the distribution
-
 
 ## [1.0.0]
 
