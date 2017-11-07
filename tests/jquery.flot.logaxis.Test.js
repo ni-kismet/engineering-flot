@@ -4,7 +4,7 @@
 describe("unit tests for the log scale functions", function() {
     var placeholder;
     beforeEach(function() {
-        placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
+        placeholder = setFixtures('<div id="test-container" style="width: 800px;height: 400px">')
             .find('#test-container');
     });
 

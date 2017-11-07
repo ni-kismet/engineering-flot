@@ -1,12 +1,23 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.3]
+### Changes ###
+
+- Change jquery.flot.legend.js to use SVG and add it to the distribution
+
+### Bug fixes ###
+
+- No minimum margin for axis tick labels
+
+
 ## [1.0.2]
 ### Changes ###
 
 - Expose the composeImages as part of the plot instance
 
 ### Bug fixes ###
+
 - The speed of the zoom made on the Mac track pad
 - Invalid SVG width and height values red by composeImages on Firefox
 
@@ -1397,6 +1408,7 @@ Moved labelMargin option to grid from x/yaxis.
 First public release.
 
 
+[1.0.3]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/ni-kismet/engineering-flot/compare/v0.6.0...v1.0.0
