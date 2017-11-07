@@ -4,9 +4,11 @@
     const SUCCESSFULIMAGEPREPARATION = 0;
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
+    var pixelRatio = 1;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
+        pixelRatio = getPixelRation(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -19,7 +21,14 @@
     }
 
     function isValidSource(canvasOrSvgSource) {
-        return window.getComputedStyle(canvasOrSvgSource).visibility === "visible";
+        var isValidFromCanvas = true;
+        if (canvasOrSvgSource.tagName === 'CANVAS') {
+            if ((canvasOrSvgSource.getBoundingClientRect().right === canvasOrSvgSource.getBoundingClientRect().left) ||
+                (canvasOrSvgSource.getBoundingClientRect().bottom === canvasOrSvgSource.getBoundingClientRect().top)) {
+                isValidFromCanvas = false;
+            }
+        }
+        return isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === 'visible');
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
@@ -58,7 +67,7 @@
 
     function embedCSSRulesInSVG(rules, svg) {
         var text = [
-            '<svg class="snapshot" width="' + svg.width.baseVal.value + '" height="' + svg.height.baseVal.value + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
+            '<svg class="snapshot" width="' + svg.width.baseVal.value * pixelRatio + '" height="' + svg.height.baseVal.value * pixelRatio + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
             '<style>',
             '/* <![CDATA[ */',
             rules.join('\n'),
@@ -144,6 +153,18 @@
         return result;
     }
 
+    function getPixelRation(context) {
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio =
+            context.webkitBackingStorePixelRatio ||
+            context.mozBackingStorePixelRatio ||
+            context.msBackingStorePixelRatio ||
+            context.oBackingStorePixelRatio ||
+            context.backingStorePixelRatio || 1;
+
+        return devicePixelRatio / backingStoreRatio;
+    }
+
     function copyImgsToCanvas(sources, destination) {
         var prepareImagesResult = prepareImagesToBeComposed(sources, destination);
         if (prepareImagesResult === SUCCESSFULIMAGEPREPARATION) {
@@ -159,16 +180,24 @@
     function adnotateDestImgWithBoundingClientRect(srcCanvasOrSvg, destImg) {
         destImg.genLeft = srcCanvasOrSvg.getBoundingClientRect().left;
         destImg.genTop = srcCanvasOrSvg.getBoundingClientRect().top;
-        destImg.genRight = srcCanvasOrSvg.getBoundingClientRect().right;
-        destImg.genBottom = srcCanvasOrSvg.getBoundingClientRect().bottom;
+
+        if (srcCanvasOrSvg.tagName === 'CANVAS') {
+            destImg.genRight = destImg.genLeft + srcCanvasOrSvg.width;
+            destImg.genBottom = destImg.genTop + srcCanvasOrSvg.height;
+        }
+
+        if (srcCanvasOrSvg.tagName === 'svg') {
+            destImg.genRight = srcCanvasOrSvg.getBoundingClientRect().right;
+            destImg.genBottom = srcCanvasOrSvg.getBoundingClientRect().bottom;
+        }
     }
 
     function generateTempImageFromCanvasOrSvg(srcCanvasOrSvg, destImg) {
-        if (srcCanvasOrSvg.tagName === "CANVAS") {
+        if (srcCanvasOrSvg.tagName === 'CANVAS') {
             copyCanvasToImg(srcCanvasOrSvg, destImg);
         }
 
-        if (srcCanvasOrSvg.tagName === "svg") {
+        if (srcCanvasOrSvg.tagName === 'svg') {
             copySVGToImg(srcCanvasOrSvg, destImg);
         }
 
