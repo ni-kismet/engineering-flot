@@ -34,7 +34,6 @@ for creating graph snapshots
 
 - Added jquery.flot.composeImages.js to distribution
 
-
 ## [1.0.0]
 
 ### Changes ###
