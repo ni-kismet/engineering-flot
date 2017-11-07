@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.4]
+
+### Bug fixes ###
+
+- Fixed pixel ratio for devices with a different pixel ratio than 1,
+for creating graph snapshots
+
 ## [1.0.3]
 ### Changes ###
 
