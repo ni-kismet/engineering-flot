@@ -22,13 +22,13 @@
 
     function isValidSource(canvasOrSvgSource) {
         var isValidFromCanvas = true;
-        if (canvasOrSvgSource.tagName === "CANVAS") {
+        if (canvasOrSvgSource.tagName === 'CANVAS') {
             if ((canvasOrSvgSource.getBoundingClientRect().right === canvasOrSvgSource.getBoundingClientRect().left) ||
                 (canvasOrSvgSource.getBoundingClientRect().bottom === canvasOrSvgSource.getBoundingClientRect().top)) {
                 isValidFromCanvas = false;
             }
         }
-        return isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === "visible");
+        return isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === 'visible');
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
@@ -181,23 +181,23 @@
         destImg.genLeft = srcCanvasOrSvg.getBoundingClientRect().left;
         destImg.genTop = srcCanvasOrSvg.getBoundingClientRect().top;
 
-        if (srcCanvasOrSvg.tagName === "CANVAS") {
+        if (srcCanvasOrSvg.tagName === 'CANVAS') {
             destImg.genRight = destImg.genLeft + srcCanvasOrSvg.width;
             destImg.genBottom = destImg.genTop + srcCanvasOrSvg.height;
         }
 
-        if (srcCanvasOrSvg.tagName === "svg") {
+        if (srcCanvasOrSvg.tagName === 'svg') {
             destImg.genRight = srcCanvasOrSvg.getBoundingClientRect().right;
             destImg.genBottom = srcCanvasOrSvg.getBoundingClientRect().bottom;
         }
     }
 
     function generateTempImageFromCanvasOrSvg(srcCanvasOrSvg, destImg) {
-        if (srcCanvasOrSvg.tagName === "CANVAS") {
+        if (srcCanvasOrSvg.tagName === 'CANVAS') {
             copyCanvasToImg(srcCanvasOrSvg, destImg);
         }
 
-        if (srcCanvasOrSvg.tagName === "svg") {
+        if (srcCanvasOrSvg.tagName === 'svg') {
             copySVGToImg(srcCanvasOrSvg, destImg);
         }
 
