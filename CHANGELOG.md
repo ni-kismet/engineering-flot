@@ -34,6 +34,7 @@ for creating graph snapshots
 
 - Added jquery.flot.composeImages.js to distribution
 
+
 ## [1.0.0]
 
 ### Changes ###
@@ -1413,6 +1414,7 @@ Moved labelMargin option to grid from x/yaxis.
 First public release.
 
 
+[1.0.4]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.0...v1.0.1
