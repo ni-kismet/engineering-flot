@@ -395,15 +395,13 @@
         options = plot.getOptions();
 
         plot.hooks.setupGrid.push(function (plot) {
-            if (options.legend.show) {
-                var series = plot.getData(),
-                    labelFormatter = options.legend.labelFormatter,
-                    oldEntries = options.legend.legendEntries,
-                    newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted);
+            var series = plot.getData(),
+                labelFormatter = options.legend.labelFormatter,
+                oldEntries = options.legend.legendEntries,
+                newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted);
 
-                if (shouldRedraw(oldEntries, newEntries)) {
-                    insertLegend(plot, newEntries);
-                }
+            if (shouldRedraw(oldEntries, newEntries)) {
+                insertLegend(plot, newEntries);
             }
         });
     }
