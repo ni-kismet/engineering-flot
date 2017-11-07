@@ -21,7 +21,14 @@
     }
 
     function isValidSource(canvasOrSvgSource) {
-        return window.getComputedStyle(canvasOrSvgSource).visibility === "visible";
+        var isValidFromCanvas = true;
+        if (canvasOrSvgSource.tagName === "CANVAS") {
+            if ((canvasOrSvgSource.getBoundingClientRect().right === canvasOrSvgSource.getBoundingClientRect().left) ||
+                (canvasOrSvgSource.getBoundingClientRect().bottom === canvasOrSvgSource.getBoundingClientRect().top)) {
+                isValidFromCanvas = false;
+            }
+        }
+        return isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === "visible");
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
@@ -175,14 +182,8 @@
         destImg.genTop = srcCanvasOrSvg.getBoundingClientRect().top;
 
         if (srcCanvasOrSvg.tagName === "CANVAS") {
-            if ((srcCanvasOrSvg.getBoundingClientRect().right === srcCanvasOrSvg.getBoundingClientRect().left) ||
-                (srcCanvasOrSvg.getBoundingClientRect().bottom === srcCanvasOrSvg.getBoundingClientRect().top)) {
-                destImg.genRight = destImg.genLeft;
-                destImg.genBottom = destImg.genTop;
-            } else {
-                destImg.genRight = destImg.genLeft + srcCanvasOrSvg.width;
-                destImg.genBottom = destImg.genTop + srcCanvasOrSvg.height;
-            }
+            destImg.genRight = destImg.genLeft + srcCanvasOrSvg.width;
+            destImg.genBottom = destImg.genTop + srcCanvasOrSvg.height;
         }
 
         if (srcCanvasOrSvg.tagName === "svg") {
