@@ -27,7 +27,6 @@ All notable changes to this project will be documented in this file.
 
 - Added jquery.flot.composeImages.js to distribution
 
-
 ## [1.0.0]
 
 ### Changes ###
