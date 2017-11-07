@@ -7057,9 +7057,11 @@ The plugin allso adds the following methods to the plot object:
     const SUCCESSFULIMAGEPREPARATION = 0;
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
+    var pixelRatio = 1;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
+        pixelRatio = getPixelRation(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -7111,7 +7113,7 @@ The plugin allso adds the following methods to the plot object:
 
     function embedCSSRulesInSVG(rules, svg) {
         var text = [
-            '<svg class="snapshot" width="' + svg.width.baseVal.value + '" height="' + svg.height.baseVal.value + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
+            '<svg class="snapshot" width="' + svg.width.baseVal.value * pixelRatio + '" height="' + svg.height.baseVal.value * pixelRatio + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
             '<style>',
             '/* <![CDATA[ */',
             rules.join('\n'),
@@ -7197,6 +7199,18 @@ The plugin allso adds the following methods to the plot object:
         return result;
     }
 
+    function getPixelRation(context) {
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio =
+            context.webkitBackingStorePixelRatio ||
+            context.mozBackingStorePixelRatio ||
+            context.msBackingStorePixelRatio ||
+            context.oBackingStorePixelRatio ||
+            context.backingStorePixelRatio || 1;
+
+        return devicePixelRatio / backingStoreRatio;
+    }
+
     function copyImgsToCanvas(sources, destination) {
         var prepareImagesResult = prepareImagesToBeComposed(sources, destination);
         if (prepareImagesResult === SUCCESSFULIMAGEPREPARATION) {
@@ -7212,8 +7226,16 @@ The plugin allso adds the following methods to the plot object:
     function adnotateDestImgWithBoundingClientRect(srcCanvasOrSvg, destImg) {
         destImg.genLeft = srcCanvasOrSvg.getBoundingClientRect().left;
         destImg.genTop = srcCanvasOrSvg.getBoundingClientRect().top;
-        destImg.genRight = srcCanvasOrSvg.getBoundingClientRect().right;
-        destImg.genBottom = srcCanvasOrSvg.getBoundingClientRect().bottom;
+
+        if (srcCanvasOrSvg.tagName === "CANVAS") {
+            destImg.genRight = destImg.genLeft + srcCanvasOrSvg.width;
+            destImg.genBottom = destImg.genTop + srcCanvasOrSvg.height;
+        }
+
+        if (srcCanvasOrSvg.tagName === "svg") {
+            destImg.genRight = srcCanvasOrSvg.getBoundingClientRect().right;
+            destImg.genBottom = srcCanvasOrSvg.getBoundingClientRect().bottom;
+        }
     }
 
     function generateTempImageFromCanvasOrSvg(srcCanvasOrSvg, destImg) {
