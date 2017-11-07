@@ -175,8 +175,14 @@
         destImg.genTop = srcCanvasOrSvg.getBoundingClientRect().top;
 
         if (srcCanvasOrSvg.tagName === "CANVAS") {
-            destImg.genRight = destImg.genLeft + srcCanvasOrSvg.width;
-            destImg.genBottom = destImg.genTop + srcCanvasOrSvg.height;
+            if ((srcCanvasOrSvg.getBoundingClientRect().right === srcCanvasOrSvg.getBoundingClientRect().left) ||
+                (srcCanvasOrSvg.getBoundingClientRect().bottom === srcCanvasOrSvg.getBoundingClientRect().top)) {
+                destImg.genRight = destImg.genLeft;
+                destImg.genBottom = destImg.genTop;
+            } else {
+                destImg.genRight = destImg.genLeft + srcCanvasOrSvg.width;
+                destImg.genBottom = destImg.genTop + srcCanvasOrSvg.height;
+            }
         }
 
         if (srcCanvasOrSvg.tagName === "svg") {
