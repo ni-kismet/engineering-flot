@@ -7229,7 +7229,7 @@ The plugin allso adds the following methods to the plot object:
 
         if (srcCanvasOrSvg.tagName === "CANVAS") {
             if ((srcCanvasOrSvg.getBoundingClientRect().right === srcCanvasOrSvg.getBoundingClientRect().left) ||
-                (srcCanvasOrSvg.getBoundingClientRect().bottom === srcCanvasOrSvg.getBoundingClientRect().top)){
+                (srcCanvasOrSvg.getBoundingClientRect().bottom === srcCanvasOrSvg.getBoundingClientRect().top)) {
                 destImg.genRight = destImg.genLeft;
                 destImg.genBottom = destImg.genTop;
             } else {
