@@ -305,6 +305,7 @@
             var element = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             var textNode = document.createTextNode(text);
             element.appendChild(textNode);
+
             element.style.position = 'absolute';
             element.style.maxWidth = width;
             element.setAttributeNS(null, 'x', -9999);
@@ -387,7 +388,11 @@
                 position.active = true;
                 position.element.setAttributeNS(null, 'x', x);
                 position.element.setAttributeNS(null, 'y', y);
-                position.element.textContent = text;
+                if (text.indexOf('<br>') !== -1) {
+                    addTspanElements(text, position.element, x, y);
+                } else {
+                    position.element.textContent = text;
+                }
                 return;
             }
         }
@@ -409,12 +414,15 @@
         positions.push(position);
 
         // Move the element to its final position within the container
-
         position.element.setAttributeNS(null, 'x', x);
         position.element.setAttributeNS(null, 'y', y);
         position.element.style.textAlign = halign;
 
-        position.element.textContent = text;
+        if (text.indexOf('<br>') !== -1) {
+            addTspanElements(text, position.element, x, y);
+        } else {
+            position.element.textContent = text;
+        }
 
         if (transforms) {
             transforms.forEach(function(t) {
@@ -422,6 +430,19 @@
             });
         }
     };
+
+    var addTspanElements = function(text, element, x, y) {
+        var textContent = text.split('<br>'),
+            tspan, i;
+
+        for (i = 0; i < textContent.length; i++) {
+            tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+            tspan.textContent = textContent[i];
+            tspan.setAttributeNS(null, 'x', x);
+            tspan.setAttributeNS(null, 'y', y + i * 1.2); //pozitia ar trebui calculata altfel
+            element.appendChild(tspan);
+        }
+    }
 
     /**
      *
