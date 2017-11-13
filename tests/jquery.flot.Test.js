@@ -1137,28 +1137,43 @@ describe('flot', function() {
     });
 
     describe('getPixelRatio', function() {
-        var placeholder, placeholder2, fixtures;
+        var placeholder, plot;
+        var options = {
+            series: {
+                shadowSize: 0, // don't draw shadows
+                lines: { show: false },
+                points: { show: true, fill: false, symbol: 'circle' }
+            }
+        };
 
         beforeEach(function() {
-            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
-                .find('#test-container');
+            //placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;"></div><br> <div id="test-container2" style="width: 600px;height: 400px"><canvas id="canvasSource" width="20" height="20" title="canvasSource"></canvas></div>')
+                /*.find('#test-container')*/;
         });
 
         it('should call getPixelRatio before and after setting the dimensions of a canvas, and get different results', function() {
-            var originalCanvas = document.createElement('canvas');
-            originalCanvas.width = 20;
-            originalCanvas.height = 20;
-            originalCanvas.left = 0;
-            originalCanvas.top = 0;
+            /*var sources = placeholder.html('<div id="test-container2" style="width: 600px;height: 400px">' +
+            '<canvas id="canvasSource" width="20" height="20" title="canvasSource"></canvas></div>')
+            .find('#canvasSource').toArray();*/
+            var sources = placeholder.find('#canvasSource').toArray();
+            var originalCanvas = sources[0];
+
             drawSomeLinesOnCanvas(originalCanvas);
+
+            options.xaxis = {autoScale: 'none', min: 50, max: 0};
+            options.yaxis = {autoScale: 'none', min: 100, max: 0};
+            plot = $.plot(placeholder, [[]], options);
 
             var firstPixelRatio = plot.getPixelRatio(originalCanvas.getContext('2d'));
             var desiredRatio = 1.8;
-            originalCanvas.width = originalCanvas.width * desiredRatio;
-            originalCanvas.height = originalCanvas.height * desiredRatio;
+
+            resizeCanvas(originalCanvas, originalCanvas.width * desiredRatio);
+
+            drawSomeLinesOnCanvas(originalCanvas);
             var secondPixelRatio = plot.getPixelRatio(originalCanvas.getContext('2d'));
 
-            expect(secondPixelRatio).toBe(firstPixelRatio * desiredRatio);
+            expect(secondPixelRatio).toBe(firstPixelRatio);
         });
 
         function drawSomeLinesOnCanvas(canvas) {
@@ -1169,6 +1184,23 @@ describe('flot', function() {
             ctx.moveTo(3, 18);
             ctx.lineTo(17, 5);
             ctx.stroke();
+        }
+
+        //function addapted from  https://stackoverflow.com/questions/15878377/html5-responsive-canvas-resizing-the-browser-canvas-draw-disappear/23128583#23128583
+        function resizeCanvas(canvas, newWidth){
+            var context = canvas.getContext('2d');
+            var p = newWidth / canvas.width;
+            //canvas.style.width = canvas.width + 'px';
+            //canvas.style.height = canvas.height + 'px';
+            canvas.style.width = '118%';
+            canvas.style.height = '118%';
+
+            canvas.width *= p;
+            canvas.height *= p;
+
+            var scaleFactor = context.scaleFactor || 1;
+            context.scale(p * scaleFactor, p * scaleFactor);
+            context.scaleFactor = p * scaleFactor;
         }
     })
 });
