@@ -7086,13 +7086,18 @@ The plugin allso adds the following methods to the plot object:
 
     function isValidSource(canvasOrSvgSource) {
         var isValidFromCanvas = true;
-        if (canvasOrSvgSource.tagName === 'CANVAS') {
-            if ((canvasOrSvgSource.getBoundingClientRect().right === canvasOrSvgSource.getBoundingClientRect().left) ||
-                (canvasOrSvgSource.getBoundingClientRect().bottom === canvasOrSvgSource.getBoundingClientRect().top)) {
-                isValidFromCanvas = false;
+        var isValidFromContent = true;
+        if ((canvasOrSvgSource === null) || (canvasOrSvgSource === undefined)) {
+            isValidFromContent = false;
+        } else {
+            if (canvasOrSvgSource.tagName === 'CANVAS') {
+                if ((canvasOrSvgSource.getBoundingClientRect().right === canvasOrSvgSource.getBoundingClientRect().left) ||
+                    (canvasOrSvgSource.getBoundingClientRect().bottom === canvasOrSvgSource.getBoundingClientRect().top)) {
+                    isValidFromCanvas = false;
+                }
             }
         }
-        return isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === 'visible');
+        return isValidFromContent && isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === 'visible');
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
