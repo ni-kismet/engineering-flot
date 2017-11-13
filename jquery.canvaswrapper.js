@@ -422,8 +422,6 @@
 
         positions.push(position);
 
-        position.element.style.textAlign = halign;
-
         if (text.indexOf('<br>') !== -1) {
             y -= 0.25 * info.height;
             addTspanElements(text, position.element, x);
@@ -434,6 +432,7 @@
         // Move the element to its final position within the container
         position.element.setAttributeNS(null, 'x', x);
         position.element.setAttributeNS(null, 'y', y);
+        position.element.style.textAlign = halign;
 
         if (transforms) {
             transforms.forEach(function(t) {
@@ -451,7 +450,7 @@
             tspan.textContent = textContent[i];
             offset = i * 1 + 'em';
             tspan.setAttributeNS(null, 'dy', offset);
-            tspan.setAttributeNS(null, 'x', x); //pozitia ar trebui calculata altfel
+            tspan.setAttributeNS(null, 'x', x);
             element.appendChild(tspan);
         }
     }
