@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.4]
+### Changes ###
+- New getPixelRatio() helper function
+
+### Bug fixes ###
+- Multi lines labels
+
+
 ## [1.0.3]
 ### Changes ###
 
@@ -1409,6 +1417,7 @@ Moved labelMargin option to grid from x/yaxis.
 First public release.
 
 
+[1.0.4]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.0...v1.0.1
