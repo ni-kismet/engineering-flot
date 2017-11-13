@@ -8,7 +8,7 @@
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
-        pixelRatio = getPixelRation(destinationCanvas.getContext('2d'));
+        pixelRatio = getPixelRatio(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -153,7 +153,7 @@
         return result;
     }
 
-    function getPixelRation(context) {
+    function getPixelRatio(context) {
         var devicePixelRatio = window.devicePixelRatio || 1,
             backingStoreRatio =
             context.webkitBackingStorePixelRatio ||
@@ -171,7 +171,7 @@
             var destinationCtx = destination.getContext('2d');
 
             for (var i = 0; i < sources.length; i++) {
-                destinationCtx.drawImage(sources[i], sources[i].xCompOffset, sources[i].yCompOffset);
+                destinationCtx.drawImage(sources[i], sources[i].xCompOffset * pixelRatio, sources[i].yCompOffset * pixelRatio);
             }
         }
         return prepareImagesResult;

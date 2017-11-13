@@ -958,6 +958,17 @@ Licensed under the MIT license.
                 top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
+        plot.getPixelRatio = function(context) {
+            var devicePixelRatio = window.devicePixelRatio || 1,
+                backingStoreRatio =
+                context.webkitBackingStorePixelRatio ||
+                context.mozBackingStorePixelRatio ||
+                context.msBackingStorePixelRatio ||
+                context.oBackingStorePixelRatio ||
+                context.backingStorePixelRatio || 1;
+            console.log("new function in flot");
+            return devicePixelRatio / backingStoreRatio;
+        }
         plot.shutdown = shutdown;
         plot.destroy = function() {
             shutdown();
@@ -7061,7 +7072,7 @@ The plugin allso adds the following methods to the plot object:
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
-        pixelRatio = getPixelRation(destinationCanvas.getContext('2d'));
+        pixelRatio = getPixelRatio(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -7206,7 +7217,7 @@ The plugin allso adds the following methods to the plot object:
         return result;
     }
 
-    function getPixelRation(context) {
+    function getPixelRatio(context) {
         var devicePixelRatio = window.devicePixelRatio || 1,
             backingStoreRatio =
             context.webkitBackingStorePixelRatio ||
@@ -7224,7 +7235,7 @@ The plugin allso adds the following methods to the plot object:
             var destinationCtx = destination.getContext('2d');
 
             for (var i = 0; i < sources.length; i++) {
-                destinationCtx.drawImage(sources[i], sources[i].xCompOffset, sources[i].yCompOffset);
+                destinationCtx.drawImage(sources[i], sources[i].xCompOffset * pixelRatio, sources[i].yCompOffset * pixelRatio);
             }
         }
         return prepareImagesResult;
