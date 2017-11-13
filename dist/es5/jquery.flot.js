@@ -605,6 +605,8 @@
                 }
                 position.element.setAttributeNS(null, 'x', x);
                 position.element.setAttributeNS(null, 'y', y);
+                position.x = x;
+                position.y = y;
                 return;
             }
         }
@@ -645,12 +647,12 @@
     };
 
     var addTspanElements = function(text, element, x) {
-        var textContent = text.split('<br>'),
+        var lines = text.split('<br>'),
             tspan, i, offset;
 
-        for (i = 0; i < textContent.length; i++) {
+        for (i = 0; i < lines.length; i++) {
             tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-            tspan.textContent = textContent[i];
+            tspan.textContent = lines[i];
             offset = i * 1 + 'em';
             tspan.setAttributeNS(null, 'dy', offset);
             tspan.setAttributeNS(null, 'x', x);
