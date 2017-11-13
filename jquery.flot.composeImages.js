@@ -5,10 +5,11 @@
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
+    var getPixelRatioFunc;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
-        pixelRatio = getPixelRation(destinationCanvas.getContext('2d'));
+        pixelRatio = getPixelRatioFunc(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -22,13 +23,18 @@
 
     function isValidSource(canvasOrSvgSource) {
         var isValidFromCanvas = true;
-        if (canvasOrSvgSource.tagName === 'CANVAS') {
-            if ((canvasOrSvgSource.getBoundingClientRect().right === canvasOrSvgSource.getBoundingClientRect().left) ||
-                (canvasOrSvgSource.getBoundingClientRect().bottom === canvasOrSvgSource.getBoundingClientRect().top)) {
-                isValidFromCanvas = false;
+        var isValidFromContent = true;
+        if ((canvasOrSvgSource === null) || (canvasOrSvgSource === undefined)) {
+            isValidFromContent = false;
+        } else {
+            if (canvasOrSvgSource.tagName === 'CANVAS') {
+                if ((canvasOrSvgSource.getBoundingClientRect().right === canvasOrSvgSource.getBoundingClientRect().left) ||
+                    (canvasOrSvgSource.getBoundingClientRect().bottom === canvasOrSvgSource.getBoundingClientRect().top)) {
+                    isValidFromCanvas = false;
+                }
             }
         }
-        return isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === 'visible');
+        return isValidFromContent && isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === 'visible');
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
@@ -153,25 +159,13 @@
         return result;
     }
 
-    function getPixelRation(context) {
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
-
-        return devicePixelRatio / backingStoreRatio;
-    }
-
     function copyImgsToCanvas(sources, destination) {
         var prepareImagesResult = prepareImagesToBeComposed(sources, destination);
         if (prepareImagesResult === SUCCESSFULIMAGEPREPARATION) {
             var destinationCtx = destination.getContext('2d');
 
             for (var i = 0; i < sources.length; i++) {
-                destinationCtx.drawImage(sources[i], sources[i].xCompOffset, sources[i].yCompOffset);
+                destinationCtx.drawImage(sources[i], sources[i].xCompOffset * pixelRatio, sources[i].yCompOffset * pixelRatio);
             }
         }
         return prepareImagesResult;
@@ -214,6 +208,7 @@
     function init(plot) {
         // used to extend the public API of the plot
         plot.composeImages = composeImages;
+        getPixelRatioFunc = plot.getPixelRatio;
     }
 
     $.plot.plugins.push({

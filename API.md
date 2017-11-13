@@ -1206,6 +1206,17 @@ can call:
       // o.left and o.top now contains the offset within the div
     ```
 
+ - getPixelRatio(context)
+
+    Returns the current pixel ratio of the browser. It takes into account the
+    device pixel ratio and the browser zoom. Context is a 2D canvas context.
+    For devices with 100% DPI scale and browser zoom set to 100%, this function
+    returns 1.
+
+    ```js
+      var pixelRatio = plot.getPixelRatio(graphCanvas.getContext('2d'));
+    ```    
+
  - resize()
 
     Tells Flot to resize the drawing canvas to the size of the
