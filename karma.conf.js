@@ -34,7 +34,8 @@ module.exports = function(config) {
         'jquery.flot.absRelTime.js',
         'jquery.flot.axislabels.js',
         'jquery.flot.composeImages.js',
-        'jquery.flot.selection.js'
+        'jquery.flot.selection.js',
+        'jquery.flot.legend.js'
     ];
 
     var sources = [

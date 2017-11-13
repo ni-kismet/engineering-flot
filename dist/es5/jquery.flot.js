@@ -739,7 +739,7 @@
     window.Flot.Canvas = Canvas;
 })();
 
-/* Javascript plotting library for jQuery, version 0.8.3.
+/* Javascript plotting library for jQuery, version 1.0.3.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Licensed under the MIT license.
@@ -2998,6 +2998,7 @@ Licensed under the MIT license.
                     layer = "flot-" + axis.direction + "-axis flot-" + axis.direction + axis.n + "-axis " + legacyStyles,
                     font = axis.options.font || "flot-tick-label tickLabel",
                     i, x, y, halign, valign, info,
+                    margin = 3,
                     nullBox = {x: NaN, y: NaN, width: NaN, height: NaN}, newLabelBox, labelBoxes = [],
                     overlapping = function(x11, y11, x12, y12, x21, y21, x22, y22) {
                         return ((x11 <= x21 && x21 <= x12) || (x21 <= x11 && x11 <= x22)) &&
@@ -3026,7 +3027,7 @@ Licensed under the MIT license.
                                 y = box.top + box.height - box.padding + axis.boxPosition.centerY;
                                 valign = "bottom";
                             }
-                            newLabelBox = {x: x - info.width / 2, y: y, width: info.width, height: info.height}
+                            newLabelBox = {x: x - info.width / 2 - margin, y: y - margin, width: info.width + 2 * margin, height: info.height + 2 * margin};
                         } else {
                             valign = "middle";
                             y = plotOffset.top + axis.p2c(tick.v);
@@ -3036,7 +3037,7 @@ Licensed under the MIT license.
                             } else {
                                 x = box.left + box.padding + axis.boxPosition.centerX;
                             }
-                            newLabelBox = {x: x, y: y - info.height / 2, width: info.width, height: info.height}
+                            newLabelBox = {x: x - info.width / 2 - margin, y: y - margin, width: info.width + 2 * margin, height: info.height + 2 * margin};
                         }
 
                         if (overlapsOtherLabels(newLabelBox, labelBoxes)) {
@@ -3620,7 +3621,7 @@ Licensed under the MIT license.
         return plot;
     };
 
-    $.plot.version = "0.8.3";
+    $.plot.version = "1.0.3";
 
     $.plot.plugins = [];
 
@@ -4772,7 +4773,7 @@ can set the default in the options.
     function init(plot) {
         var panAxes = null;
 
-        function onZoomClick(e, zoomOut) {
+        function onZoomClick(e, zoomOut, amount) {
             var c = plot.offset();
             c.left = e.pageX - c.left;
             c.top = e.pageY - c.top;
@@ -4796,12 +4797,14 @@ can set the default in the options.
             if (zoomOut) {
                 plot.zoomOut({
                     center: c,
-                    axes: axes
+                    axes: axes,
+                    amount: amount
                 });
             } else {
                 plot.zoom({
                     center: c,
-                    axes: axes
+                    axes: axes,
+                    amount: amount
                 });
             }
         }
@@ -4810,9 +4813,14 @@ can set the default in the options.
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
+            var maxAbsoluteDeltaOnMac = 1,
+                isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxAbsoluteDeltaOnMac,
+                defaultNonMacScrollAmount = null,
+                macMagicRatio = 50,
+                amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / macMagicRatio : defaultNonMacScrollAmount;
             if (plot.getOptions().zoom.active) {
                 e.preventDefault();
-                onZoomClick(e, delta < 0);
+                onZoomClick(e, delta < 0, amount);
                 return false;
             }
         }
@@ -7071,5 +7079,646 @@ The plugin allso adds the following methods to the plot object:
         },
         name: 'selection',
         version: '1.1'
+    });
+})(jQuery);
+
+(function($) {
+    "use strict";
+    const GENERALFAILURECALLBACKERROR = -100; //simply a negative number
+    const SUCCESSFULIMAGEPREPARATION = 0;
+    const EMPTYARRAYOFIMAGESOURCES = -1;
+    const NEGATIVEIMAGESIZE = -2;
+    var pixelRatio = 1;
+
+    function composeImages(canvasOrSvgSources, destinationCanvas) {
+        var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
+        pixelRatio = getPixelRation(destinationCanvas.getContext('2d'));
+
+        var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
+            var tempImg = new Image();
+            var currentPromise = new Promise(getGenerateTempImg(tempImg, validCanvasOrSvgSource));
+            return currentPromise;
+        });
+
+        var lastPromise = Promise.all(allImgCompositionPromises).then(getExecuteImgComposition(destinationCanvas), failureCallback);
+        return lastPromise;
+    }
+
+    function isValidSource(canvasOrSvgSource) {
+        var isValidFromCanvas = true;
+        if (canvasOrSvgSource.tagName === 'CANVAS') {
+            if ((canvasOrSvgSource.getBoundingClientRect().right === canvasOrSvgSource.getBoundingClientRect().left) ||
+                (canvasOrSvgSource.getBoundingClientRect().bottom === canvasOrSvgSource.getBoundingClientRect().top)) {
+                isValidFromCanvas = false;
+            }
+        }
+        return isValidFromCanvas && (window.getComputedStyle(canvasOrSvgSource).visibility === 'visible');
+    }
+
+    function getGenerateTempImg(tempImg, canvasOrSvgSource) {
+        return function doGenerateTempImg(successCallbackFunc, failureCallbackFunc) {
+            tempImg.onload = function(evt) {
+                successCallbackFunc(tempImg);
+            };
+            generateTempImageFromCanvasOrSvg(canvasOrSvgSource, tempImg);
+        };
+    }
+
+    function getExecuteImgComposition(destinationCanvas) {
+        return function executeImgComposition(tempImgs) {
+            var compositionResult = copyImgsToCanvas(tempImgs, destinationCanvas);
+            return compositionResult;
+        };
+    }
+
+    function copyCanvasToImg(canvas, img) {
+        img.src = canvas.toDataURL('image/png');
+    }
+
+    function getCSSRules(document) {
+        var styleSheets = document.styleSheets,
+            rulesList = [];
+        for (var i = 0; i < styleSheets.length; i++) {
+            // in Chrome the external CSS files are empty when the page is loaded from directly disk
+            var rules = styleSheets[i].cssRules || [];
+            for (var j = 0; j < rules.length; j++) {
+                var rule = rules[j];
+                rulesList.push(rule.cssText);
+            }
+        }
+        return rulesList;
+    }
+
+    function embedCSSRulesInSVG(rules, svg) {
+        var text = [
+            '<svg class="snapshot" width="' + svg.width.baseVal.value * pixelRatio + '" height="' + svg.height.baseVal.value * pixelRatio + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
+            '<style>',
+            '/* <![CDATA[ */',
+            rules.join('\n'),
+            '/* ]]> */',
+            '</style>',
+            svg.innerHTML,
+            '</svg>'
+        ].join('\n');
+        return text;
+    }
+
+    function copySVGToImgMostBrowsers(svg, img) {
+        var rules = getCSSRules(document),
+            text = embedCSSRulesInSVG(rules, svg),
+            blob = new Blob([text], {type: "image/svg+xml;charset=utf-8"}),
+            domURL = self.URL || self.webkitURL || self,
+            url = domURL.createObjectURL(blob);
+        img.src = url;
+    }
+
+    function copySVGToImgSafari(svg, img) {
+        var rules = getCSSRules(document),
+            text = embedCSSRulesInSVG(rules, svg),
+            data = "data:image/svg+xml;base64," + btoa(text);
+        img.src = data;
+    }
+
+    function copySVGToImg(svg, img) {
+        // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+        // Safari 3.0+ "[object HTMLElementConstructor]"
+        var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+        if (isSafari) {
+            copySVGToImgSafari(svg, img);
+        } else {
+            copySVGToImgMostBrowsers(svg, img);
+        }
+    }
+
+    function prepareImagesToBeComposed(sources, destination) {
+        var result = SUCCESSFULIMAGEPREPARATION;
+        if (sources.length === 0) {
+            result = EMPTYARRAYOFIMAGESOURCES; //nothing to do if called without sources
+        } else {
+            var minX = sources[0].genLeft;
+            var minY = sources[0].genTop;
+            var maxX = sources[0].genRight;
+            var maxY = sources[0].genBottom;
+            var i = 0;
+
+            for (i = 1; i < sources.length; i++) {
+                if (minX > sources[i].genLeft) {
+                    minX = sources[i].genLeft;
+                }
+
+                if (minY > sources[i].genTop) {
+                    minY = sources[i].genTop;
+                }
+            }
+
+            for (i = 1; i < sources.length; i++) {
+                if (maxX < sources[i].genRight) {
+                    maxX = sources[i].genRight;
+                }
+
+                if (maxY < sources[i].genBottom) {
+                    maxY = sources[i].genBottom;
+                }
+            }
+
+            if ((maxX - minX <= 0) || (maxY - minY <= 0)) {
+                result = NEGATIVEIMAGESIZE; //this might occur on hidden images
+            } else {
+                destination.width = Math.round(maxX - minX);
+                destination.height = Math.round(maxY - minY);
+
+                for (i = 0; i < sources.length; i++) {
+                    sources[i].xCompOffset = sources[i].genLeft - minX;
+                    sources[i].yCompOffset = sources[i].genTop - minY;
+                }
+            }
+        }
+        return result;
+    }
+
+    function getPixelRation(context) {
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio =
+            context.webkitBackingStorePixelRatio ||
+            context.mozBackingStorePixelRatio ||
+            context.msBackingStorePixelRatio ||
+            context.oBackingStorePixelRatio ||
+            context.backingStorePixelRatio || 1;
+
+        return devicePixelRatio / backingStoreRatio;
+    }
+
+    function copyImgsToCanvas(sources, destination) {
+        var prepareImagesResult = prepareImagesToBeComposed(sources, destination);
+        if (prepareImagesResult === SUCCESSFULIMAGEPREPARATION) {
+            var destinationCtx = destination.getContext('2d');
+
+            for (var i = 0; i < sources.length; i++) {
+                destinationCtx.drawImage(sources[i], sources[i].xCompOffset, sources[i].yCompOffset);
+            }
+        }
+        return prepareImagesResult;
+    }
+
+    function adnotateDestImgWithBoundingClientRect(srcCanvasOrSvg, destImg) {
+        destImg.genLeft = srcCanvasOrSvg.getBoundingClientRect().left;
+        destImg.genTop = srcCanvasOrSvg.getBoundingClientRect().top;
+
+        if (srcCanvasOrSvg.tagName === 'CANVAS') {
+            destImg.genRight = destImg.genLeft + srcCanvasOrSvg.width;
+            destImg.genBottom = destImg.genTop + srcCanvasOrSvg.height;
+        }
+
+        if (srcCanvasOrSvg.tagName === 'svg') {
+            destImg.genRight = srcCanvasOrSvg.getBoundingClientRect().right;
+            destImg.genBottom = srcCanvasOrSvg.getBoundingClientRect().bottom;
+        }
+    }
+
+    function generateTempImageFromCanvasOrSvg(srcCanvasOrSvg, destImg) {
+        if (srcCanvasOrSvg.tagName === 'CANVAS') {
+            copyCanvasToImg(srcCanvasOrSvg, destImg);
+        }
+
+        if (srcCanvasOrSvg.tagName === 'svg') {
+            copySVGToImg(srcCanvasOrSvg, destImg);
+        }
+
+        adnotateDestImgWithBoundingClientRect(srcCanvasOrSvg, destImg);
+    }
+
+    function failureCallback() {
+        return GENERALFAILURECALLBACKERROR;
+    }
+
+    // used for testing
+    $.plot.composeImages = composeImages;
+
+    function init(plot) {
+        // used to extend the public API of the plot
+        plot.composeImages = composeImages;
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        name: 'composeImages',
+        version: '1.0'
+    });
+})(jQuery);
+
+/* Flot plugin for drawing legends.
+
+*/
+
+(function($) {
+    var placeholder;
+
+    var options = {
+        legend: {
+            show: false,
+            labelFormatter: null, // fn: string -> string
+            container: null, // container (as jQuery object) to put legend in, null means default on top of graph
+            position: 'ne', // position of default legend container within plot
+            margin: 5, // distance from grid edge to default legend container within plot
+            backgroundColor: null, // null means auto-detect
+            backgroundOpacity: 0.85, // set to 0 to avoid background
+            sorted: null // default to no legend sorting
+        }
+    };
+
+    function insertLegend(plot, legendEntries) {
+        // clear before redraw
+        if (options.legend.container != null) {
+            $(options.legend.container).html('');
+        } else {
+            placeholder.find('.legend').remove();
+        }
+
+        if (!options.legend.show) {
+            return;
+        }
+
+        // Save the legend entries in legend options
+        var entries = options.legend.legendEntries = legendEntries,
+            plotOffset = plot.getPlotOffset(),
+            html = [],
+            entry, labelHtml, iconHtml,
+            maxLabelLength = 0,
+            j = 0,
+            pos = "",
+            p = options.legend.position,
+            m = options.legend.margin,
+            shape = {
+                name: '',
+                label: '',
+                xPos: '',
+                yPos: ''
+            };
+
+        html[j++] = '<svg class="legendLayer" style="width:inherit;height:inherit;">';
+        html[j++] = svgShapeDefs;
+
+        // Generate html for icons and labels from a list of entries
+        for (var i = 0; i < entries.length; ++i) {
+            entry = entries[i];
+            iconHtml = '';
+            shape.label = entry.label;
+            shape.xPos = '0em';
+            shape.yPos = i * 1.5 + 'em';
+            // area
+            if (entry.options.lines.show && entry.options.lines.fill) {
+                shape.name = 'area';
+                shape.fillColor = entry.color;
+                iconHtml += getEntryIconHtml(shape);
+            }
+            // bars
+            if (entry.options.bars.show) {
+                shape.name = 'bar';
+                shape.fillColor = entry.color;
+                iconHtml += getEntryIconHtml(shape);
+            }
+            // lines
+            if (entry.options.lines.show && !entry.options.lines.fill) {
+                shape.name = 'line';
+                shape.strokeColor = entry.color;
+                shape.strokeWidth = entry.options.lines.lineWidth;
+                iconHtml += getEntryIconHtml(shape);
+            }
+            // points
+            if (entry.options.points.show) {
+                shape.name = entry.options.points.symbol;
+                shape.strokeColor = entry.color;
+                shape.fillColor = entry.options.points.fillColor;
+                shape.strokeWidth = entry.options.points.lineWidth;
+                iconHtml += getEntryIconHtml(shape);
+            }
+
+            maxLabelLength = maxLabelLength < shape.label.length ? shape.label.length : maxLabelLength;
+            labelHtml = '<text x="' + shape.xPos + '" y="' + shape.yPos + '" text-anchor="start"><tspan dx="2em" dy="1.2em">' + shape.label + '</tspan></text>'
+            html[j++] = '<g>' + iconHtml + labelHtml + '</g>';
+        }
+
+        html[j++] = '</svg>';
+        if (m[0] == null) {
+            m = [m, m];
+        }
+
+        if (p.charAt(0) === 'n') {
+            pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
+        } else if (p.charAt(0) === 's') {
+            pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
+        }
+
+        if (p.charAt(1) === 'e') {
+            pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
+        } else if (p.charAt(1) === 'w') {
+            pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
+        }
+
+        var legendEl,
+            width = 2 + maxLabelLength / 2,
+            height = entries.length * 1.6;
+        if (!options.legend.container) {
+            legendEl = $('<div class="legend" style="position:absolute;' + pos + '">' + html.join('') + '</div>').appendTo(placeholder);
+            legendEl.css('width', width + 'em');
+            legendEl.css('height', height + 'em');
+            legendEl.css('pointerEvents', 'none');
+            // put the transparent background only when drawing the legend over graph
+            if (options.legend.backgroundOpacity !== 0.0) {
+                var c = options.legend.backgroundColor;
+                if (c == null) {
+                    c = options.grid.backgroundColor;
+                    if (c && typeof c === 'string') {
+                        c = $.color.parse(c);
+                    } else {
+                        c = $.color.extract(legendEl, 'background-color');
+                    }
+
+                    c.a = 1;
+                    c = c.toString();
+                }
+
+                legendEl.css('background-color', c);
+                legendEl.css('opacity', options.legend.backgroundOpacity);
+            }
+        } else {
+            legendEl = $(html.join('')).appendTo(options.legend.container)[0];
+            options.legend.container.style.width = width + 'em';
+            options.legend.container.style.height = height + 'em';
+        }
+    }
+
+    // Generate html for a shape
+    function getEntryIconHtml(shape) {
+        var html = '',
+            name = shape.name,
+            x = shape.xPos,
+            y = shape.yPos,
+            fill = shape.fillColor,
+            stroke = shape.strokeColor,
+            width = shape.strokeWidth;
+        switch (name) {
+            case 'circle':
+                html = '<use xlink:href="#circle" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    'fill="' + fill + '" ' +
+                    'stroke="' + stroke + '" ' +
+                    'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+                break;
+            case 'diamond':
+                html = '<use xlink:href="#diamond" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    'fill="' + fill + '" ' +
+                    'stroke="' + stroke + '" ' +
+                    'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+                break;
+            case 'cross':
+                html = '<use xlink:href="#cross" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    // 'fill="' + fill + '" ' +
+                    'stroke="' + stroke + '" ' +
+                    'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+                break;
+            case 'rectangle':
+                html = '<use xlink:href="#rectangle" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    'fill="' + fill + '" ' +
+                    'stroke="' + stroke + '" ' +
+                    'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+                break;
+            case 'plus':
+                html = '<use xlink:href="#plus" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    // 'fill="' + fill + '" ' +
+                    'stroke="' + stroke + '" ' +
+                    'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+                break;
+            case 'bar':
+                html = '<use xlink:href="#bars" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    'fill="' + fill + '" ' +
+                    // 'stroke="' + stroke + '" ' +
+                    // 'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+                break;
+            case 'area':
+                html = '<use xlink:href="#area" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    'fill="' + fill + '" ' +
+                    // 'stroke="' + stroke + '" ' +
+                    // 'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+                break;
+            case 'line':
+                html = '<use xlink:href="#line" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    // 'fill="' + fill + '" ' +
+                    'stroke="' + stroke + '" ' +
+                    'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+                break;
+            default:
+                // default is circle
+                html = '<use xlink:href="#circle" class="legendIcon" ' +
+                    'x="' + x + '" ' +
+                    'y="' + y + '" ' +
+                    'fill="' + fill + '" ' +
+                    'stroke="' + stroke + '" ' +
+                    'stroke-width="' + width + '" ' +
+                    'width="1.5em" height="1.5em"' +
+                    '/>';
+        }
+
+        return html;
+    }
+
+    // Define svg symbols for shapes
+    var svgShapeDefs = `
+        <defs>
+            <symbol id="line" fill="none" viewBox="-5 -5 25 25">
+                <polyline points="0,15 5,5 10,10 15,0"/>
+            </symbol>
+
+            <symbol id="area" stroke-width="1" viewBox="-5 -5 25 25">
+                <polyline points="0,15 5,5 10,10 15,0, 15,15, 0,15"/>
+            </symbol>
+
+            <symbol id="bars" stroke-width="1" viewBox="-5 -5 25 25">
+                <polyline points="1.5,15.5 1.5,12.5, 4.5,12.5 4.5,15.5 6.5,15.5 6.5,3.5, 9.5,3.5 9.5,15.5 11.5,15.5 11.5,7.5 14.5,7.5 14.5,15.5 1.5,15.5"/>
+            </symbol>
+
+            <symbol id="circle" viewBox="-5 -5 25 25">
+                <circle cx="0" cy="15" r="2.5"/>
+                <circle cx="5" cy="5" r="2.5"/>
+                <circle cx="10" cy="10" r="2.5"/>
+                <circle cx="15" cy="0" r="2.5"/>
+            </symbol>
+
+            <symbol id="rectangle" viewBox="-5 -5 25 25">
+                <rect x="-2.1" y="12.9" width="4.2" height="4.2"/>
+                <rect x="2.9" y="2.9" width="4.2" height="4.2"/>
+                <rect x="7.9" y="7.9" width="4.2" height="4.2"/>
+                <rect x="12.9" y="-2.1" width="4.2" height="4.2"/>
+            </symbol>
+
+            <symbol id="diamond" viewBox="-5 -5 25 25">
+                <path d="M-3,15 L0,12 L3,15, L0,18 Z"/>
+                <path d="M2,5 L5,2 L8,5, L5,8 Z"/>
+                <path d="M7,10 L10,7 L13,10, L10,13 Z"/>
+                <path d="M12,0 L15,-3 L18,0, L15,3 Z"/>
+            </symbol>
+
+            <symbol id="cross" fill="none" viewBox="-5 -5 25 25">
+                <path d="M-2.1,12.9 L2.1,17.1, M2.1,12.9 L-2.1,17.1 Z"/>
+                <path d="M2.9,2.9 L7.1,7.1 M7.1,2.9 L2.9,7.1 Z"/>
+                <path d="M7.9,7.9 L12.1,12.1 M12.1,7.9 L7.9,12.1 Z"/>
+                <path d="M12.9,-2.1 L17.1,2.1 M17.1,-2.1 L12.9,2.1 Z"/>
+            </symbol>
+
+            <symbol id="plus" fill="none" viewBox="-5 -5 25 25">
+                <path d="M0,12 L0,18, M-3,15 L3,15 Z"/>
+                <path d="M5,2 L5,8 M2,5 L8,5 Z"/>
+                <path d="M10,7 L10,13 M7,10 L13,10 Z"/>
+                <path d="M15,-3 L15,3 M12,0 L18,0 Z"/>
+            </symbol>
+        </defs>`;
+
+    // Generate a list of legend entries in their final order
+    function getLegendEntries(series, labelFormatter, sorted) {
+        var lf = labelFormatter,
+            legendEntries = series.map(function(s, i) {
+                return {
+                    label: (lf ? lf(s.label, s) : s.label) || 'Plot ' + (i + 1),
+                    color: s.color,
+                    options: {
+                        lines: s.lines,
+                        points: s.points,
+                        bars: s.bars
+                    }
+                };
+            });
+
+        // Sort the legend using either the default or a custom comparator
+        if (sorted) {
+            if ($.isFunction(sorted)) {
+                legendEntries.sort(sorted);
+            } else if (sorted === 'reverse') {
+                legendEntries.reverse();
+            } else {
+                var ascending = (sorted !== 'descending');
+                legendEntries.sort(function(a, b) {
+                    return a.label === b.label
+                        ? 0
+                        : ((a.label < b.label) !== ascending ? 1 : -1 // Logical XOR
+                        );
+                });
+            }
+        }
+
+        return legendEntries;
+    }
+
+    // Compare two lists of legend entries
+    function shouldRedraw(oldEntries, newEntries) {
+        // return false if opts1 same as opts2
+        function checkOptions(opts1, opts2) {
+            for (var prop in opts1) {
+                if (opts1.hasOwnProperty(prop)) {
+                    if (opts1[prop] !== opts2[prop]) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        if (!oldEntries || !newEntries) {
+            return true;
+        }
+
+        if (oldEntries.length !== newEntries.length) {
+            return true;
+        }
+        var i, newEntry, oldEntry, newOpts, oldOpts;
+        for (i = 0; i < newEntries.length; i++) {
+            newEntry = newEntries[i];
+            oldEntry = oldEntries[i];
+
+            if (newEntry.label !== oldEntry.label) {
+                return true;
+            }
+
+            if (newEntry.color !== oldEntry.color) {
+                return true;
+            }
+
+            // check for changes in lines options
+            newOpts = newEntry.options.lines;
+            oldOpts = oldEntry.options.lines;
+            if (checkOptions(newOpts, oldOpts)) {
+                return true;
+            }
+
+            // check for changes in points options
+            newOpts = newEntry.options.points;
+            oldOpts = oldEntry.options.points;
+            if (checkOptions(newOpts, oldOpts)) {
+                return true;
+            }
+
+            // check for changes in bars options
+            newOpts = newEntry.options.bars;
+            oldOpts = oldEntry.options.bars;
+            if (checkOptions(newOpts, oldOpts)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function init(plot) {
+        placeholder = plot.getPlaceholder();
+        options = plot.getOptions();
+
+        plot.hooks.setupGrid.push(function (plot) {
+            var series = plot.getData(),
+                labelFormatter = options.legend.labelFormatter,
+                oldEntries = options.legend.legendEntries,
+                newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted);
+
+            if (shouldRedraw(oldEntries, newEntries)) {
+                insertLegend(plot, newEntries);
+            }
+        });
+    }
+
+    $.plot.plugins.push({
+        init: init,
+        options: options,
+        name: 'legend',
+        version: '1.0'
     });
 })(jQuery);

@@ -116,7 +116,7 @@ can set the default in the options.
     function init(plot) {
         var panAxes = null;
 
-        function onZoomClick(e, zoomOut) {
+        function onZoomClick(e, zoomOut, amount) {
             var c = plot.offset();
             c.left = e.pageX - c.left;
             c.top = e.pageY - c.top;
@@ -140,12 +140,14 @@ can set the default in the options.
             if (zoomOut) {
                 plot.zoomOut({
                     center: c,
-                    axes: axes
+                    axes: axes,
+                    amount: amount
                 });
             } else {
                 plot.zoom({
                     center: c,
-                    axes: axes
+                    axes: axes,
+                    amount: amount
                 });
             }
         }
@@ -154,9 +156,14 @@ can set the default in the options.
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         function onMouseWheel(e, delta) {
+            var maxAbsoluteDeltaOnMac = 1,
+                isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxAbsoluteDeltaOnMac,
+                defaultNonMacScrollAmount = null,
+                macMagicRatio = 50,
+                amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / macMagicRatio : defaultNonMacScrollAmount;
             if (plot.getOptions().zoom.active) {
                 e.preventDefault();
-                onZoomClick(e, delta < 0);
+                onZoomClick(e, delta < 0, amount);
                 return false;
             }
         }
