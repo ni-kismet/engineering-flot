@@ -249,6 +249,16 @@ Licensed under the MIT license.
                 top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
+        plot.getPixelRatio = function(context) {
+            var devicePixelRatio = window.devicePixelRatio || 1,
+                backingStoreRatio =
+                context.webkitBackingStorePixelRatio ||
+                context.mozBackingStorePixelRatio ||
+                context.msBackingStorePixelRatio ||
+                context.oBackingStorePixelRatio ||
+                context.backingStorePixelRatio || 1;
+            return devicePixelRatio / backingStoreRatio;
+        }
         plot.shutdown = shutdown;
         plot.destroy = function() {
             shutdown();
