@@ -354,6 +354,9 @@
                                     } else {
                                         positions.splice(i--, 1);
                                         if (position.rendered) {
+                                            while (position.element.firstChild) {
+                                                position.element.removeChild(position.element.firstChild);
+                                            }
                                             position.element.parentNode.removeChild(position.element);
                                         }
                                     }
