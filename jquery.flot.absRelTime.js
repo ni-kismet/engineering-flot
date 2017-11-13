@@ -94,7 +94,6 @@ API.txt for details.
             var msString = showMilliseconds ? '.' + leftPadNTimes(ms, '0', 3) : '';
             var time = Globalize.format(gregorianDate, "T", formatLanguage());
             var absTimeString = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
-            absTimeString = absTimeString.replace(/\s/g, '&nbsp;');
             return absTimeString;
         }
 

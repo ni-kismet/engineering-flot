@@ -154,6 +154,9 @@
                                     } else {
                                         positions.splice(i--, 1);
                                         if (position.rendered) {
+                                            while (position.element.firstChild) {
+                                                position.element.removeChild(position.element.firstChild);
+                                            }
                                             position.element.parentNode.removeChild(position.element);
                                         }
                                     }
@@ -303,8 +306,13 @@
 
         if (!info) {
             var element = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            var textNode = document.createTextNode(text);
-            element.appendChild(textNode);
+            if (text.indexOf('<br>') !== -1) {
+                addTspanElements(text, element, -9999);
+            } else {
+                var textNode = document.createTextNode(text);
+                element.appendChild(textNode);
+            }
+
             element.style.position = 'absolute';
             element.style.maxWidth = width;
             element.setAttributeNS(null, 'x', -9999);
@@ -328,6 +336,10 @@
                 positions: []
             };
 
+            //remove elements from dom
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
             element.parentNode.removeChild(element);
         }
 
@@ -385,9 +397,14 @@
                 return;
             } else if (position.active === false) {
                 position.active = true;
+                if (text.indexOf('<br>') !== -1) {
+                    y -= 0.25 * info.height;
+                    addTspanElements(text, position.element, x);
+                } else {
+                    position.element.textContent = text;
+                }
                 position.element.setAttributeNS(null, 'x', x);
                 position.element.setAttributeNS(null, 'y', y);
-                position.element.textContent = text;
                 return;
             }
         }
@@ -408,13 +425,17 @@
 
         positions.push(position);
 
-        // Move the element to its final position within the container
+        if (text.indexOf('<br>') !== -1) {
+            y -= 0.25 * info.height;
+            addTspanElements(text, position.element, x);
+        } else {
+            position.element.textContent = text;
+        }
 
+        // Move the element to its final position within the container
         position.element.setAttributeNS(null, 'x', x);
         position.element.setAttributeNS(null, 'y', y);
         position.element.style.textAlign = halign;
-
-        position.element.textContent = text;
 
         if (transforms) {
             transforms.forEach(function(t) {
@@ -422,6 +443,20 @@
             });
         }
     };
+
+    var addTspanElements = function(text, element, x) {
+        var textContent = text.split('<br>'),
+            tspan, i, offset;
+
+        for (i = 0; i < textContent.length; i++) {
+            tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+            tspan.textContent = textContent[i];
+            offset = i * 1 + 'em';
+            tspan.setAttributeNS(null, 'dy', offset);
+            tspan.setAttributeNS(null, 'x', x);
+            element.appendChild(tspan);
+        }
+    }
 
     /**
      *

@@ -50,8 +50,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [1 + tzDiff, 2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: 0 + tzDiff, label: '12:00:00.000&nbsp;AM<br>1/1/0001'},
-            {v: 1 + tzDiff, label: '12:00:01.000&nbsp;AM<br>1/1/0001'}
+            {v: 0 + tzDiff, label: '12:00:00.000 AM<br>1/1/0001'},
+            {v: 1 + tzDiff, label: '12:00:01.000 AM<br>1/1/0001'}
         ]);
     });
 
@@ -59,8 +59,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[1 + tzDiff, 1], [2 + tzDiff, 2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: 1 + tzDiff, label: '12:00:01.000&nbsp;AM<br>1/1/0001'},
-            {v: 2 + tzDiff, label: '12:00:02.000&nbsp;AM<br>1/1/0001'}
+            {v: 1 + tzDiff, label: '12:00:01.000 AM<br>1/1/0001'},
+            {v: 2 + tzDiff, label: '12:00:02.000 AM<br>1/1/0001'}
         ]);
     });
 
@@ -68,8 +68,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[60 + tzDiff, 1], [70 + tzDiff, 2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: 60 + tzDiff, label: '12:01:00&nbsp;AM<br>1/1/0001'},
-            {v: 70 + tzDiff, label: '12:01:10&nbsp;AM<br>1/1/0001'}
+            {v: 60 + tzDiff, label: '12:01:00 AM<br>1/1/0001'},
+            {v: 70 + tzDiff, label: '12:01:10 AM<br>1/1/0001'}
         ]);
     });
 
@@ -77,8 +77,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[3600 + tzDiff, 1], [3610 + tzDiff, 2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: 3600 + tzDiff, label: '1:00:00&nbsp;AM<br>1/1/0001'},
-            {v: 3610 + tzDiff, label: '1:00:10&nbsp;AM<br>1/1/0001'}
+            {v: 3600 + tzDiff, label: '1:00:00 AM<br>1/1/0001'},
+            {v: 3610 + tzDiff, label: '1:00:10 AM<br>1/1/0001'}
         ]);
     });
 
@@ -86,8 +86,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[86400 + tzDiff, 1], [86410 + tzDiff, 2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: 86400 + tzDiff, label: '12:00:00&nbsp;AM<br>1/2/0001'},
-            {v: 86410 + tzDiff, label: '12:00:10&nbsp;AM<br>1/2/0001'}
+            {v: 86400 + tzDiff, label: '12:00:00 AM<br>1/2/0001'},
+            {v: 86410 + tzDiff, label: '12:00:10 AM<br>1/2/0001'}
         ]);
     });
 
@@ -95,8 +95,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[2764800 + tzDiff, 1], [2764810 + tzDiff, 2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: 2764800 + tzDiff, label: '12:00:00&nbsp;AM<br>2/2/0001'},
-            {v: 2764810 + tzDiff, label: '12:00:10&nbsp;AM<br>2/2/0001'}
+            {v: 2764800 + tzDiff, label: '12:00:00 AM<br>2/2/0001'},
+            {v: 2764810 + tzDiff, label: '12:00:10 AM<br>2/2/0001'}
         ]);
     });
 
@@ -104,8 +104,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[31536000 + tzDiff, 1], [31536010 + tzDiff, 2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: 31536000 + tzDiff, label: '12:00:00&nbsp;AM<br>1/1/0002'},
-            {v: 31536010 + tzDiff, label: '12:00:10&nbsp;AM<br>1/1/0002'}
+            {v: 31536000 + tzDiff, label: '12:00:00 AM<br>1/1/0002'},
+            {v: 31536010 + tzDiff, label: '12:00:10 AM<br>1/1/0002'}
         ]);
     });
 
@@ -113,8 +113,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0.001 + tzDiff, 0.1], [0.002 + tzDiff, 0.2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: 0.001 + tzDiff, label: '12:00:00.001&nbsp;AM<br>1/1/0001'},
-            {v: 0.002 + tzDiff, label: '12:00:00.002&nbsp;AM<br>1/1/0001'}
+            {v: 0.001 + tzDiff, label: '12:00:00.001 AM<br>1/1/0001'},
+            {v: 0.002 + tzDiff, label: '12:00:00.002 AM<br>1/1/0001'}
         ]);
     });
 
@@ -122,8 +122,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[-0.001 + tzDiff, 0.1], [-0.002 + tzDiff, 0.2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: -0.002 + tzDiff, label: '11:59:59.998&nbsp;PM<br>12/31/0000'},
-            {v: -0.001 + tzDiff, label: '11:59:59.999&nbsp;PM<br>12/31/0000'}
+            {v: -0.002 + tzDiff, label: '11:59:59.998 PM<br>12/31/0000'},
+            {v: -0.001 + tzDiff, label: '11:59:59.999 PM<br>12/31/0000'}
         ]);
     });
 
@@ -131,8 +131,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[-31536000 * 2 + tzDiff, 1], [-31536010 * 2 + tzDiff, 2]]]);
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
-            {v: -31536010 * 2 + tzDiff, label: '11:59:40&nbsp;PM<br>1/1/-0001'},
-            {v: -31536000 * 2 + tzDiff, label: '12:00:00&nbsp;AM<br>1/2/-0001'}
+            {v: -31536010 * 2 + tzDiff, label: '11:59:40 PM<br>1/1/-0001'},
+            {v: -31536000 * 2 + tzDiff, label: '12:00:00 AM<br>1/2/-0001'}
         ]);
     });
 
@@ -140,8 +140,8 @@ describe('A Flot chart with absolute time axes', function () {
         plot = createPlotWithVerticalAbsoluteTimeAxis(placeholder, [[[0, 1 + tzDiff], [1, 2 + tzDiff]]]);
 
         expect(firstAndLast(plot.getAxes().yaxis.ticks)).toEqual([
-            {v: 1 + tzDiff, label: '12:00:01.000&nbsp;AM<br>1/1/0001'},
-            {v: 2 + tzDiff, label: '12:00:02.000&nbsp;AM<br>1/1/0001'}
+            {v: 1 + tzDiff, label: '12:00:01.000 AM<br>1/1/0001'},
+            {v: 2 + tzDiff, label: '12:00:02.000 AM<br>1/1/0001'}
         ]);
     });
 
