@@ -1134,5 +1134,41 @@ describe('flot', function() {
             expect(plot2.width()).toBe(plot1.width() - 20 - 20);
             expect(plot2.height()).toBe(plot1.height() - 20 - 20);
         });
+    });
+
+    describe('getPixelRatio', function() {
+        var placeholder, placeholder2, fixtures;
+
+        beforeEach(function() {
+            placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
+                .find('#test-container');
+        });
+
+        it('should call getPixelRatio before and after setting the dimensions of a canvas, and get different results', function() {
+            var originalCanvas = document.createElement('canvas');
+            originalCanvas.width = 20;
+            originalCanvas.height = 20;
+            originalCanvas.left = 0;
+            originalCanvas.top = 0;
+            drawSomeLinesOnCanvas(originalCanvas);
+
+            var firstPixelRatio = plot.getPixelRatio(originalCanvas.getContext('2d'));
+            var desiredRatio = 1.8;
+            originalCanvas.width = originalCanvas.width * desiredRatio;
+            originalCanvas.height = originalCanvas.height * desiredRatio;
+            var secondPixelRatio = plot.getPixelRatio(originalCanvas.getContext('2d'));
+
+            expect(secondPixelRatio).toBe(firstPixelRatio * desiredRatio);
+        });
+
+        function drawSomeLinesOnCanvas(canvas) {
+            var ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(19, 19);
+            ctx.moveTo(3, 18);
+            ctx.lineTo(17, 5);
+            ctx.stroke();
+        }
     })
 });
