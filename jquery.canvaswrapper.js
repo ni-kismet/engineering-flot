@@ -303,8 +303,12 @@
 
         if (!info) {
             var element = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            var textNode = document.createTextNode(text);
-            element.appendChild(textNode);
+            if (text.indexOf('<br>') !== -1) {
+                addTspanElements(text, element, -9999);
+            } else {
+                var textNode = document.createTextNode(text);
+                element.appendChild(textNode);
+            }
 
             element.style.position = 'absolute';
             element.style.maxWidth = width;
@@ -329,6 +333,10 @@
                 positions: []
             };
 
+            //remove elements from dom
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
             element.parentNode.removeChild(element);
         }
 
@@ -386,13 +394,14 @@
                 return;
             } else if (position.active === false) {
                 position.active = true;
-                position.element.setAttributeNS(null, 'x', x);
-                position.element.setAttributeNS(null, 'y', y);
                 if (text.indexOf('<br>') !== -1) {
-                    addTspanElements(text, position.element, x, y);
+                    y -= 0.25 * info.height;
+                    addTspanElements(text, position.element, x);
                 } else {
                     position.element.textContent = text;
                 }
+                position.element.setAttributeNS(null, 'x', x);
+                position.element.setAttributeNS(null, 'y', y);
                 return;
             }
         }
@@ -413,16 +422,18 @@
 
         positions.push(position);
 
-        // Move the element to its final position within the container
-        position.element.setAttributeNS(null, 'x', x);
-        position.element.setAttributeNS(null, 'y', y);
         position.element.style.textAlign = halign;
 
         if (text.indexOf('<br>') !== -1) {
-            addTspanElements(text, position.element, x, y);
+            y -= 0.25 * info.height;
+            addTspanElements(text, position.element, x);
         } else {
             position.element.textContent = text;
         }
+
+        // Move the element to its final position within the container
+        position.element.setAttributeNS(null, 'x', x);
+        position.element.setAttributeNS(null, 'y', y);
 
         if (transforms) {
             transforms.forEach(function(t) {
@@ -431,15 +442,16 @@
         }
     };
 
-    var addTspanElements = function(text, element, x, y) {
+    var addTspanElements = function(text, element, x) {
         var textContent = text.split('<br>'),
-            tspan, i;
+            tspan, i, offset;
 
         for (i = 0; i < textContent.length; i++) {
-            tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+            tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
             tspan.textContent = textContent[i];
-            tspan.setAttributeNS(null, 'x', x);
-            tspan.setAttributeNS(null, 'y', y + i * 1.2); //pozitia ar trebui calculata altfel
+            offset = i * 1 + 'em';
+            tspan.setAttributeNS(null, 'dy', offset);
+            tspan.setAttributeNS(null, 'x', x); //pozitia ar trebui calculata altfel
             element.appendChild(tspan);
         }
     }
