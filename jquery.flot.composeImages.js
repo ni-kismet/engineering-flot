@@ -5,10 +5,11 @@
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
+    var getPixelRatioFunc;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
-        pixelRatio = getPixelRatio(destinationCanvas.getContext('2d'));
+        pixelRatio = getPixelRatioFunc(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -153,18 +154,6 @@
         return result;
     }
 
-    function getPixelRatio(context) {
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
-
-        return devicePixelRatio / backingStoreRatio;
-    }
-
     function copyImgsToCanvas(sources, destination) {
         var prepareImagesResult = prepareImagesToBeComposed(sources, destination);
         if (prepareImagesResult === SUCCESSFULIMAGEPREPARATION) {
@@ -214,6 +203,7 @@
     function init(plot) {
         // used to extend the public API of the plot
         plot.composeImages = composeImages;
+        getPixelRatioFunc = plot.getPixelRatio;
     }
 
     $.plot.plugins.push({

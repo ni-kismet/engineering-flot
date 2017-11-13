@@ -966,7 +966,6 @@ Licensed under the MIT license.
                 context.msBackingStorePixelRatio ||
                 context.oBackingStorePixelRatio ||
                 context.backingStorePixelRatio || 1;
-            console.log("new function in flot");
             return devicePixelRatio / backingStoreRatio;
         }
         plot.shutdown = shutdown;
@@ -7069,10 +7068,11 @@ The plugin allso adds the following methods to the plot object:
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
+    var getPixelRatioFunc;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
-        pixelRatio = getPixelRatio(destinationCanvas.getContext('2d'));
+        pixelRatio = getPixelRatioFunc(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -7217,18 +7217,6 @@ The plugin allso adds the following methods to the plot object:
         return result;
     }
 
-    function getPixelRatio(context) {
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
-
-        return devicePixelRatio / backingStoreRatio;
-    }
-
     function copyImgsToCanvas(sources, destination) {
         var prepareImagesResult = prepareImagesToBeComposed(sources, destination);
         if (prepareImagesResult === SUCCESSFULIMAGEPREPARATION) {
@@ -7278,6 +7266,7 @@ The plugin allso adds the following methods to the plot object:
     function init(plot) {
         // used to extend the public API of the plot
         plot.composeImages = composeImages;
+        getPixelRatioFunc = plot.getPixelRatio;
     }
 
     $.plot.plugins.push({
