@@ -262,6 +262,11 @@ can set the default in the options.
         }
 
         function onDblClick(e) {
+            var o = plot.getOptions();
+            if (!o.pan.active || !o.zoom.active) {
+                o.pan.active = true;
+                o.zoom.active = true;
+            }
             plot.getPlaceholder().trigger("re-center", e);
         }
 
