@@ -773,4 +773,26 @@ describe("flot navigate plugin", function () {
               expect(plot.getOptions().zoom.active).toBe(true);
         });
     });
+
+    describe('mouse dblclick', function(){
+        it('on plot activates plot\'s zoom and pan active propriety', function() {
+            plot = $.plot(placeholder, [
+                [
+                    [0, 0],
+                    [10, 10]
+                ]
+              ], {
+                  zoom: { interactive: true, active: false, amount: 10 },
+                  pan: { interactive: true, active: false}
+              });
+
+              var eventHolder = plot.getEventHolder(),
+                  pointCoords = { x: 0, y: plot.height() };
+
+              simulate.dblclick(eventHolder, pointCoords.x, pointCoords.y);
+
+              expect(plot.getOptions().pan.active).toBe(true);
+              expect(plot.getOptions().zoom.active).toBe(true);
+        });
+    });
 });
