@@ -154,6 +154,31 @@ describe('CanvasWrapper', function() {
         expect(elems.length).toBe(3);
     });
 
+    it('should add multiple tspan for text that contains br tag', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerB', 100, 200, '1<br>2<br>3<br>4', 'b');
+        canvas.render();
+
+        var elems = placeholder.find('.b')[0];
+        expect(elems.childNodes.length).toBe(4);
+    });
+
+    it('should update the cache position of the elements', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.render();
+
+        canvas.removeText('layerA', 100, 200, '123', 'a');
+        canvas.addText('layerA', 130, 230, '123', 'a');
+        canvas.render();
+
+        canvas.addText('layerA', 100, 200, '123', 'a');
+        canvas.render();
+
+        var elems = placeholder.find('.a');
+        expect(elems.length).toBe(2);
+    });
+
     it('should not add the same text with the same CSS and the same coords twice', function() {
         var canvas = newCanvas(placeholder);
         canvas.addText('layerA', 100, 200, '123', 'a');
