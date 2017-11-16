@@ -7142,10 +7142,27 @@ The plugin allso adds the following methods to the plot object:
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
+        tempImg.componentName = canvasOrSvgSource.className + '  (' + canvasOrSvgSource.tagName + ')';
+        tempImg.sourceComponent = canvasOrSvgSource;
+
         return function doGenerateTempImg(successCallbackFunc, failureCallbackFunc) {
             tempImg.onload = function(evt) {
+                tempImg.successfullyLoaded = true;
                 successCallbackFunc(tempImg);
             };
+
+            tempImg.onabort = function(evt) {
+                tempImg.successfullyLoaded = false;
+                console.log('Can\'t generate temp image from ' + tempImg.componentName + '. It is possible that its content is not supported by this browser. Source component:', tempImg.sourceComponent);
+                successCallbackFunc(tempImg); //call successCallback, to allow snapshot of all working images
+            };
+
+            tempImg.onerror = function(evt) {
+                tempImg.successfullyLoaded = false;
+                console.log('Can\'t generate temp image from ' + tempImg.componentName + '. It is possible that its content is not supported by this browser. Source component:', tempImg.sourceComponent);
+                successCallbackFunc(tempImg); //call successCallback, to allow snapshot of all working images
+            };
+
             generateTempImageFromCanvasOrSvg(canvasOrSvgSource, tempImg);
         };
     }
@@ -7269,7 +7286,9 @@ The plugin allso adds the following methods to the plot object:
             var destinationCtx = destination.getContext('2d');
 
             for (var i = 0; i < sources.length; i++) {
-                destinationCtx.drawImage(sources[i], sources[i].xCompOffset * pixelRatio, sources[i].yCompOffset * pixelRatio);
+                if (sources[i].successfullyLoaded === true) {
+                    destinationCtx.drawImage(sources[i], sources[i].xCompOffset * pixelRatio, sources[i].yCompOffset * pixelRatio);
+                }
             }
         }
         return prepareImagesResult;
