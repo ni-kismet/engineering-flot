@@ -38,7 +38,7 @@
     }
 
     function getGenerateTempImg(tempImg, canvasOrSvgSource) {
-        tempImg.componentName = canvasOrSvgSource.className + '  (' + canvasOrSvgSource.tagName + ')';
+        tempImg.sourceDescription = '<info className="' + canvasOrSvgSource.className + '" tagName="' + canvasOrSvgSource.tagName + '" id="' + canvasOrSvgSource.id + '">';
         tempImg.sourceComponent = canvasOrSvgSource;
 
         return function doGenerateTempImg(successCallbackFunc, failureCallbackFunc) {
@@ -49,13 +49,13 @@
 
             tempImg.onabort = function(evt) {
                 tempImg.successfullyLoaded = false;
-                console.log('Can\'t generate temp image from ' + tempImg.componentName + '. It is possible that it is missing some properties or its content is not supported by this browser. Source component:', tempImg.sourceComponent);
+                console.log('Can\'t generate temp image from ' + tempImg.sourceDescription + '. It is possible that it is missing some properties or its content is not supported by this browser. Source component:', tempImg.sourceComponent);
                 successCallbackFunc(tempImg); //call successCallback, to allow snapshot of all working images
             };
 
             tempImg.onerror = function(evt) {
                 tempImg.successfullyLoaded = false;
-                console.log('Can\'t generate temp image from ' + tempImg.componentName + '. It is possible that it is missing some properties or its content is not supported by this browser. Source component:', tempImg.sourceComponent);
+                console.log('Can\'t generate temp image from ' + tempImg.sourceDescription + '. It is possible that it is missing some properties or its content is not supported by this browser. Source component:', tempImg.sourceComponent);
                 successCallbackFunc(tempImg); //call successCallback, to allow snapshot of all working images
             };
 
