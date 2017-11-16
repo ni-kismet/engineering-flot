@@ -7153,13 +7153,13 @@ The plugin allso adds the following methods to the plot object:
 
             tempImg.onabort = function(evt) {
                 tempImg.successfullyLoaded = false;
-                console.log('Can\'t generate temp image from ' + tempImg.componentName + '. It is possible that its content is not supported by this browser. Source component:', tempImg.sourceComponent);
+                console.log('Can\'t generate temp image from ' + tempImg.componentName + '. It is possible that it is missing some properties or its content is not supported by this browser. Source component:', tempImg.sourceComponent);
                 successCallbackFunc(tempImg); //call successCallback, to allow snapshot of all working images
             };
 
             tempImg.onerror = function(evt) {
                 tempImg.successfullyLoaded = false;
-                console.log('Can\'t generate temp image from ' + tempImg.componentName + '. It is possible that its content is not supported by this browser. Source component:', tempImg.sourceComponent);
+                console.log('Can\'t generate temp image from ' + tempImg.componentName + '. It is possible that it is missing some properties or its content is not supported by this browser. Source component:', tempImg.sourceComponent);
                 successCallbackFunc(tempImg); //call successCallback, to allow snapshot of all working images
             };
 

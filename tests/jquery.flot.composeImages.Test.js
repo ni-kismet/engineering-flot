@@ -5,6 +5,13 @@ describe("composeImages", function() {
     var placeholder, plot;
     var composeImages = $.plot.composeImages;
 
+    /*
+    compPointer = $.plot.plugins.find(function(element){return (element.name === "composeImages")});
+    if ((compPointer !== null) && (compPointer !== undefined)) {
+        compPointer.init($.plot);
+    }
+    */
+
     beforeEach(function() {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
             .find('#test-container');
@@ -583,6 +590,165 @@ describe("composeImages", function() {
 
             expect(canvasData(originalCanvas, 0, 0, 20, 20))
                 .toMatchCanvasArea(canvasData(destinationCanvas, 0, 0, 20, 20));
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one SVG as a source, which defines only its viewbox, without width and height', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '<svg id="svgSource" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" title="svg">' +
+            '<circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>' +
+            '<circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>' +
+            '<circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>' +
+        '</svg>' +
+        '</div>' +
+        '<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('svg').toArray();
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(600);
+            expect(destinationCanvas.height).toBe(600);
+            expect(canvasData(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(canvasData(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(canvasData(destinationCanvas, 50, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one SVG as a source, which defines only its width and height, without its viewbox', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '<svg id="svgSource" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg">' +
+            '<circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>' +
+            '<circle id="c2" cx="30" cy="40" r="7" style="fill:#00FF00"/>' +
+            '<circle id="c3" cx="50" cy="70" r="9" style="fill:blue"/>' +
+        '</svg>' +
+        '</div>' +
+        '<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('svg').toArray();
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(100);
+            expect(destinationCanvas.height).toBe(100);
+            expect(canvasData(destinationCanvas, 10, 10, 1, 1)).toMatchPixelColor([255, 0, 0, 255]);
+            expect(canvasData(destinationCanvas, 30, 40, 1, 1)).toMatchPixelColor([0, 255, 0, 255]);
+            expect(canvasData(destinationCanvas, 50, 70, 1, 1)).toMatchPixelColor([0, 0, 255, 255]);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one potentially unsupported SVG as a source, because it contains "uses". Only its viewBox is defined.', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '<svg class="legendLayer" style="width:inherit;height:inherit;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+            '<defs>' +
+                '<symbol id="line" fill="none" viewBox="-5 -5 25 25">' +
+                    '<polyline points="0,15 5,5 10,10 15,0"></polyline>' +
+                '</symbol>' +
+            '</defs>' +
+            '<g>' +
+                '<use xlink:href="#line" class="legendIcon" x="0em" y="0em" stroke="#82A3D1" stroke-width="2" width="1.5em" height="1.5em"></use>' +
+                '<text x="0em" y="0em" text-anchor="start"><tspan dx="2em" dy="1.2em">Plot 1</tspan></text>' +
+            '</g>' +
+            '<g>' +
+                '<use xlink:href="#line" class="legendIcon" x="0em" y="1.5em" stroke="#862323" stroke-width="1" width="1.5em" height="1.5em"></use>' +
+                '<text x="0em" y="1.5em" text-anchor="start"><tspan dx="2em" dy="1.2em">Plot 2</tspan></text>' +
+            '</g>' +
+        '</svg>' +
+        '</div>' +
+        '<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('svg').toArray();
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(600);
+            expect(destinationCanvas.height).toBe(400);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one potentially unsupported SVG as a source, because it contains "uses". Only the width and height properties are defined.', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '<svg class="legendLayer" style="width:inherit;height:inherit;" xmlns="http://www.w3.org/2000/svg" width="20" height="20">' +
+            '<defs>' +
+                '<symbol id="line" fill="none" viewBox="-5 -5 25 25">' +
+                    '<polyline points="0,15 5,5 10,10 15,0"></polyline>' +
+                '</symbol>' +
+            '</defs>' +
+            '<g>' +
+                '<use xlink:href="#line" class="legendIcon" x="0em" y="0em" stroke="#82A3D1" stroke-width="2" width="1.5em" height="1.5em"></use>' +
+                '<text x="0em" y="0em" text-anchor="start"><tspan dx="2em" dy="1.2em">Plot 1</tspan></text>' +
+            '</g>' +
+            '<g>' +
+                '<use xlink:href="#line" class="legendIcon" x="0em" y="1.5em" stroke="#862323" stroke-width="1" width="1.5em" height="1.5em"></use>' +
+                '<text x="0em" y="1.5em" text-anchor="start"><tspan dx="2em" dy="1.2em">Plot 2</tspan></text>' +
+            '</g>' +
+        '</svg>' +
+        '</div>' +
+        '<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('svg').toArray();
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(600);
+            expect(destinationCanvas.height).toBe(400);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one potentially unsupported SVG as a source, because it contains "uses". ViewBox, width and height properties are defined.', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '<svg class="legendLayer" style="width:inherit;height:inherit;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 100 100">' +
+            '<defs>' +
+                '<symbol id="line" fill="none" viewBox="-5 -5 25 25">' +
+                    '<polyline points="0,15 5,5 10,10 15,0"></polyline>' +
+                '</symbol>' +
+            '</defs>' +
+            '<g>' +
+                '<use xlink:href="#line" class="legendIcon" x="0em" y="0em" stroke="#82A3D1" stroke-width="2" width="1.5em" height="1.5em"></use>' +
+                '<text x="0em" y="0em" text-anchor="start"><tspan dx="2em" dy="1.2em">Plot 1</tspan></text>' +
+            '</g>' +
+            '<g>' +
+                '<use xlink:href="#line" class="legendIcon" x="0em" y="1.5em" stroke="#862323" stroke-width="1" width="1.5em" height="1.5em"></use>' +
+                '<text x="0em" y="1.5em" text-anchor="start"><tspan dx="2em" dy="1.2em">Plot 2</tspan></text>' +
+            '</g>' +
+        '</svg>' +
+        '</div>' +
+        '<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('svg').toArray();
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(600);
+            expect(destinationCanvas.height).toBe(400);
+
+            done();
+        }, null);
+    });
+
+    it('should call composeImages on one empty SVG as a source. This may block composeImages.', function (done) {
+        var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
+        '<svg class="legendLayer" style="width:inherit;height:inherit;" xmlns="http://www.w3.org/2000/svg">' +
+        '</svg>' +
+        '</div>' +
+        '<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>'
+        ).find('svg').toArray();
+
+        var destinationCanvas = document.getElementById("myCanvas");
+
+        composeImages(sources, destinationCanvas).then(function() {
+            expect(destinationCanvas.width).toBe(600);
+            expect(destinationCanvas.height).toBe(400);
 
             done();
         }, null);
