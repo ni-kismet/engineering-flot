@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.5]
+### Bug fixes ###
+- Added a filter in composeImages for sources, which can't be loaded to img
+At the moment, there is a known issue, about copying an img to canvas, which
+freezes the copy function (drawImage) if the img comes from an empty svg
+
 ## [1.0.4]
 ### Changes ###
 - New getPixelRatio() helper function
