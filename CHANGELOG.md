@@ -1,11 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.0.5]
+## [1.0.6]
 ### Bug fixes ###
-- Added a filter in composeImages for sources, which can't be loaded to img
-At the moment, there is a known issue, about copying an img to canvas, which
-freezes the copy function (drawImage) if the img comes from an empty svg
+- Hang caused by 'use' elements in SVGs when calling composeImages
+
+## [1.0.5]
+### Changes ###
+- Activate graph navigation on double click
+
+### Bug fixes ###
+- Wrong tick labels position
 
 ## [1.0.4]
 ### Changes ###
