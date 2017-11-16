@@ -5,13 +5,6 @@ describe("composeImages", function() {
     var placeholder, plot;
     var composeImages = $.plot.composeImages;
 
-    /*
-    compPointer = $.plot.plugins.find(function(element){return (element.name === "composeImages")});
-    if ((compPointer !== null) && (compPointer !== undefined)) {
-        compPointer.init($.plot);
-    }
-    */
-
     beforeEach(function() {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
             .find('#test-container');
@@ -595,7 +588,7 @@ describe("composeImages", function() {
         }, null);
     });
 
-    it('should call composeImages on one SVG as a source, which defines only its viewbox, without width and height', function (done) {
+    xit('should call composeImages on one SVG as a source, which defines only its viewbox, without width and height', function (done) {
         var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
         '<svg id="svgSource" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" title="svg">' +
             '<circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>' +
@@ -619,7 +612,7 @@ describe("composeImages", function() {
         }, null);
     });
 
-    it('should call composeImages on one SVG as a source, which defines only its width and height, without its viewbox', function (done) {
+    xit('should call composeImages on one SVG as a source, which defines only its width and height, without its viewbox', function (done) {
         var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
         '<svg id="svgSource" xmlns="http://www.w3.org/2000/svg" width="100" height="100" title="svg">' +
             '<circle id="c1" cx="10" cy="10" r="5" style="fill:red"/>' +
@@ -643,7 +636,7 @@ describe("composeImages", function() {
         }, null);
     });
 
-    it('should call composeImages on one potentially unsupported SVG as a source, because it contains "uses". Only its viewBox is defined.', function (done) {
+    xit('should call composeImages on one potentially unsupported SVG as a source, because it contains "uses". Only its viewBox is defined.', function (done) {
         var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
         '<svg class="legendLayer" style="width:inherit;height:inherit;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
             '<defs>' +
@@ -674,7 +667,7 @@ describe("composeImages", function() {
         }, null);
     });
 
-    it('should call composeImages on one potentially unsupported SVG as a source, because it contains "uses". Only the width and height properties are defined.', function (done) {
+    xit('should call composeImages on one potentially unsupported SVG as a source, because it contains "uses". Only the width and height properties are defined.', function (done) {
         var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
         '<svg class="legendLayer" style="width:inherit;height:inherit;" xmlns="http://www.w3.org/2000/svg" width="20" height="20">' +
             '<defs>' +
@@ -736,9 +729,9 @@ describe("composeImages", function() {
         }, null);
     });
 
-    it('should call composeImages on one empty SVG as a source. This may block composeImages.', function (done) {
+    xit('should call composeImages on one empty SVG as a source. This may block composeImages.', function (done) {
         var sources = placeholder.html('<div id="test-container" style="width: 600px;height: 400px">' +
-        '<svg class="legendLayer" style="width:inherit;height:inherit;" xmlns="http://www.w3.org/2000/svg">' +
+        '<svg class="legendLayer" style="width:inherit;height:inherit;" xmlns="http://www.w3.org/2000/svg" id="blockingTest">' +
         '</svg>' +
         '</div>' +
         '<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;"></canvas>'
