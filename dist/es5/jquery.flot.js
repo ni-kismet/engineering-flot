@@ -7479,7 +7479,7 @@ The plugin allso adds the following methods to the plot object:
             pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
         }
 
-        var legendEl,
+        var legendEl, svgEl,
             width = 2 + maxLabelLength / 2,
             height = entries.length * 1.6;
         if (!options.legend.container) {
@@ -7487,6 +7487,7 @@ The plugin allso adds the following methods to the plot object:
             legendEl.css('width', width + 'em');
             legendEl.css('height', height + 'em');
             legendEl.css('pointerEvents', 'none');
+            svgEl = legendEl.children()[0];
             // put the transparent background only when drawing the legend over graph
             if (options.legend.backgroundOpacity !== 0.0) {
                 var c = options.legend.backgroundColor;
@@ -7504,6 +7505,8 @@ The plugin allso adds the following methods to the plot object:
 
                 legendEl.css('background-color', c);
                 legendEl.css('opacity', options.legend.backgroundOpacity);
+                svgEl.style.backgroundColor = c;
+                svgEl.style.opacity = options.legend.backgroundOpacity;
             }
         } else {
             legendEl = $(html.join('')).appendTo(options.legend.container)[0];
