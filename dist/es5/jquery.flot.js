@@ -7227,7 +7227,12 @@ The plugin allso adds the following methods to the plot object:
         // Safari 3.0+ "[object HTMLElementConstructor]"
         var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
 
-        if (isSafari) {
+        //https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
+        function isMobileSafari() {
+            return navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/);
+        }
+
+        if (isSafari || isMobileSafari()) {
             copySVGToImgSafari(svg, img);
         } else {
             copySVGToImgMostBrowsers(svg, img);
