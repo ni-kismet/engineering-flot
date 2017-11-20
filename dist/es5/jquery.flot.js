@@ -7207,20 +7207,10 @@ The plugin allso adds the following methods to the plot object:
     }
 
     function copySVGToImgMostBrowsers(svg, img) {
-        //get svg source.
         var rules = getCSSRules(document),
             source = embedCSSRulesInSVG(rules, svg);
 
-        //add name spaces.
-        if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
-            source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-        }
-        if (!source.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
-            source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-        }
-
-        //add xml declaration
-        source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+        source = patchSVGSource(source);
 
         var blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"}),
             domURL = self.URL || self.webkitURL || self,
@@ -7229,23 +7219,28 @@ The plugin allso adds the following methods to the plot object:
     }
 
     function copySVGToImgSafari(svg, img) {
-        //get svg source.
         var rules = getCSSRules(document),
             source = embedCSSRulesInSVG(rules, svg),
             data;
 
+        source = patchSVGSource(source);
+
+        data = "data:image/svg+xml;base64," + btoa(source);
+        img.src = data;
+    }
+
+    function patchSVGSource(svgSource) {
+        var source = '';
         //add name spaces.
-        if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
-            source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+        if (!svgSource.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+            source = svgSource.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
         }
-        if (!source.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
-            source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+        if (!svgSource.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
+            source = svgSource.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
         }
 
         //add xml declaration
-        source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-        data = "data:image/svg+xml;base64," + btoa(source);
-        img.src = data;
+        return '<?xml version="1.0" standalone="no"?>\r\n' + source;
     }
 
     function copySVGToImg(svg, img) {
