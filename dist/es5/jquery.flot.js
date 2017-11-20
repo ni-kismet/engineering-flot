@@ -7208,8 +7208,11 @@ The plugin allso adds the following methods to the plot object:
 
     function copySVGToImgMostBrowsers(svg, img) {
         var rules = getCSSRules(document),
-            text = embedCSSRulesInSVG(rules, svg),
-            blob = new Blob([text], {type: "image/svg+xml;charset=utf-8"}),
+            source = embedCSSRulesInSVG(rules, svg);
+
+        source = patchSVGSource(source);
+
+        var blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"}),
             domURL = self.URL || self.webkitURL || self,
             url = domURL.createObjectURL(blob);
         img.src = url;
@@ -7217,9 +7220,27 @@ The plugin allso adds the following methods to the plot object:
 
     function copySVGToImgSafari(svg, img) {
         var rules = getCSSRules(document),
-            text = embedCSSRulesInSVG(rules, svg),
-            data = "data:image/svg+xml;base64," + btoa(text);
+            source = embedCSSRulesInSVG(rules, svg),
+            data;
+
+        source = patchSVGSource(source);
+
+        data = "data:image/svg+xml;base64," + btoa(source);
         img.src = data;
+    }
+
+    function patchSVGSource(svgSource) {
+        var source = '';
+        //add name spaces.
+        if (!svgSource.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+            source = svgSource.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+        if (!svgSource.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
+            source = svgSource.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+        }
+
+        //add xml declaration
+        return '<?xml version="1.0" standalone="no"?>\r\n' + source;
     }
 
     function copySVGToImg(svg, img) {
@@ -7453,7 +7474,7 @@ The plugin allso adds the following methods to the plot object:
             pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
         }
 
-        var legendEl,
+        var legendEl, svgEl,
             width = 2 + maxLabelLength / 2,
             height = entries.length * 1.6;
         if (!options.legend.container) {
@@ -7461,6 +7482,7 @@ The plugin allso adds the following methods to the plot object:
             legendEl.css('width', width + 'em');
             legendEl.css('height', height + 'em');
             legendEl.css('pointerEvents', 'none');
+            svgEl = legendEl.children()[0];
             // put the transparent background only when drawing the legend over graph
             if (options.legend.backgroundOpacity !== 0.0) {
                 var c = options.legend.backgroundColor;
@@ -7478,6 +7500,8 @@ The plugin allso adds the following methods to the plot object:
 
                 legendEl.css('background-color', c);
                 legendEl.css('opacity', options.legend.backgroundOpacity);
+                svgEl.style.backgroundColor = c;
+                svgEl.style.opacity = options.legend.backgroundOpacity;
             }
         } else {
             legendEl = $(html.join('')).appendTo(options.legend.container)[0];
