@@ -3413,12 +3413,12 @@ Licensed under the MIT license.
                     left: canvasX,
                     top: canvasY
                 }),
-                distance = searchDistance ? searchDistance : options.grid.mouseActiveRadius;
+                distance = searchDistance !== undefined ? searchDistance : options.grid.mouseActiveRadius;
 
             pos.pageX = event.pageX;
             pos.pageY = event.pageY;
 
-            var item = findNearbyItem(canvasX, canvasY, seriesFilter, options.grid.mouseActiveRadius);
+            var item = findNearbyItem(canvasX, canvasY, seriesFilter, distance);
 
             if (item) {
                 // fill in mouse pos for any listeners out there
@@ -4941,7 +4941,7 @@ can set the default in the options.
                 o.pan.active = true;
                 o.zoom.active = true;
             }
-            plot.getPlaceholder().trigger("re-center", e);
+            plot.getPlaceholder().trigger('re-center', e);
         }
 
         function onClick(e) {
@@ -4953,9 +4953,9 @@ can set the default in the options.
             }
 
             if (o.grid.hoverable) {
-                plot.triggerClickHoverEvent("plothover", e,
+                plot.triggerClickHoverEvent('plothover', e,
                     function(i) {
-                        return series[i]["hoverable"] !== false;
+                        return series[i]['hoverable'] !== false;
                     }, 30);
             }
 

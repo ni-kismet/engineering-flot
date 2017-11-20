@@ -267,7 +267,7 @@ can set the default in the options.
                 o.pan.active = true;
                 o.zoom.active = true;
             }
-            plot.getPlaceholder().trigger("re-center", e);
+            plot.getPlaceholder().trigger('re-center', e);
         }
 
         function onClick(e) {
@@ -279,9 +279,9 @@ can set the default in the options.
             }
 
             if (o.grid.hoverable) {
-                plot.triggerClickHoverEvent("plothover", e,
+                plot.triggerClickHoverEvent('plothover', e,
                     function(i) {
-                        return series[i]["hoverable"] !== false;
+                        return series[i]['hoverable'] !== false;
                     }, 30);
             }
 

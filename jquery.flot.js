@@ -2667,12 +2667,12 @@ Licensed under the MIT license.
                     left: canvasX,
                     top: canvasY
                 }),
-                distance = searchDistance ? searchDistance : options.grid.mouseActiveRadius;
+                distance = searchDistance !== undefined ? searchDistance : options.grid.mouseActiveRadius;
 
             pos.pageX = event.pageX;
             pos.pageY = event.pageY;
 
-            var item = findNearbyItem(canvasX, canvasY, seriesFilter, options.grid.mouseActiveRadius);
+            var item = findNearbyItem(canvasX, canvasY, seriesFilter, distance);
 
             if (item) {
                 // fill in mouse pos for any listeners out there
