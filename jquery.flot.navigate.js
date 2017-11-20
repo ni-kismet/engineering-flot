@@ -271,11 +271,20 @@ can set the default in the options.
         }
 
         function onClick(e) {
-            var o = plot.getOptions();
+            var o = plot.getOptions(),
+                series = plot.getData();
             if (!o.pan.active || !o.zoom.active) {
                 o.pan.active = true;
                 o.zoom.active = true;
             }
+
+            if (o.grid.hoverable) {
+                plot.triggerClickHoverEvent("plothover", e,
+                    function(i) {
+                        return series[i]["hoverable"] !== false;
+                    }, 30);
+            }
+
             return false;
         }
 

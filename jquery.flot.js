@@ -139,7 +139,7 @@ Licensed under the MIT license.
                     clickable: false,
                     hoverable: false,
                     autoHighlight: true, // highlight in case mouse is near
-                    mouseActiveRadius: 10 // how far the mouse can be away to activate an item
+                    mouseActiveRadius: 15 // how far the mouse can be away to activate an item
                 },
                 interaction: {
                     redrawOverlayInterval: 1000 / 60 // time between updates, -1 means in same flow
@@ -259,6 +259,7 @@ Licensed under the MIT license.
                 context.backingStorePixelRatio || 1;
             return devicePixelRatio / backingStoreRatio;
         }
+        plot.triggerClickHoverEvent = triggerClickHoverEvent;
         plot.shutdown = shutdown;
         plot.destroy = function() {
             shutdown();
@@ -2658,14 +2659,15 @@ Licensed under the MIT license.
 
         // trigger click or hover event (they send the same parameters
         // so we share their code)
-        function triggerClickHoverEvent(eventname, event, seriesFilter) {
+        function triggerClickHoverEvent(eventname, event, seriesFilter, searchDistance) {
             var offset = eventHolder.offset(),
                 canvasX = event.pageX - offset.left - plotOffset.left,
                 canvasY = event.pageY - offset.top - plotOffset.top,
                 pos = canvasToCartesianAxisCoords({
                     left: canvasX,
                     top: canvasY
-                });
+                }),
+                distance = searchDistance ? searchDistance : options.grid.mouseActiveRadius;
 
             pos.pageX = event.pageX;
             pos.pageY = event.pageY;
@@ -2682,10 +2684,10 @@ Licensed under the MIT license.
                 // clear auto-highlights
                 for (var i = 0; i < highlights.length; ++i) {
                     var h = highlights[i];
-                    if (h.auto === eventname &&
+                    if ((h.auto === eventname &&
                         !(item && h.series === item.series &&
                             h.point[0] === item.datapoint[0] &&
-                            h.point[1] === item.datapoint[1])) {
+                            h.point[1] === item.datapoint[1])) || !item) {
                         unhighlight(h.series, h.point);
                     }
                 }
