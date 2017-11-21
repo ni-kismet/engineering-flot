@@ -42,6 +42,7 @@
             }
 
             updateOnMultipleTouches(e);
+            mainEventHolder.dispatchEvent(new CustomEvent('touchevent', { detail: e }));
 
             if (isPinchEvent(e)) {
                 executeAction(e, 'pinch');

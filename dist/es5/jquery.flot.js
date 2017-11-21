@@ -5421,6 +5421,7 @@ can set the default in the options.
             var o = plot.getOptions();
 
             if (o.grid.hoverable || o.grid.clickable) {
+                eventHolder[0].addEventListener('touchevent', triggerCleanupEvent, false);
                 eventHolder[0].addEventListener('tap', tap.generatePlothoverEvent, false);
             }
 
@@ -5443,6 +5444,7 @@ can set the default in the options.
 
         function shutdown(plot, eventHolder) {
             eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
+            eventHolder[0].addEventListener('tap', triggerCleanupEvent);
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
             eventHolder.unbind("click", onClick);
@@ -5473,6 +5475,11 @@ can set the default in the options.
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
             plot.hooks.drawOverlay.push(drawOverlay);
+        }
+
+        var triggerCleanupEvent = function(e) {
+            plot.unhighlight();
+            plot.getPlaceholder().trigger(new CustomEvent('plothovercleanup', { detail: e }));
         }
     }
 
@@ -5736,6 +5743,7 @@ can set the default in the options.
             }
 
             updateOnMultipleTouches(e);
+            mainEventHolder.dispatchEvent(new CustomEvent('touchevent', { detail: e }));
 
             if (isPinchEvent(e)) {
                 executeAction(e, 'pinch');

@@ -24,6 +24,7 @@
             var o = plot.getOptions();
 
             if (o.grid.hoverable || o.grid.clickable) {
+                eventHolder[0].addEventListener('touchevent', triggerCleanupEvent, false);
                 eventHolder[0].addEventListener('tap', tap.generatePlothoverEvent, false);
             }
 
@@ -46,6 +47,7 @@
 
         function shutdown(plot, eventHolder) {
             eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
+            eventHolder[0].addEventListener('tap', triggerCleanupEvent);
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
             eventHolder.unbind("click", onClick);
@@ -76,6 +78,11 @@
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
             plot.hooks.drawOverlay.push(drawOverlay);
+        }
+
+        var triggerCleanupEvent = function(e) {
+            plot.unhighlight();
+            plot.getPlaceholder().trigger(new CustomEvent('plothovercleanup', { detail: e }));
         }
     }
 
