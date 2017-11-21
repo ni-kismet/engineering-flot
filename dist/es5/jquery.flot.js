@@ -4719,8 +4719,7 @@ can set the default in the options.
         }
 
         function onClick(e) {
-            var o = plot.getOptions(),
-                series = plot.getData();
+            var o = plot.getOptions();
             if (!o.pan.active || !o.zoom.active) {
                 o.pan.active = true;
                 o.zoom.active = true;
@@ -5426,7 +5425,7 @@ can set the default in the options.
             }
 
             if (options.grid.clickable) {
-                eventHolder[0].click(onClick);
+                eventHolder.click(onClick);
             }
 
             if (options.grid.hoverable) {
@@ -5446,7 +5445,7 @@ can set the default in the options.
             eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
-            eventHolder[0].unbind("click", onClick);
+            eventHolder.unbind("click", onClick);
             highlights = [];
         }
 
@@ -5510,7 +5509,6 @@ can set the default in the options.
     // so we share their code)
     function triggerClickHoverEvent(eventname, event, seriesFilter, searchDistance) {
         var options = plot.getOptions(),
-            eventHolder = plot.getEventHolder(),
             offset = plot.offset(),
             canvasX = event.pageX - offset.left,
             canvasY = event.pageY - offset.top,
@@ -5692,7 +5690,6 @@ can set the default in the options.
         name: 'navigateTouch',
         version: '0.3'
     });
-
 })(jQuery);
 
 
@@ -5916,7 +5913,6 @@ can set the default in the options.
                 return false;
             }
         };
-
 
         if (options.pan.enableTouch === true) {
             plot.hooks.bindEvents.push(bindEvents);

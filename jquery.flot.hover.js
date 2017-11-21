@@ -28,7 +28,7 @@
             }
 
             if (options.grid.clickable) {
-                eventHolder[0].click(onClick);
+                eventHolder.click(onClick);
             }
 
             if (options.grid.hoverable) {
@@ -48,7 +48,7 @@
             eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
-            eventHolder[0].unbind("click", onClick);
+            eventHolder.unbind("click", onClick);
             highlights = [];
         }
 
@@ -112,7 +112,6 @@
     // so we share their code)
     function triggerClickHoverEvent(eventname, event, seriesFilter, searchDistance) {
         var options = plot.getOptions(),
-            eventHolder = plot.getEventHolder(),
             offset = plot.offset(),
             canvasX = event.pageX - offset.left,
             canvasY = event.pageY - offset.top,
@@ -294,5 +293,4 @@
         name: 'navigateTouch',
         version: '0.3'
     });
-
 })(jQuery);
