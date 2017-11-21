@@ -104,8 +104,11 @@
 
     function copySVGToImgMostBrowsers(svg, img) {
         var rules = getCSSRules(document),
-            text = embedCSSRulesInSVG(rules, svg),
-            blob = new Blob([text], {type: "image/svg+xml;charset=utf-8"}),
+            source = embedCSSRulesInSVG(rules, svg);
+
+        source = patchSVGSource(source);
+
+        var blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"}),
             domURL = self.URL || self.webkitURL || self,
             url = domURL.createObjectURL(blob);
         img.src = url;
@@ -113,9 +116,27 @@
 
     function copySVGToImgSafari(svg, img) {
         var rules = getCSSRules(document),
-            text = embedCSSRulesInSVG(rules, svg),
-            data = "data:image/svg+xml;base64," + btoa(text);
+            source = embedCSSRulesInSVG(rules, svg),
+            data;
+
+        source = patchSVGSource(source);
+
+        data = "data:image/svg+xml;base64," + btoa(source);
         img.src = data;
+    }
+
+    function patchSVGSource(svgSource) {
+        var source = '';
+        //add name spaces.
+        if (!svgSource.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+            source = svgSource.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+        if (!svgSource.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
+            source = svgSource.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+        }
+
+        //add xml declaration
+        return '<?xml version="1.0" standalone="no"?>\r\n' + source;
     }
 
     function copySVGToImg(svg, img) {
