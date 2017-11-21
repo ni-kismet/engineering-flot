@@ -1263,11 +1263,6 @@ can call:
 
     Returns the size used for axis ticks. This is used internally.
 
- - triggerClickHoverEvent (eventname, event, seriesFilter, searchDistance)
-    Triggers the event named eventname used for click or hover.
-    Searching radius for the nearest plot point can be customized using searchDistance.
-    This is used internally.
-
 
 There are also some members that let you peek inside the internal
 workings of Flot which is useful in some cases. Note that if you change

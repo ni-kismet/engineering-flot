@@ -271,18 +271,10 @@ can set the default in the options.
         }
 
         function onClick(e) {
-            var o = plot.getOptions(),
-                series = plot.getData();
+            var o = plot.getOptions();
             if (!o.pan.active || !o.zoom.active) {
                 o.pan.active = true;
                 o.zoom.active = true;
-            }
-
-            if (o.grid.hoverable) {
-                plot.triggerClickHoverEvent('plothover', e,
-                    function(i) {
-                        return series[i]['hoverable'] !== false;
-                    }, 30);
             }
 
             return false;
@@ -302,10 +294,8 @@ can set the default in the options.
                 eventHolder.bind("dragend", onDragEnd);
             }
 
-            if (o.zoom.interactive || o.pan.interactive) {
-                eventHolder.dblclick(onDblClick);
-                eventHolder.click(onClick);
-            }
+            eventHolder.dblclick(onDblClick);
+            eventHolder.click(onClick);
         }
 
         plot.zoomOut = function(args) {
