@@ -69,4 +69,21 @@ describe("flot hover plugin", function () {
         expect(spy).toHaveBeenCalled();
         expect(spy.calls.count()).toBe(1);
     });
+
+    it('set data to the plot triggers plothovercleanup event', function() {
+        plot = $.plot(placeholder, [
+            [
+                [0, 0],
+                [10, 10]
+            ]
+        ], options);
+
+        var spy = jasmine.createSpy('spy');
+
+        $(plot.getPlaceholder()).on('plothovercleanup', spy);
+
+        plot.setData([1, 2, 3, 4]);
+
+        expect(spy).toHaveBeenCalled();
+    });
 });

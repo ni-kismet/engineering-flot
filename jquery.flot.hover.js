@@ -4,21 +4,20 @@
     'use strict';
 
     var options = {
-            grid: {
-                hoverable: true,
-                clickable: true
-            }
-        },
-        plot, highlights = [];
+        grid: {
+            hoverable: true,
+            clickable: true
+        }
+    };
 
     function init(plot) {
-        plot.highlight = highlight;
-        plot.unhighlight = unhighlight;
         plot.hooks.processOptions.push(initHover);
     }
 
-    function initHover(flot, options) {
-        plot = flot;
+    function initHover(plot, options) {
+        var highlights = [];
+        plot.highlight = highlight;
+        plot.unhighlight = unhighlight;
 
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
@@ -80,165 +79,161 @@
             plot.hooks.drawOverlay.push(drawOverlay);
             plot.hooks.processRawData.push(processRawData);
         }
-    }
 
-    function onMouseMove(e) {
-        var series = plot.getData();
+        function onMouseMove(e) {
+            var series = plot.getData();
 
-        if (options.grid.hoverable) {
             triggerClickHoverEvent("plothover", e,
                 function(i) {
                     return series[i]["hoverable"] !== false;
                 });
         }
-    }
 
-    function onMouseLeave(e) {
-        if (options.grid.hoverable) {
+        function onMouseLeave(e) {
             triggerClickHoverEvent("plothover", e,
                 function(i) {
                     return false;
                 });
         }
-    }
 
-    function onClick(e) {
-        var series = plot.getData();
+        function onClick(e) {
+            var series = plot.getData();
 
-        triggerClickHoverEvent("plotclick", e,
-            function(i) {
-                return series[i]["clickable"] !== false;
-            });
-    }
-
-    function triggerCleanupEvent() {
-        plot.unhighlight();
-        plot.getPlaceholder().trigger(new CustomEvent('plothovercleanup'));
-    }
-
-    // trigger click or hover event (they send the same parameters
-    // so we share their code)
-    function triggerClickHoverEvent(eventname, event, seriesFilter, searchDistance) {
-        var options = plot.getOptions(),
-            offset = plot.offset(),
-            canvasX = event.pageX - offset.left,
-            canvasY = event.pageY - offset.top,
-            pos = plot.c2p({
-                left: canvasX,
-                top: canvasY
-            }),
-            distance = searchDistance !== undefined ? searchDistance : options.grid.mouseActiveRadius;
-
-        pos.pageX = event.pageX;
-        pos.pageY = event.pageY;
-
-        var item = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
-
-        if (item) {
-            // fill in mouse pos for any listeners out there
-            item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left, 10);
-            item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top, 10);
+            triggerClickHoverEvent("plotclick", e,
+                function(i) {
+                    return series[i]["clickable"] !== false;
+                });
         }
 
-        if (options.grid.autoHighlight) {
-            // clear auto-highlights
-            for (var i = 0; i < highlights.length; ++i) {
-                var h = highlights[i];
-                if ((h.auto === eventname &&
-                    !(item && h.series === item.series &&
-                        h.point[0] === item.datapoint[0] &&
-                        h.point[1] === item.datapoint[1])) || !item) {
-                    unhighlight(h.series, h.point);
+        function triggerCleanupEvent() {
+            plot.unhighlight();
+            plot.getPlaceholder().trigger(new CustomEvent('plothovercleanup'));
+        }
+
+        // trigger click or hover event (they send the same parameters
+        // so we share their code)
+        function triggerClickHoverEvent(eventname, event, seriesFilter, searchDistance) {
+            var options = plot.getOptions(),
+                offset = plot.offset(),
+                canvasX = event.pageX - offset.left,
+                canvasY = event.pageY - offset.top,
+                pos = plot.c2p({
+                    left: canvasX,
+                    top: canvasY
+                }),
+                distance = searchDistance !== undefined ? searchDistance : options.grid.mouseActiveRadius;
+
+            pos.pageX = event.pageX;
+            pos.pageY = event.pageY;
+
+            var item = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
+
+            if (item) {
+                // fill in mouse pos for any listeners out there
+                item.pageX = parseInt(item.series.xaxis.p2c(item.datapoint[0]) + offset.left, 10);
+                item.pageY = parseInt(item.series.yaxis.p2c(item.datapoint[1]) + offset.top, 10);
+            }
+
+            if (options.grid.autoHighlight) {
+                // clear auto-highlights
+                for (var i = 0; i < highlights.length; ++i) {
+                    var h = highlights[i];
+                    if ((h.auto === eventname &&
+                        !(item && h.series === item.series &&
+                            h.point[0] === item.datapoint[0] &&
+                            h.point[1] === item.datapoint[1])) || !item) {
+                        unhighlight(h.series, h.point);
+                    }
+                }
+
+                if (item) {
+                    highlight(item.series, item.datapoint, eventname);
                 }
             }
 
-            if (item) {
-                highlight(item.series, item.datapoint, eventname);
+            plot.getPlaceholder().trigger(eventname, [pos, item]);
+        }
+
+        function highlight(s, point, auto) {
+            if (typeof s === "number") {
+                s = plot.getData()[s];
+            }
+
+            if (typeof point === "number") {
+                var ps = s.datapoints.pointsize;
+                point = s.datapoints.points.slice(ps * point, ps * (point + 1));
+            }
+
+            var i = indexOfHighlight(s, point);
+            if (i === -1) {
+                highlights.push({
+                    series: s,
+                    point: point,
+                    auto: auto
+                });
+
+                plot.triggerRedrawOverlay();
+            } else if (!auto) {
+                highlights[i].auto = false;
             }
         }
 
-        plot.getPlaceholder().trigger(eventname, [pos, item]);
-    }
+        function unhighlight(s, point) {
+            if (s == null && point == null) {
+                highlights = [];
+                plot.triggerRedrawOverlay();
+                return;
+            }
 
-    function highlight(s, point, auto) {
-        if (typeof s === "number") {
-            s = series[s];
-        }
+            if (typeof s === "number") {
+                s = plot.getData()[s];
+            }
 
-        if (typeof point === "number") {
-            var ps = s.datapoints.pointsize;
-            point = s.datapoints.points.slice(ps * point, ps * (point + 1));
-        }
+            if (typeof point === "number") {
+                var ps = s.datapoints.pointsize;
+                point = s.datapoints.points.slice(ps * point, ps * (point + 1));
+            }
 
-        var i = indexOfHighlight(s, point);
-        if (i === -1) {
-            highlights.push({
-                series: s,
-                point: point,
-                auto: auto
-            });
+            var i = indexOfHighlight(s, point);
+            if (i !== -1) {
+                highlights.splice(i, 1);
 
-            plot.triggerRedrawOverlay();
-        } else if (!auto) {
-            highlights[i].auto = false;
-        }
-    }
-
-    function unhighlight(s, point) {
-        if (s == null && point == null) {
-            highlights = [];
-            plot.triggerRedrawOverlay();
-            return;
-        }
-
-        if (typeof s === "number") {
-            s = series[s];
-        }
-
-        if (typeof point === "number") {
-            var ps = s.datapoints.pointsize;
-            point = s.datapoints.points.slice(ps * point, ps * (point + 1));
-        }
-
-        var i = indexOfHighlight(s, point);
-        if (i !== -1) {
-            highlights.splice(i, 1);
-
-            plot.triggerRedrawOverlay();
-        }
-    }
-
-    function indexOfHighlight(s, p) {
-        for (var i = 0; i < highlights.length; ++i) {
-            var h = highlights[i];
-            if (h.series === s &&
-                h.point[0] === p[0] &&
-                h.point[1] === p[1]) {
-                return i;
+                plot.triggerRedrawOverlay();
             }
         }
 
-        return -1;
-    }
+        function indexOfHighlight(s, p) {
+            for (var i = 0; i < highlights.length; ++i) {
+                var h = highlights[i];
+                if (h.series === s &&
+                    h.point[0] === p[0] &&
+                    h.point[1] === p[1]) {
+                    return i;
+                }
+            }
 
-    function drawOverlay(plot, octx, overlay) {
-        var plotOffset = plot.getPlotOffset(),
-            i, hi;
-
-        octx.save();
-        overlay.clear();
-        octx.translate(plotOffset.left, plotOffset.top);
-        for (i = 0; i < highlights.length; ++i) {
-            hi = highlights[i];
-
-            if (hi.series.bars.show) drawBarHighlight(hi.series, hi.point, octx);
-            else drawPointHighlight(hi.series, hi.point, octx);
+            return -1;
         }
-        octx.restore();
-    }
 
-    function processRawData() {
-        triggerCleanupEvent();
+        function processRawData() {
+            triggerCleanupEvent();
+        }
+
+        function drawOverlay(plot, octx, overlay) {
+            var plotOffset = plot.getPlotOffset(),
+                i, hi;
+
+            octx.save();
+            overlay.clear();
+            octx.translate(plotOffset.left, plotOffset.top);
+            for (i = 0; i < highlights.length; ++i) {
+                hi = highlights[i];
+
+                if (hi.series.bars.show) drawBarHighlight(hi.series, hi.point, octx);
+                else drawPointHighlight(hi.series, hi.point, octx);
+            }
+            octx.restore();
+        }
     }
 
     function drawPointHighlight(series, point, octx) {
