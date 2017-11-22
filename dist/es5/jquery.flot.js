@@ -5444,7 +5444,7 @@ can set the default in the options.
 
         function shutdown(plot, eventHolder) {
             eventHolder[0].removeEventListener('tap', tap.generatePlothoverEvent);
-            eventHolder[0].addEventListener('tap', triggerCleanupEvent);
+            eventHolder[0].removeEventListener('tap', triggerCleanupEvent);
             eventHolder.unbind("mousemove", onMouseMove);
             eventHolder.unbind("mouseleave", onMouseLeave);
             eventHolder.unbind("click", onClick);
@@ -5475,11 +5475,7 @@ can set the default in the options.
             plot.hooks.bindEvents.push(bindEvents);
             plot.hooks.shutdown.push(shutdown);
             plot.hooks.drawOverlay.push(drawOverlay);
-        }
-
-        var triggerCleanupEvent = function(e) {
-            plot.unhighlight();
-            plot.getPlaceholder().trigger(new CustomEvent('plothovercleanup', { detail: e }));
+            plot.hooks.processRawData.push(processRawData);
         }
     }
 
@@ -5510,6 +5506,11 @@ can set the default in the options.
             function(i) {
                 return series[i]["clickable"] !== false;
             });
+    }
+
+    function triggerCleanupEvent() {
+        plot.unhighlight();
+        plot.getPlaceholder().trigger(new CustomEvent('plothovercleanup'));
     }
 
     // trigger click or hover event (they send the same parameters
@@ -5631,6 +5632,10 @@ can set the default in the options.
             else drawPointHighlight(hi.series, hi.point, octx);
         }
         octx.restore();
+    }
+
+    function processRawData() {
+        triggerCleanupEvent();
     }
 
     function drawPointHighlight(series, point, octx) {
