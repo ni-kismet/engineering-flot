@@ -1019,6 +1019,9 @@ true (the default), nearby data items are highlighted automatically.
 If needed, you can disable highlighting and control it yourself with
 the highlight/unhighlight plot methods described elsewhere.
 
+In case hoverable is set to true, plothovercleanup event will be triggered
+on or pinc interaction or if setData() function is called.
+
 You can use "plotclick" and "plothover" events like this:
 
 ```js
