@@ -230,13 +230,13 @@
                 hi = highlights[i];
 
                 if (hi.series.bars.show) drawBarHighlight(hi.series, hi.point, octx);
-                else drawPointHighlight(hi.series, hi.point, octx);
+                else drawPointHighlight(hi.series, hi.point, octx, plot);
             }
             octx.restore();
         }
     }
 
-    function drawPointHighlight(series, point, octx) {
+    function drawPointHighlight(series, point, octx, plot) {
         var x = point[0],
             y = point[1],
             axisx = series.xaxis,
