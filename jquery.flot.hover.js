@@ -107,7 +107,7 @@
 
         function triggerCleanupEvent() {
             plot.unhighlight();
-            plot.getPlaceholder().trigger(new CustomEvent('plothovercleanup'));
+            plot.getPlaceholder().trigger('plothovercleanup');
         }
 
         // trigger click or hover event (they send the same parameters
