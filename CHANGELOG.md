@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 ## [1.0.7]
 ### Changes ###
 - Generate plothover event for tap on point
+- Support for mobile safari browser for snapshots
+
+### Bug fixes ###
+- Fix legend background color
 
 ## [1.0.6]
 ### Bug fixes ###
