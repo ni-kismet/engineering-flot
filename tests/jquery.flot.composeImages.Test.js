@@ -3,13 +3,14 @@
 
 describe("composeImages", function() {
     var placeholder, plot;
-    var composeImages = $.plot.composeImages;
+    var composeImages = $.plot.composeImages,
+        canvasData = window.colors.canvasData;
 
     beforeEach(function() {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px; padding: 0px margin: 0px; border: 0px; font-size:0pt; font-family:sans-serif; line-height:0px;">')
             .find('#test-container');
 
-        jasmine.addMatchers(pixelMatchers);
+        jasmine.addMatchers(window.colors.jasmineMatchers);
     });
 
     it('should call composeImages on an empty array of sources, so the destination canvas should stay unmodified', function (done) {
@@ -764,105 +765,4 @@ describe("composeImages", function() {
         ctx.fillStyle = color;
         ctx.fill();
     }
-
-    function canvasData(canvas, x, y, width, height) {
-        return canvas.getContext('2d').getImageData(x, y, width, height).data;
-    }
-
-    function matchPixelColor(pixelData, r, g, b, a) {
-        return (pixelData[0] === r) && (pixelData[1] === g) && (pixelData[2] === b) && (pixelData[3] === a);
-    }
-
-    function matchPixelColorWithError(pixelData, r, g, b, a, err) {
-        return (Math.abs(pixelData[0] - r) <= err) && (Math.abs(pixelData[1] - g) <= err) && (Math.abs(pixelData[2] - b) <= err) && (Math.abs(pixelData[3] - a) <= err);
-    }
-
-    function matchPixelDataArrays(pixelData1, pixelData2) {
-        var sameValue = true;
-        if (pixelData1.length !== pixelData2.length) {
-            sameValue = false;
-        } else {
-            for (var i = 0; i < pixelData1.length; i++) {
-                if (pixelData1[i] !== pixelData2[i]) {
-                    sameValue = false;
-                    break;
-                }
-            }
-        }
-        return sameValue;
-    }
-
-    //see https://jasmine.github.io/2.0/custom_matcher.html
-    var pixelMatchers = {
-        toMatchPixelColor: function(util, customEqualityTesters) {
-            return {
-                compare: function(actual, expected) {
-                    if (expected === undefined) {
-                        expected = expected || [-1000, -1000, -999, -999]; //no color should match these values
-                    }
-
-                    var pixelData = actual,
-                        r = expected[0],
-                        g = expected[1],
-                        b = expected[2],
-                        a = expected[3],
-
-                        result = {};
-                    result.pass = matchPixelColor(pixelData, r, g, b, a);
-                    if (!result.pass) {
-                        result.message =
-                          'Expected [' + pixelData +
-                          '] to match [' + r + ',' + g + ',' + b + ',' + a + ']';
-                    }
-                    return result;
-                }
-            };
-        },
-
-        toMatchPixelColorWithError: function(util, customEqualityTesters) {
-            return {
-                compare: function(actual, expected) {
-                    if (expected === undefined) {
-                        expected = expected || [-1000, -1000, -999, -999, -1500]; //no color should match these values
-                    }
-
-                    var pixelData = actual,
-                        r = expected[0],
-                        g = expected[1],
-                        b = expected[2],
-                        a = expected[3],
-                        err = expected[4],
-
-                        result = {};
-                    result.pass = matchPixelColorWithError(pixelData, r, g, b, a, err);
-                    if (!result.pass) {
-                        result.message =
-                          'Expected [' + pixelData +
-                          '] to match [' + r + ',' + g + ',' + b + ',' + a + ']';
-                    }
-                    return result;
-                }
-            };
-        },
-
-        toMatchCanvasArea: function(util, customEqualityTesters) {
-            return {
-                compare: function(actual, expected) {
-                    if (expected === undefined) {
-                        expected = [];
-                    }
-
-                    var result = {};
-                    result.pass = matchPixelDataArrays(actual, expected);
-                    if (!result.pass) {
-                        result.message =
-                          'Expected actual[...]' +
-                          ' to match expected[...]';
-                    }
-                    return result;
-                }
-            };
-        }
-    }
-
 });
