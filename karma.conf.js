@@ -35,7 +35,8 @@ module.exports = function(config) {
         'jquery.flot.axislabels.js',
         'jquery.flot.composeImages.js',
         'jquery.flot.selection.js',
-        'jquery.flot.legend.js'
+        'jquery.flot.legend.js',
+        'jquery.flot.hover.js'
     ];
 
     var sources = [

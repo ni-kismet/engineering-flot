@@ -401,4 +401,86 @@ describe("flot touch plugin", function () {
             expect(spy).not.toHaveBeenCalled();
         });
     });
+
+    describe('tap', function() {
+
+        beforeEach(function() {
+            jasmine.clock().install().mockDate();
+        });
+
+        afterEach(function() {
+            jasmine.clock().uninstall();
+        });
+
+        it('should trigger the tap event', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('tap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(50);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchend');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should trigger the tap event even when there is a different touch point', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('tap handler'),
+                initialCoords = [{x: 10, y: 20}],
+                finalCoords = [{x: 11, y: 21}];
+
+            eventHolder.addEventListener('tap', spy);
+
+            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(50);
+            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(1);
+        });
+
+        it('should not trigger the tap event for a big interval between taps', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('tap handler'),
+                coords = [{x: 10, y: 20}];
+
+            eventHolder.addEventListener('tap', spy);
+
+            simulate.sendTouchEvents(coords, eventHolder, 'touchstart');
+            jasmine.clock().tick(200);
+            simulate.sendTouchEvents(coords, eventHolder, 'touchend');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+
+        it('should not trigger the tap event for a big interval between taps', function() {
+            plot = $.plot(placeholder, [[]], options);
+
+            var eventHolder = plot.getEventHolder(),
+                spy = jasmine.createSpy('tap handler'),
+                initalCoords = [{x: 10, y: 20}],
+                moveCoords = [{x: 30, y: 60}];;
+
+            eventHolder.addEventListener('tap', spy);
+
+            simulate.sendTouchEvents(initalCoords, eventHolder, 'touchstart');
+            simulate.sendTouchEvents(moveCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(30);
+            simulate.sendTouchEvents(moveCoords, eventHolder, 'touchend');
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(spy.calls.count()).toBe(0);
+        });
+    });
 });

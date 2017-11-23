@@ -267,7 +267,7 @@ can set the default in the options.
                 o.pan.active = true;
                 o.zoom.active = true;
             }
-            plot.getPlaceholder().trigger("re-center", e);
+            plot.getPlaceholder().trigger('re-center', e);
         }
 
         function onClick(e) {
@@ -276,6 +276,7 @@ can set the default in the options.
                 o.pan.active = true;
                 o.zoom.active = true;
             }
+
             return false;
         }
 
@@ -293,10 +294,8 @@ can set the default in the options.
                 eventHolder.bind("dragend", onDragEnd);
             }
 
-            if (o.zoom.interactive || o.pan.interactive) {
-                eventHolder.dblclick(onDblClick);
-                eventHolder.click(onClick);
-            }
+            eventHolder.dblclick(onDblClick);
+            eventHolder.click(onClick);
         }
 
         plot.zoomOut = function(args) {

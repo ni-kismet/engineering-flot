@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.7]
+### Changes ###
+- Generate plothover event for tap on point
+
 ## [1.0.6]
 ### Bug fixes ###
 - Hang caused by 'use' elements in SVGs when calling composeImages
@@ -1427,7 +1431,7 @@ Moved labelMargin option to grid from x/yaxis.
 
 First public release.
 
-
+[1.0.7]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.3...v1.0.4
