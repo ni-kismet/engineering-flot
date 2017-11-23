@@ -752,7 +752,7 @@ describe("flot navigate plugin", function () {
         });
     });
 
-    describe('mouse click', function(){
+    describe('click', function(){
         it('on plot activates plot\'s zoom and pan active propriety', function() {
             plot = $.plot(placeholder, [
                 [

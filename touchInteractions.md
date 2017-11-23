@@ -23,6 +23,7 @@ This plugin is responsible only for transforming the low level ```touchstart```,
 * ```pinchend```
 * ```doubletap```
 * ```longtap```
+* ```tap```
 
 This plugin is using the ```bindEvents``` hook of flot to add the event listenters for the low level events and, after interpreting them, will dispach the higher level events to the same event holder.
 

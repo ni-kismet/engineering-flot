@@ -31,6 +31,7 @@
             maxIntervalBetweenTaps = 500,
             maxLongTapDistance = 20,
             minLongTapDuration = 1500,
+            pressedTapDuration = 125,
             mainEventHolder;
 
         function interpretGestures(e) {
@@ -41,6 +42,7 @@
             }
 
             updateOnMultipleTouches(e);
+            mainEventHolder.dispatchEvent(new CustomEvent('touchevent', { detail: e }));
 
             if (isPinchEvent(e)) {
                 executeAction(e, 'pinch');
@@ -50,6 +52,7 @@
                     if (isDoubleTap(e)) {
                         executeAction(e, 'doubleTap');
                     }
+                    executeAction(e, 'tap');
                     executeAction(e, 'longTap');
                 }
             }
@@ -68,6 +71,9 @@
                     break;
                 case 'longTap':
                     longTap[e.type](e);
+                    break;
+                case 'tap':
+                    tap[e.type](e);
                     break;
                 default:
                     break;
@@ -185,6 +191,33 @@
                 if (!gestureState.longTapTriggerId) {
                     gestureState.longTapTriggerId = setTimeout(longTapTrigger, minLongTapDuration);
                 }
+            }
+        };
+
+        var tap = {
+            touchstart: function(e) {
+                gestureState.tapStartTime = new Date().getTime();
+            },
+
+            touchmove: function(e) {
+            },
+
+            touchend: function(e) {
+                if (tap.isTap(e)) {
+                    mainEventHolder.dispatchEvent(new CustomEvent('tap', { detail: e }));
+                    preventEventPropagation(e);
+                }
+            },
+
+            isTap: function(e) {
+                var currentTime = new Date().getTime(),
+                    tapDuration = currentTime - gestureState.tapStartTime;
+                if (tapDuration <= pressedTapDuration) {
+                    if (distance(gestureState.currentTapStart.x, gestureState.currentTapStart.y, gestureState.currentTapEnd.x, gestureState.currentTapEnd.y) < maxLongTapDistance) {
+                        return true;
+                    }
+                }
+                return false;
             }
         };
 
