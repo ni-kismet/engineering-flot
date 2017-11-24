@@ -144,7 +144,7 @@
         // Safari 3.0+ "[object HTMLElementConstructor]"
         var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
 
-        //isMobileSafari addapted from https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
+        //isMobileSafari adapted from https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
         var isMobileSafari = navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/);
 
         if (isSafari || isMobileSafari) {
@@ -154,8 +154,12 @@
         }
     }
 
-    function addaptDestSizeToZoom(destinationCanvas, containsSVGs) {
-        if (containsSVGs) {
+    function adaptDestSizeToZoom(destinationCanvas, sources) {
+        function containsSVGs(source) {
+            return source.srcImgTagName === 'svg';
+        }
+
+        if (sources.find(containsSVGs) !== undefined) {
             if (pixelRatio < 1) {
                 destinationCanvas.width = destinationCanvas.width * pixelRatio;
                 destinationCanvas.height = destinationCanvas.height * pixelRatio;
@@ -200,17 +204,12 @@
                 destination.width = Math.round(maxX - minX);
                 destination.height = Math.round(maxY - minY);
 
-                var containsSVGs = false;
                 for (i = 0; i < sources.length; i++) {
                     sources[i].xCompOffset = sources[i].genLeft - minX;
                     sources[i].yCompOffset = sources[i].genTop - minY;
-
-                    if (sources[i].srcImgTagName === 'svg') {
-                        containsSVGs = true;
-                    }
                 }
 
-                addaptDestSizeToZoom(destination, containsSVGs);
+                adaptDestSizeToZoom(destination, sources);
             }
         }
         return result;
