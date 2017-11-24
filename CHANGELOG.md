@@ -2,7 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [1.0.8]
+
 ### Bug fixes ###
+- tspan leak for absolute time axis fix
 - Fix snapshot image size for pixel ratios less than 1
 
 ## [1.0.7]
