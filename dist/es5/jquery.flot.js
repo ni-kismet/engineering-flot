@@ -597,6 +597,7 @@
                 return;
             } else if (position.active === false) {
                 position.active = true;
+                position.text = text;
                 if (text.indexOf('<br>') !== -1) {
                     y -= 0.25 * info.height;
                     addTspanElements(text, position.element, x);
@@ -651,12 +652,16 @@
             tspan, i, offset;
 
         for (i = 0; i < lines.length; i++) {
-            tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+            if (!element.childNodes[i]) {
+                tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                element.appendChild(tspan);
+            } else {
+                tspan = element.childNodes[i];
+            }
             tspan.textContent = lines[i];
             offset = i * 1 + 'em';
             tspan.setAttributeNS(null, 'dy', offset);
             tspan.setAttributeNS(null, 'x', x);
-            element.appendChild(tspan);
         }
     }
 

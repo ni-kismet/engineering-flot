@@ -156,11 +156,24 @@ describe('CanvasWrapper', function() {
 
     it('should add multiple tspan for text that contains br tag', function() {
         var canvas = newCanvas(placeholder);
-        canvas.addText('layerB', 100, 200, '1<br>2<br>3<br>4', 'b');
+        canvas.addText('layerA', 100, 200, '1<br>2<br>3<br>4', 'a');
         canvas.render();
 
-        var elems = placeholder.find('.b')[0];
-        expect(elems.childNodes.length).toBe(4);
+        var elem = placeholder.find('.a')[0];
+        expect(elem.childNodes.length).toBe(4);
+    });
+
+    it('should update the tspan element content', function() {
+        var canvas = newCanvas(placeholder);
+        canvas.addText('layerA', 100, 200, '1<br>2<br>3', 'a');
+        canvas.render();
+
+        canvas.removeText('layerA', 100, 200, '1<br>2<br>3', 'a');
+        canvas.addText('layerA', 130, 230, '1<br>2<br>3<br>4', 'a');
+        canvas.render();
+
+        var elem = placeholder.find('.a')[0];
+        expect(elem.childNodes.length).toBe(4);
     });
 
     it('should update the cache position of the elements', function() {
