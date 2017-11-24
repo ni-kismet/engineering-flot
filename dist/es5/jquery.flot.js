@@ -4641,7 +4641,7 @@ can set the default in the options.
         }
 
         function onDragStart(e) {
-            if (e.buttons !== 1) {
+            if (e.which !== 1) {
                 // only accept left-click
                 return false;
             }
