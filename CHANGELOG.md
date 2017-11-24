@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.8]
+### Bug fixes ###
+- Fix snapshot image size for pixel ratios less than 1
+
 ## [1.0.7]
 ### Changes ###
 - Generate plothover event for tap on point
@@ -1435,6 +1439,7 @@ Moved labelMargin option to grid from x/yaxis.
 
 First public release.
 
+[1.0.8]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.4...v1.0.5
