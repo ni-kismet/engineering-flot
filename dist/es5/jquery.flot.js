@@ -7370,6 +7370,15 @@ The plugin allso adds the following methods to the plot object:
         }
     }
 
+    function addaptDestSizeToZoom(destinationCanvas, containsSVGs) {
+        if (containsSVGs) {
+            if (pixelRatio < 1) {
+                destinationCanvas.width = destinationCanvas.width * pixelRatio;
+                destinationCanvas.height = destinationCanvas.height * pixelRatio;
+            }
+        }
+    }
+
     function prepareImagesToBeComposed(sources, destination) {
         var result = SUCCESSFULIMAGEPREPARATION;
         if (sources.length === 0) {
@@ -7407,10 +7416,17 @@ The plugin allso adds the following methods to the plot object:
                 destination.width = Math.round(maxX - minX);
                 destination.height = Math.round(maxY - minY);
 
+                var containsSVGs = false;
                 for (i = 0; i < sources.length; i++) {
                     sources[i].xCompOffset = sources[i].genLeft - minX;
                     sources[i].yCompOffset = sources[i].genTop - minY;
+
+                    if (sources[i].srcImgTagName === 'svg') {
+                        containsSVGs = true;
+                    }
                 }
+
+                addaptDestSizeToZoom(destination, containsSVGs);
             }
         }
         return result;
@@ -7454,6 +7470,7 @@ The plugin allso adds the following methods to the plot object:
             copySVGToImg(srcCanvasOrSvg, destImg);
         }
 
+        destImg.srcImgTagName = srcCanvasOrSvg.tagName;
         adnotateDestImgWithBoundingClientRect(srcCanvasOrSvg, destImg);
     }
 
