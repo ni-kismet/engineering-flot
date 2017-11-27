@@ -267,7 +267,17 @@ can set the default in the options.
                 o.pan.active = true;
                 o.zoom.active = true;
             }
-            plot.getPlaceholder().trigger('re-center', e);
+
+            var axes = plot.getTouchedAxis(e.clientX, e.clientY),
+                event;
+            if (axes[0]) {
+                event = new jQuery.Event('re-center', { detail: {
+                    axisTouched: axes[0]
+                }});
+            } else {
+                event = new jQuery.Event('re-center', {detail: e});
+            }
+            plot.getPlaceholder().trigger(event);
         }
 
         function onClick(e) {
@@ -618,6 +628,22 @@ can set the default in the options.
 
                 ctx.stroke();
             }
+        }
+
+        plot.getTouchedAxis = function(touchPointX, touchPointY) {
+            var ec = plot.getPlaceholder().offset();
+            ec.left = touchPointX - ec.left;
+            ec.top = touchPointY - ec.top;
+
+            var axis = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+                var box = axis.box;
+                if (box !== undefined) {
+                    return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                            (ec.top > box.top) && (ec.top < box.top + box.height);
+                }
+            });
+
+            return axis;
         }
 
         plot.hooks.drawOverlay.push(drawOverlay);
