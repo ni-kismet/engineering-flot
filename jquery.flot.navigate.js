@@ -156,23 +156,29 @@ can set the default in the options.
             }
         }
 
+        var prevCursor = 'default',
+            panHint = null,
+            panTimeout = null,
+            plotState,
+            isPanAction = false;
+
         function onMouseWheel(e, delta) {
             var maxAbsoluteDeltaOnMac = 1,
                 isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxAbsoluteDeltaOnMac,
                 defaultNonMacScrollAmount = null,
                 macMagicRatio = 50,
                 amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / macMagicRatio : defaultNonMacScrollAmount;
+
+            if (isPanAction) {
+                onDragEnd(e);
+            }
+
             if (plot.getOptions().zoom.active) {
                 e.preventDefault();
                 onZoomClick(e, delta < 0, amount);
                 return false;
             }
         }
-
-        var prevCursor = 'default',
-            panHint = null,
-            panTimeout = null,
-            plotState;
 
         plot.navigationState = function(startPageX, startPageY) {
             var axes = this.getAxes();
@@ -206,7 +212,9 @@ can set the default in the options.
                 return false;
             }
 
+            isPanAction = true;
             var [pageX, pageY] = getPageXY(e);
+
             var ec = plot.getPlaceholder().offset();
             ec.left = pageX - ec.left;
             ec.top = pageY - ec.top;
@@ -263,6 +271,7 @@ can set the default in the options.
                 panTimeout = null;
             }
 
+            isPanAction = false;
             var [pageX, pageY] = getPageXY(e);
 
             plot.getPlaceholder().css('cursor', prevCursor);
@@ -297,6 +306,10 @@ can set the default in the options.
             if (!o.pan.active || !o.zoom.active) {
                 o.pan.active = true;
                 o.zoom.active = true;
+            }
+
+            if (isPanAction) {
+                onDragEnd(e);
             }
 
             return false;

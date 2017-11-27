@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Bug fixes ###
 - Panning the plot in Firefox using any mouse button
 - Overlay canvas cleared too often
+- Click or mouse wheel pressed while dragging will stop drag event
 
 ## [1.0.8]
 
