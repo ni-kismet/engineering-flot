@@ -193,8 +193,19 @@ can set the default in the options.
             return result;
         }
 
+        function isLeftMouseButtonPressed(e) {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Safari 3.0+ "[object HTMLElementConstructor]"
+            var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+            //isMobileSafari adapted from https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
+            var isMobileSafari = navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/);
+
+            return (isSafari || isMobileSafari) ? e.which === 1 : e.buttons === 1;
+        }
+
         function onDragStart(e) {
-            if (e.buttons !== 1) {
+            if (!isLeftMouseButtonPressed(e)) {
                 // only accept left-click
                 return false;
             }
