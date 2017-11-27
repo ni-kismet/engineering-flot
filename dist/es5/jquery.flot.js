@@ -4646,9 +4646,16 @@ can set the default in the options.
             return result;
         }
 
+        function isLeftMouseButtonPressed(e) {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Safari 3.0+ "[object HTMLElementConstructor]"
+            var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+            return isSafari ? e.which === 1 : e.buttons === 1;
+        }
+
         function onDragStart(e) {
-            if (e.buttons !== 1) {
-                // only accept left-click
+            if (!isLeftMouseButtonPressed(e)) {
                 return false;
             }
 
