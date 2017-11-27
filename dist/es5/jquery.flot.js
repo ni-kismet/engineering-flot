@@ -4608,23 +4608,29 @@ can set the default in the options.
         var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
         var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
+        var prevCursor = 'default',
+            panHint = null,
+            panTimeout = null,
+            plotState,
+            isPanAction = false;
+
         function onMouseWheel(e, delta) {
             var maxAbsoluteDeltaOnMac = 1,
                 isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxAbsoluteDeltaOnMac,
                 defaultNonMacScrollAmount = null,
                 macMagicRatio = 50,
                 amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / macMagicRatio : defaultNonMacScrollAmount;
+
+            if (isPanAction) {
+                onDragEnd(e);
+            }
+
             if (plot.getOptions().zoom.active) {
                 e.preventDefault();
                 onZoomClick(e, delta < 0, amount);
                 return false;
             }
         }
-
-        var prevCursor = 'default',
-            panHint = null,
-            panTimeout = null,
-            plotState;
 
         plot.navigationState = function(startPageX, startPageY) {
             var axes = this.getAxes();
@@ -4651,6 +4657,7 @@ can set the default in the options.
                 return false;
             }
 
+            isPanAction = true;
             var ec = plot.getPlaceholder().offset();
             ec.left = e.pageX - ec.left;
             ec.top = e.pageY - ec.top;
@@ -4706,6 +4713,8 @@ can set the default in the options.
                 panTimeout = null;
             }
 
+            isPanAction = false;
+
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.smartPan({
                 x: plotState.startPageX - e.pageX,
@@ -4738,6 +4747,10 @@ can set the default in the options.
             if (!o.pan.active || !o.zoom.active) {
                 o.pan.active = true;
                 o.zoom.active = true;
+            }
+
+            if (isPanAction) {
+                onDragEnd(e);
             }
 
             return false;
@@ -5417,8 +5430,8 @@ can set the default in the options.
 
     var options = {
         grid: {
-            hoverable: true,
-            clickable: true
+            hoverable: false,
+            clickable: false
         }
     };
 
@@ -5636,7 +5649,6 @@ can set the default in the options.
                 i, hi;
 
             octx.save();
- 
             octx.translate(plotOffset.left, plotOffset.top);
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];

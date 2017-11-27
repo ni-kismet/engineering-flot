@@ -5,8 +5,8 @@
 
     var options = {
         grid: {
-            hoverable: true,
-            clickable: true
+            hoverable: false,
+            clickable: false
         }
     };
 
