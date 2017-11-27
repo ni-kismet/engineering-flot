@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.9]
+
+### Bug fixes ###
+- Overlay canvas cleared too often
+- Panning the plot in Firefox using any mouse button
+
 ## [1.0.8]
 
 ### Bug fixes ###
