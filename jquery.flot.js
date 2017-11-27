@@ -2624,7 +2624,7 @@ Licensed under the MIT license.
             if (!octx) {
                 return;
             }
-
+            overlay.clear();
             executeHooks(hooks.drawOverlay, [octx, overlay]);
         }
 
