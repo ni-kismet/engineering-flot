@@ -4565,6 +4565,8 @@ can set the default in the options.
     };
 
     var saturated = $.plot.saturated;
+    var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
+    var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
     function init(plot) {
         var panAxes = null;
@@ -4607,20 +4609,6 @@ can set the default in the options.
             }
         }
 
-        function getPageXY(e) {
-            // This function calculates the pageX and pageY which are not valid
-            //while running the tests with Edge and creating events using
-            //new WheelEvent() or new MouseEvent()
-            // This code is inspired from https://stackoverflow.com/a/3464890
-            var doc = document.documentElement,
-                left = e.clientX + (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0),
-                top = e.clientY + (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
-            return [left, top];
-        }
-
-        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
-        var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
-
         function onMouseWheel(e, delta) {
             var maxAbsoluteDeltaOnMac = 1,
                 isMacScroll = Math.abs(e.originalEvent.deltaY) <= maxAbsoluteDeltaOnMac,
@@ -4639,7 +4627,7 @@ can set the default in the options.
             panTimeout = null,
             plotState;
 
-        plot.navigationState = function(startScreenX, startScreenY) {
+        plot.navigationState = function(startPageX, startPageY) {
             var axes = this.getAxes();
             var result = {};
             Object.keys(axes).forEach(function(axisName) {
@@ -4653,8 +4641,8 @@ can set the default in the options.
                 }
             });
 
-            result.startScreenX = startScreenX || 0;
-            result.startScreenY = startScreenY || 0;
+            result.startPageX = startPageX || 0;
+            result.startPageY = startPageY || 0;
             return result;
         }
 
@@ -4664,9 +4652,10 @@ can set the default in the options.
                 return false;
             }
 
+            var [pageX, pageY] = getPageXY(e);
             var ec = plot.getPlaceholder().offset();
-            ec.left = e.screenX - ec.left;
-            ec.top = e.screenY - ec.top;
+            ec.left = pageX - ec.left;
+            ec.top = pageY - ec.top;
 
             panAxes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
                 var box = axis.box;
@@ -4686,16 +4675,17 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            plotState = plot.navigationState(e.screenX, e.screenY);
+            plotState = plot.navigationState(pageX, pageY);
         }
 
         function onDrag(e) {
+            var [pageX, pageY] = getPageXY(e);
             var frameRate = plot.getOptions().pan.frameRate;
 
             if (frameRate === -1) {
                 plot.smartPan({
-                    x: plotState.startScreenX - e.screenX,
-                    y: plotState.startScreenY - e.screenY
+                    x: plotState.startPageX - pageX,
+                    y: plotState.startPageY - pageY
                 }, plotState, panAxes);
 
                 return;
@@ -4705,8 +4695,8 @@ can set the default in the options.
 
             panTimeout = setTimeout(function() {
                 plot.smartPan({
-                    x: plotState.startScreenX - e.screenX,
-                    y: plotState.startScreenY - e.screenY
+                    x: plotState.startPageX - pageX,
+                    y: plotState.startPageY - pageY
                 }, plotState, panAxes);
 
                 panTimeout = null;
@@ -4719,10 +4709,12 @@ can set the default in the options.
                 panTimeout = null;
             }
 
+            var [pageX, pageY] = getPageXY(e);
+
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.smartPan({
-                x: plotState.startScreenX - e.screenX,
-                y: plotState.startScreenY - e.screenY
+                x: plotState.startPageX - pageX,
+                y: plotState.startPageY - pageY
             }, plotState, panAxes);
             panHint = null;
         }
@@ -4906,6 +4898,17 @@ can set the default in the options.
             plot.draw();
         };
 
+        var getPageXY = function(e) {
+            // This function calculates the pageX and pageY which are not valid
+            //while running the tests with Edge and creating events using the
+            //recommended WheelEvent or MouseEvent constructors.
+            // This code is inspired from https://stackoverflow.com/a/3464890
+            var doc = document.documentElement,
+                pageX = e.clientX + (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0),
+                pageY = e.clientY + (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+            return [pageX, pageY];
+        };
+
         var shouldSnap = function(delta) {
             return (Math.abs(delta.y) < SNAPPING_CONSTANT && Math.abs(delta.x) >= SNAPPING_CONSTANT) ||
                 (Math.abs(delta.x) < SNAPPING_CONSTANT && Math.abs(delta.y) >= SNAPPING_CONSTANT);
@@ -4962,19 +4965,19 @@ can set the default in the options.
             if (snap) {
                 panHint = {
                     start: {
-                        x: initialState.startScreenX - plot.offset().left + plot.getPlotOffset().left,
-                        y: initialState.startScreenY - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: {
-                        x: initialState.startScreenX - delta.x - plot.offset().left + plot.getPlotOffset().left,
-                        y: initialState.startScreenY - delta.y - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - delta.x - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - delta.y - plot.offset().top + plot.getPlotOffset().top
                     }
                 }
             } else {
                 panHint = {
                     start: {
-                        x: initialState.startScreenX - plot.offset().left + plot.getPlotOffset().left,
-                        y: initialState.startScreenY - plot.offset().top + plot.getPlotOffset().top
+                        x: initialState.startPageX - plot.offset().left + plot.getPlotOffset().left,
+                        y: initialState.startPageY - plot.offset().top + plot.getPlotOffset().top
                     },
                     end: false
                 }
