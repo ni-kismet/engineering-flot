@@ -112,18 +112,22 @@ can set the default in the options.
     };
 
     var saturated = $.plot.saturated;
+    var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
+    var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
     function init(plot) {
         var panAxes = null;
 
         function onZoomClick(e, zoomOut, amount) {
+            var [pageX, pageY] = getPageXY(e);
+
             var c = plot.offset();
-            c.left = e.pageX - c.left;
-            c.top = e.pageY - c.top;
+            c.left = pageX - c.left;
+            c.top = pageY - c.top;
 
             var ec = plot.getPlaceholder().offset();
-            ec.left = e.pageX - ec.left;
-            ec.top = e.pageY - ec.top;
+            ec.left = pageX - ec.left;
+            ec.top = pageY - ec.top;
 
             var axes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
                 var box = axis.box;
@@ -151,9 +155,6 @@ can set the default in the options.
                 });
             }
         }
-
-        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
-        var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
         var prevCursor = 'default',
             panHint = null,
@@ -198,16 +199,25 @@ can set the default in the options.
             return result;
         }
 
+        function isLeftMouseButtonPressed(e) {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Safari 3.0+ "[object HTMLElementConstructor]"
+            var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+            return isSafari ? e.which === 1 : e.buttons === 1;
+        }
+
         function onDragStart(e) {
-            if (e.which !== 1) {
-                // only accept left-click
+            if (!isLeftMouseButtonPressed(e)) {
                 return false;
             }
 
             isPanAction = true;
+            var [pageX, pageY] = getPageXY(e);
+
             var ec = plot.getPlaceholder().offset();
-            ec.left = e.pageX - ec.left;
-            ec.top = e.pageY - ec.top;
+            ec.left = pageX - ec.left;
+            ec.top = pageY - ec.top;
 
             panAxes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
                 var box = axis.box;
@@ -227,16 +237,17 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            plotState = plot.navigationState(e.pageX, e.pageY);
+            plotState = plot.navigationState(pageX, pageY);
         }
 
         function onDrag(e) {
+            var [pageX, pageY] = getPageXY(e);
             var frameRate = plot.getOptions().pan.frameRate;
 
             if (frameRate === -1) {
                 plot.smartPan({
-                    x: plotState.startPageX - e.pageX,
-                    y: plotState.startPageY - e.pageY
+                    x: plotState.startPageX - pageX,
+                    y: plotState.startPageY - pageY
                 }, plotState, panAxes);
 
                 return;
@@ -246,8 +257,8 @@ can set the default in the options.
 
             panTimeout = setTimeout(function() {
                 plot.smartPan({
-                    x: plotState.startPageX - e.pageX,
-                    y: plotState.startPageY - e.pageY
+                    x: plotState.startPageX - pageX,
+                    y: plotState.startPageY - pageY
                 }, plotState, panAxes);
 
                 panTimeout = null;
@@ -261,11 +272,12 @@ can set the default in the options.
             }
 
             isPanAction = false;
+            var [pageX, pageY] = getPageXY(e);
 
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.smartPan({
-                x: plotState.startPageX - e.pageX,
-                y: plotState.startPageY - e.pageY
+                x: plotState.startPageX - pageX,
+                y: plotState.startPageY - pageY
             }, plotState, panAxes);
             panHint = null;
         }
@@ -461,6 +473,17 @@ can set the default in the options.
             });
             plot.setupGrid();
             plot.draw();
+        };
+
+        var getPageXY = function(e) {
+            // This function calculates the pageX and pageY which are not valid
+            //while running the tests with Edge and creating events using the
+            //recommended WheelEvent or MouseEvent constructors.
+            // This code is inspired from https://stackoverflow.com/a/3464890
+            var doc = document.documentElement,
+                pageX = e.clientX + (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0),
+                pageY = e.clientY + (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+            return [pageX, pageY];
         };
 
         var shouldSnap = function(delta) {
