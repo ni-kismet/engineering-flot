@@ -3375,7 +3375,7 @@ Licensed under the MIT license.
             if (!octx) {
                 return;
             }
-
+            overlay.clear();
             executeHooks(hooks.drawOverlay, [octx, overlay]);
         }
 
@@ -4732,7 +4732,17 @@ can set the default in the options.
                 o.pan.active = true;
                 o.zoom.active = true;
             }
-            plot.getPlaceholder().trigger('re-center', e);
+
+            var axes = plot.getTouchedAxis(e.clientX, e.clientY),
+                event;
+            if (axes[0]) {
+                event = new jQuery.Event('re-center', { detail: {
+                    axisTouched: axes[0]
+                }});
+            } else {
+                event = new jQuery.Event('re-center', {detail: e});
+            }
+            plot.getPlaceholder().trigger(event);
         }
 
         function onClick(e) {
@@ -5096,6 +5106,22 @@ can set the default in the options.
             }
         }
 
+        plot.getTouchedAxis = function(touchPointX, touchPointY) {
+            var ec = plot.getPlaceholder().offset();
+            ec.left = touchPointX - ec.left;
+            ec.top = touchPointY - ec.top;
+
+            var axis = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
+                var box = axis.box;
+                if (box !== undefined) {
+                    return (ec.left > box.left) && (ec.left < box.left + box.width) &&
+                            (ec.top > box.top) && (ec.top < box.top + box.height);
+                }
+            });
+
+            return axis;
+        }
+
         plot.hooks.drawOverlay.push(drawOverlay);
         plot.hooks.bindEvents.push(bindEvents);
         plot.hooks.shutdown.push(shutdown);
@@ -5260,12 +5286,12 @@ can set the default in the options.
     }
 
     function checkAxesForDoubleTap(plot, e, navigationState) {
-        var axis = getTouchedAxis(plot, e.detail.firstTouch.x, e.detail.firstTouch.y);
+        var axis = plot.getTouchedAxis(e.detail.firstTouch.x, e.detail.firstTouch.y);
         if (axis[0] !== undefined) {
             navigationState.prevTouchedAxis = axis[0].direction;
         }
 
-        axis = getTouchedAxis(plot, e.detail.secondTouch.x, e.detail.secondTouch.y);
+        axis = plot.getTouchedAxis(e.detail.secondTouch.x, e.detail.secondTouch.y);
         if (axis[0] !== undefined) {
             navigationState.touchedAxis = axis;
             navigationState.currentTouchedAxis = axis[0].direction;
@@ -5305,17 +5331,17 @@ can set the default in the options.
 
     function getAxis(plot, e, gesture, navigationState) {
         if (e.type === 'pinchstart') {
-            var axisTouch1 = getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
-            var axisTouch2 = getTouchedAxis(plot, e.detail.touches[1].pageX, e.detail.touches[1].pageY);
+            var axisTouch1 = plot.getTouchedAxis(e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+            var axisTouch2 = plot.getTouchedAxis(e.detail.touches[1].pageX, e.detail.touches[1].pageY);
 
             if (axisTouch1.length === axisTouch2.length && axisTouch1.toString() === axisTouch2.toString()) {
                 return axisTouch1;
             }
         } else if (e.type === 'panstart') {
-            return getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+            return plot.getTouchedAxis(e.detail.touches[0].pageX, e.detail.touches[0].pageY);
         } else if (e.type === 'pinchend') {
             //update axis since instead on pinch, a pan event is made
-            return getTouchedAxis(plot, e.detail.touches[0].pageX, e.detail.touches[0].pageY);
+            return plot.getTouchedAxis(e.detail.touches[0].pageX, e.detail.touches[0].pageY);
         } else {
             return navigationState.touchedAxis;
         }
@@ -5364,22 +5390,6 @@ can set the default in the options.
         var t1 = e.detail.touches[0],
             t2 = e.detail.touches[1];
         return distance(t1.pageX, t1.pageY, t2.pageX, t2.pageY);
-    }
-
-    function getTouchedAxis(plot, touchPointX, touchPointY) {
-        var ec = plot.getPlaceholder().offset();
-        ec.left = touchPointX - ec.left;
-        ec.top = touchPointY - ec.top;
-
-        var axis = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
-            var box = axis.box;
-            if (box !== undefined) {
-                return (ec.left > box.left) && (ec.left < box.left + box.width) &&
-                        (ec.top > box.top) && (ec.top < box.top + box.height);
-            }
-        });
-
-        return axis;
     }
 
     function updatePrevPanPosition(e, gesture, gestureState, navigationState) {
@@ -5649,7 +5659,7 @@ can set the default in the options.
                 i, hi;
 
             octx.save();
-            overlay.clear();
+ 
             octx.translate(plotOffset.left, plotOffset.top);
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];

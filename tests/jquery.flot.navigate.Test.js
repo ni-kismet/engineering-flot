@@ -794,5 +794,27 @@ describe("flot navigate plugin", function () {
               expect(plot.getOptions().pan.active).toBe(true);
               expect(plot.getOptions().zoom.active).toBe(true);
         });
+
+        it('sends touched axis for double click on axis', function(){
+            plot = $.plot(placeholder, [
+                [
+                    [-1, 2],
+                    [11, 12]
+                ]
+            ], options);
+
+            var eventHolder = plot.getEventHolder(),
+                xaxis = plot.getXAxes()[0],
+                coords = { x: xaxis.p2c(4), y: xaxis.box.top + 10 };
+
+            var spyRecenter = jasmine.createSpy('spy');
+            $(plot.getPlaceholder()).on('re-center', spyRecenter);
+
+            simulate.dblclick(eventHolder, coords.x, coords.y);
+
+            expect(spyRecenter).toHaveBeenCalled();
+
+            expect(spyRecenter.calls.all()[0].args[0].detail.axisTouched).toEqual(xaxis);
+        });
     });
 });
