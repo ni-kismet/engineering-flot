@@ -224,7 +224,6 @@
                 i, hi;
 
             octx.save();
-            overlay.clear();
             octx.translate(plotOffset.left, plotOffset.top);
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];

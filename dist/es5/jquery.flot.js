@@ -3375,7 +3375,7 @@ Licensed under the MIT license.
             if (!octx) {
                 return;
             }
-
+            overlay.clear();
             executeHooks(hooks.drawOverlay, [octx, overlay]);
         }
 
@@ -5626,7 +5626,7 @@ can set the default in the options.
                 i, hi;
 
             octx.save();
-            overlay.clear();
+ 
             octx.translate(plotOffset.left, plotOffset.top);
             for (i = 0; i < highlights.length; ++i) {
                 hi = highlights[i];
