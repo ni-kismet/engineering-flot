@@ -34,6 +34,17 @@ Licensed under the MIT license.
         return ticks;
     }
 
+    function getPixelRatio(context) {
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio =
+            context.webkitBackingStorePixelRatio ||
+            context.mozBackingStorePixelRatio ||
+            context.msBackingStorePixelRatio ||
+            context.oBackingStorePixelRatio ||
+            context.backingStorePixelRatio || 1;
+        return devicePixelRatio / backingStoreRatio;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // The top-level container for the entire plot.
     function Plot(placeholder, data_, options_, plugins) {
@@ -246,16 +257,7 @@ Licensed under the MIT license.
                 top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
-        plot.getPixelRatio = function(context) {
-            var devicePixelRatio = window.devicePixelRatio || 1,
-                backingStoreRatio =
-                context.webkitBackingStorePixelRatio ||
-                context.mozBackingStorePixelRatio ||
-                context.msBackingStorePixelRatio ||
-                context.oBackingStorePixelRatio ||
-                context.backingStorePixelRatio || 1;
-            return devicePixelRatio / backingStoreRatio;
-        }
+        plot.getPixelRatio = getPixelRatio;
         plot.shutdown = shutdown;
         plot.destroy = function() {
             shutdown();
@@ -2678,6 +2680,7 @@ Licensed under the MIT license.
         });
     };
 
+    $.plot.getPixelRatio = getPixelRatio;
     $.plot.linearTickGenerator = defaultTickGenerator;
 
     // round to nearby lower multiple of base
