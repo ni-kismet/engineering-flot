@@ -764,14 +764,14 @@ Licensed under the MIT license.
 
     function defaultTickGenerator(axis) {
         var ticks = [],
-            start = $.plot.saturated.saturate(floorInBase(axis.min, axis.tickSize)),
+            start = $.plot.saturated.saturate($.plot.saturated.floorInBase(axis.min, axis.tickSize)),
             i = 0,
             v = Number.NaN,
             prev;
 
         if (start === -Number.MAX_VALUE) {
             ticks.push(start);
-            start = floorInBase(axis.min + axis.tickSize, axis.tickSize);
+            start = $.plot.saturated.floorInBase(axis.min + axis.tickSize, axis.tickSize);
         }
 
         do {
@@ -3433,11 +3433,6 @@ Licensed under the MIT license.
 
     $.plot.getPixelRatio = getPixelRatio;
     $.plot.linearTickGenerator = defaultTickGenerator;
-
-    // round to nearby lower multiple of base
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
-    }
 })(jQuery);
 
 (function ($) {
@@ -3474,6 +3469,10 @@ Licensed under the MIT license.
 
                 return saturated.saturate(result);
             }
+        },
+        // round to nearby lower multiple of base
+        floorInBase: function(n, base) {
+            return base * Math.floor(n / base);
         }
     };
 
@@ -4075,6 +4074,8 @@ Set axis.mode to "log" to enable.
         xaxis: {}
     };
 
+    var floorInBase = $.plot.saturated.floorInBase;
+
     var defaultTickFormatter,
         expRepTickFormatter;
 
@@ -4285,11 +4286,6 @@ Set axis.mode to "log" to enable.
             }
         }
         return vals;
-    }
-
-    // round to nearby lower multiple of base
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
     }
 
     function setDataminRange(plot, axis) {
@@ -6119,11 +6115,7 @@ API.txt for details.
         }
     };
 
-    // round to nearby lower multiple of base
-
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
-    }
+    var floorInBase = $.plot.saturated.floorInBase;
 
     // Returns a string with the date d formatted according to fmt.
     // A subset of the Open Group's strftime format is supported.
@@ -7295,8 +7287,8 @@ The plugin allso adds the following methods to the plot object:
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
-    var getPixelRatio = $.flot.getPixelRatio;
-    var browser = $.flot.browser;
+    var getPixelRatio = $.plot.getPixelRatio;
+    var browser = $.plot.browser;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);

@@ -13,14 +13,14 @@ Licensed under the MIT license.
 
     function defaultTickGenerator(axis) {
         var ticks = [],
-            start = $.plot.saturated.saturate(floorInBase(axis.min, axis.tickSize)),
+            start = $.plot.saturated.saturate($.plot.saturated.floorInBase(axis.min, axis.tickSize)),
             i = 0,
             v = Number.NaN,
             prev;
 
         if (start === -Number.MAX_VALUE) {
             ticks.push(start);
-            start = floorInBase(axis.min + axis.tickSize, axis.tickSize);
+            start = $.plot.saturated.floorInBase(axis.min + axis.tickSize, axis.tickSize);
         }
 
         do {
@@ -2682,9 +2682,4 @@ Licensed under the MIT license.
 
     $.plot.getPixelRatio = getPixelRatio;
     $.plot.linearTickGenerator = defaultTickGenerator;
-
-    // round to nearby lower multiple of base
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
-    }
 })(jQuery);
