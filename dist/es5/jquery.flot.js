@@ -7631,7 +7631,7 @@ The plugin allso adds the following methods to the plot object:
         }
 
         var legendEl, svgEl,
-            width = 2 + maxLabelLength / 2,
+            width = 3 + maxLabelLength / 2,
             height = entries.length * 1.6;
         if (!options.legend.container) {
             legendEl = $('<div class="legend" style="position:absolute;' + pos + '">' + html.join('') + '</div>').appendTo(placeholder);
