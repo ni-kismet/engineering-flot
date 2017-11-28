@@ -23,6 +23,7 @@ module.exports = function(config) {
         'jquery.canvaswrapper.js',
         'jquery.flot.js',
         'jquery.flot.saturated.js',
+        'jquery.flot.browser.js',
         'jquery.flot.drawSeries.js',
         'jquery.flot.uiConstants.js',
         'jquery.flot.logaxis.js',

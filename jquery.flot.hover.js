@@ -5,10 +5,12 @@
 
     var options = {
         grid: {
-            hoverable: true,
-            clickable: true
+            hoverable: false,
+            clickable: false
         }
     };
+
+    var browser = $.plot.browser;
 
     function init(plot) {
         plot.hooks.processOptions.push(initHover);
@@ -62,6 +64,8 @@
                 //transform from touch event to mouse event format
                 newEvent.pageX = e.detail.changedTouches[0].pageX;
                 newEvent.pageY = e.detail.changedTouches[0].pageY;
+                newEvent.clientX = e.detail.changedTouches[0].clientX;
+                newEvent.clientY = e.detail.changedTouches[0].clientY;
 
                 if (o.grid.hoverable) {
                     triggerClickHoverEvent('plothover', newEvent,
@@ -115,16 +119,17 @@
         function triggerClickHoverEvent(eventname, event, seriesFilter, searchDistance) {
             var options = plot.getOptions(),
                 offset = plot.offset(),
-                canvasX = event.pageX - offset.left,
-                canvasY = event.pageY - offset.top,
+                page = browser.getPageXY(event),
+                canvasX = page.X - offset.left,
+                canvasY = page.Y - offset.top,
                 pos = plot.c2p({
                     left: canvasX,
                     top: canvasY
                 }),
                 distance = searchDistance !== undefined ? searchDistance : options.grid.mouseActiveRadius;
 
-            pos.pageX = event.pageX;
-            pos.pageY = event.pageY;
+            pos.pageX = page.X;
+            pos.pageY = page.Y;
 
             var item = plot.findNearbyItem(canvasX, canvasY, seriesFilter, distance);
 
