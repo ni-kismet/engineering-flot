@@ -3,6 +3,7 @@
 
 describe("flot touch navigate plugin", function () {
     var placeholder, plot, options;
+    var minFrameDuration = 1 / 60 * 1000;
 
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
@@ -13,6 +14,11 @@ describe("flot touch navigate plugin", function () {
             zoom: { interactive: true, active: true, amount: 10 },
             pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
         };
+        jasmine.clock().install();
+    });
+
+    afterEach(function() {
+        jasmine.clock().uninstall();
     });
 
     it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
@@ -60,8 +66,11 @@ describe("flot touch navigate plugin", function () {
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
             simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            jasmine.clock().tick(minFrameDuration);
 
             expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
             expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
@@ -95,8 +104,11 @@ describe("flot touch navigate plugin", function () {
                 ];
 
             simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            jasmine.clock().tick(minFrameDuration);
 
             expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[2].x), 6);
             expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[2].x), 6);
@@ -133,8 +145,11 @@ describe("flot touch navigate plugin", function () {
             var spy = spyOn(plot, 'zoom').and.callThrough();
 
             simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            jasmine.clock().tick(minFrameDuration);
 
             expect(spy).not.toHaveBeenCalled();
         });
@@ -172,8 +187,11 @@ describe("flot touch navigate plugin", function () {
                   amount = getDistance(finalCoords) / getDistance(initialCoords);
 
               simulate.sendTouchEvents(initialCoords, plot.getEventHolder(), 'touchstart');
+              jasmine.clock().tick(minFrameDuration);
               simulate.sendTouchEvents(finalCoords, plot.getEventHolder(), 'touchmove');
+              jasmine.clock().tick(minFrameDuration);
               simulate.sendTouchEvents(finalCoords, plot.getEventHolder(), 'touchend');
+              jasmine.clock().tick(minFrameDuration);
 
               expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
               expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
@@ -211,8 +229,11 @@ describe("flot touch navigate plugin", function () {
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
             simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            jasmine.clock().tick(minFrameDuration);
 
             expect(xaxis.min).not.toBeCloseTo(initialYmin, 6);
             expect(xaxis.max).not.toBeCloseTo(initialYmax, 6);
@@ -251,8 +272,11 @@ describe("flot touch navigate plugin", function () {
               amount = getDistance(finalCoords) / getDistance(initialCoords);
 
           simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+          jasmine.clock().tick(minFrameDuration);
           simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+          jasmine.clock().tick(minFrameDuration);
           simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+          jasmine.clock().tick(minFrameDuration);
 
           expect(Math.abs(xaxis.min - ((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin))).toBeLessThan(1);
           expect(Math.abs(xaxis.max - (initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount)))).toBeLessThan(1);
@@ -291,8 +315,11 @@ describe("flot touch navigate plugin", function () {
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
             simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            jasmine.clock().tick(minFrameDuration);
 
             expect(xaxis.min).toBeCloseTo(initialXmin, 6);
             expect(xaxis.max).toBeCloseTo(initialXmax, 6);
@@ -328,8 +355,11 @@ describe("flot touch navigate plugin", function () {
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
             simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            jasmine.clock().tick(minFrameDuration);
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
@@ -365,8 +395,11 @@ describe("flot touch navigate plugin", function () {
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
             simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
+            jasmine.clock().tick(minFrameDuration);
             simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            jasmine.clock().tick(minFrameDuration);
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
@@ -404,8 +437,11 @@ describe("flot touch navigate plugin", function () {
             ];
 
         simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        jasmine.clock().tick(minFrameDuration);
         simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        jasmine.clock().tick(minFrameDuration);
         simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        jasmine.clock().tick(minFrameDuration);
 
         expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
         expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -445,8 +481,11 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
           expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -486,10 +525,13 @@ describe("flot touch navigate plugin", function () {
 
         //simulate drag from (1, 1) to (100, 100) sequentially
         simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        jasmine.clock().tick(minFrameDuration);
         for (var i = 2; i <= limit; i++) {
             simulate.touchmove(eventHolder, pointCoords[i].x, pointCoords[i].y);
+            jasmine.clock().tick(minFrameDuration);
         }
         simulate.touchend(eventHolder, pointCoords[limit].x, pointCoords[limit].y);
+        jasmine.clock().tick(minFrameDuration);
 
         // compare axes after sequential drag with axes after direct drag
         expect(Math.abs(xaxis.min - (initialXmin + (canvasCoords[1].x - canvasCoords[limit].x)))).toBeLessThan(1);
@@ -523,8 +565,11 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           expect(xaxis.min).toBeCloseTo(initialXmin, 6);
           expect(xaxis.max).toBeCloseTo(initialXmax, 6);
@@ -556,8 +601,11 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           expect(xaxis.min).toBeCloseTo(initialXmin, 6);
           expect(xaxis.max).toBeCloseTo(initialXmax, 6);
@@ -586,9 +634,13 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           expect(xaxis.min).toBe(0);
           expect(xaxis.max).toBe(10);
@@ -616,9 +668,13 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           expect(xaxis.min).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmin) + (pointCoords[0].x - pointCoords[1].x)), 6);
           expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(initialXmax) + (pointCoords[0].x - pointCoords[1].x)), 6);
@@ -650,9 +706,13 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           expect(xaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
@@ -684,9 +744,13 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           expect(xaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
@@ -727,8 +791,11 @@ describe("flot touch navigate plugin", function () {
 
           //simulate pinch
           simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
+          jasmine.clock().tick(minFrameDuration);
           simulate.sendTouchEvents(midPointCoords, eventHolder, 'touchmove');
+          jasmine.clock().tick(minFrameDuration);
           simulate.sendTouchEvents(finalCoordsPinch, eventHolder, 'touchend');
+          jasmine.clock().tick(minFrameDuration);
 
           previousXmin = xaxis.min;
           previousXmax = xaxis.max;
@@ -742,7 +809,9 @@ describe("flot touch navigate plugin", function () {
 
           //simulate pan after pinch event
           simulate.sendTouchEvents(finalCoordsPan, eventHolder, 'touchmove');
+          jasmine.clock().tick(minFrameDuration);
           simulate.sendTouchEvents(finalCoordsPan, eventHolder, 'touchend');
+          jasmine.clock().tick(minFrameDuration);
 
           expect(xaxis.min).toBeCloseTo(xaxis.c2p(xaxis.p2c(previousXmin) + (finalCoordsPinch[0].x - finalCoordsPan[0].x)), 6);
           expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(previousXmax) + (finalCoordsPinch[0].x - finalCoordsPan[0].x)), 6);
@@ -776,8 +845,11 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           //check if the drag modified the plot correctly
           expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -787,9 +859,13 @@ describe("flot touch navigate plugin", function () {
 
           //simulate double tap
           simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           //check if axis values returned to initial coordinates
           expect(xaxis.min).toBeCloseTo(initialXmin, 6);
@@ -822,8 +898,11 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           //check if the drag modified the plot correctly
           expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -833,8 +912,11 @@ describe("flot touch navigate plugin", function () {
 
           //simulate double tap
           simulate.touchstart(eventHolder, xaxis.p2c(5), xaxis.box.top + plot.offset().top + 15);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, xaxis.p2c(5), xaxis.box.top + plot.offset().top + 15);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchstart(eventHolder, xaxis.p2c(5), xaxis.box.top + plot.offset().top + 15);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, xaxis.p2c(5), xaxis.box.top + plot.offset().top + 15);
 
           //check if axis values returned to initial coordinates
@@ -868,8 +950,11 @@ describe("flot touch navigate plugin", function () {
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+          jasmine.clock().tick(minFrameDuration);
 
           //check if the drag modified the plot correctly
           expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -879,9 +964,13 @@ describe("flot touch navigate plugin", function () {
 
           //simulate double tap
           simulate.touchstart(eventHolder, xaxis.box.left - 20, yaxis.p2c(5));
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder,  xaxis.box.left - 20, yaxis.p2c(5));
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchstart(eventHolder, xaxis.box.left - 20, yaxis.p2c(5));
+          jasmine.clock().tick(minFrameDuration);
           simulate.touchend(eventHolder, xaxis.box.left - 20, yaxis.p2c(5));
+          jasmine.clock().tick(minFrameDuration);
 
           //check if axis values returned to initial coordinates
           expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -913,8 +1002,11 @@ describe("flot touch navigate plugin", function () {
                 ];
 
             simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+            jasmine.clock().tick(minFrameDuration);
             simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+            jasmine.clock().tick(minFrameDuration);
             simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+            jasmine.clock().tick(minFrameDuration);
 
             //check if the drag modified the plot correctly
             expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
@@ -924,9 +1016,13 @@ describe("flot touch navigate plugin", function () {
 
             //simulate double tap
             simulate.touchstart(eventHolder, xaxis.box.left - 20, yaxis.p2c(5));
+            jasmine.clock().tick(minFrameDuration);
             simulate.touchend(eventHolder,  xaxis.box.left - 20, yaxis.p2c(5));
+            jasmine.clock().tick(minFrameDuration);
             simulate.touchstart(eventHolder, 10, 20);
+            jasmine.clock().tick(minFrameDuration);
             simulate.touchend(eventHolder, 10, 20);
+            jasmine.clock().tick(minFrameDuration);
 
             //check if axis values remained the same
             expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
