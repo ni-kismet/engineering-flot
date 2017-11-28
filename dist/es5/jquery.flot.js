@@ -3300,7 +3300,7 @@ Licensed under the MIT license.
                 ps = series[i].datapoints.pointsize;
 
                 // Find the nearest points, x-wise
-                for (j = 0; j < points.length; j += ps) {
+                for (j = ps; j < points.length; j += ps) {
                     if (points[j] > posX) {
                         break;
                     }
