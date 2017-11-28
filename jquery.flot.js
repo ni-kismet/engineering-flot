@@ -257,7 +257,6 @@ Licensed under the MIT license.
                 top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
-        plot.getPixelRatio = getPixelRatio;
         plot.shutdown = shutdown;
         plot.destroy = function() {
             shutdown();
@@ -290,6 +289,7 @@ Licensed under the MIT license.
             overlay.clearCache();
         };
 
+        plot.getPixelRatio = getPixelRatio;
         plot.computeRangeForDataSeries = computeRangeForDataSeries;
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
         plot.findNearbyItem = findNearbyItem;
@@ -2673,13 +2673,12 @@ Licensed under the MIT license.
     $.plot.plugins = [];
 
     // Also add the plot function as a chainable property
-
     $.fn.plot = function(data, options) {
         return this.each(function() {
             $.plot(this, data, options);
         });
     };
 
-    $.plot.getPixelRatio = getPixelRatio;
     $.plot.linearTickGenerator = defaultTickGenerator;
+    $.plot.getPixelRatio = getPixelRatio;
 })(jQuery);
