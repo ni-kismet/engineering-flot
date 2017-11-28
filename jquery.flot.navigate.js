@@ -112,18 +112,23 @@ can set the default in the options.
     };
 
     var saturated = $.plot.saturated;
+    var browser = $.plot.browser;
+    var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
+    var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
     function init(plot) {
         var panAxes = null;
 
         function onZoomClick(e, zoomOut, amount) {
+            var page = browser.getPageXY(e);
+
             var c = plot.offset();
-            c.left = e.pageX - c.left;
-            c.top = e.pageY - c.top;
+            c.left = page.X - c.left;
+            c.top = page.Y - c.top;
 
             var ec = plot.getPlaceholder().offset();
-            ec.left = e.pageX - ec.left;
-            ec.top = e.pageY - ec.top;
+            ec.left = page.X - ec.left;
+            ec.top = page.Y - ec.top;
 
             var axes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
                 var box = axis.box;
@@ -152,8 +157,11 @@ can set the default in the options.
             }
         }
 
-        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
-        var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
+        var prevCursor = 'default',
+            panHint = null,
+            panTimeout = null,
+            plotState,
+            isPanAction = false;
 
         function onMouseWheel(e, delta) {
             var maxAbsoluteDeltaOnMac = 1,
@@ -161,17 +169,17 @@ can set the default in the options.
                 defaultNonMacScrollAmount = null,
                 macMagicRatio = 50,
                 amount = isMacScroll ? 1 + Math.abs(e.originalEvent.deltaY) / macMagicRatio : defaultNonMacScrollAmount;
+
+            if (isPanAction) {
+                onDragEnd(e);
+            }
+
             if (plot.getOptions().zoom.active) {
                 e.preventDefault();
                 onZoomClick(e, delta < 0, amount);
                 return false;
             }
         }
-
-        var prevCursor = 'default',
-            panHint = null,
-            panTimeout = null,
-            plotState;
 
         plot.navigationState = function(startPageX, startPageY) {
             var axes = this.getAxes();
@@ -192,15 +200,21 @@ can set the default in the options.
             return result;
         }
 
+        function isLeftMouseButtonPressed(e) {
+            return browser.isSafari ? e.which === 1 : e.buttons === 1;
+        }
+
         function onDragStart(e) {
-            if (e.which !== 1) {
-                // only accept left-click
+            if (!isLeftMouseButtonPressed(e)) {
                 return false;
             }
 
+            isPanAction = true;
+            var page = browser.getPageXY(e);
+
             var ec = plot.getPlaceholder().offset();
-            ec.left = e.pageX - ec.left;
-            ec.top = e.pageY - ec.top;
+            ec.left = page.X - ec.left;
+            ec.top = page.Y - ec.top;
 
             panAxes = plot.getXAxes().concat(plot.getYAxes()).filter(function (axis) {
                 var box = axis.box;
@@ -220,16 +234,17 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
-            plotState = plot.navigationState(e.pageX, e.pageY);
+            plotState = plot.navigationState(page.X, page.Y);
         }
 
         function onDrag(e) {
+            var page = browser.getPageXY(e);
             var frameRate = plot.getOptions().pan.frameRate;
 
             if (frameRate === -1) {
                 plot.smartPan({
-                    x: plotState.startPageX - e.pageX,
-                    y: plotState.startPageY - e.pageY
+                    x: plotState.startPageX - page.X,
+                    y: plotState.startPageY - page.Y
                 }, plotState, panAxes);
 
                 return;
@@ -239,8 +254,8 @@ can set the default in the options.
 
             panTimeout = setTimeout(function() {
                 plot.smartPan({
-                    x: plotState.startPageX - e.pageX,
-                    y: plotState.startPageY - e.pageY
+                    x: plotState.startPageX - page.X,
+                    y: plotState.startPageY - page.Y
                 }, plotState, panAxes);
 
                 panTimeout = null;
@@ -253,10 +268,13 @@ can set the default in the options.
                 panTimeout = null;
             }
 
+            isPanAction = false;
+            var page = browser.getPageXY(e);
+
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.smartPan({
-                x: plotState.startPageX - e.pageX,
-                y: plotState.startPageY - e.pageY
+                x: plotState.startPageX - page.X,
+                y: plotState.startPageY - page.Y
             }, plotState, panAxes);
             panHint = null;
         }
@@ -285,6 +303,10 @@ can set the default in the options.
             if (!o.pan.active || !o.zoom.active) {
                 o.pan.active = true;
                 o.zoom.active = true;
+            }
+
+            if (isPanAction) {
+                onDragEnd(e);
             }
 
             return false;
