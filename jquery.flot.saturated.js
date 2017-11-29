@@ -32,6 +32,10 @@
 
                 return saturated.saturate(result);
             }
+        },
+        // round to nearby lower multiple of base
+        floorInBase: function(n, base) {
+            return base * Math.floor(n / base);
         }
     };
 

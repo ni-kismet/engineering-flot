@@ -5,11 +5,12 @@
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
-    var getPixelRatioFunc;
+    var getPixelRatio = $.plot.browser.getPixelRatio;
+    var browser = $.plot.browser;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
-        pixelRatio = getPixelRatioFunc(destinationCanvas.getContext('2d'));
+        pixelRatio = getPixelRatio(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -140,14 +141,7 @@
     }
 
     function copySVGToImg(svg, img) {
-        // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
-        // Safari 3.0+ "[object HTMLElementConstructor]"
-        var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
-
-        //isMobileSafari adapted from https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
-        var isMobileSafari = navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/);
-
-        if (isSafari || isMobileSafari) {
+        if (browser.isSafari() || browser.isMobileSafari()) {
             copySVGToImgSafari(svg, img);
         } else {
             copySVGToImgMostBrowsers(svg, img);
@@ -267,7 +261,6 @@
     function init(plot) {
         // used to extend the public API of the plot
         plot.composeImages = composeImages;
-        getPixelRatioFunc = plot.getPixelRatio;
     }
 
     $.plot.plugins.push({

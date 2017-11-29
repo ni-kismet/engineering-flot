@@ -16,6 +16,8 @@ Set axis.mode to "log" to enable.
         xaxis: {}
     };
 
+    var floorInBase = $.plot.saturated.floorInBase;
+
     var defaultTickFormatter,
         expRepTickFormatter;
 
@@ -226,11 +228,6 @@ Set axis.mode to "log" to enable.
             }
         }
         return vals;
-    }
-
-    // round to nearby lower multiple of base
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
     }
 
     function setDataminRange(plot, axis) {
