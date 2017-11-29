@@ -232,24 +232,7 @@
         this.element = element;
 
         var context = this.context = element.getContext('2d');
-
-        // Determine the screen's ratio of physical to device-independent
-        // pixels.  This is the ratio between the canvas width that the browser
-        // advertises and the number of pixels actually present in that space.
-
-        // The iPhone 4, for example, has a device-independent width of 320px,
-        // but its screen is actually 640px wide.  It therefore has a pixel
-        // ratio of 2, while most normal devices have a ratio of 1.
-
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
-
-        this.pixelRatio = devicePixelRatio / backingStoreRatio;
+        this.pixelRatio = $.plot.browser.getPixelRatio(context);
 
         // Size the canvas to match the internal dimensions of its container
 
@@ -785,17 +768,6 @@ Licensed under the MIT license.
         return ticks;
     }
 
-    function getPixelRatio(context) {
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
-        return devicePixelRatio / backingStoreRatio;
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     // The top-level container for the entire plot.
     function Plot(placeholder, data_, options_, plugins) {
@@ -1008,7 +980,6 @@ Licensed under the MIT license.
                 top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
-        plot.getPixelRatio = getPixelRatio;
         plot.shutdown = shutdown;
         plot.destroy = function() {
             shutdown();
@@ -3424,14 +3395,12 @@ Licensed under the MIT license.
     $.plot.plugins = [];
 
     // Also add the plot function as a chainable property
-
     $.fn.plot = function(data, options) {
         return this.each(function() {
             $.plot(this, data, options);
         });
     };
 
-    $.plot.getPixelRatio = getPixelRatio;
     $.plot.linearTickGenerator = defaultTickGenerator;
 })(jQuery);
 
@@ -3484,14 +3453,22 @@ Licensed under the MIT license.
 
     var browser = {
         getPageXY: function (e) {
-            // This function calculates the pageX and pageY which are not valid
-            //while running the tests with Edge and creating events using the
-            //recommended WheelEvent or MouseEvent constructors.
             // This code is inspired from https://stackoverflow.com/a/3464890
             var doc = document.documentElement,
                 pageX = e.clientX + (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0),
                 pageY = e.clientY + (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
             return { X: pageX, Y: pageY };
+        },
+
+        getPixelRatio: function(context) {
+            var devicePixelRatio = window.devicePixelRatio || 1,
+                backingStoreRatio =
+                context.webkitBackingStorePixelRatio ||
+                context.mozBackingStorePixelRatio ||
+                context.msBackingStorePixelRatio ||
+                context.oBackingStorePixelRatio ||
+                context.backingStorePixelRatio || 1;
+            return devicePixelRatio / backingStoreRatio;
         },
 
         isSafari: function() {
@@ -7287,7 +7264,7 @@ The plugin allso adds the following methods to the plot object:
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
-    var getPixelRatio = $.plot.getPixelRatio;
+    var getPixelRatio = $.plot.browser.getPixelRatio;
     var browser = $.plot.browser;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
