@@ -32,24 +32,7 @@
         this.element = element;
 
         var context = this.context = element.getContext('2d');
-
-        // Determine the screen's ratio of physical to device-independent
-        // pixels.  This is the ratio between the canvas width that the browser
-        // advertises and the number of pixels actually present in that space.
-
-        // The iPhone 4, for example, has a device-independent width of 320px,
-        // but its screen is actually 640px wide.  It therefore has a pixel
-        // ratio of 2, while most normal devices have a ratio of 1.
-
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
-
-        this.pixelRatio = devicePixelRatio / backingStoreRatio;
+        this.pixelRatio = $.plot.browser.getPixelRatio(context);
 
         // Size the canvas to match the internal dimensions of its container
 

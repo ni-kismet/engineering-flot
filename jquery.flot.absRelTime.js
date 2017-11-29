@@ -21,11 +21,7 @@ API.txt for details.
         }
     };
 
-    // round to nearby lower multiple of base
-
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
-    }
+    var floorInBase = $.plot.saturated.floorInBase;
 
     // Returns a string with the date d formatted according to fmt.
     // A subset of the Open Group's strftime format is supported.

@@ -1209,17 +1209,6 @@ can call:
       // o.left and o.top now contains the offset within the div
     ```
 
- - getPixelRatio(context)
-
-    Returns the current pixel ratio of the browser. It takes into account the
-    device pixel ratio and the browser zoom. Context is a 2D canvas context.
-    For devices with 100% DPI scale and browser zoom set to 100%, this function
-    returns 1.
-
-    ```js
-      var pixelRatio = plot.getPixelRatio(graphCanvas.getContext('2d'));
-    ```    
-
  - resize()
 
     Tells Flot to resize the drawing canvas to the size of the
@@ -1376,33 +1365,51 @@ a downloadable image. Some browser even support downloading canvases.
 
 How to use *composeImages* function:
 ```js
-//The destination canvas can be dynamically generated if required.
-var destinationCanvas = document.getElementById('destinationCanvas'),
-    destinationImage = document.getElementById('destinationImage');
-
-function asyncProcessAllImagesForComposition() {
-    var sources = [myCanvas, mySvg, otherSvg, otherCanvas2, anotherCanvas];
-    var asynResult = myPlot.composeImages(sources, destinationCanvas);
-    asynResult.then(getCopyCanvasToImg(destinationCanvas, destinationImage), failureCallback);
-}
-
-//for example, put a button which calls composeImages using promises:
 function composeImagesOnClick() {
-    asyncProcessAllImagesForComposition();
+    var sources = [myCanvas, mySvg, myOtherCanvas, myOtherSvg],
+        destinationCanvas = document.getElementById('destinationCanvas'),
+        destinationImage = document.getElementById('destinationImage');
+    $.plot.composeImages(sources, destinationCanvas)
+        .then(function() {
+            destinationImage.width = destinationCanvas.width;
+            destinationImage.height = destinationCanvas.height;
+            destinationImage.src = destinationCanvas.toDataURL('image/png');
+        });
 }
+```
 
-function copyCanvasToImg(canvas, img) {
-    img.src = canvas.toDataURL('image/png');
-}
+  - getPageXY(e)
 
-function getCopyCanvasToImg(canvas, img) {
-    return function copyCanvasToImgOuter(result) {
-        img.width = canvas.width;
-        img.height = canvas.height;
-        copyCanvasToImg(canvas, img);
-        return 0;
-    }
-}
+This function calculates the pageX and pageY which are not valid
+while running the tests with Edge and creating events using the
+recommended WheelEvent or MouseEvent constructors.
+
+```js
+var page = $.plot.browser.getPageXY(e);
+console.log(page.X === e.pageX); // true unless the event was constructed in Edge
+console.log(page.Y === e.pageY); // true unless the event was constructed in Edge
+```
+
+  - getPixelRatio(context)
+
+Determine the screen's ratio of physical to device-independent
+pixels.  This is the ratio between the canvas width that the browser
+advertises and the number of pixels actually present in that space.
+
+The iPhone 4, for example, has a device-independent width of 320px,
+but its screen is actually 640px wide.  It therefore has a pixel
+ratio of 2, while most normal devices have a ratio of 1.
+
+```js
+var pixelRatio = $.plot.browser.getPixelRatio(canvas.getContext('2d'));
+```
+
+  - isSafari()
+  - isMobileSafari()
+
+```js
+console.log($.plot.browser.isSafari()); // true when running on Safari
+console.log($.plot.browser.isMobileSafari()); // true when running on Mobile Safari
 ```
 
 ## Hooks ##

@@ -232,24 +232,7 @@
         this.element = element;
 
         var context = this.context = element.getContext('2d');
-
-        // Determine the screen's ratio of physical to device-independent
-        // pixels.  This is the ratio between the canvas width that the browser
-        // advertises and the number of pixels actually present in that space.
-
-        // The iPhone 4, for example, has a device-independent width of 320px,
-        // but its screen is actually 640px wide.  It therefore has a pixel
-        // ratio of 2, while most normal devices have a ratio of 1.
-
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
-
-        this.pixelRatio = devicePixelRatio / backingStoreRatio;
+        this.pixelRatio = $.plot.browser.getPixelRatio(context);
 
         // Size the canvas to match the internal dimensions of its container
 
@@ -764,14 +747,14 @@ Licensed under the MIT license.
 
     function defaultTickGenerator(axis) {
         var ticks = [],
-            start = $.plot.saturated.saturate(floorInBase(axis.min, axis.tickSize)),
+            start = $.plot.saturated.saturate($.plot.saturated.floorInBase(axis.min, axis.tickSize)),
             i = 0,
             v = Number.NaN,
             prev;
 
         if (start === -Number.MAX_VALUE) {
             ticks.push(start);
-            start = floorInBase(axis.min + axis.tickSize, axis.tickSize);
+            start = $.plot.saturated.floorInBase(axis.min + axis.tickSize, axis.tickSize);
         }
 
         do {
@@ -997,16 +980,6 @@ Licensed under the MIT license.
                 top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
-        plot.getPixelRatio = function(context) {
-            var devicePixelRatio = window.devicePixelRatio || 1,
-                backingStoreRatio =
-                context.webkitBackingStorePixelRatio ||
-                context.mozBackingStorePixelRatio ||
-                context.msBackingStorePixelRatio ||
-                context.oBackingStorePixelRatio ||
-                context.backingStorePixelRatio || 1;
-            return devicePixelRatio / backingStoreRatio;
-        }
         plot.shutdown = shutdown;
         plot.destroy = function() {
             shutdown();
@@ -3422,7 +3395,6 @@ Licensed under the MIT license.
     $.plot.plugins = [];
 
     // Also add the plot function as a chainable property
-
     $.fn.plot = function(data, options) {
         return this.each(function() {
             $.plot(this, data, options);
@@ -3430,11 +3402,6 @@ Licensed under the MIT license.
     };
 
     $.plot.linearTickGenerator = defaultTickGenerator;
-
-    // round to nearby lower multiple of base
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
-    }
 })(jQuery);
 
 (function ($) {
@@ -3471,6 +3438,10 @@ Licensed under the MIT license.
 
                 return saturated.saturate(result);
             }
+        },
+        // round to nearby lower multiple of base
+        floorInBase: function(n, base) {
+            return base * Math.floor(n / base);
         }
     };
 
@@ -3482,9 +3453,6 @@ Licensed under the MIT license.
 
     var browser = {
         getPageXY: function (e) {
-            // This function calculates the pageX and pageY which are not valid
-            //while running the tests with Edge and creating events using the
-            //recommended WheelEvent or MouseEvent constructors.
             // This code is inspired from https://stackoverflow.com/a/3464890
             var doc = document.documentElement,
                 pageX = e.clientX + (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0),
@@ -3492,10 +3460,26 @@ Licensed under the MIT license.
             return { X: pageX, Y: pageY };
         },
 
+        getPixelRatio: function(context) {
+            var devicePixelRatio = window.devicePixelRatio || 1,
+                backingStoreRatio =
+                context.webkitBackingStorePixelRatio ||
+                context.mozBackingStorePixelRatio ||
+                context.msBackingStorePixelRatio ||
+                context.oBackingStorePixelRatio ||
+                context.backingStorePixelRatio || 1;
+            return devicePixelRatio / backingStoreRatio;
+        },
+
         isSafari: function() {
             // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
             // Safari 3.0+ "[object HTMLElementConstructor]"
             return /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+        },
+
+        isMobileSafari: function() {
+            //isMobileSafari adapted from https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
+            return navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/);
         }
     };
 
@@ -4067,6 +4051,8 @@ Set axis.mode to "log" to enable.
         xaxis: {}
     };
 
+    var floorInBase = $.plot.saturated.floorInBase;
+
     var defaultTickFormatter,
         expRepTickFormatter;
 
@@ -4277,11 +4263,6 @@ Set axis.mode to "log" to enable.
             }
         }
         return vals;
-    }
-
-    // round to nearby lower multiple of base
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
     }
 
     function setDataminRange(plot, axis) {
@@ -6125,11 +6106,7 @@ API.txt for details.
         }
     };
 
-    // round to nearby lower multiple of base
-
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
-    }
+    var floorInBase = $.plot.saturated.floorInBase;
 
     // Returns a string with the date d formatted according to fmt.
     // A subset of the Open Group's strftime format is supported.
@@ -7302,11 +7279,12 @@ The plugin allso adds the following methods to the plot object:
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
-    var getPixelRatioFunc;
+    var getPixelRatio = $.plot.browser.getPixelRatio;
+    var browser = $.plot.browser;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
-        pixelRatio = getPixelRatioFunc(destinationCanvas.getContext('2d'));
+        pixelRatio = getPixelRatio(destinationCanvas.getContext('2d'));
 
         var allImgCompositionPromises = validCanvasOrSvgSources.map(function(validCanvasOrSvgSource) {
             var tempImg = new Image();
@@ -7437,14 +7415,7 @@ The plugin allso adds the following methods to the plot object:
     }
 
     function copySVGToImg(svg, img) {
-        // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
-        // Safari 3.0+ "[object HTMLElementConstructor]"
-        var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
-
-        //isMobileSafari adapted from https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
-        var isMobileSafari = navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/);
-
-        if (isSafari || isMobileSafari) {
+        if (browser.isSafari() || browser.isMobileSafari()) {
             copySVGToImgSafari(svg, img);
         } else {
             copySVGToImgMostBrowsers(svg, img);
@@ -7564,7 +7535,6 @@ The plugin allso adds the following methods to the plot object:
     function init(plot) {
         // used to extend the public API of the plot
         plot.composeImages = composeImages;
-        getPixelRatioFunc = plot.getPixelRatio;
     }
 
     $.plot.plugins.push({

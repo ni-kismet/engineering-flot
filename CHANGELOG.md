@@ -1,6 +1,20 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.0]
+
+### Changes ###
+- getPixelRatio moved from the plot instance to $.plot.browser namespace
+
+### Bug fixes ###
+- Pinch events fired too fast and slowing down the drawing
+
+## [1.0.10]
+
+### Bug fixes ###
+- Skipping the first point when looking for the nearest point
+- Wrong coordinates when tapping a point
+
 ## [1.0.9]
 
 ### Bug fixes ###
@@ -1448,6 +1462,8 @@ Moved labelMargin option to grid from x/yaxis.
 
 First public release.
 
+[1.1.0]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.10...v1.1.0
+[1.0.10]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.6...v1.0.7

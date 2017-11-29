@@ -13,14 +13,14 @@ Licensed under the MIT license.
 
     function defaultTickGenerator(axis) {
         var ticks = [],
-            start = $.plot.saturated.saturate(floorInBase(axis.min, axis.tickSize)),
+            start = $.plot.saturated.saturate($.plot.saturated.floorInBase(axis.min, axis.tickSize)),
             i = 0,
             v = Number.NaN,
             prev;
 
         if (start === -Number.MAX_VALUE) {
             ticks.push(start);
-            start = floorInBase(axis.min + axis.tickSize, axis.tickSize);
+            start = $.plot.saturated.floorInBase(axis.min + axis.tickSize, axis.tickSize);
         }
 
         do {
@@ -246,16 +246,6 @@ Licensed under the MIT license.
                 top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plotOffset.top, 10)
             };
         };
-        plot.getPixelRatio = function(context) {
-            var devicePixelRatio = window.devicePixelRatio || 1,
-                backingStoreRatio =
-                context.webkitBackingStorePixelRatio ||
-                context.mozBackingStorePixelRatio ||
-                context.msBackingStorePixelRatio ||
-                context.oBackingStorePixelRatio ||
-                context.backingStorePixelRatio || 1;
-            return devicePixelRatio / backingStoreRatio;
-        }
         plot.shutdown = shutdown;
         plot.destroy = function() {
             shutdown();
@@ -2671,7 +2661,6 @@ Licensed under the MIT license.
     $.plot.plugins = [];
 
     // Also add the plot function as a chainable property
-
     $.fn.plot = function(data, options) {
         return this.each(function() {
             $.plot(this, data, options);
@@ -2679,9 +2668,4 @@ Licensed under the MIT license.
     };
 
     $.plot.linearTickGenerator = defaultTickGenerator;
-
-    // round to nearby lower multiple of base
-    function floorInBase(n, base) {
-        return base * Math.floor(n / base);
-    }
 })(jQuery);
