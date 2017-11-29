@@ -78,34 +78,48 @@
                 }
             }
         };
-
+        var pinchDragTimeout;
         pinch = {
             start: function(e) {
+                if (pinchDragTimeout) {
+                    clearTimeout(pinchDragTimeout);
+                    pinchDragTimeout = null;
+                }
                 presetNavigationState(e, 'pinch', gestureState);
                 setPrevDistance(e, gestureState);
                 updateData(e, 'pinch', gestureState, navigationState);
             },
 
             drag: function(e) {
-                presetNavigationState(e, 'pinch', gestureState);
-                plot.pan({
-                    left: delta(e, 'pinch', gestureState).x,
-                    top: delta(e, 'pinch', gestureState).y,
-                    axes: navigationState.touchedAxis
-                });
-                updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
-
-                var dist = pinchDistance(e);
-
-                if (gestureState.zoomEnable || Math.abs(dist - gestureState.prevDistance) > ZOOM_DISTANCE_MARGIN) {
-                    zoomPlot(plot, e, gestureState, navigationState);
-
-                    //activate zoom mode
-                    gestureState.zoomEnable = true;
+                if (pinchDragTimeout) {
+                    return;
                 }
+                pinchDragTimeout = setTimeout(function() {
+                    presetNavigationState(e, 'pinch', gestureState);
+                    plot.pan({
+                        left: delta(e, 'pinch', gestureState).x,
+                        top: delta(e, 'pinch', gestureState).y,
+                        axes: navigationState.touchedAxis
+                    });
+                    updatePrevPanPosition(e, 'pinch', gestureState, navigationState);
+
+                    var dist = pinchDistance(e);
+
+                    if (gestureState.zoomEnable || Math.abs(dist - gestureState.prevDistance) > ZOOM_DISTANCE_MARGIN) {
+                        zoomPlot(plot, e, gestureState, navigationState);
+
+                        //activate zoom mode
+                        gestureState.zoomEnable = true;
+                    }
+                    pinchDragTimeout = null;
+                }, 1000 / 60);
             },
 
             end: function(e) {
+                if (pinchDragTimeout) {
+                    clearTimeout(pinchDragTimeout);
+                    pinchDragTimeout = null;
+                }
                 presetNavigationState(e, 'pinch', gestureState);
                 gestureState.prevDistance = null;
             }

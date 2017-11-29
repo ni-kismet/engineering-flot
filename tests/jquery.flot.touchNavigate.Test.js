@@ -3,6 +3,7 @@
 
 describe("flot touch navigate plugin", function () {
     var placeholder, plot, options;
+    var minFrameDuration = 1 / 60 * 1000;
 
     beforeEach(function () {
         placeholder = setFixtures('<div id="test-container" style="width: 600px;height: 400px">')
@@ -13,6 +14,11 @@ describe("flot touch navigate plugin", function () {
             zoom: { interactive: true, active: true, amount: 10 },
             pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
         };
+        jasmine.clock().install();
+    });
+
+    afterEach(function() {
+        jasmine.clock().uninstall();
     });
 
     it('shows that the eventHolder is cleared through shutdown when the plot is replaced', function() {
@@ -26,8 +32,12 @@ describe("flot touch navigate plugin", function () {
         expect(spy).toHaveBeenCalledWith('panstart', jasmine.any(Function))
         expect(spy).toHaveBeenCalledWith('pandrag', jasmine.any(Function));
         expect(spy).toHaveBeenCalledWith('panend', jasmine.any(Function));
-
     });
+
+    var simulateTouchEvent = function (coords, eventHolder, eventName) {
+        simulate.sendTouchEvents(coords, eventHolder, eventName);
+        jasmine.clock().tick(minFrameDuration);
+    }
 
     describe('touchZoom', function() {
         it('should zoom the plot',function() {
@@ -59,9 +69,9 @@ describe("flot touch navigate plugin", function () {
                 },
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchend');
 
             expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
             expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
@@ -94,15 +104,14 @@ describe("flot touch navigate plugin", function () {
                   getPairOfCoords(xaxis, yaxis, canvasCoords[3].x, canvasCoords[3].y)
                 ];
 
-            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchend');
 
             expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[2].x), 6);
             expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[2].x), 6);
             expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[2].y), 6);
             expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[2].y), 6);
-
         });
 
         it('should not zoom the plot for two fingers with small distance variation',function() {
@@ -132,9 +141,9 @@ describe("flot touch navigate plugin", function () {
 
             var spy = spyOn(plot, 'zoom').and.callThrough();
 
-            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchend');
 
             expect(spy).not.toHaveBeenCalled();
         });
@@ -171,9 +180,9 @@ describe("flot touch navigate plugin", function () {
                   },
                   amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-              simulate.sendTouchEvents(initialCoords, plot.getEventHolder(), 'touchstart');
-              simulate.sendTouchEvents(finalCoords, plot.getEventHolder(), 'touchmove');
-              simulate.sendTouchEvents(finalCoords, plot.getEventHolder(), 'touchend');
+              simulateTouchEvent(initialCoords, plot.getEventHolder(), 'touchstart');
+              simulateTouchEvent(finalCoords, plot.getEventHolder(), 'touchmove');
+              simulateTouchEvent(finalCoords, plot.getEventHolder(), 'touchend');
 
               expect(xaxis.min).toBeCloseTo((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin, 6);
               expect(xaxis.max).toBeCloseTo(initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount), 6);
@@ -210,15 +219,14 @@ describe("flot touch navigate plugin", function () {
                 },
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchend');
 
             expect(xaxis.min).not.toBeCloseTo(initialYmin, 6);
             expect(xaxis.max).not.toBeCloseTo(initialYmax, 6);
             expect(yaxis.min).not.toBeCloseTo(initialYmin, 6);
             expect(yaxis.max).not.toBeCloseTo(initialYmax, 6);
-
         });
 
         it('should zoom the plot on axis x',function() {
@@ -250,15 +258,14 @@ describe("flot touch navigate plugin", function () {
               },
               amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-          simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-          simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
-          simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+          simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+          simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
+          simulateTouchEvent(finalCoords, eventHolder, 'touchend');
 
           expect(Math.abs(xaxis.min - ((midPointCoords.x - initialXmin) * (1 - 1/amount) + initialXmin))).toBeLessThan(1);
           expect(Math.abs(xaxis.max - (initialXmax - (initialXmax - midPointCoords.x) * (1 - 1/amount)))).toBeLessThan(1);
           expect(yaxis.min).toBeCloseTo(initialYmin, 6);
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
-
         });
 
         it('should zoom the plot on axis y',function() {
@@ -290,15 +297,14 @@ describe("flot touch navigate plugin", function () {
                 },
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchend');
 
             expect(xaxis.min).toBeCloseTo(initialXmin, 6);
             expect(xaxis.max).toBeCloseTo(initialXmax, 6);
             expect(Math.abs(yaxis.min - ((midPointCoords.y - initialYmin) * (1 - 1/amount) + initialYmin))).toBeLessThan(1);
             expect(Math.abs(yaxis.max - (initialYmax - (initialYmax - midPointCoords.x) * (1 - 1/amount)))).toBeLessThan(1);
-
           });
 
         it('should not zoom the plot on axis for axis zoom not enabled',function() {
@@ -327,15 +333,14 @@ describe("flot touch navigate plugin", function () {
                 ],
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchend');
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
             expect(yaxis.min).toBe(0);
             expect(yaxis.max).toBe(10);
-
         });
 
         it('should not zoom the axis for plot zoom not enabled',function() {
@@ -364,15 +369,14 @@ describe("flot touch navigate plugin", function () {
                 ],
                 amount = getDistance(finalCoords) / getDistance(initialCoords);
 
-            simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchmove');
-            simulate.sendTouchEvents(finalCoords, eventHolder, 'touchend');
+            simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchmove');
+            simulateTouchEvent(finalCoords, eventHolder, 'touchend');
 
             expect(xaxis.min).toBe(0);
             expect(xaxis.max).toBe(10);
             expect(yaxis.min).not.toBe(0);
             expect(yaxis.max).not.toBe(10);
-
         });
 
         function getDistance(coords) {
@@ -411,7 +415,6 @@ describe("flot touch navigate plugin", function () {
         expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
         expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
         expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
-
       });
 
       it('should drag the logarithmic plot', function() {
@@ -486,8 +489,10 @@ describe("flot touch navigate plugin", function () {
 
         //simulate drag from (1, 1) to (100, 100) sequentially
         simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        
         for (var i = 2; i <= limit; i++) {
             simulate.touchmove(eventHolder, pointCoords[i].x, pointCoords[i].y);
+            
         }
         simulate.touchend(eventHolder, pointCoords[limit].x, pointCoords[limit].y);
 
@@ -496,7 +501,6 @@ describe("flot touch navigate plugin", function () {
         expect(Math.abs(xaxis.max - (initialXmax + (canvasCoords[1].x - canvasCoords[limit].x)))).toBeLessThan(1);
         expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[1].y - canvasCoords[limit].y), 0);
         expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[1].y - canvasCoords[limit].y), 0);
-
       });
 
       it('should not pan the plot for a finger outside canvas',function() {
@@ -594,7 +598,6 @@ describe("flot touch navigate plugin", function () {
           expect(xaxis.max).toBe(10);
           expect(yaxis.min).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmin) + (pointCoords[0].y - pointCoords[1].y)), 6);
           expect(yaxis.max).toBeCloseTo(yaxis.c2p(yaxis.p2c(initialYmax) + (pointCoords[0].y - pointCoords[1].y)), 6);
-
       });
 
       it('should drag the plot on the xaxis only', function() {
@@ -726,9 +729,9 @@ describe("flot touch navigate plugin", function () {
               ];
 
           //simulate pinch
-          simulate.sendTouchEvents(initialCoords, eventHolder, 'touchstart');
-          simulate.sendTouchEvents(midPointCoords, eventHolder, 'touchmove');
-          simulate.sendTouchEvents(finalCoordsPinch, eventHolder, 'touchend');
+          simulateTouchEvent(initialCoords, eventHolder, 'touchstart');
+          simulateTouchEvent(midPointCoords, eventHolder, 'touchmove');
+          simulateTouchEvent(finalCoordsPinch, eventHolder, 'touchend');
 
           previousXmin = xaxis.min;
           previousXmax = xaxis.max;
@@ -741,14 +744,13 @@ describe("flot touch navigate plugin", function () {
           expect(previousYmax).not.toBeCloseTo(initialYmax, 6);
 
           //simulate pan after pinch event
-          simulate.sendTouchEvents(finalCoordsPan, eventHolder, 'touchmove');
-          simulate.sendTouchEvents(finalCoordsPan, eventHolder, 'touchend');
+          simulateTouchEvent(finalCoordsPan, eventHolder, 'touchmove');
+          simulateTouchEvent(finalCoordsPan, eventHolder, 'touchend');
 
           expect(xaxis.min).toBeCloseTo(xaxis.c2p(xaxis.p2c(previousXmin) + (finalCoordsPinch[0].x - finalCoordsPan[0].x)), 6);
           expect(xaxis.max).toBeCloseTo(xaxis.c2p(xaxis.p2c(previousXmax) + (finalCoordsPinch[0].x - finalCoordsPan[0].x)), 6);
           expect(yaxis.min).toBe(previousYmin);
           expect(yaxis.max).toBe(previousYmax);
-
         });
     });
 
@@ -842,7 +844,6 @@ describe("flot touch navigate plugin", function () {
           expect(xaxis.max).toBeCloseTo(initialXmax, 6);
           expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
           expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
-
         });
 
         it('should recenter the plot on axis y',function() {
@@ -888,7 +889,6 @@ describe("flot touch navigate plugin", function () {
           expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
           expect(yaxis.min).toBeCloseTo(initialYmin, 6);
           expect(yaxis.max).toBeCloseTo(initialYmax, 6);
-
         });
 
         it('should not recenter the plot for one touch inside axis box and one inside plot area', function(){
@@ -933,7 +933,6 @@ describe("flot touch navigate plugin", function () {
             expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
             expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
             expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
-
         });
     });
 
