@@ -34,17 +34,6 @@ Licensed under the MIT license.
         return ticks;
     }
 
-    function getPixelRatio(context) {
-        var devicePixelRatio = window.devicePixelRatio || 1,
-            backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
-        return devicePixelRatio / backingStoreRatio;
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     // The top-level container for the entire plot.
     function Plot(placeholder, data_, options_, plugins) {
@@ -289,7 +278,6 @@ Licensed under the MIT license.
             overlay.clearCache();
         };
 
-        plot.getPixelRatio = getPixelRatio;
         plot.computeRangeForDataSeries = computeRangeForDataSeries;
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
         plot.findNearbyItem = findNearbyItem;
@@ -2680,5 +2668,4 @@ Licensed under the MIT license.
     };
 
     $.plot.linearTickGenerator = defaultTickGenerator;
-    $.plot.getPixelRatio = getPixelRatio;
 })(jQuery);

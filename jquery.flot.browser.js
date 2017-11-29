@@ -3,14 +3,22 @@
 
     var browser = {
         getPageXY: function (e) {
-            // This function calculates the pageX and pageY which are not valid
-            //while running the tests with Edge and creating events using the
-            //recommended WheelEvent or MouseEvent constructors.
             // This code is inspired from https://stackoverflow.com/a/3464890
             var doc = document.documentElement,
                 pageX = e.clientX + (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0),
                 pageY = e.clientY + (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
             return { X: pageX, Y: pageY };
+        },
+
+        getPixelRatio: function(context) {
+            var devicePixelRatio = window.devicePixelRatio || 1,
+                backingStoreRatio =
+                context.webkitBackingStorePixelRatio ||
+                context.mozBackingStorePixelRatio ||
+                context.msBackingStorePixelRatio ||
+                context.oBackingStorePixelRatio ||
+                context.backingStorePixelRatio || 1;
+            return devicePixelRatio / backingStoreRatio;
         },
 
         isSafari: function() {
