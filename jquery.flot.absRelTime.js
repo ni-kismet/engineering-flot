@@ -141,11 +141,12 @@ API.txt for details.
         }
 
         for (var i = 0; i < fmt.length; ++i) {
-            var c = fmt.charAt(i);
+            var c = fmt.charAt(i),
+                localDateValue = d.date || d.getDate();
             if (escape) {
                 switch (c) {
-                    case 'r': c = toRelativeTimeStr(d.date, showMilliseconds); break;
-                    case 'A': c = toAbsoluteTimeStr(d.date, showMilliseconds); break;
+                    case 'r': c = toRelativeTimeStr(localDateValue, showMilliseconds); break;
+                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds); break;
                 }
                 r.push(c);
                 escape = false;
