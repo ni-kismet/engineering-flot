@@ -276,7 +276,7 @@
             };
 
             if (series.decimate) {
-                datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth);
+                datapoints.points = series.decimate(series, series.xaxis.min, series.xaxis.max, plotWidth, series.yaxis.min, series.yaxis.max, plotHeight);
             }
 
             var lw = series.lines.lineWidth;
