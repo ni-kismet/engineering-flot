@@ -3338,11 +3338,13 @@ Licensed under the MIT license.
             }
 
             if (!redrawTimeout) {
-                redrawTimeout = setTimeout(drawOverlay, t);
+                redrawTimeout = setTimeout(function() {
+                    drawOverlay(plot);
+                }, t);
             }
         }
 
-        function drawOverlay() {
+        function drawOverlay(plot) {
             redrawTimeout = null;
 
             if (!octx) {
@@ -3350,10 +3352,8 @@ Licensed under the MIT license.
             }
             overlay.clear();
             executeHooks(hooks.drawOverlay, [octx, overlay]);
-            //this.getPlaceholder().trigger('onDrawingDone', []);
-            if ((overlay.element.onDrawingDone !== null) && (overlay.element.onDrawingDone !== undefined)) {
-                overlay.element.onDrawingDone();
-            }
+            var event = new CustomEvent('onDrawingDone');
+            plot.getEventHolder().dispatchEvent(event);
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
