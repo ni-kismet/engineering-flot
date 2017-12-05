@@ -2616,6 +2616,10 @@ Licensed under the MIT license.
             }
             overlay.clear();
             executeHooks(hooks.drawOverlay, [octx, overlay]);
+            //this.getPlaceholder().trigger('onDrawingDone', []);
+            if ((overlay.element.onDrawingDone !== null) && (overlay.element.onDrawingDone !== undefined)) {
+                overlay.element.onDrawingDone();
+            }
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {
