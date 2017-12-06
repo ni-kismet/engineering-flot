@@ -4664,7 +4664,7 @@ can set the default in the options.
         }
 
         function isLeftMouseButtonPressed(e) {
-            return browser.isSafari ? e.which === 1 : e.buttons === 1;
+            return browser.isSafari() ? e.which === 1 : e.buttons === 1;
         }
 
         function onDragStart(e) {
