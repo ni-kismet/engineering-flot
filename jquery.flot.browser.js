@@ -30,6 +30,41 @@
         isMobileSafari: function() {
             //isMobileSafari adapted from https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
             return navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/);
+        },
+
+        isOpera: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            //Opera 8.0+
+            return (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+        },
+
+        isFirefox: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Firefox 1.0+
+            return typeof InstallTrigger !== 'undefined';
+        },
+
+        isIE: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Internet Explorer 6-11
+            return /*@cc_on!@*/false || !!document.documentMode;
+        },
+
+        isEdge: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Edge 20+
+            return !isIE() && !!window.StyleMedia;
+        },
+
+        isChrome: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Chrome 1+
+            return !!window.chrome && !!window.chrome.webstore;
+        },
+
+        isBlink: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            return (isChrome() || isOpera()) && !!window.CSS;
         }
     };
 

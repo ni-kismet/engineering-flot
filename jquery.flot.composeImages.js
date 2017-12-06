@@ -5,8 +5,8 @@
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
-    var getPixelRatio = $.plot.browser.getPixelRatio;
     var browser = $.plot.browser;
+    var getPixelRatio = browser.getPixelRatio;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
