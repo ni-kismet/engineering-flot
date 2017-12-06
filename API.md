@@ -1184,7 +1184,7 @@ can call:
     immediately, instead a timer is set to catch multiple successive
     redraws (e.g. from a mousemove). You can get to the overlay by
     setting up a drawOverlay hook.
-    This function will also trigger the creation and dispatching the
+    This function will also trigger the dispatching of the
     'onDrawingDone' custom event, which can be used to notify listeners
     (drawOverlay hooks) about the finishing of a drawing operation.
     Use addEventListener('onDrawingDone', callback) and
@@ -1648,7 +1648,7 @@ hooks in the plugins bundled with Flot.
     metrics computed by Flot, e.g. plot.width()/plot.height(). See the
     crosshair plugin for an example.
 
-    This hook creates and dispatches the 'onDrawingDone' custom event.
+    This hook dispatches the 'onDrawingDone' custom event.
     It notifies listeners about the finishing of a drawing operation.
     Use addEventListener('onDrawingDone', callback) and
     removeEventListener('onDrawingDone', callback), to register and unregister

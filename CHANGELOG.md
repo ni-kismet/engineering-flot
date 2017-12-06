@@ -1,14 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.1.1]
-### Changes ###
-- Added 'onDrawingDone' custom event, dispatched by triggerRedrawOverlay.
-
 ## [1.1.0]
 
 ### Changes ###
 - getPixelRatio moved from the plot instance to $.plot.browser namespace
+- Added 'onDrawingDone' custom event, dispatched by triggerRedrawOverlay.
 
 ### Bug fixes ###
 - Pinch events fired too fast and slowing down the drawing
@@ -1466,7 +1463,6 @@ Moved labelMargin option to grid from x/yaxis.
 
 First public release.
 
-[1.1.1]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.10...v1.1.0
 [1.0.10]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.8...v1.0.9
