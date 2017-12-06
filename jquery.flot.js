@@ -2604,11 +2604,13 @@ Licensed under the MIT license.
             }
 
             if (!redrawTimeout) {
-                redrawTimeout = setTimeout(drawOverlay, t);
+                redrawTimeout = setTimeout(function() {
+                    drawOverlay(plot);
+                }, t);
             }
         }
 
-        function drawOverlay() {
+        function drawOverlay(plot) {
             redrawTimeout = null;
 
             if (!octx) {
@@ -2616,6 +2618,8 @@ Licensed under the MIT license.
             }
             overlay.clear();
             executeHooks(hooks.drawOverlay, [octx, overlay]);
+            var event = new CustomEvent('onDrawingDone');
+            plot.getEventHolder().dispatchEvent(event);
         }
 
         function getColorOrGradient(spec, bottom, top, defaultColor) {

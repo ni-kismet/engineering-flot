@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changes ###
 - getPixelRatio moved from the plot instance to $.plot.browser namespace
+- Added 'onDrawingDone' custom event, dispatched by triggerRedrawOverlay.
 
 ### Bug fixes ###
 - Pinch events fired too fast and slowing down the drawing
