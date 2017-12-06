@@ -77,8 +77,10 @@ describe("flot legend plugin", function() {
         plot = $.plot(placeholder, [[1, 3, 5, 6]], options);
 
         var legendSvg = document.getElementsByClassName('legendLayer')[0];
-        
-        expect(legendSvg.childNodes[2].childNodes[1].textContent).toBe('Plot 1');
+        var firstLegendEntry = legendSvg.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'g')[0];
+        var entryLabel = firstLegendEntry.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'text')[0];
+
+        expect(entryLabel.textContent).toBe('Plot 1');
     });
 
     it('should display the plot label', function(){
@@ -87,8 +89,10 @@ describe("flot legend plugin", function() {
         plot = $.plot(placeholder, [[1, 3, 5, 6]], options);
 
         var legendSvg = document.getElementsByClassName('legendLayer')[0];
-        
-        expect(legendSvg.childNodes[2].childNodes[1].textContent).toBe(label);
+        var firstLegendEntry = legendSvg.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'g')[0];
+        var entryLabel =  firstLegendEntry.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'text')[0];
+
+        expect(entryLabel.textContent).toBe(label);
     });
 
     it('should take into account the show option', function() {
