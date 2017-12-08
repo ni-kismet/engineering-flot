@@ -12,8 +12,6 @@
             container: null, // container (as jQuery object) to put legend in, null means default on top of graph
             position: 'ne', // position of default legend container within plot
             margin: 5, // distance from grid edge to default legend container within plot
-            backgroundColor: null, // null means auto-detect
-            backgroundOpacity: 0.85, // set to 0 to avoid background
             sorted: null // default to no legend sorting
         }
     };
@@ -30,12 +28,9 @@
             return;
         }
 
-        var backgroundColor = options.legend.backgroundColor || 'rgb(255,255,255)';
-        var backgroundOpacity = options.legend.backgroundOpacity || 0.0;
-
         // Save the legend entries in legend options
         var entries = options.legend.legendEntries = legendEntries,
-            plotOffset = plot.getPlotOffset(),
+            plotOffset = options.legend.plotOffset = plot.getPlotOffset(),
             html = [],
             entry, labelHtml, iconHtml,
             maxLabelLength = 0,
@@ -51,7 +46,7 @@
             };
 
         html[j++] = '<svg class="legendLayer" style="width:inherit;height:inherit;">';
-        html[j++] = '<rect width="100%" height="100%" style="stroke-width:0; fill:' + backgroundColor + '; fill-opacity:' + backgroundOpacity + '"/>';
+        html[j++] = '<rect class="background" width="100%" height="100%"/>';
         html[j++] = svgShapeDefs;
 
         // Generate html for icons and labels from a list of entries
@@ -317,20 +312,20 @@
         return legendEntries;
     }
 
-    // Compare two lists of legend entries
-    function shouldRedraw(oldEntries, newEntries) {
-        // return false if opts1 same as opts2
-        function checkOptions(opts1, opts2) {
-            for (var prop in opts1) {
-                if (opts1.hasOwnProperty(prop)) {
-                    if (opts1[prop] !== opts2[prop]) {
-                        return true;
-                    }
+    // return false if opts1 same as opts2
+    function checkOptions(opts1, opts2) {
+        for (var prop in opts1) {
+            if (opts1.hasOwnProperty(prop)) {
+                if (opts1[prop] !== opts2[prop]) {
+                    return true;
                 }
             }
-            return false;
         }
+        return false;
+    }
 
+    // Compare two lists of legend entries
+    function shouldRedraw(oldEntries, newEntries) {
         if (!oldEntries || !newEntries) {
             return true;
         }
@@ -384,9 +379,12 @@
             var series = plot.getData(),
                 labelFormatter = options.legend.labelFormatter,
                 oldEntries = options.legend.legendEntries,
-                newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted);
+                oldPlotOffset = options.legend.plotOffset,
+                newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted),
+                newPlotOffset = plot.getPlotOffset();
 
-            if (shouldRedraw(oldEntries, newEntries)) {
+            if (shouldRedraw(oldEntries, newEntries) ||
+                checkOptions(oldPlotOffset, newPlotOffset)) {
                 insertLegend(plot, newEntries);
             }
         });
