@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.2]
+
+### Changes ###
+- move backgroundColor and backgroundOpacity from legend settings to css
+
 ## [1.1.0]
 
 ### Changes ###
