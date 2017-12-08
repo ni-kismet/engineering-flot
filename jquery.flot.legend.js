@@ -12,8 +12,6 @@
             container: null, // container (as jQuery object) to put legend in, null means default on top of graph
             position: 'ne', // position of default legend container within plot
             margin: 5, // distance from grid edge to default legend container within plot
-            backgroundColor: null, // null means auto-detect
-            backgroundOpacity: 0.85, // set to 0 to avoid background
             sorted: null // default to no legend sorting
         }
     };
@@ -32,7 +30,7 @@
 
         // Save the legend entries in legend options
         var entries = options.legend.legendEntries = legendEntries,
-            plotOffset = plot.getPlotOffset(),
+            plotOffset = options.legend.plotOffset = plot.getPlotOffset(),
             html = [],
             entry, labelHtml, iconHtml,
             maxLabelLength = 0,
@@ -48,6 +46,7 @@
             };
 
         html[j++] = '<svg class="legendLayer" style="width:inherit;height:inherit;">';
+        html[j++] = '<rect class="background" width="100%" height="100%"/>';
         html[j++] = svgShapeDefs;
 
         // Generate html for icons and labels from a list of entries
@@ -107,7 +106,7 @@
             pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
         }
 
-        var legendEl, svgEl,
+        var legendEl,
             width = 3 + maxLabelLength / 2,
             height = entries.length * 1.6;
         if (!options.legend.container) {
@@ -115,27 +114,6 @@
             legendEl.css('width', width + 'em');
             legendEl.css('height', height + 'em');
             legendEl.css('pointerEvents', 'none');
-            svgEl = legendEl.children()[0];
-            // put the transparent background only when drawing the legend over graph
-            if (options.legend.backgroundOpacity !== 0.0) {
-                var c = options.legend.backgroundColor;
-                if (c == null) {
-                    c = options.grid.backgroundColor;
-                    if (c && typeof c === 'string') {
-                        c = $.color.parse(c);
-                    } else {
-                        c = $.color.extract(legendEl, 'background-color');
-                    }
-
-                    c.a = 1;
-                    c = c.toString();
-                }
-
-                legendEl.css('background-color', c);
-                legendEl.css('opacity', options.legend.backgroundOpacity);
-                svgEl.style.backgroundColor = c;
-                svgEl.style.opacity = options.legend.backgroundOpacity;
-            }
         } else {
             legendEl = $(html.join('')).appendTo(options.legend.container)[0];
             options.legend.container.style.width = width + 'em';
@@ -334,20 +312,20 @@
         return legendEntries;
     }
 
-    // Compare two lists of legend entries
-    function shouldRedraw(oldEntries, newEntries) {
-        // return false if opts1 same as opts2
-        function checkOptions(opts1, opts2) {
-            for (var prop in opts1) {
-                if (opts1.hasOwnProperty(prop)) {
-                    if (opts1[prop] !== opts2[prop]) {
-                        return true;
-                    }
+    // return false if opts1 same as opts2
+    function checkOptions(opts1, opts2) {
+        for (var prop in opts1) {
+            if (opts1.hasOwnProperty(prop)) {
+                if (opts1[prop] !== opts2[prop]) {
+                    return true;
                 }
             }
-            return false;
         }
+        return false;
+    }
 
+    // Compare two lists of legend entries
+    function shouldRedraw(oldEntries, newEntries) {
         if (!oldEntries || !newEntries) {
             return true;
         }
@@ -401,9 +379,12 @@
             var series = plot.getData(),
                 labelFormatter = options.legend.labelFormatter,
                 oldEntries = options.legend.legendEntries,
-                newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted);
+                oldPlotOffset = options.legend.plotOffset,
+                newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted),
+                newPlotOffset = plot.getPlotOffset();
 
-            if (shouldRedraw(oldEntries, newEntries)) {
+            if (shouldRedraw(oldEntries, newEntries) ||
+                checkOptions(oldPlotOffset, newPlotOffset)) {
                 insertLegend(plot, newEntries);
             }
         });

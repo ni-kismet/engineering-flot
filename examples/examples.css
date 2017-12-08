@@ -100,11 +100,6 @@ input[type=checkbox] {
 	font-size: 14px;
 }
 
-.legend table {
-	border-spacing: 5px;
-	line-height: 1.2em;
-}
-
 fieldset {
 		display: block;
 		-webkit-margin-start: 2px;
@@ -130,7 +125,15 @@ fieldset {
 		border-color: initial;
 		border-image: initial;
 		padding-left: 10px;
-		padding-right: 10px;
+        padding-right: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+}
+
+.legendLayer .background {
+    fill: rgba(255, 255, 255, 0.85);
+    stroke: rgba(0, 0, 0, 0.85);
+    stroke-width: 1;
 }
 
 input[type="radio"] {

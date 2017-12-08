@@ -3484,6 +3484,41 @@ Licensed under the MIT license.
         isMobileSafari: function() {
             //isMobileSafari adapted from https://stackoverflow.com/questions/3007480/determine-if-user-navigated-from-mobile-safari
             return navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/);
+        },
+
+        isOpera: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            //Opera 8.0+
+            return (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+        },
+
+        isFirefox: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Firefox 1.0+
+            return typeof InstallTrigger !== 'undefined';
+        },
+
+        isIE: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Internet Explorer 6-11
+            return /*@cc_on!@*/false || !!document.documentMode;
+        },
+
+        isEdge: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Edge 20+
+            return !isIE() && !!window.StyleMedia;
+        },
+
+        isChrome: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            // Chrome 1+
+            return !!window.chrome && !!window.chrome.webstore;
+        },
+
+        isBlink: function() {
+            // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+            return (isChrome() || isOpera()) && !!window.CSS;
         }
     };
 
@@ -7283,8 +7318,8 @@ The plugin allso adds the following methods to the plot object:
     const EMPTYARRAYOFIMAGESOURCES = -1;
     const NEGATIVEIMAGESIZE = -2;
     var pixelRatio = 1;
-    var getPixelRatio = $.plot.browser.getPixelRatio;
     var browser = $.plot.browser;
+    var getPixelRatio = browser.getPixelRatio;
 
     function composeImages(canvasOrSvgSources, destinationCanvas) {
         var validCanvasOrSvgSources = canvasOrSvgSources.filter(isValidSource);
@@ -7369,7 +7404,7 @@ The plugin allso adds the following methods to the plot object:
 
     function embedCSSRulesInSVG(rules, svg) {
         var text = [
-            '<svg class="snapshot" width="' + svg.width.baseVal.value * pixelRatio + '" height="' + svg.height.baseVal.value * pixelRatio + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
+            '<svg class="snapshot ' + svg.classList + '" width="' + svg.width.baseVal.value * pixelRatio + '" height="' + svg.height.baseVal.value * pixelRatio + '" viewBox="0 0 ' + svg.width.baseVal.value + ' ' + svg.height.baseVal.value + '" xmlns="http://www.w3.org/2000/svg">',
             '<style>',
             '/* <![CDATA[ */',
             rules.join('\n'),
@@ -7562,8 +7597,6 @@ The plugin allso adds the following methods to the plot object:
             container: null, // container (as jQuery object) to put legend in, null means default on top of graph
             position: 'ne', // position of default legend container within plot
             margin: 5, // distance from grid edge to default legend container within plot
-            backgroundColor: null, // null means auto-detect
-            backgroundOpacity: 0.85, // set to 0 to avoid background
             sorted: null // default to no legend sorting
         }
     };
@@ -7582,7 +7615,7 @@ The plugin allso adds the following methods to the plot object:
 
         // Save the legend entries in legend options
         var entries = options.legend.legendEntries = legendEntries,
-            plotOffset = plot.getPlotOffset(),
+            plotOffset = options.legend.plotOffset = plot.getPlotOffset(),
             html = [],
             entry, labelHtml, iconHtml,
             maxLabelLength = 0,
@@ -7598,6 +7631,7 @@ The plugin allso adds the following methods to the plot object:
             };
 
         html[j++] = '<svg class="legendLayer" style="width:inherit;height:inherit;">';
+        html[j++] = '<rect class="background" width="100%" height="100%"/>';
         html[j++] = svgShapeDefs;
 
         // Generate html for icons and labels from a list of entries
@@ -7657,7 +7691,7 @@ The plugin allso adds the following methods to the plot object:
             pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
         }
 
-        var legendEl, svgEl,
+        var legendEl,
             width = 3 + maxLabelLength / 2,
             height = entries.length * 1.6;
         if (!options.legend.container) {
@@ -7665,27 +7699,6 @@ The plugin allso adds the following methods to the plot object:
             legendEl.css('width', width + 'em');
             legendEl.css('height', height + 'em');
             legendEl.css('pointerEvents', 'none');
-            svgEl = legendEl.children()[0];
-            // put the transparent background only when drawing the legend over graph
-            if (options.legend.backgroundOpacity !== 0.0) {
-                var c = options.legend.backgroundColor;
-                if (c == null) {
-                    c = options.grid.backgroundColor;
-                    if (c && typeof c === 'string') {
-                        c = $.color.parse(c);
-                    } else {
-                        c = $.color.extract(legendEl, 'background-color');
-                    }
-
-                    c.a = 1;
-                    c = c.toString();
-                }
-
-                legendEl.css('background-color', c);
-                legendEl.css('opacity', options.legend.backgroundOpacity);
-                svgEl.style.backgroundColor = c;
-                svgEl.style.opacity = options.legend.backgroundOpacity;
-            }
         } else {
             legendEl = $(html.join('')).appendTo(options.legend.container)[0];
             options.legend.container.style.width = width + 'em';
@@ -7884,20 +7897,20 @@ The plugin allso adds the following methods to the plot object:
         return legendEntries;
     }
 
-    // Compare two lists of legend entries
-    function shouldRedraw(oldEntries, newEntries) {
-        // return false if opts1 same as opts2
-        function checkOptions(opts1, opts2) {
-            for (var prop in opts1) {
-                if (opts1.hasOwnProperty(prop)) {
-                    if (opts1[prop] !== opts2[prop]) {
-                        return true;
-                    }
+    // return false if opts1 same as opts2
+    function checkOptions(opts1, opts2) {
+        for (var prop in opts1) {
+            if (opts1.hasOwnProperty(prop)) {
+                if (opts1[prop] !== opts2[prop]) {
+                    return true;
                 }
             }
-            return false;
         }
+        return false;
+    }
 
+    // Compare two lists of legend entries
+    function shouldRedraw(oldEntries, newEntries) {
         if (!oldEntries || !newEntries) {
             return true;
         }
@@ -7951,9 +7964,12 @@ The plugin allso adds the following methods to the plot object:
             var series = plot.getData(),
                 labelFormatter = options.legend.labelFormatter,
                 oldEntries = options.legend.legendEntries,
-                newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted);
+                oldPlotOffset = options.legend.plotOffset,
+                newEntries = getLegendEntries(series, labelFormatter, options.legend.sorted),
+                newPlotOffset = plot.getPlotOffset();
 
-            if (shouldRedraw(oldEntries, newEntries)) {
+            if (shouldRedraw(oldEntries, newEntries) ||
+                checkOptions(oldPlotOffset, newPlotOffset)) {
                 insertLegend(plot, newEntries);
             }
         });
