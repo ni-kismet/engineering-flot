@@ -9,6 +9,10 @@ Set axis.mode to "log" to enable.
 
 /* global jQuery*/
 
+/**
+## jquery.flot.logaxis
+*/
+
 (function ($) {
     'use strict';
 
