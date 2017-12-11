@@ -16,7 +16,7 @@ var docs2generate = [
   ['docs/hover.md', 'jquery.flot.hover.js'],
  // ['docs/legend.md', 'jquery.flot.legend.js'],
   ['docs/logaxis.md', 'jquery.flot.logaxis.js'],
- // ['docs/navigate.md', 'jquery.flot.navigate.js'],
+  ['docs/navigate.md', 'jquery.flot.navigate.js'],
  // ['docs/selection.md', 'jquery.flot.selection.js'],
  // ['docs/symbol.md', 'jquery.flot.symbol.js'],
  // ['docs/touch.md', 'jquery.flot.touch.js'],
