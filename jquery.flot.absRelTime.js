@@ -7,7 +7,31 @@ Set axis.format to "time" to enable. See the section "Time series data" in
 API.txt for details.
 */
 
-/* global timezoneJS */
+/** ## jquery.flot.absRelTime.js
+
+This plugin is used to format the time axis in absolute time representation as
+well as relative time representation.
+
+Depending upon the timeformat axis parameter value, the axis tick formatter will
+choose between an absolute time representation if the value is '%A' or
+relative time for timeformat '%r'.
+
+If the format for an axis is 'time', inside processOptions hook the tickGenerator
+and tickFormatter of the axis will be overrided with the custom ones used by time axes.
+
+### Relative time axis
+A relative time axis will show the time values with respect to the first data sample.
+Basically, the first datapoint from the points array will be considered time 00:00:00:00.
+If the difference between two datapoints is small, the milliseconds will apear.
+Otherwise, the time representation will contain only the hour, minute and second.
+
+
+### Absolute time axis
+The absolute time representation contains, beside the hours, minutes and secconds
+corresponding to the sample the date and year.
+The value will be splitted on two rows, where the first row is the time and
+the the second one the date in gregorian date format.
+*/
 
 (function($) {
     'use strict';
@@ -258,6 +282,7 @@ API.txt for details.
     var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
         [1, "year"]]);
 
+    //function used for relative time axis to compute the first data point from which the values are starting
     function updateAxisFirstData(plot, axis) {
         var plotData = plot.getData();
         if (plotData.length > 0 && (plotData[0].data.length > 0 || plotData[0].datapoints.points.length > 0)) {

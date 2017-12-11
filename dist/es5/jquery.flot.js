@@ -254,7 +254,6 @@ don't work unless the canvas is attached to the DOM.
         this._textCache = {};
     }
 
-
     /**
     - resize(width, height)
 
@@ -6167,7 +6166,17 @@ Set axis.format to "time" to enable. See the section "Time series data" in
 API.txt for details.
 */
 
-/* global timezoneJS */
+/** ## jquery.flot.absRelTime.js
+
+This plugin is used to format the time axis in absolute time representation as
+well as relative time representation.
+
+A relative time axis will show the time values with respect to the first data sample.
+Basically, the first datapoint from the points array will be considered time 00:00:00.
+
+The absolute time representation contains, beside the hours, minutes and secconds
+corresponding to the sample the date and year.
+*/
 
 (function($) {
     'use strict';
