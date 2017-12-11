@@ -1,6 +1,13 @@
 ## jquery.flot.hover.js
 
 This plugin is used for mouse hover and tap on a point of plot series.
+It supports these options:
+```js
+grid: {
+    hoverable: false, //to trigger plothover event on mouse hover or tap on a point
+    clickable: false //to trigger plotclick event on mouse hover
+}
+```
 
 It listens to native mouse move event or click, as well as artificial generated
 tap and touchevent.

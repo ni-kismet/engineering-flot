@@ -3,6 +3,16 @@
 This plugin is used to format the time axis in absolute time representation as
 well as relative time representation.
 
+It supports these options:
+```js
+xaxis: {
+   timezone: null, // "browser" for local to the client or timezone for timezone-js
+   timeformat: null, // format string to use
+   twelveHourClock: false, // 12 or 24 time in time mode
+   monthNames: null // list of names of months
+}
+```
+
 Depending upon the timeformat axis parameter value, the axis tick formatter will
 choose between an absolute time representation if the value is '%A' or
 relative time for timeformat '%r'.

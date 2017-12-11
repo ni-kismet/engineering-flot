@@ -79,5 +79,3 @@ use the p2c helpers on the axes in Flot to help you convert between these).
 **amount** is the amount to zoom the viewport relative to the current range, so
 1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out). You
 can set the default in the options.
-
-/* eslint-enable 
