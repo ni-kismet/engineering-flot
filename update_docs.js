@@ -10,6 +10,7 @@ var docs2generate = [
  // ['docs/colorhelpers.md', 'jquery.colorhelpers.js'],
   ['docs/absRelTime.md', 'jquery.flot.absRelTime.js'],
  // ['docs/axislabels.md', 'jquery.flot.axislabels.js'],
+  ['docs/browser.md', 'jquery.flot.browser.js'],
   ['docs/composeImages.md', 'jquery.flot.composeImages.js'],
   ['docs/drawSeries.md', 'jquery.flot.drawSeries.js'],
   ['docs/hover.md', 'jquery.flot.hover.js'],
