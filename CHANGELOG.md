@@ -1468,6 +1468,7 @@ Moved labelMargin option to grid from x/yaxis.
 
 First public release.
 
+[1.1.2]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.0...v1.1.2
 [1.1.0]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.10...v1.1.0
 [1.0.10]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.8...v1.0.9
