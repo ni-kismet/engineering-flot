@@ -4131,7 +4131,7 @@ Set axis.mode to "log" to enable.
 This plugin is used to create logarithmic axis. This includes tick generation,
 formatters and transformers to and from logarithmic representation.
 
-### Methods and used hooks
+### Methods and hooks
 */
 
 (function ($) {
@@ -5566,6 +5566,23 @@ can set the default in the options.
 
 /* global jQuery */
 
+/**
+## jquery.flot.hover.js
+
+This plugin is used for mouse hover and tap on a point of plot series.
+
+It listens to native mouse move event or click, as well as artificial generated
+tap and touchevent.
+
+When the mouse is over a point or a tap on a point is performed, that point or
+the correscponding bar will be highlighted and a "plothover" event will be generated.
+
+Custom "touchevent" is triggered when any touch interaction is made. Hover pluigin
+handles this events by unhighlighting all of the previously highlighted points and generates
+"plothovercleanup" event to notify any part that is handling plothover (for exemple to cleanup
+the tooltip from webcharts).
+*/
+
 (function($) {
     'use strict';
 
@@ -5867,8 +5884,8 @@ can set the default in the options.
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'navigateTouch',
-        version: '0.3'
+        name: 'hover',
+        version: '0.1'
     });
 })(jQuery);
 
@@ -7408,6 +7425,40 @@ The plugin allso adds the following methods to the plot object:
     });
 })(jQuery);
 
+/** ## jquery.flot.composeImages.js
+
+This plugin is used to expose a function used to overlap several canvases and
+SVGs, for the purpose of creating a snaphot out of them.
+
+### When composeImages is used:
+When multiple canvases and SVGs have to be overlapped into a single image
+and their offset on the page, must be preserved.
+
+### Where can be used:
+In creating a downloadable snapshot of the plots, axes, cursors etc of a graph.
+
+### How it works:
+The entry point is composeImages function. It expects an array of objects,
+which should be either canvases or SVGs (or a mix). It does a prevalidation
+of them, by verifying if they will be usable or not, later in the flow.
+After selecting only usable sources, it passes them to getGenerateTempImg
+function, which generates temporary images out of them. This function
+expects that some of the passed sources (canvas or SVG) may still have
+problems being converted to an image and makes sure the promises system,
+used by composeImages function, moves forward. As an example, SVGs with
+missing information from header or with unsupported content, may lead to
+failure in generating the temporary image. Temporary images are required
+mostly on extracting content from SVGs, but this is also where the x/y
+offsets are extracted for each image which will be added. For SVGs in
+particular, their CSS rules have to be applied.
+After all temporary images are generated, they are overlapped using
+getExecuteImgComposition function. This is where the destination canvas
+is set to the proper dimensions. It is then output by composeImages.
+This function returns a promise, which can be used to wait for the whole
+composition process. It requires to be asynchronous, because this is how
+temporary images load their data.
+*/
+
 (function($) {
     "use strict";
     const GENERALFAILURECALLBACKERROR = -100; //simply a negative number
@@ -7489,7 +7540,7 @@ The plugin allso adds the following methods to the plot object:
         var styleSheets = document.styleSheets,
             rulesList = [];
         for (var i = 0; i < styleSheets.length; i++) {
-            // in Chrome the external CSS files are empty when the page is loaded from directly disk
+            // in Chrome, the external CSS files are empty when the page is directly loaded from disk
             var rules = styleSheets[i].cssRules || [];
             for (var j = 0; j < rules.length; j++) {
                 var rule = rules[j];
