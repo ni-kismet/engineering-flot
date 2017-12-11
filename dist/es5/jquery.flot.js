@@ -254,7 +254,6 @@ don't work unless the canvas is attached to the DOM.
         this._textCache = {};
     }
 
-
     /**
     - resize(width, height)
 
@@ -3531,6 +3530,14 @@ Licensed under the MIT license.
     $.plot.browser = browser;
 })(jQuery);
 
+/**
+## jquery.flot.drawSeries.js
+
+This plugin is used by flot for drawing lines, plots, bars or area.
+
+### Public methods
+*/
+
 (function($) {
     "use strict";
 
@@ -3793,6 +3800,16 @@ Licensed under the MIT license.
             }
         }
 
+        /**
+        - drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient)
+
+         This function is used for drawing lines or area fill.  In case the series has line decimation function
+         attached, before starting to draw, as an optimization the points will first be decimated.
+
+         The series parameter contains the series to be drown on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drowing surface.
+         The function getColorOrGradient is used to compute the fill style of lines and area.
+        */
         function drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
@@ -3829,6 +3846,16 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
+        /**
+        - drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient)
+
+         This function is used for drawing points using a given symbol. In case the series has points decimation
+         function attached, before starting to draw, as an optimization the points will first be decimated.
+
+         The series parameter contains the series to be drown on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drowing surface.
+         The function drawSymbol is used to compute and draw the symbol chosen for the points.
+        */
         function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function drawCircle(ctx, x, y, radius, shadow, fill) {
                 ctx.moveTo(x + radius, y);
@@ -3989,6 +4016,16 @@ Licensed under the MIT license.
             }
         }
 
+        /**
+        - drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient)
+
+         This function is used for drawing series represented as bars. In case the series has decimation
+         function attached, before starting to draw, as an optimization the points will first be decimated.
+
+         The series parameter contains the series to be drown on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drowing surface.
+         The function getColorOrGradient is used to compute the fill style of bars.
+        */
         function drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
                 var points = datapoints.points,
@@ -4094,7 +4131,7 @@ Set axis.mode to "log" to enable.
 This plugin is used to create logarithmic axis. This includes tick generation,
 formatters and transformers to and from logarithmic representation.
 
-### Used hooks
+### Methods and used hooks
 */
 
 (function ($) {
@@ -4334,7 +4371,7 @@ formatters and transformers to and from logarithmic representation.
 
     /**
     - setDataminRange(plot, axis)
-    
+
     It is used for clamping the starting point of a logarithmic axis.
     This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
     The function is usefull since the logarithmic representation can not show
@@ -6167,7 +6204,30 @@ Set axis.format to "time" to enable. See the section "Time series data" in
 API.txt for details.
 */
 
-/* global timezoneJS */
+/** ## jquery.flot.absRelTime.js
+
+This plugin is used to format the time axis in absolute time representation as
+well as relative time representation.
+
+Depending upon the timeformat axis parameter value, the axis tick formatter will
+choose between an absolute time representation if the value is '%A' or
+relative time for timeformat '%r'.
+
+If the format for an axis is 'time', inside processOptions hook the tickGenerator
+and tickFormatter of the axis will be overrided with the custom ones used by time axes.
+
+### Relative time axis
+A relative time axis will show the time values with respect to the first data sample.
+Basically, the first datapoint from the points array will be considered time 00:00:00:00.
+If the difference between two datapoints is small, the milliseconds will apear.
+Otherwise, the time representation will contain only the hour, minute and second.
+
+### Absolute time axis
+The absolute time representation contains, beside the hours, minutes and secconds
+corresponding to the sample the date and year.
+The value will be splitted on two rows, where the first row is the time and
+the the second one the date in gregorian date format.
+*/
 
 (function($) {
     'use strict';
@@ -6418,6 +6478,7 @@ API.txt for details.
     var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
         [1, "year"]]);
 
+    //function used for relative time axis to compute the first data point from which the values are starting
     function updateAxisFirstData(plot, axis) {
         var plotData = plot.getData();
         if (plotData.length > 0 && (plotData[0].data.length > 0 || plotData[0].datapoints.points.length > 0)) {

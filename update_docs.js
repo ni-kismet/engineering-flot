@@ -8,10 +8,10 @@ var fs = require('fs');
 var docs2generate = [
   ['docs/canvaswrapper.md', 'jquery.canvaswrapper.js'],
  // ['docs/colorhelpers.md', 'jquery.colorhelpers.js'],
- // ['docs/absRelTime.md', 'jquery.flot.absRelTime.js'],
+  ['docs/absRelTime.md', 'jquery.flot.absRelTime.js'],
  // ['docs/axislabels.md', 'jquery.flot.axislabels.js'],
  // ['docs/composeImages.md', 'jquery.composeImages.js'],
- // ['docs/drawSeries.md', 'jquery.flot.drawSeries.js'],
+  ['docs/drawSeries.md', 'jquery.flot.drawSeries.js'],
  // ['docs/hover.md', 'jquery.flot.hover.js'],
  // ['docs/legend.md', 'jquery.flot.legend.js'],
   ['docs/logaxis.md', 'jquery.flot.logaxis.js'],

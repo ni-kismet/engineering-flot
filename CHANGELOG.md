@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changes ###
 - move backgroundColor and backgroundOpacity from legend settings to css
+- document each flot plugin
 
 ## [1.1.0]
 

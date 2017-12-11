@@ -54,7 +54,6 @@ don't work unless the canvas is attached to the DOM.
         this._textCache = {};
     }
 
-
     /**
     - resize(width, height)
 
