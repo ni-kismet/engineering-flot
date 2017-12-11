@@ -16,7 +16,6 @@ Basically, the first datapoint from the points array will be considered time 00:
 If the difference between two datapoints is small, the milliseconds will apear.
 Otherwise, the time representation will contain only the hour, minute and second.
 
-
 ### Absolute time axis
 The absolute time representation contains, beside the hours, minutes and secconds
 corresponding to the sample the date and year.

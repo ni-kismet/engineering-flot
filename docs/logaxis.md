@@ -2,7 +2,7 @@
 This plugin is used to create logarithmic axis. This includes tick generation,
 formatters and transformers to and from logarithmic representation.
 
-### Used hooks
+### Methods and used hooks
 
 
 - logTickGenerator(plot, axis, noTicks)
