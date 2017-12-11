@@ -3473,7 +3473,6 @@ This is a collection of functions, used to check if the code is running in a
 particular browser or Javascript engine.
 */
 
-
 (function ($) {
     'use strict';
 
