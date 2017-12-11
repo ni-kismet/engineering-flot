@@ -12,7 +12,7 @@ var docs2generate = [
  // ['docs/axislabels.md', 'jquery.flot.axislabels.js'],
  // ['docs/composeImages.md', 'jquery.composeImages.js'],
   ['docs/drawSeries.md', 'jquery.flot.drawSeries.js'],
- // ['docs/hover.md', 'jquery.flot.hover.js'],
+  ['docs/hover.md', 'jquery.flot.hover.js'],
  // ['docs/legend.md', 'jquery.flot.legend.js'],
   ['docs/logaxis.md', 'jquery.flot.logaxis.js'],
  // ['docs/navigate.md', 'jquery.flot.navigate.js'],

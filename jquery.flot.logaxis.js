@@ -14,7 +14,7 @@ Set axis.mode to "log" to enable.
 This plugin is used to create logarithmic axis. This includes tick generation,
 formatters and transformers to and from logarithmic representation.
 
-### Methods and used hooks
+### Methods and hooks
 */
 
 (function ($) {
