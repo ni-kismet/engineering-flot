@@ -4878,7 +4878,6 @@ can set the default in the options.
         }
 
         function onDblClick(e) {
-            var o = plot.getOptions();
             plot.activate();
 
             var axes = plot.getTouchedAxis(e.clientX, e.clientY),
@@ -4894,7 +4893,6 @@ can set the default in the options.
         }
 
         function onClick(e) {
-            var o = plot.getOptions();
             plot.activate();
 
             if (isPanAction) {
@@ -4905,6 +4903,7 @@ can set the default in the options.
         }
 
         plot.activate = function() {
+            var o = plot.getOptions();
             if (!o.pan.active || !o.zoom.active) {
                 o.pan.active = true;
                 o.zoom.active = true;
