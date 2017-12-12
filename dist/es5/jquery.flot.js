@@ -3469,6 +3469,7 @@ properties of the event are not correct while running tests in Edge.
 ### getPixelRatio
 This function returns the current pixel ratio defined by the product of desktop
 zoom and page zoom.
+Additional info: https://www.html5rocks.com/en/tutorials/canvas/hidpi/
 
 ### isSafari, isMobileSafari, isOpera, isFirefox, isIE, isEdge, isChrome, isBlink
 This is a collection of functions, used to check if the code is running in a
