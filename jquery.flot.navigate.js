@@ -10,7 +10,8 @@ Licensed under the MIT license.
 /**
 ## jquery.flot.navigate.js
 
-This flot plugin is used for adding the ability to pan and zoom the plot
+This flot plugin is used for adding the ability to pan and zoom the plot.
+A higher level overview is available at [interactions](interactions.md) documentation.
 
 The default behaviour is scrollwheel up/down to zoom in, drag
 to pan. The plugin defines plot.zoom({ center }), plot.zoomOut() and

@@ -1,11 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.3]
+
+### Changes ###
+- document flot plugins
+
 ## [1.1.2]
 
 ### Changes ###
 - move backgroundColor and backgroundOpacity from legend settings to css
-- document each flot plugin
 
 ## [1.1.0]
 
@@ -1469,6 +1473,7 @@ Moved labelMargin option to grid from x/yaxis.
 
 First public release.
 
+[1.1.3]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.0...v1.1.2
 [1.1.0]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.10...v1.1.0
 [1.0.10]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.9...v1.0.10

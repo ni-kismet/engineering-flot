@@ -1,12 +1,11 @@
 # Interaction
 
-Engineering-flot offers support for both mouse and touch interactions by using [navigate](jquery.flot.navigate.js), [touch](jquery.flot.touch.js)
+Engineering-flot offers support for both mouse and touch interactions by using [navigate](docs/navigate.md), [touch](jquery.flot.touch.js)
 and [touchNavigate](jquery.flot.touchNavigate.js) plugins.
 
 
 ## navigate plugin
-This plugin is adding ```zoom```,  ```pan```, ```smartPan``` and ```recenter``` capabilities to flot.
-
+This plugin is adding ```zoom```,  ```pan```, ```smartPan```, ```recenter``` and ```activate``` capabilities to flot.
 
 
 The touch interactions are using only:
