@@ -3462,7 +3462,9 @@ Licensed under the MIT license.
 This plugin is used to make available some browser-related utility functions.
 
 ### getPageXY
-Use getPageXY to obtain the viewable area of the page as set by the scroll bars.
+Calculates the pageX and pageY using the screenX, screenY properties of the event
+and the scrolling of the page. This is needed because the pageX and pageY
+properties of the event are not correct while running tests in Edge.
 
 ### getPixelRatio
 This function returns the current pixel ratio defined by the product of desktop
