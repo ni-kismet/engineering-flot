@@ -12,7 +12,7 @@ API.txt for details.
 This plugin is used to format the time axis in absolute time representation as
 well as relative time representation.
 
-It supports these options:
+It supports the following options:
 ```js
 xaxis: {
     timezone: null, // "browser" for local to the client or timezone for timezone-js

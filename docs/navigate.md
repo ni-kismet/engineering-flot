@@ -42,7 +42,8 @@ interactive for pan, then you'll have a basic plot that supports moving
 around; the same for zoom.
 
 **active** is true after a touch tap on plot. This enables plot navigation.
-Once activated, zoom and pan cannot be deactivated.
+Once activated, zoom and pan cannot be deactivated. When the plot becomes active,
+"plotactivated" event is triggered.
 
 **amount** specifies the default amount to zoom in (so 1.5 = 150%) relative to
 the current viewport.

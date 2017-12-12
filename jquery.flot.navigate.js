@@ -52,7 +52,8 @@ interactive for pan, then you'll have a basic plot that supports moving
 around; the same for zoom.
 
 **active** is true after a touch tap on plot. This enables plot navigation.
-Once activated, zoom and pan cannot be deactivated.
+Once activated, zoom and pan cannot be deactivated. When the plot becomes active,
+"plotactivated" event is triggered.
 
 **amount** specifies the default amount to zoom in (so 1.5 = 150%) relative to
 the current viewport.
@@ -291,10 +292,7 @@ can set the default in the options.
 
         function onDblClick(e) {
             var o = plot.getOptions();
-            if (!o.pan.active || !o.zoom.active) {
-                o.pan.active = true;
-                o.zoom.active = true;
-            }
+            plot.activate();
 
             var axes = plot.getTouchedAxis(e.clientX, e.clientY),
                 event;
@@ -310,16 +308,21 @@ can set the default in the options.
 
         function onClick(e) {
             var o = plot.getOptions();
-            if (!o.pan.active || !o.zoom.active) {
-                o.pan.active = true;
-                o.zoom.active = true;
-            }
+            plot.activate();
 
             if (isPanAction) {
                 onDragEnd(e);
             }
 
             return false;
+        }
+
+        plot.activate = function() {
+            if (!o.pan.active || !o.zoom.active) {
+                o.pan.active = true;
+                o.zoom.active = true;
+                plot.getPlaceholder().trigger("plotactivated", [plot]);
+            }
         }
 
         function bindEvents(plot, eventHolder) {
@@ -600,7 +603,7 @@ can set the default in the options.
             plot.draw();
 
             if (!preventEvent) {
-                plot.getPlaceholder().trigger("plotpan", [plot, delta]);
+                plot.getPlaceholder().trigger("plotpan", [plot, delta, panAxes, initialState]);
             }
         };
 
