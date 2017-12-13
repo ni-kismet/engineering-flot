@@ -113,4 +113,4 @@ don't work unless the canvas is attached to the DOM.
  Clears the cache used to speed up the text size measurements.
  As an (unfortunate) side effect all text within the text Layer is removed.
  Use this function before plot.setupGrid() and plot.draw() if the plot just
- became visible or he styles changed.
+ became visible or the styles changed.
