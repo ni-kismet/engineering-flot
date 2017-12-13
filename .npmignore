@@ -2,4 +2,5 @@
 
 !dist/*
 !lib/*
+!docs/*
 !CHANGELOG.md

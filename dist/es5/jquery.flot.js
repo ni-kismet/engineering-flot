@@ -198,15 +198,19 @@
     };
 })(jQuery);
 
-///////////////////////////////////////////////////////////////////////////
-// The Canvas object is a wrapper around an HTML5 <canvas> tag.
-//
-// @constructor
-// @param {string} cls List of classes to apply to the canvas.
-// @param {element} container Element onto which to append the canvas.
-//
-// Requiring a container is a little iffy, but unfortunately canvas
-// operations don't work unless the canvas is attached to the DOM.
+/** ## jquery.flot.canvaswrapper
+
+This plugin contains the function for creating and manipulating both the canvas
+layers and svg layers.
+
+The Canvas object is a wrapper around an HTML5 canvas tag.
+The constructor Canvas(cls, container) takes as parameters cls,
+the list of classes to apply to the canvas adnd the containter,
+element onto which to append the canvas. The canvas operations
+don't work unless the canvas is attached to the DOM.
+
+### jquery.canvaswrapper.js API functions
+*/
 
 (function() {
     var Canvas = function(cls, container) {
@@ -250,10 +254,13 @@
         this._textCache = {};
     }
 
-    // Resizes the canvas to the given dimensions.
-    //
-    // @param {number} width New width of the canvas, in pixels.
-    // @param {number} width New height of the canvas, in pixels.
+    /**
+    - resize(width, height)
+
+     Resizes the canvas to the given dimensions.
+     The width represents the new width of the canvas, meanwhile the height
+     is the new height of the canvas, both of them in pixels.
+    */
 
     Canvas.prototype.resize = function(width, height) {
         var minSize = 10;
@@ -297,14 +304,20 @@
         context.scale(pixelRatio, pixelRatio);
     };
 
-    // Clears the entire canvas area, not including any overlaid HTML text
+    /**
+    - clear()
 
+     Clears the entire canvas area, not including any overlaid HTML text
+    */
     Canvas.prototype.clear = function() {
         this.context.clearRect(0, 0, this.width, this.height);
     };
 
-    // Finishes rendering the canvas, including managing the text overlay.
+    /**
+    - render()
 
+     Finishes rendering the canvas, including managing the text overlay.
+    */
     Canvas.prototype.render = function() {
         var cache = this._textCache;
 
@@ -362,12 +375,13 @@
         }
     };
 
-    // Creates (if necessary) and returns the SVG overlay container.
-    //
-    // @param {string} classes String of space-separated CSS classes used to
-    //     uniquely identify the text layer.
-    // @return {object} The text-layer div.
+    /**
+    - getSVGLayer(classes)
 
+     Creates (if necessary) and returns the SVG overlay container.
+     The classes string represents the string of space-separated CSS classes
+     used to uniquely identify the text layer. It return the svg-layer div.
+    */
     Canvas.prototype.getSVGLayer = function(classes) {
         var layer = this.SVG[classes];
 
@@ -412,47 +426,48 @@
         return layer;
     };
 
-    // Creates (if necessary) and returns a text info object.
-    //
-    // The object looks like this:
-    //
-    // {
-    //     width: Width of the text's wrapper div.
-    //     height: Height of the text's wrapper div.
-    //     element: The HTML div containing the text.
-    //     positions: Array of positions at which this text is drawn.
-    // }
-    //
-    // The positions array contains objects that look like this:
-    //
-    // {
-    //     active: Flag indicating whether the text should be visible.
-    //     rendered: Flag indicating whether the text is currently visible.
-    //     element: The HTML div containing the text.
-    //     text: The actual text and is identical with element[0].textContent.
-    //     x: X coordinate at which to draw the text.
-    //     y: Y coordinate at which to draw the text.
-    // }
-    //
-    // Each position after the first receives a clone of the original element.
-    //
-    // The idea is that that the width, height, and general 'identity' of the
-    // text is constant no matter where it is placed; the placements are a
-    // secondary property.
-    //
-    // Canvas maintains a cache of recently-used text info objects; getTextInfo
-    // either returns the cached element or creates a new entry.
-    //
-    // @param {string} layer A string of space-separated CSS classes uniquely
-    //     identifying the layer containing this text.
-    // @param {string} text Text string to retrieve info for.
-    // @param {(string|object)=} font Either a string of space-separated CSS
-    //     classes or a font-spec object, defining the text's font and style.
-    // @param {number=} angle Angle at which to rotate the text, in degrees.
-    //     Angle is currently unused, it will be implemented in the future.
-    // @param {number=} width Maximum width of the text before it wraps.
-    // @return {object} a text info object.
+    /**
+    - getTextInfo(layer, text, font, angle, width)
 
+     Creates (if necessary) and returns a text info object.
+     The object looks like this:
+     ```js
+     {
+         width //Width of the text's wrapper div.
+         height //Height of the text's wrapper div.
+         element //The HTML div containing the text.
+         positions //Array of positions at which this text is drawn.
+      }
+      ```
+      The positions array contains objects that look like this:
+      ```js
+      {
+         active //Flag indicating whether the text should be visible.
+         rendered //Flag indicating whether the text is currently visible.
+         element //The HTML div containing the text.
+         text //The actual text and is identical with element[0].textContent.
+         x //X coordinate at which to draw the text.
+         y //Y coordinate at which to draw the text.
+      }
+      ```
+      Each position after the first receives a clone of the original element.
+      The idea is that that the width, height, and general 'identity' of the
+      text is constant no matter where it is placed; the placements are a
+      secondary property.
+
+      Canvas maintains a cache of recently-used text info objects; getTextInfo
+      either returns the cached element or creates a new entry.
+
+     The layer parameter is string of space-separated CSS classes uniquely
+     identifying the layer containing this text.
+     Text is the text string to retrieve info for.
+     Font is either a string of space-separated CSS classes or a font-spec object,
+     defining the text's font and style.
+     Angle is the angle at which to rotate the text, in degrees. Angle is currently unused,
+     it will be implemented in the future.
+     The last parameter is the Maximum width of the text before it wraps.
+     The method returns a text info object.
+    */
     Canvas.prototype.getTextInfo = function(layer, text, font, angle, width) {
         var textStyle, layerCache, styleCache, info;
 
@@ -530,26 +545,18 @@
         return info;
     };
 
-    // Adds a text string to the canvas text overlay.
-    //
-    // The text isn't drawn immediately; it is marked as rendering, which will
-    // result in its addition to the canvas on the next render pass.
-    //
-    // @param {string} layer A string of space-separated CSS classes uniquely
-    //     identifying the layer containing this text.
-    // @param {number} x X coordinate at which to draw the text.
-    // @param {number} y Y coordinate at which to draw the text.
-    // @param {string} text Text string to draw.
-    // @param {(string|object)=} font Either a string of space-separated CSS
-    //     classes or a font-spec object, defining the text's font and style.
-    // @param {number=} angle Angle at which to rotate the text, in degrees.
-    //     Angle is currently unused, it will be implemented in the future.
-    // @param {number=} width Maximum width of the text before it wraps.
-    // @param {string=} halign Horizontal alignment of the text; either "left",
-    //     "center" or "right".
-    // @param {string=} valign Vertical alignment of the text; either "top",
-    //     "middle" or "bottom".
+    /**
+    - addText (layer, x, y, text, font, angle, width, halign, valign, transforms)
 
+     Adds a text string to the canvas text overlay.
+     The text isn't drawn immediately; it is marked as rendering, which will
+     result in its addition to the canvas on the next render pass.
+
+     The layer is string of space-separated CSS classes uniquely
+     identifying the layer containing this text.
+     X and Y represents the X and Y coordinate at which to draw the text.
+     and text is the string to draw
+    */
     Canvas.prototype.addText = function(layer, x, y, text, font, angle, width, halign, valign, transforms) {
         var info = this.getTextInfo(layer, text, font, angle, width),
             positions = info.positions;
@@ -649,26 +656,22 @@
     }
 
     /**
-     *
-     * Removes one or more text strings from the canvas text overlay.
-     *
-     * If no parameters are given, all text within the layer is removed.
-     *
-     * Note that the text is not immediately removed; it is simply marked as
-     * inactive, which will result in its removal on the next render pass.
-     * This avoids the performance penalty for 'clear and redraw' behavior,
-     * where we potentially get rid of all text on a layer, but will likely
-     * add back most or all of it later, as when redrawing axes, for example.
-     *
-     * @param {string} layer A string of space-separated CSS classes uniquely
-     * identifying the layer containing this text.
-     * @param {number=} x X coordinate of the text.
-     * @param {number=} y Y coordinate of the text.
-     * @param {string=} text Text string to remove.
-     * @param {(string|object)=} font Either a string of space-separated CSS
-     * classes or a font-spec object, defining the text's font and style.
-     * @param {number=} angle Angle at which the text is rotated, in degrees.
-     * Angle is currently unused, it will be implemented in the future.
+    - removeText (layer, x, y, text, font, angle)
+
+      The function removes one or more text strings from the canvas text overlay.
+      If no parameters are given, all text within the layer is removed.
+
+      Note that the text is not immediately removed; it is simply marked as
+      inactive, which will result in its removal on the next render pass.
+      This avoids the performance penalty for 'clear and redraw' behavior,
+      where we potentially get rid of all text on a layer, but will likely
+      add back most or all of it later, as when redrawing axes, for example.
+
+      The layer is a string of space-separated CSS classes uniquely
+      identifying the layer containing this text. The following parameter are
+      X and Y coordinate of the text.
+      Text is the string to remove, while the font is either a string of space-separated CSS
+      classes or a font-spec object, defining the text's font and style.
      */
     Canvas.prototype.removeText = function(layer, x, y, text, font, angle) {
         var info, htmlYCoord;
@@ -701,12 +704,14 @@
         }
     };
 
-    // Clears the cache used to speed up the text size measurements.
-    // As an (unfortunate) side effect all text within the text Layer is removed.
-    // Use this function before plot.setupGrid() and plot.draw() in one of these
-    // cases:
-    // 1. The plot just became visible.
-    // 2. The styles changed.
+    /**
+    - clearCache()
+
+     Clears the cache used to speed up the text size measurements.
+     As an (unfortunate) side effect all text within the text Layer is removed.
+     Use this function before plot.setupGrid() and plot.draw() if the plot just
+     became visible or the styles changed.
+    */
     Canvas.prototype.clearCache = function() {
         var cache = this._textCache;
         for (var layerKey in cache) {
@@ -3452,6 +3457,25 @@ Licensed under the MIT license.
     $.plot.saturated = saturated;
 })(jQuery);
 
+/** ## jquery.flot.browser.js
+
+This plugin is used to make available some browser-related utility functions.
+
+### getPageXY
+Calculates the pageX and pageY using the screenX, screenY properties of the event
+and the scrolling of the page. This is needed because the pageX and pageY
+properties of the event are not correct while running tests in Edge.
+
+### getPixelRatio
+This function returns the current pixel ratio defined by the product of desktop
+zoom and page zoom.
+Additional info: https://www.html5rocks.com/en/tutorials/canvas/hidpi/
+
+### isSafari, isMobileSafari, isOpera, isFirefox, isIE, isEdge, isChrome, isBlink
+This is a collection of functions, used to check if the code is running in a
+particular browser or Javascript engine.
+*/
+
 (function ($) {
     'use strict';
 
@@ -3524,6 +3548,14 @@ Licensed under the MIT license.
 
     $.plot.browser = browser;
 })(jQuery);
+
+/**
+## jquery.flot.drawSeries.js
+
+This plugin is used by flot for drawing lines, plots, bars or area.
+
+### Public methods
+*/
 
 (function($) {
     "use strict";
@@ -3787,6 +3819,16 @@ Licensed under the MIT license.
             }
         }
 
+        /**
+        - drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient)
+
+         This function is used for drawing lines or area fill.  In case the series has line decimation function
+         attached, before starting to draw, as an optimization the points will first be decimated.
+
+         The series parameter contains the series to be drawn on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drawing surface.
+         The function getColorOrGradient is used to compute the fill style of lines and area.
+        */
         function drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             ctx.save();
             ctx.translate(plotOffset.left, plotOffset.top);
@@ -3823,6 +3865,16 @@ Licensed under the MIT license.
             ctx.restore();
         }
 
+        /**
+        - drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient)
+
+         This function is used for drawing points using a given symbol. In case the series has points decimation
+         function attached, before starting to draw, as an optimization the points will first be decimated.
+
+         The series parameter contains the series to be drawn on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drawing surface.
+         The function drawSymbol is used to compute and draw the symbol chosen for the points.
+        */
         function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function drawCircle(ctx, x, y, radius, shadow, fill) {
                 ctx.moveTo(x + radius, y);
@@ -3983,6 +4035,16 @@ Licensed under the MIT license.
             }
         }
 
+        /**
+        - drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient)
+
+         This function is used for drawing series represented as bars. In case the series has decimation
+         function attached, before starting to draw, as an optimization the points will first be decimated.
+
+         The series parameter contains the series to be drawn on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drawing surface.
+         The function getColorOrGradient is used to compute the fill style of bars.
+        */
         function drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
             function plotBars(datapoints, barLeft, barRight, fillStyleCallback, axisx, axisy) {
                 var points = datapoints.points,
@@ -4083,6 +4145,14 @@ Set axis.mode to "log" to enable.
 
 /* global jQuery*/
 
+/**
+## jquery.flot.logaxis
+This plugin is used to create logarithmic axis. This includes tick generation,
+formatters and transformers to and from logarithmic representation.
+
+### Methods and hooks
+*/
+
 (function ($) {
     'use strict';
 
@@ -4132,6 +4202,13 @@ Set axis.mode to "log" to enable.
         return ticks;
     };
 
+    /**
+    - logTickGenerator(plot, axis, noTicks)
+
+    Generates logarithmic ticks, depending on axis range.
+    In case the number of ticks that can be generated is less than the expected noTicks/4,
+    a linear tick generation is used.
+    */
     var logTickGenerator = function (plot, axis, noTicks) {
         var ticks = [],
             minIdx = -1,
@@ -4237,6 +4314,13 @@ Set axis.mode to "log" to enable.
         return min;
     }
 
+    /**
+    - logTickFormatter(value, axis, precision)
+
+    This is the corresponding tickFormatter of the logaxis.
+    For a number greater that 10^6 or smaller than 10^(-3), this will be drawn
+    with e representation
+    */
     var logTickFormatter = function (value, axis, precision) {
         var tenExponent = value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0;
 
@@ -4304,6 +4388,14 @@ Set axis.mode to "log" to enable.
         return vals;
     }
 
+    /**
+    - setDataminRange(plot, axis)
+
+    It is used for clamping the starting point of a logarithmic axis.
+    This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
+    The function is usefull since the logarithmic representation can not show
+    values less than or equal to 0.
+    */
     function setDataminRange(plot, axis) {
         if (axis.options.mode === 'log' && axis.datamin <= 0) {
             if (axis.datamin === null) {
@@ -4500,7 +4592,16 @@ You can use series.step to specify the interval between consecutive indexes of t
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Copyright (c) 2016 Ciprian Ceteras.
+Copyright (c) 2017 Raluca Portase.
 Licensed under the MIT license.
+
+*/
+
+/**
+## jquery.flot.navigate.js
+
+This flot plugin is used for adding the ability to pan and zoom the plot.
+A higher level overview is available at [interactions](interactions.md) documentation.
 
 The default behaviour is scrollwheel up/down to zoom in, drag
 to pan. The plugin defines plot.zoom({ center }), plot.zoomOut() and
@@ -4508,7 +4609,7 @@ plot.pan( offset ) so you easily can add custom controls. It also fires
 "plotpan" and "plotzoom" events, useful for synchronizing plots.
 
 The plugin supports these options:
-
+```js
     zoom: {
         interactive: false,
         active: false,
@@ -4536,27 +4637,28 @@ The plugin supports these options:
         axisPan: true, //pan axis when mouse over it is allowed
         plotPan: true //pan axis is allowed for plot pan
     }
-
-"interactive" enables the built-in drag/click behaviour. If you enable
+```
+**interactive** enables the built-in drag/click behaviour. If you enable
 interactive for pan, then you'll have a basic plot that supports moving
 around; the same for zoom.
 
-"active" is true after a touch tap on plot. This enables plot navigation.
-Once activated, zoom and pan cannot be deactivated.
+**active** is true after a touch tap on plot. This enables plot navigation.
+Once activated, zoom and pan cannot be deactivated. When the plot becomes active,
+"plotactivated" event is triggered.
 
-"amount" specifies the default amount to zoom in (so 1.5 = 150%) relative to
+**amount** specifies the default amount to zoom in (so 1.5 = 150%) relative to
 the current viewport.
 
-"cursor" is a standard CSS mouse cursor string used for visual feedback to the
+**cursor** is a standard CSS mouse cursor string used for visual feedback to the
 user when dragging.
 
-"frameRate" specifies the maximum number of times per second the plot will
+**frameRate** specifies the maximum number of times per second the plot will
 update itself while the user is panning around on it (set to null to disable
 intermediate pans, the plot will then not update until the mouse button is
 released).
 
 Example API usage:
-
+```js
     plot = $.plot(...);
 
     // zoom default amount in on the pixel ( 10, 20 )
@@ -4570,14 +4672,16 @@ Example API usage:
 
     // pan 100 pixels to the left and 20 down
     plot.pan({ left: -100, top: 20 })
+```
 
 Here, "center" specifies where the center of the zooming should happen. Note
 that this is defined in pixel space, not the space of the data points (you can
 use the p2c helpers on the axes in Flot to help you convert between these).
 
-"amount" is the amount to zoom the viewport relative to the current range, so
+**amount** is the amount to zoom the viewport relative to the current range, so
 1 is 100% (i.e. no change), 1.5 is 150% (zoom in), 0.7 is 70% (zoom out). You
 can set the default in the options.
+*/
 
 /* eslint-enable */
 (function($) {
@@ -4778,11 +4882,7 @@ can set the default in the options.
         }
 
         function onDblClick(e) {
-            var o = plot.getOptions();
-            if (!o.pan.active || !o.zoom.active) {
-                o.pan.active = true;
-                o.zoom.active = true;
-            }
+            plot.activate();
 
             var axes = plot.getTouchedAxis(e.clientX, e.clientY),
                 event;
@@ -4797,17 +4897,22 @@ can set the default in the options.
         }
 
         function onClick(e) {
-            var o = plot.getOptions();
-            if (!o.pan.active || !o.zoom.active) {
-                o.pan.active = true;
-                o.zoom.active = true;
-            }
+            plot.activate();
 
             if (isPanAction) {
                 onDragEnd(e);
             }
 
             return false;
+        }
+
+        plot.activate = function() {
+            var o = plot.getOptions();
+            if (!o.pan.active || !o.zoom.active) {
+                o.pan.active = true;
+                o.zoom.active = true;
+                plot.getPlaceholder().trigger("plotactivated", [plot]);
+            }
         }
 
         function bindEvents(plot, eventHolder) {
@@ -5088,7 +5193,7 @@ can set the default in the options.
             plot.draw();
 
             if (!preventEvent) {
-                plot.getPlaceholder().trigger("plotpan", [plot, delta]);
+                plot.getPlaceholder().trigger("plotpan", [plot, delta, panAxes, initialState]);
             }
         };
 
@@ -5493,6 +5598,30 @@ can set the default in the options.
 
 /* global jQuery */
 
+/**
+## jquery.flot.hover.js
+
+This plugin is used for mouse hover and tap on a point of plot series.
+It supports the following options:
+```js
+grid: {
+    hoverable: false, //to trigger plothover event on mouse hover or tap on a point
+    clickable: false //to trigger plotclick event on mouse hover
+}
+```
+
+It listens to native mouse move event or click, as well as artificial generated
+tap and touchevent.
+
+When the mouse is over a point or a tap on a point is performed, that point or
+the correscponding bar will be highlighted and a "plothover" event will be generated.
+
+Custom "touchevent" is triggered when any touch interaction is made. Hover plugin
+handles this events by unhighlighting all of the previously highlighted points and generates
+"plothovercleanup" event to notify any part that is handling plothover (for exemple to cleanup
+the tooltip from webcharts).
+*/
+
 (function($) {
     'use strict';
 
@@ -5794,8 +5923,8 @@ can set the default in the options.
     $.plot.plugins.push({
         init: init,
         options: options,
-        name: 'navigateTouch',
-        version: '0.3'
+        name: 'hover',
+        version: '0.1'
     });
 })(jQuery);
 
@@ -6131,7 +6260,49 @@ Set axis.format to "time" to enable. See the section "Time series data" in
 API.txt for details.
 */
 
-/* global timezoneJS */
+/** ## jquery.flot.absRelTime.js
+
+This plugin is used to format the time axis in absolute time representation as
+well as relative time representation.
+
+It supports the following options:
+```js
+xaxis: {
+    timezone: null, // "browser" for local to the client or timezone for timezone-js
+    timeformat: null, // format string to use
+    twelveHourClock: false, // 12 or 24 time in time mode
+    monthNames: null // list of names of months
+}
+```
+
+Depending upon the timeformat axis parameter value, the axis tick formatter will
+choose between an absolute time representation if the value is '%A' or
+relative time for timeformat '%r'.
+
+If the format for an axis is 'time', inside processOptions hook the tickGenerator
+and tickFormatter of the axis will be overrided with the custom ones used by time axes.
+
+The formatted values look like in the example bellow:
+
+|format|value(s)|formatted value(s)|
+|------|----:|--------------:|
+|Absolute time|0|12:00:00 AM 1/1/0001|
+|Absolute time|300|12:05:00 AM 1/1/0001|
+|Relative Time|0, 300, 600|00:00:00, 00:05:00, 00:10:00|
+|Relative Time|300, 600, 900|00:00:00, 00:05:00, 00:10:00|
+
+### Relative time axis
+A relative time axis will show the time values with respect to the first data sample.
+Basically, the first datapoint from the points array will be considered time 00:00:00:00.
+If the difference between two datapoints is small, the milliseconds will apear.
+Otherwise, the time representation will contain only the hour, minute and second.
+
+### Absolute time axis
+The absolute time representation contains, beside the hours, minutes and seconds
+corresponding to the sample the date and year.
+The value will be splitted on two rows, where the first row is the time and
+the the second one the date in gregorian date format.
+*/
 
 (function($) {
     'use strict';
@@ -6382,6 +6553,7 @@ API.txt for details.
     var specQuarters = baseSpec.concat([[1, "quarter"], [2, "quarter"],
         [1, "year"]]);
 
+    //function used for relative time axis to compute the first data point from which the values are starting
     function updateAxisFirstData(plot, axis) {
         var plotData = plot.getData();
         if (plotData.length > 0 && (plotData[0].data.length > 0 || plotData[0].datapoints.points.length > 0)) {
@@ -7311,6 +7483,40 @@ The plugin allso adds the following methods to the plot object:
     });
 })(jQuery);
 
+/** ## jquery.flot.composeImages.js
+
+This plugin is used to expose a function used to overlap several canvases and
+SVGs, for the purpose of creating a snaphot out of them.
+
+### When composeImages is used:
+When multiple canvases and SVGs have to be overlapped into a single image
+and their offset on the page, must be preserved.
+
+### Where can be used:
+In creating a downloadable snapshot of the plots, axes, cursors etc of a graph.
+
+### How it works:
+The entry point is composeImages function. It expects an array of objects,
+which should be either canvases or SVGs (or a mix). It does a prevalidation
+of them, by verifying if they will be usable or not, later in the flow.
+After selecting only usable sources, it passes them to getGenerateTempImg
+function, which generates temporary images out of them. This function
+expects that some of the passed sources (canvas or SVG) may still have
+problems being converted to an image and makes sure the promises system,
+used by composeImages function, moves forward. As an example, SVGs with
+missing information from header or with unsupported content, may lead to
+failure in generating the temporary image. Temporary images are required
+mostly on extracting content from SVGs, but this is also where the x/y
+offsets are extracted for each image which will be added. For SVGs in
+particular, their CSS rules have to be applied.
+After all temporary images are generated, they are overlapped using
+getExecuteImgComposition function. This is where the destination canvas
+is set to the proper dimensions. It is then output by composeImages.
+This function returns a promise, which can be used to wait for the whole
+composition process. It requires to be asynchronous, because this is how
+temporary images load their data.
+*/
+
 (function($) {
     "use strict";
     const GENERALFAILURECALLBACKERROR = -100; //simply a negative number
@@ -7392,7 +7598,7 @@ The plugin allso adds the following methods to the plot object:
         var styleSheets = document.styleSheets,
             rulesList = [];
         for (var i = 0; i < styleSheets.length; i++) {
-            // in Chrome the external CSS files are empty when the page is loaded from directly disk
+            // in Chrome, the external CSS files are empty when the page is directly loaded from disk
             var rules = styleSheets[i].cssRules || [];
             for (var j = 0; j < rules.length; j++) {
                 var rule = rules[j];

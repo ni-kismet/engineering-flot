@@ -64,7 +64,7 @@ object with a couple of methods.
 
 ## Documentation and examples
 
-API Documentation is available here: [API reference](API.md)
+API Documentation is available here: [API reference](docs/API.md)
 
 About how the plugins work: [Plugins](PLUGINS.md)
 
