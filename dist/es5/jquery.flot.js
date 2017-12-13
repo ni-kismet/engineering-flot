@@ -710,7 +710,7 @@ don't work unless the canvas is attached to the DOM.
      Clears the cache used to speed up the text size measurements.
      As an (unfortunate) side effect all text within the text Layer is removed.
      Use this function before plot.setupGrid() and plot.draw() if the plot just
-     became visible or he styles changed.
+     became visible or the styles changed.
     */
     Canvas.prototype.clearCache = function() {
         var cache = this._textCache;
@@ -3825,8 +3825,8 @@ This plugin is used by flot for drawing lines, plots, bars or area.
          This function is used for drawing lines or area fill.  In case the series has line decimation function
          attached, before starting to draw, as an optimization the points will first be decimated.
 
-         The series parameter contains the series to be drown on ctx context. The plotOffset, plotWidth and
-         plotHeight are the corresponding parameters of flot used to determine the drowing surface.
+         The series parameter contains the series to be drawn on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drawing surface.
          The function getColorOrGradient is used to compute the fill style of lines and area.
         */
         function drawSeriesLines(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
@@ -3871,8 +3871,8 @@ This plugin is used by flot for drawing lines, plots, bars or area.
          This function is used for drawing points using a given symbol. In case the series has points decimation
          function attached, before starting to draw, as an optimization the points will first be decimated.
 
-         The series parameter contains the series to be drown on ctx context. The plotOffset, plotWidth and
-         plotHeight are the corresponding parameters of flot used to determine the drowing surface.
+         The series parameter contains the series to be drawn on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drawing surface.
          The function drawSymbol is used to compute and draw the symbol chosen for the points.
         */
         function drawSeriesPoints(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
@@ -4041,8 +4041,8 @@ This plugin is used by flot for drawing lines, plots, bars or area.
          This function is used for drawing series represented as bars. In case the series has decimation
          function attached, before starting to draw, as an optimization the points will first be decimated.
 
-         The series parameter contains the series to be drown on ctx context. The plotOffset, plotWidth and
-         plotHeight are the corresponding parameters of flot used to determine the drowing surface.
+         The series parameter contains the series to be drawn on ctx context. The plotOffset, plotWidth and
+         plotHeight are the corresponding parameters of flot used to determine the drawing surface.
          The function getColorOrGradient is used to compute the fill style of bars.
         */
         function drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, drawSymbol, getColorOrGradient) {
@@ -5616,7 +5616,7 @@ tap and touchevent.
 When the mouse is over a point or a tap on a point is performed, that point or
 the correscponding bar will be highlighted and a "plothover" event will be generated.
 
-Custom "touchevent" is triggered when any touch interaction is made. Hover pluigin
+Custom "touchevent" is triggered when any touch interaction is made. Hover plugin
 handles this events by unhighlighting all of the previously highlighted points and generates
 "plothovercleanup" event to notify any part that is handling plothover (for exemple to cleanup
 the tooltip from webcharts).
