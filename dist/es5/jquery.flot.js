@@ -3531,7 +3531,7 @@ particular browser or Javascript engine.
         isEdge: function() {
             // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
             // Edge 20+
-            return !isIE() && !!window.StyleMedia;
+            return !browser.isIE() && !!window.StyleMedia;
         },
 
         isChrome: function() {
@@ -3542,7 +3542,7 @@ particular browser or Javascript engine.
 
         isBlink: function() {
             // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
-            return (isChrome() || isOpera()) && !!window.CSS;
+            return (browser.isChrome() || browser.isOpera()) && !!window.CSS;
         }
     };
 
