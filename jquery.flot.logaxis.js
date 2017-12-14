@@ -24,7 +24,8 @@ formatters and transformers to and from logarithmic representation.
         xaxis: {}
     };
 
-    var floorInBase = $.plot.saturated.floorInBase;
+    //var floorInBase = $.plot.saturated.floorInBase;
+    var formatters = $.plot.formatters;
 
     var defaultTickFormatter,
         expRepTickFormatter;
@@ -42,28 +43,6 @@ formatters and transformers to and from logarithmic representation.
 
     var logInverseTransform = function (v) {
         return Math.exp(v);
-    };
-
-    var linearTickGenerator = function (plot, min, max, noTicks) {
-        var size = plot.computeTickSize(min, max, noTicks);
-        var ticks = [],
-            start = $.plot.saturated.saturate(floorInBase(min, size)),
-            i = 0,
-            v = Number.NaN,
-            prev;
-
-        if (start === -Number.MAX_VALUE) {
-            ticks.push(start);
-            start = floorInBase(min + size, size);
-        }
-
-        do {
-            prev = v;
-            v = $.plot.saturated.multiplyAdd(size, i, start);
-            ticks.push(v);
-            ++i;
-        } while (v < max && v !== prev);
-        return ticks;
     };
 
     /**
@@ -150,7 +129,8 @@ formatters and transformers to and from logarithmic representation.
             // Since we went in backwards order.
             ticks.reverse();
         } else {
-            ticks = linearTickGenerator(plot, min, max, noTicks);
+            var size = plot.computeTickSize(min, max, noTicks);
+            ticks = formatters.linearTickGenerator(plot, min, max, noTicks, size);
         }
 
         return ticks;
