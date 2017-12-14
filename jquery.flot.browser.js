@@ -2,25 +2,19 @@
 
 This plugin is used to make available some browser-related utility functions.
 
-### getPageXY
-Calculates the pageX and pageY using the screenX, screenY properties of the event
-and the scrolling of the page. This is needed because the pageX and pageY
-properties of the event are not correct while running tests in Edge.
-
-### getPixelRatio
-This function returns the current pixel ratio defined by the product of desktop
-zoom and page zoom.
-Additional info: https://www.html5rocks.com/en/tutorials/canvas/hidpi/
-
-### isSafari, isMobileSafari, isOpera, isFirefox, isIE, isEdge, isChrome, isBlink
-This is a collection of functions, used to check if the code is running in a
-particular browser or Javascript engine.
+### Methods
 */
 
 (function ($) {
     'use strict';
 
     var browser = {
+        /**
+        - getPageXY(e)
+
+         Calculates the pageX and pageY using the screenX, screenY properties of the event
+         and the scrolling of the page. This is needed because the pageX and pageY
+         properties of the event are not correct while running tests in Edge. */
         getPageXY: function (e) {
             // This code is inspired from https://stackoverflow.com/a/3464890
             var doc = document.documentElement,
@@ -29,6 +23,13 @@ particular browser or Javascript engine.
             return { X: pageX, Y: pageY };
         },
 
+        /**
+        - getPixelRatio(context)
+
+         This function returns the current pixel ratio defined by the product of desktop
+         zoom and page zoom.
+         Additional info: https://www.html5rocks.com/en/tutorials/canvas/hidpi/
+        */
         getPixelRatio: function(context) {
             var devicePixelRatio = window.devicePixelRatio || 1,
                 backingStoreRatio =
@@ -40,6 +41,12 @@ particular browser or Javascript engine.
             return devicePixelRatio / backingStoreRatio;
         },
 
+        /**
+        - isSafari, isMobileSafari, isOpera, isFirefox, isIE, isEdge, isChrome, isBlink
+
+         This is a collection of functions, used to check if the code is running in a
+         particular browser or Javascript engine.
+        */
         isSafari: function() {
             // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
             // Safari 3.0+ "[object HTMLElementConstructor]"
