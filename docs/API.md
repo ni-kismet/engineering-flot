@@ -1693,6 +1693,17 @@ and add new public methods if needed.
 See the [PLUGINS](PLUGINS.md) document for details on how to write a plugin. As the
 above description hints, it's actually pretty easy.
 
+Some of the flot plugins add new functionalities (like touch support), while other are parts spliced out of the main jquery.flot.js and grouped based on commune functionalities.
+Read the documentation of some of the most used plugins of flot:
+* [jquery.flot.absRelTime.js](absRelTime.md)
+* [jquery.flot.browser.js](browser.md)
+* [jquery.canvaswrapper.js](canvaswrapper.md)
+* [jquery.flot.composeImages.js](composeImages.md)
+* [jquery.flot.drawSeries.js](drawSeries.md)
+* [jquery.flot.hover.js](hover.md)
+* [jquery.flot.logaxis.js](logaxis.md)
+* [jquery.flot.navigate.js](navigate.md)
+
 
 ## Version number ##
 
