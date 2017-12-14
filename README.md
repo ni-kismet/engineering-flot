@@ -66,8 +66,8 @@ object with a couple of methods.
 
 API Documentation is available here: [API reference](docs/API.md)
 
-About how the plugins work: [Plugins](PLUGINS.md)
+About how the plugins work: [Plugins](docs/PLUGINS.md)
 
-High level overview on how touch interactions are handled internally: [Touch interactions](touchInteractions.md)
+High level overview on how interactions are handled internally: [Interactions](docs/interactions.md)
 
 Examples are included in the examples folder of this repository, but they can be tried out online as well: [Examples](https://rawgit.com/ni-kismet/engineering-flot/master/examples/index.html)
