@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Changes ###
 - document flot plugins
 
+### Bug fixes ###
+- Fixed some browser detection functions, which depend on other similar functions
+
 ## [1.1.2]
 
 ### Changes ###
