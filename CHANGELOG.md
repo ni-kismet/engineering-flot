@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changes ###
 - document flot plugins
+- refactor default tick generators and formatters and logaxis
 
 ### Bug fixes ###
 - Fixed some browser detection functions, which depend on other similar functions
