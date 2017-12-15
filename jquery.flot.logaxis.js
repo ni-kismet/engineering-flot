@@ -24,26 +24,26 @@ formatters and transformers to and from logarithmic representation.
         xaxis: {}
     };
 
-    //var floorInBase = $.plot.saturated.floorInBase;
-    var formatters = $.plot.formatters;
-
     var defaultTickFormatter,
         expRepTickFormatter;
 
     var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
         EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
 
-    var logTransform = function (v) {
-        if (v < PREFERRED_LOG_TICK_VALUES[0]) {
-            v = PREFERRED_LOG_TICK_VALUES[0];
+    function computePreferedLogTickValues(endLimit, rangeStep) {
+        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
+            log10Start = -log10End,
+            val, range, vals = [];
+
+        for (var power = log10Start; power <= log10End; power++) {
+            range = Math.pow(10, power);
+            for (var mult = 1; mult < 9; mult += rangeStep) {
+                val = range * mult;
+                vals.push(val);
+            }
         }
-
-        return Math.log(v);
-    };
-
-    var logInverseTransform = function (v) {
-        return Math.exp(v);
-    };
+        return vals;
+    }
 
     /**
     - logTickGenerator(plot, axis, noTicks)
@@ -129,8 +129,9 @@ formatters and transformers to and from logarithmic representation.
             // Since we went in backwards order.
             ticks.reverse();
         } else {
-            var size = plot.computeTickSize(min, max, noTicks);
-            ticks = formatters.linearTickGenerator(plot, min, max, noTicks, size);
+            var tickSize = plot.computeTickSize(min, max, noTicks),
+                customAxis = {min: min, max: max, tickSize: tickSize};
+            ticks = $.plot.linearTickGenerator(customAxis);
         }
 
         return ticks;
@@ -197,6 +198,36 @@ formatters and transformers to and from logarithmic representation.
         }
     };
 
+    var logTransform = function (v) {
+        if (v < PREFERRED_LOG_TICK_VALUES[0]) {
+            v = PREFERRED_LOG_TICK_VALUES[0];
+        }
+
+        return Math.log(v);
+    };
+
+    var logInverseTransform = function (v) {
+        return Math.exp(v);
+    };
+
+    /**
+    - setDataminRange(plot, axis)
+
+    It is used for clamping the starting point of a logarithmic axis.
+    This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
+    The function is usefull since the logarithmic representation can not show
+    values less than or equal to 0.
+    */
+    function setDataminRange(plot, axis) {
+        if (axis.options.mode === 'log' && axis.datamin <= 0) {
+            if (axis.datamin === null) {
+                axis.datamin = 0.1;
+            } else {
+                axis.datamin = processAxisOffset(plot, axis);
+            }
+        }
+    }
+
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
             range = series
@@ -215,39 +246,6 @@ formatters and transformers to and from logarithmic representation.
 
     function isValid(a) {
         return a > 0;
-    }
-
-    function computePreferedLogTickValues(endLimit, rangeStep) {
-        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
-            log10Start = -log10End,
-            val, range, vals = [];
-
-        for (var power = log10Start; power <= log10End; power++) {
-            range = Math.pow(10, power);
-            for (var mult = 1; mult < 9; mult += rangeStep) {
-                val = range * mult;
-                vals.push(val);
-            }
-        }
-        return vals;
-    }
-
-    /**
-    - setDataminRange(plot, axis)
-
-    It is used for clamping the starting point of a logarithmic axis.
-    This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
-    The function is usefull since the logarithmic representation can not show
-    values less than or equal to 0.
-    */
-    function setDataminRange(plot, axis) {
-        if (axis.options.mode === 'log' && axis.datamin <= 0) {
-            if (axis.datamin === null) {
-                axis.datamin = 0.1;
-            } else {
-                axis.datamin = processAxisOffset(plot, axis);
-            }
-        }
     }
 
     function init(plot) {
