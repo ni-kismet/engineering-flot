@@ -200,7 +200,6 @@ formatters and transformers to and from logarithmic representation.
         }
     };
 
-
     /*logaxis caracteristic functions*/
     var logTransform = function (v) {
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
