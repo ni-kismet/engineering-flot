@@ -124,7 +124,7 @@ describe("unit tests for the precision of axis", function() {
                         }]
                     });
                 var axis = plot.getXAxes()[0];
-                expect(plot.defaultTickFormatter(t[0], axis, t[1])).toEqual(t[2]);
+                expect($.plot.defaultTickFormatter(t[0], axis, t[1])).toEqual(t[2]);
             });
         });
         it('should show small number of decimals for numbers with e representation', function(){

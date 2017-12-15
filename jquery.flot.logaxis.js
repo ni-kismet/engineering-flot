@@ -25,9 +25,6 @@ formatters and transformers to and from logarithmic representation.
         xaxis: {}
     };
 
-    var defaultTickFormatter,
-        expRepTickFormatter;
-
     /*tick generators and formatters*/
     var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
         EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
@@ -173,9 +170,9 @@ formatters and transformers to and from logarithmic representation.
 
         if (precision) {
             if ((tenExponent >= -4) && (tenExponent <= 7)) {
-                return defaultTickFormatter(value, axis, precision);
+                return $.plot.defaultTickFormatter(value, axis, precision);
             } else {
-                return expRepTickFormatter(value, axis, precision);
+                return $.plot.expRepTickFormatter(value, axis, precision);
             }
         }
         if ((tenExponent >= -4) && (tenExponent <= 7)) {
@@ -196,7 +193,7 @@ formatters and transformers to and from logarithmic representation.
             }
             return formattedValue;
         } else {
-            return expRepTickFormatter(value, axis);
+            return $.plot.expRepTickFormatter(value, axis);
         }
     };
 
@@ -253,9 +250,6 @@ formatters and transformers to and from logarithmic representation.
 
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
-            defaultTickFormatter = plot.defaultTickFormatter;
-            expRepTickFormatter = plot.expRepTickFormatter;
-
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;
                 if (opts.mode === 'log') {

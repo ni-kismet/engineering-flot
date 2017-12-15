@@ -1249,14 +1249,6 @@ can call:
     would be at most tickDecimals. Otherwise, it would be computed
     based on the axis minimum and maximum and the number of ticks.
 
- - defaultTickFormatter (value, axis, precision)
-
-    Returns the default formatted value for a given axis.
-
- - expRepTickFormatter (value, axis, precision)
-
-    Returns the formatted value for a representation with exponent.
-
  - computeTickSize (min, max, noTicks, tickDecimals)
 
     Returns the size used for axis ticks. This is used internally.
