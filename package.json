@@ -33,7 +33,7 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "karma-jasmine-jquery": "^0.1.1",
     "karma-safari-launcher": "^1.0.0",
-    "karma-spec-reporter": "0.0.31",
+    "karma-spec-reporter": "0.0.32",
     "tmp": "0.0.33",
     "webcharts-development-settings": "1.0.5",
     "ljs": "^0.3.2"
