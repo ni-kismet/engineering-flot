@@ -2,6 +2,7 @@
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Copyright (c) 2015 Ciprian Ceteras cipix2000@gmail.com.
+Copyright (c) 2017 Raluca Portase
 Licensed under the MIT license.
 
 Set axis.mode to "log" to enable.
@@ -24,47 +25,24 @@ formatters and transformers to and from logarithmic representation.
         xaxis: {}
     };
 
-    var floorInBase = $.plot.saturated.floorInBase;
-
-    var defaultTickFormatter,
-        expRepTickFormatter;
-
+    /*tick generators and formatters*/
     var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
         EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
 
-    var logTransform = function (v) {
-        if (v < PREFERRED_LOG_TICK_VALUES[0]) {
-            v = PREFERRED_LOG_TICK_VALUES[0];
+    function computePreferedLogTickValues(endLimit, rangeStep) {
+        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
+            log10Start = -log10End,
+            val, range, vals = [];
+
+        for (var power = log10Start; power <= log10End; power++) {
+            range = Math.pow(10, power);
+            for (var mult = 1; mult < 9; mult += rangeStep) {
+                val = range * mult;
+                vals.push(val);
+            }
         }
-
-        return Math.log(v);
-    };
-
-    var logInverseTransform = function (v) {
-        return Math.exp(v);
-    };
-
-    var linearTickGenerator = function (plot, min, max, noTicks) {
-        var size = plot.computeTickSize(min, max, noTicks);
-        var ticks = [],
-            start = $.plot.saturated.saturate(floorInBase(min, size)),
-            i = 0,
-            v = Number.NaN,
-            prev;
-
-        if (start === -Number.MAX_VALUE) {
-            ticks.push(start);
-            start = floorInBase(min + size, size);
-        }
-
-        do {
-            prev = v;
-            v = $.plot.saturated.multiplyAdd(size, i, start);
-            ticks.push(v);
-            ++i;
-        } while (v < max && v !== prev);
-        return ticks;
-    };
+        return vals;
+    }
 
     /**
     - logTickGenerator(plot, axis, noTicks)
@@ -150,7 +128,9 @@ formatters and transformers to and from logarithmic representation.
             // Since we went in backwards order.
             ticks.reverse();
         } else {
-            ticks = linearTickGenerator(plot, min, max, noTicks);
+            var tickSize = plot.computeTickSize(min, max, noTicks),
+                customAxis = {min: min, max: max, tickSize: tickSize};
+            ticks = $.plot.linearTickGenerator(customAxis);
         }
 
         return ticks;
@@ -190,9 +170,9 @@ formatters and transformers to and from logarithmic representation.
 
         if (precision) {
             if ((tenExponent >= -4) && (tenExponent <= 7)) {
-                return defaultTickFormatter(value, axis, precision);
+                return $.plot.defaultTickFormatter(value, axis, precision);
             } else {
-                return expRepTickFormatter(value, axis, precision);
+                return $.plot.expRepTickFormatter(value, axis, precision);
             }
         }
         if ((tenExponent >= -4) && (tenExponent <= 7)) {
@@ -213,9 +193,40 @@ formatters and transformers to and from logarithmic representation.
             }
             return formattedValue;
         } else {
-            return expRepTickFormatter(value, axis);
+            return $.plot.expRepTickFormatter(value, axis);
         }
     };
+
+    /*logaxis caracteristic functions*/
+    var logTransform = function (v) {
+        if (v < PREFERRED_LOG_TICK_VALUES[0]) {
+            v = PREFERRED_LOG_TICK_VALUES[0];
+        }
+
+        return Math.log(v);
+    };
+
+    var logInverseTransform = function (v) {
+        return Math.exp(v);
+    };
+
+    /**
+    - setDataminRange(plot, axis)
+
+    It is used for clamping the starting point of a logarithmic axis.
+    This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
+    The function is usefull since the logarithmic representation can not show
+    values less than or equal to 0.
+    */
+    function setDataminRange(plot, axis) {
+        if (axis.options.mode === 'log' && axis.datamin <= 0) {
+            if (axis.datamin === null) {
+                axis.datamin = 0.1;
+            } else {
+                axis.datamin = processAxisOffset(plot, axis);
+            }
+        }
+    }
 
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
@@ -237,44 +248,8 @@ formatters and transformers to and from logarithmic representation.
         return a > 0;
     }
 
-    function computePreferedLogTickValues(endLimit, rangeStep) {
-        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
-            log10Start = -log10End,
-            val, range, vals = [];
-
-        for (var power = log10Start; power <= log10End; power++) {
-            range = Math.pow(10, power);
-            for (var mult = 1; mult < 9; mult += rangeStep) {
-                val = range * mult;
-                vals.push(val);
-            }
-        }
-        return vals;
-    }
-
-    /**
-    - setDataminRange(plot, axis)
-
-    It is used for clamping the starting point of a logarithmic axis.
-    This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
-    The function is usefull since the logarithmic representation can not show
-    values less than or equal to 0.
-    */
-    function setDataminRange(plot, axis) {
-        if (axis.options.mode === 'log' && axis.datamin <= 0) {
-            if (axis.datamin === null) {
-                axis.datamin = 0.1;
-            } else {
-                axis.datamin = processAxisOffset(plot, axis);
-            }
-        }
-    }
-
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
-            defaultTickFormatter = plot.defaultTickFormatter;
-            expRepTickFormatter = plot.expRepTickFormatter;
-
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;
                 if (opts.mode === 'log') {

@@ -773,6 +773,63 @@ Licensed under the MIT license.
         return ticks;
     }
 
+    function defaultTickFormatter(value, axis, precision) {
+        var oldTickDecimals = axis.tickDecimals,
+            expPosition = ("" + value).indexOf("e");
+
+        if (expPosition !== -1) {
+            return expRepTickFormatter(value, axis, precision);
+        }
+
+        if (precision > 0) {
+            axis.tickDecimals = precision;
+        }
+
+        var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1,
+            formatted = "" + Math.round(value * factor) / factor;
+
+        // If tickDecimals was specified, ensure that we have exactly that
+        // much precision; otherwise default to the value's own precision.
+        if (axis.tickDecimals != null) {
+            var decimal = formatted.indexOf("."),
+                decimalPrecision = decimal === -1 ? 0 : formatted.length - decimal - 1;
+            if (decimalPrecision < axis.tickDecimals) {
+                var decimals = ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
+                formatted = (decimalPrecision ? formatted : formatted + ".") + decimals;
+            }
+        }
+
+        axis.tickDecimals = oldTickDecimals;
+        return formatted;
+    };
+
+    function expRepTickFormatter(value, axis, precision) {
+        var expPosition = ("" + value).indexOf("e"),
+            exponentValue = parseInt(("" + value).substr(expPosition + 1)),
+            tenExponent = expPosition !== -1 ? exponentValue : (value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0),
+            roundWith = Math.pow(10, tenExponent),
+            x = value / roundWith;
+
+        if (precision) {
+            var updatedPrecision = recomputePrecision(value, precision);
+            return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
+        }
+
+        if (axis.tickDecimals > 0) {
+            return x.toFixed(recomputePrecision(value, axis.tickDecimals)) + 'e' + tenExponent;
+        }
+        return x.toFixed() + 'e' + tenExponent;
+    }
+
+    function recomputePrecision(num, precision) {
+        //for numbers close to zero, the precision from flot will be a big number
+        //while for big numbers, the precision will be negative
+        var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
+            newPrecision = Math.abs(log10Value + precision);
+
+        return newPrecision <= 20 ? Math.floor(newPrecision) : 20;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // The top-level container for the entire plot.
     function Plot(placeholder, data_, options_, plugins) {
@@ -1022,8 +1079,6 @@ Licensed under the MIT license.
         plot.findNearbyItem = findNearbyItem;
         plot.findNearbyInterpolationPoint = findNearbyInterpolationPoint;
         plot.computeValuePrecision = computeValuePrecision;
-        plot.defaultTickFormatter = defaultTickFormatter;
-        plot.expRepTickFormatter = expRepTickFormatter;
         plot.computeTickSize = computeTickSize;
 
         // public attributes
@@ -2255,63 +2310,6 @@ Licensed under the MIT license.
             return options.tickSize || size;
         };
 
-        function defaultTickFormatter(value, axis, precision) {
-            var oldTickDecimals = axis.tickDecimals,
-                expPosition = ("" + value).indexOf("e");
-
-            if (expPosition !== -1) {
-                return expRepTickFormatter(value, axis, precision);
-            }
-
-            if (precision > 0) {
-                axis.tickDecimals = precision;
-            }
-
-            var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1,
-                formatted = "" + Math.round(value * factor) / factor;
-
-            // If tickDecimals was specified, ensure that we have exactly that
-            // much precision; otherwise default to the value's own precision.
-            if (axis.tickDecimals != null) {
-                var decimal = formatted.indexOf("."),
-                    decimalPrecision = decimal === -1 ? 0 : formatted.length - decimal - 1;
-                if (decimalPrecision < axis.tickDecimals) {
-                    var decimals = ("" + factor).substr(1, axis.tickDecimals - decimalPrecision);
-                    formatted = (decimalPrecision ? formatted : formatted + ".") + decimals;
-                }
-            }
-
-            axis.tickDecimals = oldTickDecimals;
-            return formatted;
-        };
-
-        function expRepTickFormatter(value, axis, precision) {
-            var expPosition = ("" + value).indexOf("e"),
-                exponentValue = parseInt(("" + value).substr(expPosition + 1)),
-                tenExponent = expPosition !== -1 ? exponentValue : (value > 0 ? Math.floor(Math.log(value) / Math.LN10) : 0),
-                roundWith = Math.pow(10, tenExponent),
-                x = value / roundWith;
-
-            if (precision) {
-                var updatedPrecision = recomputePrecision(value, precision);
-                return (value / roundWith).toFixed(updatedPrecision) + 'e' + tenExponent;
-            }
-
-            if (axis.tickDecimals > 0) {
-                return x.toFixed(recomputePrecision(value, axis.tickDecimals)) + 'e' + tenExponent;
-            }
-            return x.toFixed() + 'e' + tenExponent;
-        }
-
-        function recomputePrecision(num, precision) {
-            //for numbers close to zero, the precision from flot will be a big number
-            //while for big numbers, the precision will be negative
-            var log10Value = Math.log(Math.abs(num)) * Math.LOG10E,
-                newPrecision = Math.abs(log10Value + precision);
-
-            return newPrecision <= 20 ? Math.floor(newPrecision) : 20;
-        }
-
         function fixupNumberOfTicks(direction, surface, ticksOption) {
             var noTicks;
 
@@ -3411,6 +3409,8 @@ Licensed under the MIT license.
     };
 
     $.plot.linearTickGenerator = defaultTickGenerator;
+    $.plot.defaultTickFormatter = defaultTickFormatter;
+    $.plot.expRepTickFormatter = expRepTickFormatter;
 })(jQuery);
 
 (function ($) {
@@ -3461,25 +3461,19 @@ Licensed under the MIT license.
 
 This plugin is used to make available some browser-related utility functions.
 
-### getPageXY
-Calculates the pageX and pageY using the screenX, screenY properties of the event
-and the scrolling of the page. This is needed because the pageX and pageY
-properties of the event are not correct while running tests in Edge.
-
-### getPixelRatio
-This function returns the current pixel ratio defined by the product of desktop
-zoom and page zoom.
-Additional info: https://www.html5rocks.com/en/tutorials/canvas/hidpi/
-
-### isSafari, isMobileSafari, isOpera, isFirefox, isIE, isEdge, isChrome, isBlink
-This is a collection of functions, used to check if the code is running in a
-particular browser or Javascript engine.
+### Methods
 */
 
 (function ($) {
     'use strict';
 
     var browser = {
+        /**
+        - getPageXY(e)
+
+         Calculates the pageX and pageY using the screenX, screenY properties of the event
+         and the scrolling of the page. This is needed because the pageX and pageY
+         properties of the event are not correct while running tests in Edge. */
         getPageXY: function (e) {
             // This code is inspired from https://stackoverflow.com/a/3464890
             var doc = document.documentElement,
@@ -3488,6 +3482,13 @@ particular browser or Javascript engine.
             return { X: pageX, Y: pageY };
         },
 
+        /**
+        - getPixelRatio(context)
+
+         This function returns the current pixel ratio defined by the product of desktop
+         zoom and page zoom.
+         Additional info: https://www.html5rocks.com/en/tutorials/canvas/hidpi/
+        */
         getPixelRatio: function(context) {
             var devicePixelRatio = window.devicePixelRatio || 1,
                 backingStoreRatio =
@@ -3499,6 +3500,12 @@ particular browser or Javascript engine.
             return devicePixelRatio / backingStoreRatio;
         },
 
+        /**
+        - isSafari, isMobileSafari, isOpera, isFirefox, isIE, isEdge, isChrome, isBlink
+
+         This is a collection of functions, used to check if the code is running in a
+         particular browser or Javascript engine.
+        */
         isSafari: function() {
             // *** https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
             // Safari 3.0+ "[object HTMLElementConstructor]"
@@ -4138,6 +4145,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Copyright (c) 2015 Ciprian Ceteras cipix2000@gmail.com.
+Copyright (c) 2017 Raluca Portase
 Licensed under the MIT license.
 
 Set axis.mode to "log" to enable.
@@ -4160,47 +4168,24 @@ formatters and transformers to and from logarithmic representation.
         xaxis: {}
     };
 
-    var floorInBase = $.plot.saturated.floorInBase;
-
-    var defaultTickFormatter,
-        expRepTickFormatter;
-
+    /*tick generators and formatters*/
     var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
         EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
 
-    var logTransform = function (v) {
-        if (v < PREFERRED_LOG_TICK_VALUES[0]) {
-            v = PREFERRED_LOG_TICK_VALUES[0];
+    function computePreferedLogTickValues(endLimit, rangeStep) {
+        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
+            log10Start = -log10End,
+            val, range, vals = [];
+
+        for (var power = log10Start; power <= log10End; power++) {
+            range = Math.pow(10, power);
+            for (var mult = 1; mult < 9; mult += rangeStep) {
+                val = range * mult;
+                vals.push(val);
+            }
         }
-
-        return Math.log(v);
-    };
-
-    var logInverseTransform = function (v) {
-        return Math.exp(v);
-    };
-
-    var linearTickGenerator = function (plot, min, max, noTicks) {
-        var size = plot.computeTickSize(min, max, noTicks);
-        var ticks = [],
-            start = $.plot.saturated.saturate(floorInBase(min, size)),
-            i = 0,
-            v = Number.NaN,
-            prev;
-
-        if (start === -Number.MAX_VALUE) {
-            ticks.push(start);
-            start = floorInBase(min + size, size);
-        }
-
-        do {
-            prev = v;
-            v = $.plot.saturated.multiplyAdd(size, i, start);
-            ticks.push(v);
-            ++i;
-        } while (v < max && v !== prev);
-        return ticks;
-    };
+        return vals;
+    }
 
     /**
     - logTickGenerator(plot, axis, noTicks)
@@ -4286,7 +4271,9 @@ formatters and transformers to and from logarithmic representation.
             // Since we went in backwards order.
             ticks.reverse();
         } else {
-            ticks = linearTickGenerator(plot, min, max, noTicks);
+            var tickSize = plot.computeTickSize(min, max, noTicks),
+                customAxis = {min: min, max: max, tickSize: tickSize};
+            ticks = $.plot.linearTickGenerator(customAxis);
         }
 
         return ticks;
@@ -4326,9 +4313,9 @@ formatters and transformers to and from logarithmic representation.
 
         if (precision) {
             if ((tenExponent >= -4) && (tenExponent <= 7)) {
-                return defaultTickFormatter(value, axis, precision);
+                return $.plot.defaultTickFormatter(value, axis, precision);
             } else {
-                return expRepTickFormatter(value, axis, precision);
+                return $.plot.expRepTickFormatter(value, axis, precision);
             }
         }
         if ((tenExponent >= -4) && (tenExponent <= 7)) {
@@ -4349,9 +4336,40 @@ formatters and transformers to and from logarithmic representation.
             }
             return formattedValue;
         } else {
-            return expRepTickFormatter(value, axis);
+            return $.plot.expRepTickFormatter(value, axis);
         }
     };
+
+    /*logaxis caracteristic functions*/
+    var logTransform = function (v) {
+        if (v < PREFERRED_LOG_TICK_VALUES[0]) {
+            v = PREFERRED_LOG_TICK_VALUES[0];
+        }
+
+        return Math.log(v);
+    };
+
+    var logInverseTransform = function (v) {
+        return Math.exp(v);
+    };
+
+    /**
+    - setDataminRange(plot, axis)
+
+    It is used for clamping the starting point of a logarithmic axis.
+    This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
+    The function is usefull since the logarithmic representation can not show
+    values less than or equal to 0.
+    */
+    function setDataminRange(plot, axis) {
+        if (axis.options.mode === 'log' && axis.datamin <= 0) {
+            if (axis.datamin === null) {
+                axis.datamin = 0.1;
+            } else {
+                axis.datamin = processAxisOffset(plot, axis);
+            }
+        }
+    }
 
     function processAxisOffset(plot, axis) {
         var series = plot.getData(),
@@ -4373,44 +4391,8 @@ formatters and transformers to and from logarithmic representation.
         return a > 0;
     }
 
-    function computePreferedLogTickValues(endLimit, rangeStep) {
-        var log10End = Math.floor(Math.log(endLimit) * Math.LOG10E) - 1,
-            log10Start = -log10End,
-            val, range, vals = [];
-
-        for (var power = log10Start; power <= log10End; power++) {
-            range = Math.pow(10, power);
-            for (var mult = 1; mult < 9; mult += rangeStep) {
-                val = range * mult;
-                vals.push(val);
-            }
-        }
-        return vals;
-    }
-
-    /**
-    - setDataminRange(plot, axis)
-
-    It is used for clamping the starting point of a logarithmic axis.
-    This will set the axis datamin range to 0.1 or to the first datapoint greater then 0.
-    The function is usefull since the logarithmic representation can not show
-    values less than or equal to 0.
-    */
-    function setDataminRange(plot, axis) {
-        if (axis.options.mode === 'log' && axis.datamin <= 0) {
-            if (axis.datamin === null) {
-                axis.datamin = 0.1;
-            } else {
-                axis.datamin = processAxisOffset(plot, axis);
-            }
-        }
-    }
-
     function init(plot) {
         plot.hooks.processOptions.push(function (plot) {
-            defaultTickFormatter = plot.defaultTickFormatter;
-            expRepTickFormatter = plot.expRepTickFormatter;
-
             $.each(plot.getAxes(), function (axisName, axis) {
                 var opts = axis.options;
                 if (opts.mode === 'log') {
