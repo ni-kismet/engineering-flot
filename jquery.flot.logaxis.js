@@ -2,6 +2,7 @@
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
 Copyright (c) 2015 Ciprian Ceteras cipix2000@gmail.com.
+Copyright (c) 2017 Raluca Portase
 Licensed under the MIT license.
 
 Set axis.mode to "log" to enable.
@@ -27,6 +28,7 @@ formatters and transformers to and from logarithmic representation.
     var defaultTickFormatter,
         expRepTickFormatter;
 
+    /*tick generators and formatters*/
     var PREFERRED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 10),
         EXTENDED_LOG_TICK_VALUES = computePreferedLogTickValues(Number.MAX_VALUE, 4);
 
@@ -198,6 +200,8 @@ formatters and transformers to and from logarithmic representation.
         }
     };
 
+
+    /*logaxis caracteristic functions*/
     var logTransform = function (v) {
         if (v < PREFERRED_LOG_TICK_VALUES[0]) {
             v = PREFERRED_LOG_TICK_VALUES[0];
