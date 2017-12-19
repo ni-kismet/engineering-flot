@@ -35,7 +35,7 @@
     "karma-safari-launcher": "^1.0.0",
     "karma-spec-reporter": "0.0.32",
     "tmp": "0.0.33",
-    "webcharts-development-settings": "1.0.5",
+    "webcharts-development-settings": "1.0.8",
     "ljs": "^0.3.2"
   }
 }
