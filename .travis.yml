@@ -13,6 +13,8 @@ before_install:
     - sh -e /etc/init.d/xvfb start
     - npm install -g greenkeeper-lockfile@1
 before_script: greenkeeper-lockfile-update
+- "sudo chown root /opt/google/chrome/chrome-sandbox"
+- "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
 after_script: greenkeeper-lockfile-upload
 install:
     - npm install
