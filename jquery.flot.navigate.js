@@ -253,7 +253,7 @@ can set the default in the options.
                 eventHolder.dblclick(onDblClick);
                 eventHolder.mouseup(onMouseUp);
                 eventHolder.mousedown(onMouseDown);
-                }
+            }
         }
 
         plot.zoomOut = function(args) {
