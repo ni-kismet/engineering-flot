@@ -79,9 +79,12 @@ can set the default in the options.
     };
 
     var saturated = $.plot.saturated;
+    var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
+    var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
     function init(plot) {
         var panAxes = null;
+        var canDrag = false;
 
         function onZoomClick(e, zoomOut) {
             var c = plot.offset();
@@ -117,13 +120,22 @@ can set the default in the options.
             }
         }
 
-        var SNAPPING_CONSTANT = $.plot.uiConstants.SNAPPING_CONSTANT;
-        var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
-
         function onMouseWheel(e, delta) {
             e.preventDefault();
             onZoomClick(e, delta < 0);
             return false;
+        }
+
+        function onMouseDown(e) {
+            canDrag = true;
+        }
+
+        function onMouseUp(e) {
+            canDrag = false;
+        }
+
+        function isLeftMouseButtonPressed(e) {
+            return e.button === 0;
         }
 
         var prevCursor = 'default',
@@ -151,7 +163,7 @@ can set the default in the options.
         }
 
         function onDragStart(e) {
-            if (e.which !== 1) {
+            if (!canDrag || !isLeftMouseButtonPressed(e)) {
                 // only accept left-click
                 return false;
             }
@@ -239,6 +251,8 @@ can set the default in the options.
 
             if (o.zoom.interactive || o.pan.interactive) {
                 eventHolder.dblclick(onDblClick);
+                eventHolder.mouseup(onMouseUp);
+                eventHolder.mousedown(onMouseDown);
             }
         }
 
@@ -503,6 +517,8 @@ can set the default in the options.
 
         function shutdown(plot, eventHolder) {
             eventHolder.unbind("mousewheel", onMouseWheel);
+            eventHolder.unbind("mousedown", onMouseDown);
+            eventHolder.unbind("mouseup", onMouseUp);
             eventHolder.unbind("dragstart", onDragStart);
             eventHolder.unbind("drag", onDrag);
             eventHolder.unbind("dragend", onDragEnd);
