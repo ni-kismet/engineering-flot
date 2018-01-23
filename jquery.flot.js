@@ -2536,6 +2536,11 @@ Licensed under the MIT license.
                 var points = series[i].datapoints.points;
                 ps = series[i].datapoints.pointsize;
 
+                // do not interpolate outside the bounds of the data.
+                if (posX < points[0]) {
+                    break;
+                }
+
                 // Find the nearest points, x-wise
                 for (j = ps; j < points.length; j += ps) {
                     if (points[j] > posX) {
