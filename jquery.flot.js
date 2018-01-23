@@ -2538,7 +2538,7 @@ Licensed under the MIT license.
 
                 // do not interpolate outside the bounds of the data.
                 if (posX < points[0]) {
-                    break;
+                    continue;
                 }
 
                 // Find the nearest points, x-wise
