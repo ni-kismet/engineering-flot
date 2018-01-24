@@ -165,12 +165,12 @@ temporary images load their data.
             return binaryString;
         };
 
-		var rules = getCSSRules(document),
+        var rules = getCSSRules(document),
             source = embedCSSRulesInSVG(rules, svg),
             data,
             utf8BinaryString;
 
-		source = patchSVGSource(source);
+        source = patchSVGSource(source);
 
         // Encode the string as UTF-8 and convert it to a binary string. The UTF-8 encoding is required to
         // capture unicode characters correctly.
