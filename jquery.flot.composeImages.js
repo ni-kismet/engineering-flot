@@ -150,13 +150,33 @@ temporary images load their data.
     }
 
     function copySVGToImgSafari(svg, img) {
+        // Use this method to convert a string buffer array to a binary string.
+        // Do so by breaking up large strings into smaller substrings; this is necessary to avoid the
+        // "maximum call stack size exceeded" exception that can happen when calling 'String.fromCharCode.apply'
+        // with a very long array.
+        function buildBinaryString (arrayBuffer) {
+            var binaryString = "";
+            const utf8Array = new Uint8Array(arrayBuffer);
+            const blockSize = 16384;
+            for (var i = 0; i < utf8Array.length; i = i + blockSize) {
+                const binarySubString = String.fromCharCode.apply(null, utf8Array.subarray(i, i + blockSize));
+                binaryString = binaryString + binarySubString;
+            }
+            return binaryString;
+        };
+
         var rules = getCSSRules(document),
             source = embedCSSRulesInSVG(rules, svg),
-            data;
+            data,
+            utf8BinaryString;
 
         source = patchSVGSource(source);
 
-        data = "data:image/svg+xml;base64," + btoa(source);
+        // Encode the string as UTF-8 and convert it to a binary string. The UTF-8 encoding is required to
+        // capture unicode characters correctly.
+        utf8BinaryString = buildBinaryString(new (TextEncoder || TextEncoderLite)('utf-8').encode(source));
+
+        data = "data:image/svg+xml;base64," + btoa(utf8BinaryString);
         img.src = data;
     }
 
