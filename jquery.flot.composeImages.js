@@ -176,7 +176,7 @@ temporary images load their data.
         // capture unicode characters correctly.
         utf8BinaryString = buildBinaryString(new (TextEncoder || TextEncoderLite)('utf-8').encode(source));
 
-        data = "data:image/svg+xml;base64," + btoa(source);
+        data = "data:image/svg+xml;base64," + btoa(utf8BinaryString);
         img.src = data;
     }
 
