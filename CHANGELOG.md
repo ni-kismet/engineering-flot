@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.4]
+
+### Changes ###
+- making graph screen capture work for Safari
+
 ## [1.1.3]
 
 ### Changes ###
@@ -1477,6 +1482,7 @@ Moved labelMargin option to grid from x/yaxis.
 
 First public release.
 
+[1.1.4]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.0...v1.1.2
 [1.1.0]: https://github.com/ni-kismet/engineering-flot/compare/v1.0.10...v1.1.0
