@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.5]
+
+### Bug fixes ###
+interpolation should not occur outside the provided data
+
 ## [1.1.4]
 
 ### Changes ###
@@ -1482,6 +1487,7 @@ Moved labelMargin option to grid from x/yaxis.
 
 First public release.
 
+[1.1.5]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/ni-kismet/engineering-flot/compare/v1.1.0...v1.1.2
