@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.5]
+
+### Bug fixes ###
+interpolation should not occur outside the provided data
+
 ## [1.1.4]
 
 ### Changes ###
