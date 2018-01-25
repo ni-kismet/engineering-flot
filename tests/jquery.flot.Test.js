@@ -518,6 +518,24 @@ describe('flot', function() {
 
             expect(item).toEqual(null);
         });
+
+        it('should return null if below the data bounds', function () {
+            plot = $.plot(placeholder, [[[-10, 0], [10, 1], [100, 2]]], {});
+            var item = plot.findNearbyInterpolationPoint(-20, 1, function() {
+                return true;
+            });
+
+            expect(item).toBe(null);
+        });
+
+        it('should return null if above the data bounds', function () {
+            plot = $.plot(placeholder, [[[-10, 0], [10, 1], [100, 2]]], {});
+            var item = plot.findNearbyInterpolationPoint(120, 1, function() {
+                return true;
+            });
+
+            expect(item).toBe(null);
+        });
     });
 
     describe('setupTickFormatter', function() {
