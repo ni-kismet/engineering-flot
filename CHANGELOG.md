@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.4]
+
+### Changes ###
+- making graph screen capture work for Safari
+
 ## [1.1.3]
 
 ### Changes ###
