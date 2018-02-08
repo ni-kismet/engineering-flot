@@ -34,8 +34,7 @@ gulp.task('build_engineering_flot', function() {
             presets: ['es2015'],
             plugins: ["external-helpers-2"]
         }))
-        .pipe(concat('jquery.flot.min.js'))
-        // .pipe(uglify())
+        .pipe(concat('jquery.flot.js'))
         .pipe(maps.write('./'))
-        .pipe(gulp.dest('dist/es5-minified'));
+        .pipe(gulp.dest('dist/es5'));
 });
