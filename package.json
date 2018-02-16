@@ -6,7 +6,6 @@
     "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 --stopOnEsLintError && npm run build-test",
     "coverage": "node node_modules/karma/bin/karma start --single-run --coverage --no-auto-watch --concurrency=1",
     "build": "node ./node_modules/gulp/bin/gulp.js build",
-    "build-test": "npm --silent run build test",
     "dont-break": "dont-break --timeout 300",
     "docs": "node ./update_docs.js"
   },
