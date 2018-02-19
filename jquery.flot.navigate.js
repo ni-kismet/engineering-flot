@@ -130,6 +130,7 @@ can set the default in the options.
 
     function init(plot) {
         var panAxes = null;
+        var canDrag = false;
 
         function onZoomClick(e, zoomOut, amount) {
             var page = browser.getPageXY(e);
@@ -212,12 +213,20 @@ can set the default in the options.
             return result;
         }
 
+        function onMouseDown(e) {
+            canDrag = true;
+        }
+
+        function onMouseUp(e) {
+            canDrag = false;
+        }
+
         function isLeftMouseButtonPressed(e) {
-            return browser.isSafari() ? e.which === 1 : e.buttons === 1;
+            return e.button === 0;
         }
 
         function onDragStart(e) {
-            if (!isLeftMouseButtonPressed(e)) {
+            if (!canDrag || !isLeftMouseButtonPressed(e)) {
                 return false;
             }
 
@@ -337,6 +346,8 @@ can set the default in the options.
                 }, onDragStart);
                 eventHolder.bind("drag", onDrag);
                 eventHolder.bind("dragend", onDragEnd);
+                eventHolder.bind("mousedown", onMouseDown);
+                eventHolder.bind("mouseup", onMouseUp);
             }
 
             eventHolder.dblclick(onDblClick);
@@ -609,6 +620,8 @@ can set the default in the options.
 
         function shutdown(plot, eventHolder) {
             eventHolder.unbind("mousewheel", onMouseWheel);
+            eventHolder.unbind("mousedown", onMouseDown);
+            eventHolder.unbind("mouseup", onMouseUp);
             eventHolder.unbind("dragstart", onDragStart);
             eventHolder.unbind("drag", onDrag);
             eventHolder.unbind("dragend", onDragEnd);

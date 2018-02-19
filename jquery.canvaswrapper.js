@@ -12,7 +12,7 @@ don't work unless the canvas is attached to the DOM.
 ### jquery.canvaswrapper.js API functions
 */
 
-(function() {
+(function($) {
     var Canvas = function(cls, container) {
         var element = container.getElementsByClassName(cls)[0];
 
@@ -535,4 +535,4 @@ don't work unless the canvas is attached to the DOM.
     }
 
     window.Flot.Canvas = Canvas;
-})();
+})(jQuery);
