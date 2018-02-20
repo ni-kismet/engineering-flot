@@ -1,24 +1,33 @@
 dist: trusty
 language: node_js
 node_js:
-    - '8'
+- '8'
 addons:
-    firefox: latest
-    chrome: stable
+  firefox: latest
+  chrome: stable
 cache:
-    directories:
-        - node_modules
+  directories:
+  - node_modules
 before_install:
-    - export DISPLAY=:99.0
-    - sh -e /etc/init.d/xvfb start
-    - npm install -g greenkeeper-lockfile@1
-before_script: 
-    - greenkeeper-lockfile-update
-    - "sudo chown root /opt/google/chrome/chrome-sandbox"
-    - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- npm install -g greenkeeper-lockfile@1
+before_script:
+- greenkeeper-lockfile-update
+- sudo chown root /opt/google/chrome/chrome-sandbox
+- sudo chmod 4755 /opt/google/chrome/chrome-sandbox
 after_script: greenkeeper-lockfile-upload
 install:
-    - npm install
+- npm install
 script:
-    - npm test
-    - npm run coverage
+- npm test
+- npm run coverage
+deploy:
+  provider: npm
+  email: webapps.ops@ni.com
+  api_key:
+    secure: dIRHjqlbaCOaiojaWSY0ApkIK8eS3zgjRELEAMsiWYOCCmZhnFYhmU3DGX0Ik7J7Z3wHmXW5eZ/nGSbUrGaCbHnVN3ZXctEyuioWt29qJtb3DwL7XpnNu4eAnB8YR/7wXWm8q3noIq4aoJLWHZjfggJZYk549zGweOfozAkDcL7bFeZrWoxhmbXXNW6qWaUIIXeQglTPOjKygabBXrwfFz3yOWDyQJ8yylJ+rayusk/pLhyyARlUBxehY0WWINwgqeN6kgFVlIDWxFeGsFKWbQYjr1SwydahQ+K0VbKJK+2NA3YvGihBS6/hvFaTqszEGTWRwk02s+D33dsfuMWJxGXo7kuZNjIn/mtalIUsRwXRFapXaHWv2D3lM0w8WiZvuAgd23NT8mFRmPWi22/AK0BUyEiG7B7vZpLCnBkbOrc1DEbFiGEr6tqy0Da09nky2k2HKEQu1QW5wwqNlRindofbU4S38OtJSUpex7/17RDLnqHV8aOGAtkPEIN2LQ3A4i7MS53v0NOd1jTfDK44Edqd0FBZ+M/b0gqMpPyoPwRi1osJES/xEZAJC+sfmPZ/KMMzZR7/u5VkdEddAG4gtQd2x0CVkM+eD/nCG5VVVMtUAJyeHbSEKPHH4sNpOIvt2IMAOqYC1bVCijWYoKKruZTbLkZW/PsHgR1zdpBHKZg=
+  on:
+    tags: true
+    repo: ni-kismet/engineering-flot
+  skip_cleanup: true
