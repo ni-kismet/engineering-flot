@@ -31,8 +31,7 @@ gulp.task('build_engineering_flot', function() {
         ])
         .pipe(maps.init())
         .pipe(babel({
-            presets: ['es2015'],
-            plugins: ["external-helpers-2"]
+            presets: ['es2015']
         }))
         .pipe(concat('jquery.flot.js'))
         .pipe(maps.write('./'))
