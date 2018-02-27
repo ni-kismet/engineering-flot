@@ -210,6 +210,18 @@ formatters and transformers to and from logarithmic representation.
         return Math.exp(v);
     };
 
+    var invertedTransform = function (v) {
+        return -v;
+    }
+
+    var invertedLogTransform = function (v) {
+        return -logTransform(v);
+    }
+
+    var invertedLogInverseTransform = function (v) {
+        return logInverseTransform(-v);
+    }
+
     /**
     - setDataminRange(plot, axis)
 
@@ -260,10 +272,13 @@ formatters and transformers to and from logarithmic representation.
                     if (typeof axis.options.tickFormatter !== 'function') {
                         axis.options.tickFormatter = logTickFormatter;
                     }
-                    axis.options.transform = logTransform;
-                    axis.options.inverseTransform = logInverseTransform;
+                    axis.options.transform = opts.inverted ? invertedLogTransform : logTransform;
+                    axis.options.inverseTransform = opts.inverted ? invertedLogInverseTransform : logInverseTransform;
                     axis.options.autoScaleMargin = 0;
                     plot.hooks.setRange.push(setDataminRange);
+                } else if (opts.inverted) {
+                    axis.options.transform = invertedTransform;
+                    axis.options.inverseTransform = invertedTransform;
                 }
             });
         });

@@ -2536,14 +2536,19 @@ Licensed under the MIT license.
                 var points = series[i].datapoints.points;
                 ps = series[i].datapoints.pointsize;
 
+                // if the data is coming from positive -> negative, reverse the comparison
+                const comparer = points[points.length - ps] < points[0]
+                    ? function (x1, x2) { return x1 > x2 }
+                    : function (x1, x2) { return x2 > x1 };
+
                 // do not interpolate outside the bounds of the data.
-                if (posX < points[0]) {
+                if (comparer(posX, points[0])) {
                     continue;
                 }
 
                 // Find the nearest points, x-wise
                 for (j = ps; j < points.length; j += ps) {
-                    if (points[j] > posX) {
+                    if (comparer(posX, points[j])) {
                         break;
                     }
                 }
