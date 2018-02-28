@@ -501,6 +501,32 @@ describe('flot', function() {
             expect(item.datapoint[1]).toEqual(expectedY);
         });
 
+        it('should interpolate correctly if data comes in reverse order', function () {
+            const reversedData = [[4, 1.4], [3, 1.3], [2, 1.2], [1, 1.1], [0, 1.0], [-1, 0.9]];
+
+            plot = $.plot(placeholder, [reversedData], {});
+            var point1 = plot.findNearbyInterpolationPoint(0.5, 0, function() {
+                return true;
+            });
+
+            expect(point1.datapoint[0]).toEqual(0.5);
+            expect(point1.datapoint[1]).toEqual(1.05);
+
+            var point2 = plot.findNearbyInterpolationPoint(2.25, 0, function () {
+                return true;
+            });
+
+            expect(point2.datapoint[0]).toEqual(2.25);
+            expect(point2.datapoint[1]).toEqual(1.225);
+
+            var point3 = plot.findNearbyInterpolationPoint(-0.5, 0, function () {
+                return true;
+            });
+
+            expect(point3.datapoint[0]).toEqual(-0.5);
+            expect(point3.datapoint[1]).toEqual(0.95);
+        });
+
         it('should return null for empty dataseries', function() {
             plot = $.plot(placeholder, [], {});
             var item = plot.findNearbyInterpolationPoint(0.5, 0, function() {
@@ -1152,5 +1178,5 @@ describe('flot', function() {
             expect(plot2.width()).toBe(plot1.width() - 20 - 20);
             expect(plot2.height()).toBe(plot1.height() - 20 - 20);
         });
-    })
+    });
 });
