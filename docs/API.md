@@ -247,6 +247,7 @@ xaxis, yaxis: {
     show: null or true/false
     position: "bottom" or "top" or "left" or "right"
     mode: null or "time" ("time" requires jquery.flot.time.js plugin)
+    inverted: null or true/false
     timezone: null, "browser" or timezone (only makes sense for mode: "time")
 
     color: null or color spec
@@ -302,6 +303,9 @@ how the data is interpreted, the default of null means as decimal
 numbers. Use "time" for time series data; see the time series data
 section. The time plugin (jquery.flot.time.js) is required for time
 series support.
+
+The "inverted" options specifies whether the transform and inverseTransform should
+include a negating transform which will reverse the axis.
 
 The "color" option determines the color of the line and ticks for the axis, and
 defaults to the grid color with transparency. For more fine-grained control you
