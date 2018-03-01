@@ -1,6 +1,6 @@
 {
   "name": "engineering-flot",
-  "version": "1.1.13",
+  "version": "1.2.0",
   "main": "dist/es5/jquery.flot.js",
   "scripts": {
     "test": "node node_modules/karma/bin/karma start --single-run --no-auto-watch --concurrency=1 --stopOnEsLintError",
