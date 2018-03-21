@@ -306,11 +306,11 @@ can set the default in the options.
             var axes = plot.getTouchedAxis(e.clientX, e.clientY),
                 event;
             if (axes[0]) {
-                event = new jQuery.Event('re-center', { detail: {
+                event = new $.Event('re-center', { detail: {
                     axisTouched: axes[0]
                 }});
             } else {
-                event = new jQuery.Event('re-center', {detail: e});
+                event = new $.Event('re-center', {detail: e});
             }
             plot.getPlaceholder().trigger(event);
         }
