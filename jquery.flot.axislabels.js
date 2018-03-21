@@ -125,13 +125,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             layerId = axisId + 'Layer',
             className = axisId + ' axisLabels',
             offsets = this.calculateOffsets(box),
-            style = $.extend({
+            style = {
                 position: 'absolute',
                 bottom: '',
                 right: '',
                 display: 'inline-block',
                 'white-space': 'nowrap'
-            });
+            };
 
         var layer = this.surface.getSVGLayer(layerId);
         var transforms = this.transforms(offsets.degrees, offsets.x, offsets.y, layer.parentNode);
