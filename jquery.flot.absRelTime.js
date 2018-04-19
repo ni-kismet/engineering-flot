@@ -60,10 +60,12 @@ the the second one the date in gregorian date format.
             timeformat: null, // format string to use
             twelveHourClock: false, // 12 or 24 time in time mode
             monthNames: null, // list of names of months
-            formatString: "" // The full format string
+            formatString: "", // The full format string
+            timeEpoch: '0000-12-31T18:00:00' // the date to use as the epoch for "total seconds from" in for format of 'yyyy-mm-ddThh:mm:ss'
         },
         yaxis: {
-            formatString: "" // The full format string
+            formatString: "", // The full format string
+            timeEpoch: '0000-12-31T18:00:00' // the date to use as the epoch for "total seconds from" in for format of 'yyyy-mm-ddThh:mm:ss'
         }
     };
 
@@ -121,6 +123,7 @@ the the second one the date in gregorian date format.
             return navigator.locale || 'en-US';
         }
 
+        // Returns the set of options to be used by an instance of Intl.DateTimeFormat
         function getFormatterOptions(formatString) {
             var options = {};
             if (formatString === undefined || formatString === null) {
@@ -244,9 +247,8 @@ the the second one the date in gregorian date format.
             return timeString + (dateString !== "" && timeString !== "" ? "<br>" : "") + dateString;
         }
 
-        function toAbsoluteTimeStr(date, showMilliseconds, formatString) {
-            var unixToAbsoluteEpochDiff = 62135596800000, // 2082844800000,
-                minDateValue = -8640000000000000,
+        function toAbsoluteTimeStr(date, showMilliseconds, formatString, timeEpoch) {
+            var minDateValue = -8640000000000000,
                 d = date.valueOf(),
                 ms = Math.floor(d % 1000);
 
@@ -254,11 +256,14 @@ the the second one the date in gregorian date format.
                 ms = 1000 + ms;
             }
 
-            if (date < minDateValue + unixToAbsoluteEpochDiff) {
-                date = minDateValue + unixToAbsoluteEpochDiff;
+            var timeEpochDate = new Date(timeEpoch);
+            var offsetDirection = timeEpochDate.valueOf() < date.valueOf() ? 1 : -1;
+            var timeEpochOffset = timeEpochDate.valueOf() * offsetDirection;
+            if (date < minDateValue + timeEpochOffset) {
+                date = minDateValue + timeEpochOffset;
             }
 
-            var gregorianDate = makeUtcWrapper(new Date(date - unixToAbsoluteEpochDiff)).date;
+            var gregorianDate = makeUtcWrapper(new Date(date.valueOf() + timeEpochOffset)).date;
 
             var time;
             if (formatString !== "") {
@@ -333,13 +338,14 @@ the the second one the date in gregorian date format.
             dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         }
 
+        var timeEpoch = new Date(axis.options.timeEpoch);
         for (var i = 0; i < fmt.length; ++i) {
             var c = fmt.charAt(i),
                 localDateValue = d.date || d.getDate();
             if (escape) {
                 switch (c) {
                     case 'r': c = toRelativeTimeStr(localDateValue, showMilliseconds, axis.options.formatString); break;
-                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds, axis.options.formatString); break;
+                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds, axis.options.formatString, timeEpoch); break;
                 }
                 r.push(c);
                 escape = false;
