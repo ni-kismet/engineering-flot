@@ -420,6 +420,7 @@ don't work unless the canvas is attached to the DOM.
 
         if (text.indexOf('<br>') !== -1) {
             y -= 0.25 * info.height;
+            x += info.width / 2;
             addTspanElements(text, position.element, x);
         } else {
             position.element.textContent = text;
@@ -452,6 +453,7 @@ don't work unless the canvas is attached to the DOM.
             offset = i * 1 + 'em';
             tspan.setAttributeNS(null, 'dy', offset);
             tspan.setAttributeNS(null, 'x', x);
+            tspan.style.textAnchor = "middle";
         }
     }
 

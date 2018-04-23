@@ -25,11 +25,14 @@ describe('A Flot chart with absolute time axes', function () {
         return [arr[0], arr[arr.length - 1]];
     };
 
-    var createPlotWithAbsoluteTimeAxis = function (placeholder, data) {
+    var createPlotWithAbsoluteTimeAxis = function (placeholder, data, formatString, timeEpoch) {
         return $.plot(placeholder, data, {
             xaxis: {
                 format: 'time',
-                timeformat: '%A'
+                formatString: formatString,
+                timeformat: '%A',
+                timeEpoch: timeEpoch,
+                showTickLabels: 'all'
             },
             yaxis: {}
         });
@@ -41,7 +44,8 @@ describe('A Flot chart with absolute time axes', function () {
             yaxis: {
                 format: 'time',
                 timeformat: '%A',
-                autoScale: 'exact'
+                autoScale: 'exact',
+                showTickLabels: 'all'
             }
         });
     };
@@ -142,6 +146,127 @@ describe('A Flot chart with absolute time axes', function () {
         expect(firstAndLast(plot.getAxes().yaxis.ticks)).toEqual([
             {v: 1 + tzDiff, label: '12:00:01.000 AM<br>1/1/0001'},
             {v: 2 + tzDiff, label: '12:00:02.000 AM<br>1/1/0001'}
+        ]);
+    });
+
+    it('shows only hours and minutes with formatString: "hh:mm"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [60 + tzDiff, 2]]], "hh:mm", "2000-12-31T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '06:00 AM'},
+            {v: 60 + tzDiff, label: '06:01 AM'}
+        ]);
+    });
+
+    it('shows 24-hour time when using "HH" in formatString', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [60 + tzDiff, 2]]], "HH:mm", "2000-12-31T13:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '19:00'},
+            {v: 60 + tzDiff, label: '19:01'}
+        ]);
+    });
+
+    it('shows only hours, minutes and seconds with formatString: "hh:mm:ss"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [61 + tzDiff, 2]]], "hh:mm:ss", "2000-12-31T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '06:00:00 AM'},
+            {v: 61 + tzDiff, label: '06:01:01 AM'}
+        ]);
+    });
+
+    it('shows proper number of millisecond digits with formatString: "hh:mm:ss.SSS"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff + 0.5, 1], [61 + tzDiff + 0.001, 2]]], "hh:mm:ss.SSS", "2000-12-31T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff + 0.5, label: '06:00:00.500 AM'},
+            {v: 61 + tzDiff + 0.001, label: '06:01:01.001 AM'}
+        ]);
+    });
+
+    it('shows time properly with "#T" formatString"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [60 + tzDiff, 2]]], "#T", "2000-12-31T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '6:00:00 AM'},
+            {v: 60 + tzDiff, label: '6:01:00 AM'}
+        ]);
+    });
+
+    it('shows time with milliseconds with "#T.SS" formatString"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [60 + tzDiff, 2]]], "#T.SS", "2000-12-31T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '6:00:00.00 AM'},
+            {v: 60 + tzDiff, label: '6:01:00.00 AM'}
+        ]);
+    });
+
+    // TODO: Figure out the proper way to test localized strings of languages other than "en-us".
+    // You can't set navigator.language to subvert the desired browser language. This is what the
+    // implementation is using to localize.
+    xit('shows localized date time properly with "#T#d" formatString"', function () {
+        navigator.language = "de";
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [60 + tzDiff, 2]]], "#T#d", "2000-12-31T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '6:00:00<br>31.12.2000'},
+            {v: 60 + tzDiff, label: '6:01:00<br>31.12.2000'}
+        ]);
+    });
+
+    it('shows date properly with "#d" formatString"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [60 + tzDiff, 2]]], "#d", "2000-12-31T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '12/31/2000'},
+            {v: 60 + tzDiff, label: '12/31/2000'}
+        ]);
+    });
+
+    it('shows days before month with format: "dd/MM"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [86400 + tzDiff, 2]]], "dd/MM", "2000-12-30T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '30/12'},
+            {v: 86400 + tzDiff, label: '31/12'}
+        ]);
+    });
+
+    it('shows month before days with format: "MM/dd"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [86400 + tzDiff, 2]]], "MM/dd", "2000-12-30T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '12/30'},
+            {v: 86400 + tzDiff, label: '12/31'}
+        ]);
+    });
+
+    it('shows 2-digit year with format: "MM/dd/yy"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [86400 + tzDiff, 2]]], "MM/dd/yy", "2000-12-30T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '12/30/00'},
+            {v: 86400 + tzDiff, label: '12/31/00'}
+        ]);
+    });
+
+    it('shows 4-digit year with format: "MM/dd/yyyy"', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [86400 + tzDiff, 2]]], "MM/dd/yyyy", "2000-12-30T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '12/30/2000'},
+            {v: 86400 + tzDiff, label: '12/31/2000'}
+        ]);
+    });
+
+    it('shows both date and time with a newline with format: MM/dd/yy hh:mm', function () {
+        plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0 + tzDiff, 1], [86400 + tzDiff, 2]]], "MM/dd/yy hh:mm", "2000-12-30T00:00:00");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + tzDiff, label: '06:00 AM<br>12/30/00'},
+            {v: 86400 + tzDiff, label: '06:00 AM<br>12/31/00'}
         ]);
     });
 
