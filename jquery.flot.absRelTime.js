@@ -256,7 +256,7 @@ the the second one the date in gregorian date format.
 
             // Custom format
             var formatParts = Intl.DateTimeFormat(locale, formatOptions).formatToParts(date);
-            var formatPartsTypeList = formatParts.map(({type, value}) => { return type; });
+            var formatPartsTypeList = formatParts.map(({type, value}) => { return type.toLowerCase(); });
             var hourIndex = formatPartsTypeList.indexOf('hour');
             var minuteIndex = formatPartsTypeList.indexOf('minute');
             var hourMinuteDelimiter = formatParts[(hourIndex + minuteIndex) / 2].value;
