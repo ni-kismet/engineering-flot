@@ -299,7 +299,13 @@ the the second one the date in gregorian date format.
             var gregorianDate = makeUtcWrapper(new Date(date.valueOf() + timeEpoch)).date;
 
             var time;
-            time = getFormattedDateTimeString(gregorianDate, formatString);
+            if (formatString !== "") {
+                time = getFormattedDateTimeString(gregorianDate, formatString);
+            } else {
+                var msString = showMilliseconds ? '.' + padNTimes(ms, '0', 3) : '';
+                time = Globalize.format(gregorianDate, "T", formatLanguage());
+                time = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
+            }
 
             return time;
         }
