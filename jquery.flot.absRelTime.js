@@ -93,13 +93,15 @@ the the second one the date in gregorian date format.
             timeformat: null, // format string to use
             twelveHourClock: false, // 12 or 24 time in time mode
             monthNames: null, // list of names of months
-            formatString: "", // The full format string
-            timeEpoch: '0000-12-31T18:00:00' // the UTC date to use as the epoch for "total seconds from" in for format of 'yyyy-mm-ddThh:mm:ss'
+            formatString: "", // The full format string (se above docs)
+            timeEpoch: -62135596800000 // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
+                                       // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
         },
         yaxis: {
-            formatString: "", // The full format string
-            timeEpoch: '0000-12-31T18:00:00' // the UTC date to use as the epoch for "total seconds from" in for format of 'yyyy-mm-ddThh:mm:ss'
-        }
+            formatString: "", // The full format string (see above docs)
+            timeEpoch: -62135596800000 // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
+                                       // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
+                                    }
     };
 
     var floorInBase = $.plot.saturated.floorInBase;
@@ -213,8 +215,8 @@ the the second one the date in gregorian date format.
             var dayIndex = formatPartsTypeList.indexOf('day');
             var monthIndex = formatPartsTypeList.indexOf('month');
             var dayMonthDelimiter = formatParts[(monthIndex + dayIndex) / 2].value;
-            var dayValue = formatParts[dayIndex].value;
-            var monthValue = formatParts[monthIndex].value;
+            var dayValue = leftPad(formatParts[dayIndex].value);
+            var monthValue = leftPad(formatParts[monthIndex].value);
             var yearValue = showYear ? formatParts[formatPartsTypeList.indexOf('year')].value : "";
 
             if (showYear) {
@@ -295,9 +297,7 @@ the the second one the date in gregorian date format.
                 date = minDateValue + unixToAbsoluteEpochDiff;
             }
 
-            var timeEpochDate = new Date(timeEpoch);
-            var timeEpochOffset = timeEpochDate.valueOf();
-            var gregorianDate = makeUtcWrapper(new Date(date.valueOf() + timeEpochOffset)).date;
+            var gregorianDate = makeUtcWrapper(new Date(date.valueOf() + timeEpoch)).date;
 
             var time;
             if (formatString !== "") {
@@ -372,14 +372,13 @@ the the second one the date in gregorian date format.
             dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         }
 
-        var timeEpoch = new Date(axis.options.timeEpoch);
         for (var i = 0; i < fmt.length; ++i) {
             var c = fmt.charAt(i),
                 localDateValue = d.date || d.getDate();
             if (escape) {
                 switch (c) {
                     case 'r': c = toRelativeTimeStr(localDateValue, showMilliseconds, axis.options.formatString); break;
-                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds, axis.options.formatString, timeEpoch); break;
+                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds, axis.options.formatString, axis.options.timeEpoch); break;
                 }
                 r.push(c);
                 escape = false;

@@ -2259,7 +2259,7 @@ Licensed under the MIT license.
                                 y = box.top + box.height - box.padding + axis.boxPosition.centerY;
                                 valign = "bottom";
                             }
-                            newLabelBox = {x: x - margin, y: y - margin, width: info.width + 2 * margin, height: info.height + 2 * margin};
+                            newLabelBox = {x: x - info.width / 2 - margin, y: y - margin, width: info.width + 2 * margin, height: info.height + 2 * margin};
                         } else {
                             valign = "middle";
                             y = plotOffset.top + axis.p2c(tick.v);
