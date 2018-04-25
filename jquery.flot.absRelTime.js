@@ -19,18 +19,36 @@ xaxis: {
     timeformat: null, // format string to use
     twelveHourClock: false, // 12 or 24 time in time mode
     monthNames: null // list of names of months
-    formatString: "" // A string that allows a user to format the time display (see below for details)
     timeEpoch: '0000-12-31T18:00:00' // A time in UTC string format to use as an offset for the display of dates (see below)
 }
 yaxis: {
-    formatString: "" // A string that allows a user to format the time display (see below for details)
     timeEpoch: '0000-12-31T18:00:00' // A time in UTC string format to use as an offset for the display of dates (see below)
 }
 ```
 
 Depending upon the timeformat axis parameter value, the axis tick formatter will
-choose between an absolute time representation if the value is '%A' or
+choose between an absolute time representation if the value begins with '%A' or
 relative time for timeformat '%r'.
+
+Time formatting options may follow the %A or %r specification in the timeformat string.
+They take the form of:
+
+<(hh|HH):mm[:ss[.S+]]> or <#T> for localized version of time
+
+'<HH:mm>'          24-hour format
+'<hh:mm:ss>'       12-hour format
+'<hh:mm:ss.SSS>'   12-hour format, with three-digit fractional seconds
+'<#T.SSS>'         localized format, with three-digit fractional seconds
+
+Date formatting options will be honored when following the %A specification.
+They take the form of:
+
+<(dd/MM|MM/dd)/yy(yy)> or <#d> for localized version of date
+
+'<dd/MM>'         Day/Month  (no year)
+'<MM/dd/yy>'      Month/Day/2-digit year
+'<MM/dd/yyyy>'    Month/Day/4-digit year
+'<#d>'            localized date format (per preferred language setting of browser)
 
 If the format for an axis is 'time', inside processOptions hook the tickGenerator
 and tickFormatter of the axis will be overrided with the custom ones used by time axes.
@@ -43,32 +61,6 @@ The formatted values look like in the example bellow:
 |Absolute time|300|12:05:00 AM 1/1/0001|
 |Relative Time|0, 300, 600|00:00:00, 00:05:00, 00:10:00|
 |Relative Time|300, 600, 900|00:00:00, 00:05:00, 00:10:00|
-
-formatString usage
-------------------
-There are two flavors of formats you can provide for the date and time formatting options through the
-'formatString' option, and can be mixed between the date and time sections. The first is a simple string
-to indicate date and/or time should be formatted according to the language preference of the browser:
-#d: date
-#T: time
-
-A user could specify formatString = "#d" to indicate the display of a particular date-time should
-just show the date. A string of "#d#T" indicates both date and time should be displayed. Note that time
-is always displayed before the date, and when both are displayed they will be separated by a newline (so order
-of the time and date format substrings doesn't matter).
-
-The second flavor is a more verbose set of options, allowing a user to specify certain characteristics of both
-the date and time displays. The following shows the complete set of options:
-dd/MM/yy(yy) hh:mm:ss.SSS  (NOTE: The (yy) just indicates you can optionally specify a 4 digit year. So 'yy' or 'yyyy'.)
-
-Acceptable date configutations are:
-dd/MM</yy(yy)>  <...> indicates optional part of formatString
-MM/dd</yy(yy)>
-
-Acceptable time configurations are:
-hh(or HH):mm   (HH will indicate that the formatted time should be in 24-hour format)
-hh:mm:ss
-hh:mm:ss(.S+) (where 'S+' just means you can specify a particular number of 'S's for fractional seconds)
 
 ### Relative time axis
 A relative time axis will show the time values with respect to the first data sample.
@@ -93,13 +85,11 @@ the the second one the date in gregorian date format.
             timeformat: null, // format string to use
             twelveHourClock: false, // 12 or 24 time in time mode
             monthNames: null, // list of names of months
-            formatString: "", // The full format string (se above docs)
             // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
             // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
             timeEpoch: -62135596800000
         },
         yaxis: {
-            formatString: "", // The full format string (see above docs)
             // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
             // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
             timeEpoch: -62135596800000
@@ -233,18 +223,25 @@ the the second one the date in gregorian date format.
             }
         }
 
+        function getFractionalSecondsString(milliseconds, formatString, forceFractionalSeconds) {
+            var fractionalSecondsIndex = formatString.indexOf(".S");
+            var fractionalSecondsSearch = new RegExp(".S+", "g");
+            var fallbackDigitCount = forceFractionalSeconds ? 3 : 0;
+            var numberOfFractionalSeconds = fractionalSecondsIndex > 0 ? fractionalSecondsSearch.exec(formatString)[0].length - 1 : fallbackDigitCount;
+            var fractionalSecondsString = padNTimes(milliseconds, "0", 3);
+            fractionalSecondsString = padNTimes(fractionalSecondsString, "0", numberOfFractionalSeconds, true);
+            fractionalSecondsString = numberOfFractionalSeconds > 0 ? fractionalSecondsString.substring(0, numberOfFractionalSeconds) : "";
+            return fractionalSecondsString;
+        }
+
         function getFormattedTimeString(date, formatString, formatOptions, locale) {
             var showTime = formatString.includes("hh") || formatString.includes("HH") || formatString.includes("#T");
             if (!showTime) {
                 return "";
             }
 
-            var fractionalSecondsIndex = formatString.indexOf(".S");
-            var fractionalSecondsSearch = new RegExp(".S+", "g");
-            var numberOfFractionalSeconds = fractionalSecondsIndex > 0 ? fractionalSecondsSearch.exec(formatString)[0].length - 1 : 0;
-            var fractionalSecondsString = padNTimes(date.getMilliseconds(), "0", 3);
-            fractionalSecondsString = padNTimes(fractionalSecondsString, "0", numberOfFractionalSeconds, true);
-            fractionalSecondsString = numberOfFractionalSeconds > 0 ? fractionalSecondsString.substring(0, numberOfFractionalSeconds) : "";
+            var fractionalSecondsString = getFractionalSecondsString(date.getMilliseconds(), formatString);
+            var numberOfFractionalSeconds = fractionalSecondsString.length;
 
             // System format
             if (formatString.includes("#T")) {
@@ -341,23 +338,8 @@ the the second one the date in gregorian date format.
             result += leftPad(minutes);
             if (showSeconds) {
                 result += (":" + leftPad(seconds));
-            }
-
-            var forceMilliseconds = showSeconds && formatString.includes(".S");
-            showMilliseconds = (showMilliseconds && formatString === "") || forceMilliseconds;
-            var padAmount = 3;
-            if (forceMilliseconds) {
-                var fractionalSecondsIndex = formatString.indexOf(".S");
-                var numberOfFractionalSeconds = fractionalSecondsIndex > 0 ? formatString.substring(fractionalSecondsIndex + 1) : 0;
-                padAmount = numberOfFractionalSeconds;
-            }
-            if (showMilliseconds && padAmount > 0) {
-                var padResult = padNTimes(milliseconds, "0", 3); // fill in digits left of milliseconds if needed
-                if (padAmount > 3) {
-                    padResult = padNTimes(padResult, "0", padAmount, true); // fill in digits right of millisecond if needed
-                }
-
-                result += '.' + padResult.substring(0, padAmount);
+                var fractionalSecondsString = getFractionalSecondsString(milliseconds, formatString, showMilliseconds);
+                result += (showMilliseconds || fractionalSecondsString.length > 0) ? '.' + fractionalSecondsString : "";
             }
 
             return result;
@@ -378,9 +360,16 @@ the the second one the date in gregorian date format.
             var c = fmt.charAt(i),
                 localDateValue = d.date || d.getDate();
             if (escape) {
+                var timeFormatStartIndex = fmt.indexOf('<');
+                var timeFormatEndIndex = fmt.indexOf('>');
+                var timeFormat = timeFormatStartIndex > 0 ? fmt.substring(timeFormatStartIndex + 1, timeFormatEndIndex) : "";
+                if (timeFormatStartIndex > 0) {
+                    i += (timeFormat.length + 2);
+                }
+
                 switch (c) {
-                    case 'r': c = toRelativeTimeStr(localDateValue, showMilliseconds, axis.options.formatString); break;
-                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds, axis.options.formatString, axis.options.timeEpoch); break;
+                    case 'r': c = toRelativeTimeStr(localDateValue, showMilliseconds, timeFormat); break;
+                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds, timeFormat, axis.options.timeEpoch); break;
                 }
                 r.push(c);
                 escape = false;

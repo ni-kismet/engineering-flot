@@ -37,11 +37,12 @@ describe('A Flot chart with relative time axes', function () {
         });
     };
 
-    var createPlotWithRelativeTimeAxis = function (placeholder, data) {
+    var createPlotWithRelativeTimeAxis = function (placeholder, data, formatString) {
         var plot = $.plot(placeholder, [[[0, 0]]], {
             xaxis: {
                 format: 'time',
-                timeformat: '%r'
+                timeformat: '%r' + (formatString !== undefined ? '<' + formatString + '>' : ""),
+                showTickLabels: 'all'
             },
             yaxis: {}
         });
@@ -185,5 +186,32 @@ describe('A Flot chart with relative time axes', function () {
             xaxis2 = plot.getAxes().x2axis;
         expect(firstAndLast(xaxis1.ticks)).toEqual([{v: 3600, label: '00:00:00'}, {v: 4200, label: '00:10:00'}]);
         expect(firstAndLast(xaxis2.ticks)).toEqual([{v: 4200, label: '00:00:00'}, {v: 4800, label: '00:10:00'}]);
+    });
+
+    it('shows only hours and minutes with formatString: "hh:mm"', function () {
+        plot = createPlotWithRelativeTimeAxis(placeholder, [[[0, 1], [60, 2]]], "hh:mm");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0, label: '00:00'},
+            {v: 60, label: '00:01'}
+        ]);
+    });
+
+    it('shows only hours, minutes and seconds with formatString: "hh:mm:ss"', function () {
+        plot = createPlotWithRelativeTimeAxis(placeholder, [[[0, 1], [61, 2]]], "hh:mm:ss");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0, label: '00:00:00'},
+            {v: 61, label: '00:01:01'}
+        ]);
+    });
+
+    it('shows proper number of millisecond digits with formatString: "hh:mm:ss.SSS"', function () {
+        plot = createPlotWithRelativeTimeAxis(placeholder, [[[0 + 0.5, 1], [61 + 0.001, 2]]], "hh:mm:ss.SSS");
+
+        expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([
+            {v: 0 + 0.5, label: '00:00:00.500'},
+            {v: 61 + 0.001, label: '00:01:01.001'}
+        ]);
     });
 });

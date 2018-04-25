@@ -29,8 +29,7 @@ describe('A Flot chart with absolute time axes', function () {
         return $.plot(placeholder, data, {
             xaxis: {
                 format: 'time',
-                formatString: formatString,
-                timeformat: '%A',
+                timeformat: '%A' + (formatString !== undefined ? '<' + formatString + '>' : ""),
                 timeEpoch: timeEpoch,
                 showTickLabels: 'all'
             },
