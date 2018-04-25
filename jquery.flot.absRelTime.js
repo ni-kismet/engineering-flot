@@ -94,14 +94,16 @@ the the second one the date in gregorian date format.
             twelveHourClock: false, // 12 or 24 time in time mode
             monthNames: null, // list of names of months
             formatString: "", // The full format string (se above docs)
-            timeEpoch: -62135596800000 // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
-                                       // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
+            // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
+            // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
+            timeEpoch: -62135596800000
         },
         yaxis: {
             formatString: "", // The full format string (see above docs)
-            timeEpoch: -62135596800000 // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
-                                       // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
-                                    }
+            // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
+            // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
+            timeEpoch: -62135596800000
+        }
     };
 
     var floorInBase = $.plot.saturated.floorInBase;
