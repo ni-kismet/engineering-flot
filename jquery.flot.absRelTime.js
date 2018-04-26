@@ -19,12 +19,40 @@ xaxis: {
     timeformat: null, // format string to use
     twelveHourClock: false, // 12 or 24 time in time mode
     monthNames: null // list of names of months
+    timeEpoch: '0000-12-31T18:00:00' // A time in UTC string format to use as an offset for the display of dates (see below)
+}
+yaxis: {
+    timeEpoch: '0000-12-31T18:00:00' // A time in UTC string format to use as an offset for the display of dates (see below)
 }
 ```
 
 Depending upon the timeformat axis parameter value, the axis tick formatter will
-choose between an absolute time representation if the value is '%A' or
+choose between an absolute time representation if the value begins with '%A' or
 relative time for timeformat '%r'.
+
+Time formatting options may follow the %A or %r specification in the timeformat string.
+They take the form of:
+
+<(hh|HH):mm[:ss[.S+]]> or <#T> for localized version of time
+
+'<HH:mm>'          24-hour format
+'<hh:mm:ss>'       12-hour format
+'<hh:mm:ss.SSS>'   12-hour format, with three-digit fractional seconds
+'<#T.SSS>'         localized format, with three-digit fractional seconds
+
+Date formatting options will be honored when following the %A specification. Note that it
+can be used in combination with the time formatting (with both sets of options between
+the '<>' characters. If both date and time formatting options are present, currently time
+will always be displayed first, and the date will be displayed on a newline.
+
+Date formats are as follows:
+
+<(dd/MM|MM/dd)/yy(yy)> or <#d> for localized version of date
+
+'<dd/MM>'         Day/Month  (no year)
+'<MM/dd/yy>'      Month/Day/2-digit year
+'<MM/dd/yyyy>'    Month/Day/4-digit year
+'<#d>'            localized date format (per preferred language setting of browser)
 
 If the format for an axis is 'time', inside processOptions hook the tickGenerator
 and tickFormatter of the axis will be overrided with the custom ones used by time axes.
@@ -43,6 +71,7 @@ A relative time axis will show the time values with respect to the first data sa
 Basically, the first datapoint from the points array will be considered time 00:00:00:00.
 If the difference between two datapoints is small, the milliseconds will apear.
 Otherwise, the time representation will contain only the hour, minute and second.
+NOTE: If a formatString is provided, any date format will be ignored.
 
 ### Absolute time axis
 The absolute time representation contains, beside the hours, minutes and seconds
@@ -59,7 +88,15 @@ the the second one the date in gregorian date format.
             timezone: null, // "browser" for local to the client or timezone for timezone-js
             timeformat: null, // format string to use
             twelveHourClock: false, // 12 or 24 time in time mode
-            monthNames: null // list of names of months
+            monthNames: null, // list of names of months
+            // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
+            // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
+            timeEpoch: -62135596800000
+        },
+        yaxis: {
+            // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
+            // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
+            timeEpoch: -62135596800000
         }
     };
 
@@ -81,13 +118,17 @@ the the second one the date in gregorian date format.
             return n.length === 1 ? pad + n : n;
         };
 
-        var leftPadNTimes = function(n, pad, nTimes) {
+        var padNTimes = function(n, pad, nTimes, right) {
             n = "" + n;
             if (pad) pad = "" + pad;
             else pad = "0";
 
             while (n.length < nTimes) {
-                n = pad + n;
+                if (right === true) {
+                    n = n + pad;
+                } else {
+                    n = pad + n;
+                }
             }
             return n;
         };
@@ -113,7 +154,138 @@ the the second one the date in gregorian date format.
             return navigator.locale || 'en-US';
         }
 
-        function toAbsoluteTimeStr(date, showMilliseconds) {
+        // Returns the set of options to be used by an instance of Intl.DateTimeFormat
+        function getFormatterOptions(formatString) {
+            var options = {};
+            if (formatString === undefined || formatString === null) {
+                return options;
+            }
+
+            if (formatString.includes("#d")) {
+                options['year'] = "numeric";
+                options['month'] = "numeric";
+                options['day'] = "numeric";
+            } else {
+                if (formatString.includes("yyyy")) {
+                    options['year'] = "numeric";
+                } else if (formatString.includes("yy")) {
+                    options['year'] = "2-digit";
+                }
+
+                options['month'] = "numeric";
+                options['day'] = "numeric";
+            }
+
+            if (formatString.includes("#T")) {
+                options['hour'] = "numeric";
+                options['minute'] = "numeric";
+                options['second'] = "numeric";
+            } else { // format has either "hh" or "HH" (which always will show minutes)
+                options['hour'] = "2-digit";
+                options['minute'] = "2-digit";
+
+                if (formatString.includes("ss")) {
+                    options['second'] = "2-digit";
+                }
+
+                options['hour12'] = formatString.includes("hh");
+            }
+
+            return options;
+        }
+
+        function getFormattedDateString(date, formatString, formatOptions, locale) {
+            var showYear = formatString.includes("yy") || formatString.includes("#d");
+            if (!showYear && !formatString.includes("MM")) {
+                return "";
+            }
+
+            // System format
+            if (formatString.includes("#d")) {
+                return Intl.DateTimeFormat(locale, {year: 'numeric', month: 'numeric', day: 'numeric'}).format(date);
+            }
+
+            // Custom format
+            var formatParts = Intl.DateTimeFormat(locale, formatOptions).formatToParts(date);
+            var formatPartsTypeList = formatParts.map(({type, value}) => { return type; });
+            var dayIndex = formatPartsTypeList.indexOf('day');
+            var monthIndex = formatPartsTypeList.indexOf('month');
+            var dayMonthDelimiter = formatParts[(monthIndex + dayIndex) / 2].value;
+            var dayValue = leftPad(formatParts[dayIndex].value);
+            var monthValue = leftPad(formatParts[monthIndex].value);
+            var yearValue = showYear ? formatParts[formatPartsTypeList.indexOf('year')].value : "";
+
+            if (showYear) {
+                var padAmount = formatString.includes("yyyy") ? 4 : 2;
+                yearValue = padNTimes(yearValue, "0", padAmount);
+            }
+
+            if (formatString.indexOf("dd") < formatString.indexOf("MM")) {
+                return dayValue + dayMonthDelimiter + monthValue + (showYear ? dayMonthDelimiter + yearValue : "");
+            } else {
+                return monthValue + dayMonthDelimiter + dayValue + (showYear ? dayMonthDelimiter + yearValue : "");
+            }
+        }
+
+        function getFractionalSecondsString(milliseconds, formatString, forceFractionalSeconds) {
+            var fractionalSecondsIndex = formatString.indexOf(".S");
+            var fractionalSecondsSearch = new RegExp(".S+", "g");
+            var fallbackDigitCount = forceFractionalSeconds ? 3 : 0;
+            var numberOfFractionalSeconds = fractionalSecondsIndex > 0 ? fractionalSecondsSearch.exec(formatString)[0].length - 1 : fallbackDigitCount;
+            var fractionalSecondsString = padNTimes(milliseconds, "0", 3);
+            fractionalSecondsString = padNTimes(fractionalSecondsString, "0", numberOfFractionalSeconds, true);
+            fractionalSecondsString = numberOfFractionalSeconds > 0 ? fractionalSecondsString.substring(0, numberOfFractionalSeconds) : "";
+            return fractionalSecondsString;
+        }
+
+        function getFormattedTimeString(date, formatString, formatOptions, locale) {
+            var showTime = formatString.includes("hh") || formatString.includes("HH") || formatString.includes("#T");
+            if (!showTime) {
+                return "";
+            }
+
+            var fractionalSecondsString = getFractionalSecondsString(date.getMilliseconds(), formatString);
+
+            // System format
+            if (formatString.includes("#T")) {
+                var formattedDate = Intl.DateTimeFormat(locale, {hour: 'numeric', minute: 'numeric', second: 'numeric'}).format(date);
+                if (fractionalSecondsString !== "") {
+                    var lastDigitSearch = new RegExp("[0-9](?!.*[0-9])", "g");
+                    lastDigitSearch.test(formattedDate);
+                    formattedDate = [formattedDate.slice(0, lastDigitSearch.lastIndex), "." + fractionalSecondsString, formattedDate.slice(lastDigitSearch.lastIndex)].join('');
+                }
+
+                return formattedDate;
+            }
+
+            // Custom format
+            var formatParts = Intl.DateTimeFormat(locale, formatOptions).formatToParts(date);
+            var formatPartsTypeList = formatParts.map(({type, value}) => { return type.toLowerCase(); });
+            var hourIndex = formatPartsTypeList.indexOf('hour');
+            var minuteIndex = formatPartsTypeList.indexOf('minute');
+            var hourMinuteDelimiter = formatParts[(hourIndex + minuteIndex) / 2].value;
+            var hourValue = leftPad(formatParts[hourIndex].value);
+            var minuteValue = leftPad(formatParts[minuteIndex].value);
+            var showSeconds = formatString.includes("ss");
+            var secondValue = showSeconds ? leftPad(formatParts[formatPartsTypeList.indexOf('second')].value) : "";
+            var dayPeriod = formatOptions['hour12'] === true ? formatParts[formatPartsTypeList.indexOf('dayperiod')].value : "";
+            return hourValue +
+                   hourMinuteDelimiter +
+                   minuteValue +
+                   (showSeconds ? hourMinuteDelimiter + secondValue : "") +
+                   (showSeconds && fractionalSecondsString.length > 0 ? "." + fractionalSecondsString : "") +
+                   (dayPeriod !== "" ? " " + dayPeriod : "");
+        }
+
+        function getFormattedDateTimeString(date, formatString) {
+            var locale = navigator.language || navigator.browserLanguage || navigator.languages[0];
+            var formatOptions = getFormatterOptions(formatString);
+            var dateString = getFormattedDateString(date, formatString, formatOptions, locale);
+            var timeString = getFormattedTimeString(date, formatString, formatOptions, locale);
+            return timeString + (dateString !== "" && timeString !== "" ? "<br>" : "") + dateString;
+        }
+
+        function toAbsoluteTimeStr(date, showMilliseconds, formatString, timeEpoch) {
             var unixToAbsoluteEpochDiff = 62135596800000,
                 minDateValue = -8640000000000000,
                 d = date.valueOf(),
@@ -127,15 +299,21 @@ the the second one the date in gregorian date format.
                 date = minDateValue + unixToAbsoluteEpochDiff;
             }
 
-            var gregorianDate = makeUtcWrapper(new Date(date - unixToAbsoluteEpochDiff)).date;
+            var gregorianDate = makeUtcWrapper(new Date(date.valueOf() + timeEpoch)).date;
 
-            var msString = showMilliseconds ? '.' + leftPadNTimes(ms, '0', 3) : '';
-            var time = Globalize.format(gregorianDate, "T", formatLanguage());
-            var absTimeString = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
-            return absTimeString;
+            var time;
+            if (formatString !== "") {
+                time = getFormattedDateTimeString(gregorianDate, formatString);
+            } else {
+                var msString = showMilliseconds ? '.' + padNTimes(ms, '0', 3) : '';
+                time = Globalize.format(gregorianDate, "T", formatLanguage());
+                time = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
+            }
+
+            return time;
         }
 
-        function toRelativeTimeStr(date, showMilliseconds) {
+        function toRelativeTimeStr(date, showMilliseconds, formatString) {
             var result = '';
 
             var dateValue = date.valueOf(),
@@ -153,15 +331,18 @@ the the second one the date in gregorian date format.
             var dateInHours = Math.floor(dateInMinutes / 60);
             var hours = dateInHours % 24;
             var days = Math.floor(dateInHours / 24);
+            var showSeconds = formatString === "" || formatString.includes("ss");
 
-            if (days) {
+            if (days && formatString === "") {
                 result += days + '.';
             }
+
             result += leftPad(hours) + ':';
-            result += leftPad(minutes) + ':';
-            result += leftPad(seconds);
-            if (showMilliseconds) {
-                result += '.' + leftPadNTimes(milliseconds, "0", 3);
+            result += leftPad(minutes);
+            if (showSeconds) {
+                result += (":" + leftPad(seconds));
+                var fractionalSecondsString = getFractionalSecondsString(milliseconds, formatString, showMilliseconds);
+                result += (showMilliseconds || fractionalSecondsString.length > 0) ? '.' + fractionalSecondsString : "";
             }
 
             return result;
@@ -182,9 +363,16 @@ the the second one the date in gregorian date format.
             var c = fmt.charAt(i),
                 localDateValue = d.date || d.getDate();
             if (escape) {
+                var timeFormatStartIndex = fmt.indexOf('<');
+                var timeFormatEndIndex = fmt.indexOf('>');
+                var timeFormat = timeFormatStartIndex > 0 ? fmt.substring(timeFormatStartIndex + 1, timeFormatEndIndex) : "";
+                if (timeFormatStartIndex > 0) {
+                    i += (timeFormat.length + 2);
+                }
+
                 switch (c) {
-                    case 'r': c = toRelativeTimeStr(localDateValue, showMilliseconds); break;
-                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds); break;
+                    case 'r': c = toRelativeTimeStr(localDateValue, showMilliseconds, timeFormat); break;
+                    case 'A': c = toAbsoluteTimeStr(localDateValue, showMilliseconds, timeFormat, axis.options.timeEpoch); break;
                 }
                 r.push(c);
                 escape = false;
