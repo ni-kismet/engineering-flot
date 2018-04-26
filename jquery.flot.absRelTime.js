@@ -40,8 +40,12 @@ They take the form of:
 '<hh:mm:ss.SSS>'   12-hour format, with three-digit fractional seconds
 '<#T.SSS>'         localized format, with three-digit fractional seconds
 
-Date formatting options will be honored when following the %A specification.
-They take the form of:
+Date formatting options will be honored when following the %A specification. Note that it
+can be used in combination with the time formatting (with both sets of options between
+the '<>' characters. If both date and time formatting options are present, currently time 
+will always be displayed first, and the date will be displayed on a newline.
+
+Date formats are as follows:
 
 <(dd/MM|MM/dd)/yy(yy)> or <#d> for localized version of date
 
@@ -241,7 +245,6 @@ the the second one the date in gregorian date format.
             }
 
             var fractionalSecondsString = getFractionalSecondsString(date.getMilliseconds(), formatString);
-            var numberOfFractionalSeconds = fractionalSecondsString.length;
 
             // System format
             if (formatString.includes("#T")) {
@@ -270,7 +273,7 @@ the the second one the date in gregorian date format.
                    hourMinuteDelimiter +
                    minuteValue +
                    (showSeconds ? hourMinuteDelimiter + secondValue : "") +
-                   (showSeconds && numberOfFractionalSeconds > 0 ? "." + fractionalSecondsString : "") +
+                   (showSeconds && fractionalSecondsString.length > 0 ? "." + fractionalSecondsString : "") +
                    (dayPeriod !== "" ? " " + dayPeriod : "");
         }
 
