@@ -42,7 +42,7 @@ They take the form of:
 
 Date formatting options will be honored when following the %A specification. Note that it
 can be used in combination with the time formatting (with both sets of options between
-the '<>' characters. If both date and time formatting options are present, currently time 
+the '<>' characters. If both date and time formatting options are present, currently time
 will always be displayed first, and the date will be displayed on a newline.
 
 Date formats are as follows:
