@@ -3,9 +3,7 @@
 */
 
 (function($) {
-    var placeholder;
-
-    var options = {
+    var defaultOptions = {
         legend: {
             show: false,
             labelFormatter: null, // fn: string -> string
@@ -16,7 +14,7 @@
         }
     };
 
-    function insertLegend(plot, legendEntries) {
+    function insertLegend(plot, options, placeholder, legendEntries) {
         // clear before redraw
         if (options.legend.container != null) {
             $(options.legend.container).html('');
@@ -372,10 +370,8 @@
     }
 
     function init(plot) {
-        placeholder = plot.getPlaceholder();
-        options = plot.getOptions();
-
         plot.hooks.setupGrid.push(function (plot) {
+            var options = plot.getOptions();
             var series = plot.getData(),
                 labelFormatter = options.legend.labelFormatter,
                 oldEntries = options.legend.legendEntries,
@@ -385,14 +381,14 @@
 
             if (shouldRedraw(oldEntries, newEntries) ||
                 checkOptions(oldPlotOffset, newPlotOffset)) {
-                insertLegend(plot, newEntries);
+                insertLegend(plot, options, plot.getPlaceholder(), newEntries);
             }
         });
     }
 
     $.plot.plugins.push({
         init: init,
-        options: options,
+        options: defaultOptions,
         name: 'legend',
         version: '1.0'
     });
