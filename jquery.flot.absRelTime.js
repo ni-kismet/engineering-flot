@@ -161,14 +161,14 @@ the the second one the date in gregorian date format.
                 return options;
             }
 
-            if (formatString.includes("#d")) {
+            if (formatString.indexOf("#d") >= 0) {
                 options['year'] = "numeric";
                 options['month'] = "numeric";
                 options['day'] = "numeric";
             } else {
-                if (formatString.includes("yyyy")) {
+                if (formatString.indexOf("yyyy") >= 0) {
                     options['year'] = "numeric";
-                } else if (formatString.includes("yy")) {
+                } else if (formatString.indexOf("yy") >= 0) {
                     options['year'] = "2-digit";
                 }
 
@@ -176,7 +176,7 @@ the the second one the date in gregorian date format.
                 options['day'] = "numeric";
             }
 
-            if (formatString.includes("#T")) {
+            if (formatString.indexOf("#T") >= 0) {
                 options['hour'] = "numeric";
                 options['minute'] = "numeric";
                 options['second'] = "numeric";
@@ -184,24 +184,24 @@ the the second one the date in gregorian date format.
                 options['hour'] = "2-digit";
                 options['minute'] = "2-digit";
 
-                if (formatString.includes("ss")) {
+                if (formatString.indexOf("ss") >= 0) {
                     options['second'] = "2-digit";
                 }
 
-                options['hour12'] = formatString.includes("hh");
+                options['hour12'] = formatString.indexOf("hh") >= 0;
             }
 
             return options;
         }
 
         function getFormattedDateString(date, formatString, formatOptions, locale) {
-            var showYear = formatString.includes("yy") || formatString.includes("#d");
-            if (!showYear && !formatString.includes("MM")) {
+            var showYear = formatString.indexOf("yy") >= 0 || formatString.indexOf("#d") >= 0;
+            if (!showYear && !(formatString.indexOf("MM") >= 0)) {
                 return "";
             }
 
             // System format
-            if (formatString.includes("#d")) {
+            if (formatString.indexOf("#d") >= 0) {
                 return Intl.DateTimeFormat(locale, {year: 'numeric', month: 'numeric', day: 'numeric'}).format(date);
             }
 
@@ -216,7 +216,7 @@ the the second one the date in gregorian date format.
             var yearValue = showYear ? formatParts[formatPartsTypeList.indexOf('year')].value : "";
 
             if (showYear) {
-                var padAmount = formatString.includes("yyyy") ? 4 : 2;
+                var padAmount = formatString.indexOf("yyyy") >= 0 ? 4 : 2;
                 yearValue = padNTimes(yearValue, "0", padAmount);
             }
 
@@ -239,7 +239,7 @@ the the second one the date in gregorian date format.
         }
 
         function getFormattedTimeString(date, formatString, formatOptions, locale) {
-            var showTime = formatString.includes("hh") || formatString.includes("HH") || formatString.includes("#T");
+            var showTime = formatString.indexOf("hh") >= 0 || formatString.indexOf("HH") >= 0 || formatString.indexOf("#T") >= 0;
             if (!showTime) {
                 return "";
             }
@@ -247,7 +247,7 @@ the the second one the date in gregorian date format.
             var fractionalSecondsString = getFractionalSecondsString(date.getMilliseconds(), formatString);
 
             // System format
-            if (formatString.includes("#T")) {
+            if (formatString.indexOf("#T") >= 0) {
                 var formattedDate = Intl.DateTimeFormat(locale, {hour: 'numeric', minute: 'numeric', second: 'numeric'}).format(date);
                 if (fractionalSecondsString !== "") {
                     var lastDigitSearch = new RegExp("[0-9](?!.*[0-9])", "g");
@@ -266,7 +266,7 @@ the the second one the date in gregorian date format.
             var hourMinuteDelimiter = formatParts[(hourIndex + minuteIndex) / 2].value;
             var hourValue = leftPad(formatParts[hourIndex].value);
             var minuteValue = leftPad(formatParts[minuteIndex].value);
-            var showSeconds = formatString.includes("ss");
+            var showSeconds = formatString.indexOf("ss") >= 0;
             var secondValue = showSeconds ? leftPad(formatParts[formatPartsTypeList.indexOf('second')].value) : "";
             var dayPeriod = formatOptions['hour12'] === true ? formatParts[formatPartsTypeList.indexOf('dayperiod')].value : "";
             return hourValue +
@@ -331,7 +331,7 @@ the the second one the date in gregorian date format.
             var dateInHours = Math.floor(dateInMinutes / 60);
             var hours = dateInHours % 24;
             var days = Math.floor(dateInHours / 24);
-            var showSeconds = formatString === "" || formatString.includes("ss");
+            var showSeconds = formatString === "" || formatString.indexOf("ss") >= 0;
 
             if (days && formatString === "") {
                 result += days + '.';
