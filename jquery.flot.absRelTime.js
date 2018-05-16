@@ -196,7 +196,7 @@ the the second one the date in gregorian date format.
 
         function getFormattedDateString(date, formatString, formatOptions, locale) {
             var showYear = formatString.indexOf("yy") >= 0 || formatString.indexOf("#d") >= 0;
-            if (!showYear && !formatString.indexOf("MM") >= 0) {
+            if (!showYear && !(formatString.indexOf("MM") >= 0)) {
                 return "";
             }
 
