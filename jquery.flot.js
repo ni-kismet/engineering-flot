@@ -238,6 +238,8 @@ Licensed under the MIT license.
             },
             plot = this;
 
+        var eventManager = {};
+
         // interactive features
 
         var redrawTimeout = null;
@@ -341,6 +343,7 @@ Licensed under the MIT license.
         plot.findNearbyInterpolationPoint = findNearbyInterpolationPoint;
         plot.computeValuePrecision = computeValuePrecision;
         plot.computeTickSize = computeTickSize;
+        plot.addEventHandler = addEventHandler;
 
         // public attributes
         plot.hooks = hooks;
@@ -982,6 +985,24 @@ Licensed under the MIT license.
 
         function bindEvents() {
             executeHooks(hooks.bindEvents, [eventHolder]);
+        }
+
+        function addEventHandler(event, handler, eventHolder, priority) {
+            var eventlist = eventManager[event];
+            if (eventlist === undefined) {
+                eventlist = [];
+            }
+
+            // var newEventList = [];
+            eventlist.push({"event": event, "handler": handler, "eventHolder": eventHolder, "priority": priority});
+            eventlist.sort(function(a, b) { return b.priority - a.priority });
+            for (var i = 0; i < eventlist.length; i++) {
+                var eventData = eventlist[i];
+                eventData.eventHolder.unbind(eventData.event, eventData.handler);
+                eventData.eventHolder.bind(eventData.event, eventData.handler);
+            }
+
+            eventManager[event] = eventlist;
         }
 
         function shutdown() {
