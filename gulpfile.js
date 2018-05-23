@@ -9,25 +9,25 @@ gulp.task('build', gulpSequence('build_engineering_flot'));
 
 gulp.task('build_engineering_flot', function() {
     return gulp.src([
-        './jquery.colorhelpers.js',
-        './jquery.canvaswrapper.js',
-        './jquery.flot.js',
-        './jquery.flot.saturated.js',
-        './jquery.flot.browser.js',
-        './jquery.flot.drawSeries.js',
-        './jquery.flot.uiConstants.js',
-        './jquery.flot.logaxis.js',
-        './jquery.flot.symbol.js',
-        './jquery.flot.flatdata.js',
-        './jquery.flot.navigate.js',
-        './jquery.flot.touchNavigate.js',
-        './jquery.flot.hover.js',
-        './jquery.flot.touch.js',
-        './jquery.flot.absRelTime.js',
-        './jquery.flot.axislabels.js',
-        './jquery.flot.selection.js',
-        './jquery.flot.composeImages.js',
-        './jquery.flot.legend.js'
+        './source/jquery.canvaswrapper.js',
+        './source/jquery.colorhelpers.js',
+        './source/jquery.flot.js',
+        './source/jquery.flot.saturated.js',
+        './source/jquery.flot.browser.js',
+        './source/jquery.flot.drawSeries.js',
+        './source/jquery.flot.uiConstants.js',
+        './source/jquery.flot.logaxis.js',
+        './source/jquery.flot.symbol.js',
+        './source/jquery.flot.flatdata.js',
+        './source/jquery.flot.navigate.js',
+        './source/jquery.flot.touchNavigate.js',
+        './source/jquery.flot.hover.js',
+        './source/jquery.flot.touch.js',
+        './source/jquery.flot.absRelTime.js',
+        './source/jquery.flot.axislabels.js',
+        './source/jquery.flot.selection.js',
+        './source/jquery.flot.composeImages.js',
+        './source/jquery.flot.legend.js'
         ])
         .pipe(maps.init())
         .pipe(babel({
