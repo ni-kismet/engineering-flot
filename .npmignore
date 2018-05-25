@@ -3,4 +3,5 @@
 !dist/*
 !lib/*
 !docs/*
+!source/*
 !CHANGELOG.md
