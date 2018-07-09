@@ -989,21 +989,16 @@ Licensed under the MIT license.
 
         function addEventHandler(event, handler, eventHolder, priority) {
             var key = eventHolder + event;
-            var eventlist = eventManager[key];
-            if (eventlist === undefined) {
-                eventlist = [];
-            }
+            var eventList = eventManager[key] || [];
 
-            // var newEventList = [];
-            eventlist.push({"event": event, "handler": handler, "eventHolder": eventHolder, "priority": priority});
-            eventlist.sort(function(a, b) { return b.priority - a.priority });
-            for (var i = 0; i < eventlist.length; i++) {
-                var eventData = eventlist[i];
+            eventList.push({"event": event, "handler": handler, "eventHolder": eventHolder, "priority": priority});
+            eventList.sort(function(a, b) { return b.priority - a.priority });
+            eventList.forEach( eventData => {
                 eventData.eventHolder.unbind(eventData.event, eventData.handler);
                 eventData.eventHolder.bind(eventData.event, eventData.handler);
-            }
+            });
 
-            eventManager[key] = eventlist;
+            eventManager[key] = eventList;
         }
 
         function shutdown() {
