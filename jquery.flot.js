@@ -988,7 +988,8 @@ Licensed under the MIT license.
         }
 
         function addEventHandler(event, handler, eventHolder, priority) {
-            var eventlist = eventManager[event];
+            var key = eventHolder + event;
+            var eventlist = eventManager[key];
             if (eventlist === undefined) {
                 eventlist = [];
             }
@@ -1002,7 +1003,7 @@ Licensed under the MIT license.
                 eventData.eventHolder.bind(eventData.event, eventData.handler);
             }
 
-            eventManager[event] = eventlist;
+            eventManager[key] = eventlist;
         }
 
         function shutdown() {
