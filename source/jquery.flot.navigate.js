@@ -341,11 +341,9 @@ can set the default in the options.
             }
 
             if (o.pan.interactive) {
-                eventHolder.bind("dragstart", {
-                    distance: 10
-                }, onDragStart);
-                eventHolder.bind("drag", onDrag);
-                eventHolder.bind("dragend", onDragEnd);
+                plot.addEventHandler("dragstart", onDragStart, eventHolder, 0);
+                plot.addEventHandler("drag", onDrag, eventHolder, 0);
+                plot.addEventHandler("dragend", onDragEnd, eventHolder, 0);
                 eventHolder.bind("mousedown", onMouseDown);
                 eventHolder.bind("mouseup", onMouseUp);
             }
