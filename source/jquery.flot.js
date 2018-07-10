@@ -992,7 +992,7 @@ Licensed under the MIT license.
             var eventList = eventManager[key] || [];
 
             eventList.push({"event": event, "handler": handler, "eventHolder": eventHolder, "priority": priority});
-            eventList.sort(function(a, b) { return b.priority - a.priority });
+            eventList.sort((a, b) => b.priority - a.priority );
             eventList.forEach( eventData => {
                 eventData.eventHolder.unbind(eventData.event, eventData.handler);
                 eventData.eventHolder.bind(eventData.event, eventData.handler);
