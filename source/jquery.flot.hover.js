@@ -34,6 +34,8 @@ the tooltip from webcharts).
         }
     };
 
+    var lastMouseMoveEvent = undefined;
+
     var browser = $.plot.browser;
 
     function init(plot) {
@@ -110,6 +112,7 @@ the tooltip from webcharts).
 
         function onMouseMove(e) {
             var series = plot.getData();
+            lastMouseMoveEvent = e;
 
             triggerClickHoverEvent("plothover", e,
                 function(i) {
@@ -118,6 +121,7 @@ the tooltip from webcharts).
         }
 
         function onMouseLeave(e) {
+            lastMouseMoveEvent = undefined;
             triggerClickHoverEvent("plothover", e,
                 function(i) {
                     return false;
@@ -246,6 +250,13 @@ the tooltip from webcharts).
 
         function processRawData() {
             triggerCleanupEvent();
+            var series = plot.getData();
+            if (lastMouseMoveEvent !== undefined) {
+                triggerClickHoverEvent("plothover", lastMouseMoveEvent,
+                    function(i) {
+                        return series[i]["hoverable"] !== false;
+                    });
+            }
         }
 
         function drawOverlay(plot, octx, overlay) {
