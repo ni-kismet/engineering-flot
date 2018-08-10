@@ -34,8 +34,6 @@ the tooltip from webcharts).
         }
     };
 
-    var lastMouseMoveEvent = undefined;
-
     var browser = $.plot.browser;
 
     function init(plot) {
@@ -44,6 +42,14 @@ the tooltip from webcharts).
 
     function initHover(plot, options) {
         var highlights = [];
+
+        var eventType = {
+            click: 'click',
+            hover: 'hover'
+        }
+
+        var lastMouseMoveEvent = undefined;
+
         plot.highlight = highlight;
         plot.unhighlight = unhighlight;
 
@@ -81,10 +87,24 @@ the tooltip from webcharts).
             highlights = [];
         }
 
+        function doTriggerClickHoverEvent(event, eventType, searchDistance) {
+            var series = plot.getData();
+            if (event !== undefined 
+                && series.length > 0 
+                && series[0].xaxis.c2p !== undefined 
+                && series[0].yaxis.c2p !== undefined) {
+                var eventToTrigger = "plot" + eventType;
+                var seriesFlag = eventType + "able";
+                triggerClickHoverEvent(eventToTrigger, event,
+                    function(i) {
+                        return series[i][seriesFlag] !== false;
+                    }, searchDistance);
+            }
+        }
+
         var tap = {
             generatePlothoverEvent: function (e) {
                 var o = plot.getOptions(),
-                    series = plot.getData(),
                     newEvent = new CustomEvent('mouseevent');
 
                 //transform from touch event to mouse event format
@@ -94,10 +114,7 @@ the tooltip from webcharts).
                 newEvent.clientY = e.detail.changedTouches[0].clientY;
 
                 if (o.grid.hoverable) {
-                    triggerClickHoverEvent('plothover', newEvent,
-                        function(i) {
-                            return series[i]['hoverable'] !== false;
-                        }, 30);
+                    doTriggerClickHoverEvent(e, eventType.hover, 30);
                 }
                 return false;
             }
@@ -111,13 +128,8 @@ the tooltip from webcharts).
         }
 
         function onMouseMove(e) {
-            var series = plot.getData();
             lastMouseMoveEvent = e;
-
-            triggerClickHoverEvent("plothover", e,
-                function(i) {
-                    return series[i]["hoverable"] !== false;
-                });
+            doTriggerClickHoverEvent(e, eventType.hover);
         }
 
         function onMouseLeave(e) {
@@ -129,12 +141,7 @@ the tooltip from webcharts).
         }
 
         function onClick(e) {
-            var series = plot.getData();
-
-            triggerClickHoverEvent("plotclick", e,
-                function(i) {
-                    return series[i]["clickable"] !== false;
-                });
+            doTriggerClickHoverEvent(e, eventType.click);
         }
 
         function triggerCleanupEvent() {
@@ -250,16 +257,7 @@ the tooltip from webcharts).
 
         function processRawData() {
             triggerCleanupEvent();
-            var series = plot.getData();
-            if (lastMouseMoveEvent !== undefined 
-                && series.length > 0 
-                && series[0].xaxis.c2p !== undefined 
-                && series[0].yaxis.c2p !== undefined) {
-                triggerClickHoverEvent("plothover", lastMouseMoveEvent,
-                    function(i) {
-                        return series[i]["hoverable"] !== false;
-                    });
-            }
+            doTriggerClickHoverEvent(lastMouseMoveEvent, eventType.hover);
         }
 
         function drawOverlay(plot, octx, overlay) {
