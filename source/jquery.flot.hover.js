@@ -251,7 +251,10 @@ the tooltip from webcharts).
         function processRawData() {
             triggerCleanupEvent();
             var series = plot.getData();
-            if (lastMouseMoveEvent !== undefined) {
+            if (lastMouseMoveEvent !== undefined 
+                && series.length > 0 
+                && series[0].xaxis.c2p !== undefined 
+                && series[0].yaxis.c2p !== undefined) {
                 triggerClickHoverEvent("plothover", lastMouseMoveEvent,
                     function(i) {
                         return series[i]["hoverable"] !== false;
