@@ -67,7 +67,7 @@ jobs:
     - run: export PATH="~/ni-kismet/engineering-flot/node_modules/.bin:$PATH"
     - run: npm install
     # This is based on your 1.0 configuration file or project settings
-    - run: npm install -g git+https://cristiingineru@github.com/cristiingineru/dont-break.git#allowTestingIndirectDependents
+    - run: npm install -g dont-break
     - run: npm run build
     # Save dependency cache
     - save_cache:
