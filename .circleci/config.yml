@@ -68,6 +68,7 @@ jobs:
     - run: npm install
     # This is based on your 1.0 configuration file or project settings
     - run: npm install -g dont-break
+    - run: npm run build
     # Save dependency cache
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
