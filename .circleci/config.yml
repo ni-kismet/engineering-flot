@@ -28,7 +28,7 @@ jobs:
     # https://circleci.com/docs/2.0/circleci-images/
     docker:
     # - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
-    - image: circleci/node:8-stretch
+    - image: circleci/node:8-stretch-browsers
     #  command: /sbin/init
     steps:
     # Machine Setup
@@ -55,11 +55,11 @@ jobs:
         # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
         - v1-dep-
     # This is based on your 1.0 configuration file or project settings
-    - run: sudo apt-get update
-    - run: sudo apt-get install libpango1.0-0
-    - run: sudo apt-get install firefox
-    - run: sudo ln -sf /usr/lib/firefox/firefox /usr/bin/firefox
-    - run: curl -s https://raw.githubusercontent.com/chronogolf/circleci-google-chrome/master/use_chrome_stable_version.sh | bash
+    #- run: sudo apt-get update
+    #- run: sudo apt-get install libpango1.0-0
+    #- run: sudo apt-get install firefox
+    #- run: sudo ln -sf /usr/lib/firefox/firefox /usr/bin/firefox
+    #- run: curl -s https://raw.githubusercontent.com/chronogolf/circleci-google-chrome/master/use_chrome_stable_version.sh | bash
     - run: node --version
     - run: npm --version
     - run: npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
