@@ -114,7 +114,7 @@ the tooltip from webcharts).
                 newEvent.clientY = e.detail.changedTouches[0].clientY;
 
                 if (o.grid.hoverable) {
-                    doTriggerClickHoverEvent(e, eventType.hover, 30);
+                    doTriggerClickHoverEvent(newEvent, eventType.hover, 30);
                 }
                 return false;
             }
