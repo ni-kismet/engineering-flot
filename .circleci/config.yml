@@ -28,7 +28,7 @@ jobs:
     # https://circleci.com/docs/2.0/circleci-images/
     docker:
     # - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
-    - image: circleci/node:stretch
+    - image: circleci/node:8-stretch
       command: /sbin/init
     steps:
     # Machine Setup
