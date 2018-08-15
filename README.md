@@ -71,3 +71,8 @@ About how the plugins work: [Plugins](docs/PLUGINS.md)
 High level overview on how interactions are handled internally: [Interactions](docs/interactions.md)
 
 Examples are included in the examples folder of this repository, but they can be tried out online as well: [Examples](https://rawgit.com/ni-kismet/engineering-flot/master/examples/index.html)
+
+## CircleCI
+
+[CircleCI](https://circleci.com/) is used in this repo to run [dont-break](https://www.npmjs.com/package/dont-break), 
+which checks if the current version of engineering-flot breaks unit tests on specified dependent projects. 
