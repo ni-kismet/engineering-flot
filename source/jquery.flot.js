@@ -1421,6 +1421,10 @@ Licensed under the MIT license.
                     min = minimum;
                     max = currentMax;
                 }
+                else { 
+                    min = currentMax;
+                    max = currentMax;
+                }
             }
 
             return {
