@@ -1407,26 +1407,19 @@ Licensed under the MIT license.
             executeHooks(hooks.setupGrid, []);
         }
 
-        function widenMinMax(minimum, maximum) {
+        function widenMinMax(minimum, maximum, currentMin, currentMax) {
             var min = (minimum === undefined ? null : minimum);
             var max = (maximum === undefined ? null : maximum);
             var delta = max - min;
             if (delta === 0.0) {
                 // degenerate case
-                var widen = max === 0 ? 1 : 0.01;
-                var wmin = null;
-                if (min == null) {
-                    wmin -= widen;
+                if (minimum > currentMax) {
+                    min = currentMin;
+                    max = minimum;
                 }
-
-                // always widen max if we couldn't widen min to ensure we
-                // don't fall into min == max which doesn't work
-                if (max == null || min != null) {
-                    max += widen;
-                }
-
-                if (wmin != null) {
-                    min = wmin;
+                else if (maximum < currentMin) {
+                    min = minimum;
+                    max = currentMax;
                 }
             }
 
@@ -1440,6 +1433,8 @@ Licensed under the MIT license.
             var opts = axis.options,
                 min = opts.min,
                 max = opts.max,
+                currentMin = opts.min,
+                currentMax = opts.max,
                 datamin = axis.datamin,
                 datamax = axis.datamax,
                 delta;
@@ -1481,7 +1476,7 @@ Licensed under the MIT license.
                     break;
             }
 
-            var widenedMinMax = widenMinMax(min, max);
+            var widenedMinMax = widenMinMax(min, max, currentMin, currentMax);
             min = widenedMinMax.min;
             max = widenedMinMax.max;
 
