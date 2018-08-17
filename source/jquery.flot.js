@@ -1422,7 +1422,7 @@ Licensed under the MIT license.
                     max = currentMax;
                 }
                 else { 
-                    min = currentMax;
+                    min = currentMin;
                     max = currentMax;
                 }
             }
