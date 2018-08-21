@@ -1411,13 +1411,30 @@ Licensed under the MIT license.
             var min = (minimum === undefined ? null : minimum);
             var max = (maximum === undefined ? null : maximum);
             var delta = max - min;
-            if (delta === 0.0) {
+            if (delta === 0.0 && (currentMin === undefined || currentMax === undefined)) {
+                var widen = max === 0 ? 1 : 0.01;
+                var wmin = null;
+                if (min == null) {
+                    wmin -= widen;
+                }
+
+                // always widen max if we couldn't widen min to ensure we
+                // don't fall into min == max which doesn't work
+                if (max == null || min != null) {
+                    max += widen;
+                }
+
+                if (wmin != null) {
+                    min = wmin;
+                }
+            }
+            else if (delta === 0.0) {
                 // degenerate case
-                if (minimum > currentMax) {
+                if (minimum >= currentMax) {
                     min = currentMin;
                     max = minimum;
                 }
-                else if (maximum < currentMin) {
+                else if (maximum <= currentMin) {
                     min = minimum;
                     max = currentMax;
                 }
@@ -1437,8 +1454,8 @@ Licensed under the MIT license.
             var opts = axis.options,
                 min = opts.min,
                 max = opts.max,
-                currentMin = opts.min,
-                currentMax = opts.max,
+                currentMin = axis.min,
+                currentMax = axis.max,
                 datamin = axis.datamin,
                 datamax = axis.datamax,
                 delta;
