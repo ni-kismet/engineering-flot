@@ -287,7 +287,7 @@ the the second one the date in gregorian date format.
 
         function getDefaultDateTimeString(gregorianDate, showMilliseconds, ms) {
             var msString = showMilliseconds ? '.' + padNTimes(ms, '0', 3) : '';
-            time = Globalize.format(gregorianDate, "T", formatLanguage());
+            var time = Globalize.format(gregorianDate, "T", formatLanguage());
             time = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
             return time;
         }
