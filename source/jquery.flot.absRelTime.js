@@ -285,6 +285,13 @@ the the second one the date in gregorian date format.
             return timeString + (dateString !== "" && timeString !== "" ? "<br>" : "") + dateString;
         }
 
+        function getDefaultDateTimeString(gregorianDate, showMilliseconds, ms) {
+            var msString = showMilliseconds ? '.' + padNTimes(ms, '0', 3) : '';
+            time = Globalize.format(gregorianDate, "T", formatLanguage());
+            time = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
+            return time;
+        }
+
         function toAbsoluteTimeStr(date, showMilliseconds, formatString, timeEpoch) {
             var unixToAbsoluteEpochDiff = 62135596800000,
                 minDateValue = -8640000000000000,
@@ -303,11 +310,14 @@ the the second one the date in gregorian date format.
 
             var time;
             if (formatString !== "") {
-                time = getFormattedDateTimeString(gregorianDate, formatString);
+                try {
+                    time = getFormattedDateTimeString(gregorianDate, formatString);
+                }
+                catch(err) {
+                    time = getDefaultDateTimeString(gregorianDate, showMilliseconds, ms);
+                }
             } else {
-                var msString = showMilliseconds ? '.' + padNTimes(ms, '0', 3) : '';
-                time = Globalize.format(gregorianDate, "T", formatLanguage());
-                time = addMilliseconds(time, msString) + '<br>' + Globalize.format(gregorianDate, "d", formatLanguage());
+                time = getDefaultDateTimeString(gregorianDate, showMilliseconds, ms);
             }
 
             return time;
