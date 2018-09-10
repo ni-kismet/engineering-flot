@@ -169,6 +169,7 @@ Licensed under the MIT license.
                         show: false,
                         lineWidth: 2, // in pixels
                         barWidth: 1, // in units of the x axis
+                        absoluteBarWidth: false,
                         fill: true,
                         fillColor: null,
                         align: "left", // "left", "right", or "center"
@@ -2417,7 +2418,7 @@ Licensed under the MIT license.
                 var delta;
 
                 // update bar width if needed
-                if (series.datapoints && series.datapoints.points && series.bars.width === 1) {
+                if (series.datapoints && series.datapoints.point && !series.bars.absoluteBarWidth) {
                     computeBarWidth(series);
                 }
 
@@ -2463,7 +2464,7 @@ Licensed under the MIT license.
                     minDistance = distance;
                 }
             }
-            series.bars.barWidth = 0.8 * minDistance;
+            series.bars.barWidth = series.bars.barWidth * minDistance;
         }
 
         // returns the data item the mouse is over/ the cursor is closest to, or null if none is found
