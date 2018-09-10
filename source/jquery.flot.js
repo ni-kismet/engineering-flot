@@ -2416,8 +2416,8 @@ Licensed under the MIT license.
                 // make sure we got room for the bar on the dancing floor
                 var delta;
 
-                //update bar width if needed
-                if (series.datapoints && series.datapoints.points) {
+                // update bar width if needed
+                if (series.datapoints && series.datapoints.points && series.bars.width === 1) {
                     computeBarWidth(series);
                 }
 
