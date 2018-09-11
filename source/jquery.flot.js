@@ -168,8 +168,8 @@ Licensed under the MIT license.
                     bars: {
                         show: false,
                         lineWidth: 2, // in pixels
-                        barWidth: 1, // in units of the x axis
-                        absoluteBarWidth: false,
+                        barWidth: 1, // relative to the minimum distance between points for the series
+                        absoluteBarWidth: false, // when true, the value of barWidth is considered to be in units of the x-axis
                         fill: true,
                         fillColor: null,
                         align: "left", // "left", "right", or "center"
