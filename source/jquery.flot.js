@@ -2425,30 +2425,16 @@ Licensed under the MIT license.
                     computeBarWidth(series);
                 }
 
+                var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
                 switch (series.bars.align) {
                     case "left":
                         delta = 0;
                         break;
                     case "right":
-                        if (typeof series.bars.barWidth === "number") {
-                            delta = -series.bars.barWidth;
-                        } else {
-                            delta = -series.bars.barWidth[0];
-                        }
+                        delta = -barWidth;
                         break;
                     default:
-                        if (typeof series.bars.barWidth === "number") {
-                            delta = -series.bars.barWidth / 2;
-                        } else {
-                            delta = -series.bars.barWidth[0] / 2;
-                        }
-                }
-
-                var barWidth;
-                if (typeof series.bars.barWidth === "number") {
-                    barWidth = series.bars.barWidth;
-                } else {
-                    barWidth = series.bars.barWidth[0];
+                        delta = -barWidth / 2;
                 }
 
                 range.xmin += delta;

@@ -316,13 +316,7 @@ describe('drawSeries', function() {
             series.datapoints.points = [150, 25];
             series.bars.fillTowards = Infinity;
 
-            var barWidth;
-            if (typeof series.bars.barWidth === "number") {
-                barWidth = series.bars.barWidth;
-            } else {
-                barWidth = series.bars.barWidth[0];
-            }
-
+            var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
                 leftValue = xaxis.p2c(series.datapoints.points[0] - barWidth / 2),
@@ -343,13 +337,7 @@ describe('drawSeries', function() {
             series.datapoints.points = [150, 25];
             series.bars.fillTowards = -Infinity;
 
-            var barWidth;
-            if (typeof series.bars.barWidth === "number") {
-                barWidth = series.bars.barWidth;
-            } else {
-                barWidth = series.bars.barWidth[0];
-            }
-
+            var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
                 leftValue = xaxis.p2c(series.datapoints.points[0] - barWidth / 2),
@@ -371,13 +359,7 @@ describe('drawSeries', function() {
             series.datapoints.points = [150, 25];
             series.bars.fillTowards = 0;
 
-            var barWidth;
-            if (typeof series.bars.barWidth === "number") {
-                barWidth = series.bars.barWidth;
-            } else {
-                barWidth = series.bars.barWidth[0];
-            }
-
+            var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
                 leftValue = xaxis.p2c(series.datapoints.points[0] - barWidth / 2),
@@ -439,13 +421,7 @@ describe('drawSeries', function() {
                     },
                 });
 
-                var barWidth;
-                if (typeof plot.getData()[0].bars.barWidth === "number") {
-                    barWidth = plot.getData()[0].bars.barWidth;
-                } else {
-                    barWidth = plot.getData()[0].bars.barWidth[0];
-                }
-
+                var barWidth = plot.getData()[0].bars.barWidth[0] || plot.getData()[0].bars.barWidth;
                 expect(barWidth).toBeCloseTo(testVector[i][1], 4);
             }
         });
@@ -459,13 +435,7 @@ describe('drawSeries', function() {
 
             var axes = plot.getAxes();
 
-            var barWidth;
-            if (typeof plot.getData()[0].bars.barWidth === "number") {
-                barWidth = plot.getData()[0].bars.barWidth;
-            } else {
-                barWidth = plot.getData()[0].bars.barWidth[0];
-            }
-
+            var barWidth = plot.getData()[0].bars.barWidth[0] || plot.getData()[0].bars.barWidth;
             expect(barWidth).toEqual(4);
         });
     });
