@@ -414,8 +414,8 @@ describe('flot', function() {
 
             limits = plot.adjustSeriesDataRange(series, limits);
 
-            expect(limits.xmin).toBe(10 - ((0.1 * 6) / 2));
-            expect(limits.xmax).toBe(12 - ((0.1 * 6) / 2) + (0.1 * 6));
+            expect(limits.xmin).toBeCloseTo(10 - ((0.1 * 6) / 2));
+            expect(limits.xmax).toBeCloseTo(12 - ((0.1 * 6) / 2) + (0.1 * 6));
         });
     });
 
