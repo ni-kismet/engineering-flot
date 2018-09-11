@@ -171,7 +171,7 @@ Licensed under the MIT license.
                         // barWidth: number or [number, absolute]
                         // when 'absolute' is false, 'number' is relative to the minimum distance between points for the series
                         // when 'absolute' is true, 'number' is considered to be in units of the x-axis
-                        barWidth: 1,
+                        barWidth: 0.8,
                         fill: true,
                         fillColor: null,
                         align: "left", // "left", "right", or "center"
@@ -2420,7 +2420,7 @@ Licensed under the MIT license.
                 var delta;
 
                 // update bar width if needed
-                var useAbsoluteBarWidth = Array.isArray(series.bars.barWidth) && typeof series.bars.barWidth[1] === "boolean" && series.bars.barWidth[1];
+                var useAbsoluteBarWidth = series.bars.barWidth[1];
                 if (series.datapoints && series.datapoints.points && !useAbsoluteBarWidth) {
                     computeBarWidth(series);
                 }
@@ -2430,14 +2430,29 @@ Licensed under the MIT license.
                         delta = 0;
                         break;
                     case "right":
-                        delta = -series.bars.barWidth[0];
+                        if (typeof series.bars.barWidth === "number") {
+                            delta = -series.bars.barWidth;
+                        } else {
+                            delta = -series.bars.barWidth[0];
+                        }
                         break;
                     default:
-                        delta = -series.bars.barWidth[0] / 2;
+                        if (typeof series.bars.barWidth === "number") {
+                            delta = -series.bars.barWidth / 2;
+                        } else {
+                            delta = -series.bars.barWidth[0] / 2;
+                        }
+                }
+
+                var barWidth;
+                if (typeof series.bars.barWidth === "number") {
+                    barWidth = series.bars.barWidth;
+                } else {
+                    barWidth = series.bars.barWidth[0];
                 }
 
                 range.xmin += delta;
-                range.xmax += delta + series.bars.barWidth[0];
+                range.xmax += delta + barWidth;
             }
 
             if ((series.bars.show && series.bars.zero) || (series.lines.show && series.lines.zero)) {
@@ -2467,7 +2482,12 @@ Licensed under the MIT license.
                     minDistance = distance;
                 }
             }
-            series.bars.barWidth[0] = series.bars.barWidth[0] * minDistance;
+
+            if (typeof series.bars.barWidth === "number") {
+                series.bars.barWidth = series.bars.barWidth * minDistance;
+            } else {
+                series.bars.barWidth[0] = series.bars.barWidth[0] * minDistance;
+            }
         }
 
         // returns the data item the mouse is over/ the cursor is closest to, or null if none is found

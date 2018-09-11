@@ -316,10 +316,18 @@ the tooltip from webcharts).
                 barLeft = 0;
                 break;
             case "right":
-                barLeft = -series.bars.barWidth[0];
+                if (typeof series.bars.barWidth === "number") {
+                    barLeft = -series.bars.barWidth;
+                } else {
+                    barLeft = -series.bars.barWidth[0];
+                }
                 break;
             default:
-                barLeft = -series.bars.barWidth[0] / 2;
+                if (typeof series.bars.barWidth === "number") {
+                    barLeft = -series.bars.barWidth / 2;
+                } else {
+                    barLeft = -series.bars.barWidth[0] / 2;
+                }
         }
 
         octx.lineWidth = series.bars.lineWidth;
@@ -328,7 +336,14 @@ the tooltip from webcharts).
         var fillTowards = series.bars.fillTowards || 0,
             bottom = fillTowards > series.yaxis.min ? Math.min(series.yaxis.max, fillTowards) : series.yaxis.min;
 
-        $.plot.drawSeries.drawBar(point[0], point[1], point[2] || bottom, barLeft, barLeft + series.bars.barWidth[0],
+        var barWidth;
+        if (typeof series.bars.barWidth === "number") {
+            barWidth = series.bars.barWidth;
+        } else {
+            barWidth = series.bars.barWidth[0];
+        }
+
+        $.plot.drawSeries.drawBar(point[0], point[1], point[2] || bottom, barLeft, barLeft + barWidth,
             function() {
                 return fillStyle;
             }, series.xaxis, series.yaxis, octx, series.bars.lineWidth);
