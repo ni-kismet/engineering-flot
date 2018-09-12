@@ -347,7 +347,7 @@ describe('flot', function() {
             [true, false].forEach(function(show) {
                 var series = {
                         lines: { show: show, zero: show },
-                        bars: { show: !show, zero: !show },
+                        bars: { show: !show, zero: !show, barWidth: 0.8 },
                         datapoints: { pointsize: 1 }
                     },
                     limits = {xmin: 10, ymin: 11, xmax: 12, ymax: 13};
@@ -363,7 +363,7 @@ describe('flot', function() {
             [true, false].forEach(function(show) {
                 var series = {
                         lines: { show: show, zero: show },
-                        bars: { show: !show, zero: !show },
+                        bars: { show: !show, zero: !show, barWidth: 0.8 },
                         datapoints: { pointsize: 1 }
                     },
                     limits = {xmin: 10, ymin: -11, xmax: 12, ymax: -9};
@@ -379,7 +379,7 @@ describe('flot', function() {
             [true, false].forEach(function(show) {
                 var series = {
                         lines: { show: show, zero: show },
-                        bars: { show: !show, zero: !show },
+                        bars: { show: !show, zero: !show, barWidth: 0.8 },
                         datapoints: { pointsize: 3 }
                     },
                     limits = {xmin: 10, ymin: -11, xmax: 12, ymax: -9};
@@ -414,8 +414,8 @@ describe('flot', function() {
 
             limits = plot.adjustSeriesDataRange(series, limits);
 
-            expect(limits.xmin).toBe(10 - 0.08 / 2);
-            expect(limits.xmax).toBe(12 + 0.08 / 2);
+            expect(limits.xmin).toBeCloseTo(10 - ((0.1 * 6) / 2));
+            expect(limits.xmax).toBeCloseTo(12 - ((0.1 * 6) / 2) + (0.1 * 6));
         });
     });
 

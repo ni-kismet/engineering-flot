@@ -168,7 +168,10 @@ Licensed under the MIT license.
                     bars: {
                         show: false,
                         lineWidth: 2, // in pixels
-                        barWidth: 1, // in units of the x axis
+                        // barWidth: number or [number, absolute]
+                        // when 'absolute' is false, 'number' is relative to the minimum distance between points for the series
+                        // when 'absolute' is true, 'number' is considered to be in units of the x-axis
+                        barWidth: 0.8,
                         fill: true,
                         fillColor: null,
                         align: "left", // "left", "right", or "center"
@@ -2416,24 +2419,26 @@ Licensed under the MIT license.
                 // make sure we got room for the bar on the dancing floor
                 var delta;
 
-                //update bar width if needed
-                if (series.datapoints && series.datapoints.points) {
+                // update bar width if needed
+                var useAbsoluteBarWidth = series.bars.barWidth[1];
+                if (series.datapoints && series.datapoints.points && !useAbsoluteBarWidth) {
                     computeBarWidth(series);
                 }
 
+                var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
                 switch (series.bars.align) {
                     case "left":
                         delta = 0;
                         break;
                     case "right":
-                        delta = -series.bars.barWidth;
+                        delta = -barWidth;
                         break;
                     default:
-                        delta = -series.bars.barWidth / 2;
+                        delta = -barWidth / 2;
                 }
 
                 range.xmin += delta;
-                range.xmax += delta + series.bars.barWidth;
+                range.xmax += delta + barWidth;
             }
 
             if ((series.bars.show && series.bars.zero) || (series.lines.show && series.lines.zero)) {
@@ -2463,7 +2468,12 @@ Licensed under the MIT license.
                     minDistance = distance;
                 }
             }
-            series.bars.barWidth = 0.8 * minDistance;
+
+            if (typeof series.bars.barWidth === "number") {
+                series.bars.barWidth = series.bars.barWidth * minDistance;
+            } else {
+                series.bars.barWidth[0] = series.bars.barWidth[0] * minDistance;
+            }
         }
 
         // returns the data item the mouse is over/ the cursor is closest to, or null if none is found

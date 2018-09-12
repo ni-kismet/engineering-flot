@@ -791,7 +791,7 @@ series: {
     }
 
     bars: {
-        barWidth: number
+        barWidth: number or array
         align: "left", "right" or "center"
         horizontal: boolean
     }
@@ -842,16 +842,17 @@ setting fill to a number between 0 (fully transparent) and 1 (fully
 opaque).
 
 For bars, fillColor can be a gradient, see the gradient documentation
-below. "barWidth" is the width of the bars in units of the x axis (or
-the y axis if "horizontal" is true), contrary to most other measures
-that are specified in pixels. For instance, for time series the unit
-is milliseconds so 24 * 60 * 60 * 1000 produces bars with the width of
-a day. "align" specifies whether a bar should be left-aligned
-(default), right-aligned or centered on top of the value it represents.
-When "horizontal" is on, the bars are drawn horizontally, i.e. from the
-y axis instead of the x axis; note that the bar end points are still
-defined in the same way so you'll probably want to swap the
-coordinates if you've been plotting vertical bars first.
+below. "barWidth" is the width of the bars relative to the minimum distance
+between points. If the absolute flag is provided, the width
+of the bar will be in units of the x axis (or the y axis if "horizontal"
+is true),contrary to most other measures that are specified in pixels.
+For instance, for time series the unit is milliseconds so 24 * 60 * 60 * 1000
+produces bars with the width of a day. "align" specifies whether a bar
+should be left-aligned (default), right-aligned or centered on top of
+the value it represents. When "horizontal" is on, the bars are drawn
+horizontally, i.e. from the y axis instead of the x axis; note that the
+bar end points are still defined in the same way so you'll probably want
+to swap the coordinates if you've been plotting vertical bars first.
 
 Area and bar charts normally start from zero, regardless of the data's range.
 This is because they convey information through size, and starting from a

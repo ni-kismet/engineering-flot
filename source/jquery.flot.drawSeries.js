@@ -527,23 +527,23 @@ This plugin is used by flot for drawing lines, plots, bars or area.
             ctx.strokeStyle = series.color;
 
             var barLeft;
-
+            var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
             switch (series.bars.align) {
                 case "left":
                     barLeft = 0;
                     break;
                 case "right":
-                    barLeft = -series.bars.barWidth;
+                    barLeft = -barWidth;
                     break;
                 default:
-                    barLeft = -series.bars.barWidth / 2;
+                    barLeft = -barWidth / 2;
             }
 
             var fillStyleCallback = series.bars.fill ? function(bottom, top) {
                 return getFillStyle(series.bars, series.color, bottom, top, getColorOrGradient);
             } : null;
 
-            plotBars(datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
+            plotBars(datapoints, barLeft, barLeft + barWidth, fillStyleCallback, series.xaxis, series.yaxis);
             ctx.restore();
         }
 

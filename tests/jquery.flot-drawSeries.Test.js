@@ -316,10 +316,11 @@ describe('drawSeries', function() {
             series.datapoints.points = [150, 25];
             series.bars.fillTowards = Infinity;
 
+            var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
-                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
-                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                leftValue = xaxis.p2c(series.datapoints.points[0] - barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + barWidth / 2),
                 topValue = yaxis.p2c(maxy),
                 yValue = xaxis.p2c(series.datapoints.points[1]);
 
@@ -336,10 +337,11 @@ describe('drawSeries', function() {
             series.datapoints.points = [150, 25];
             series.bars.fillTowards = -Infinity;
 
+            var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
-                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
-                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                leftValue = xaxis.p2c(series.datapoints.points[0] - barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + barWidth / 2),
                 bottomValue = yaxis.p2c(miny),
                 yValue = xaxis.p2c(series.datapoints.points[1]);
 
@@ -357,10 +359,11 @@ describe('drawSeries', function() {
             series.datapoints.points = [150, 25];
             series.bars.fillTowards = 0;
 
+            var barWidth = series.bars.barWidth[0] || series.bars.barWidth;
             var xaxis = series.xaxis,
                 yaxis = series.yaxis,
-                leftValue = xaxis.p2c(series.datapoints.points[0] - series.bars.barWidth / 2),
-                rightValue = xaxis.p2c(series.datapoints.points[0] + series.bars.barWidth / 2),
+                leftValue = xaxis.p2c(series.datapoints.points[0] - barWidth / 2),
+                rightValue = xaxis.p2c(series.datapoints.points[0] + barWidth / 2),
                 zeroValue = yaxis.p2c(0),
                 yValue = xaxis.p2c(series.datapoints.points[1]);
 
@@ -418,7 +421,8 @@ describe('drawSeries', function() {
                     },
                 });
 
-                expect(plot.getData()[0].bars.barWidth).toBeCloseTo(testVector[i][1], 4);
+                var barWidth = plot.getData()[0].bars.barWidth[0] || plot.getData()[0].bars.barWidth;
+                expect(barWidth).toBeCloseTo(testVector[i][1], 4);
             }
         });
 
@@ -431,7 +435,8 @@ describe('drawSeries', function() {
 
             var axes = plot.getAxes();
 
-            expect(plot.getData()[0].bars.barWidth).toEqual(4);
+            var barWidth = plot.getData()[0].bars.barWidth[0] || plot.getData()[0].bars.barWidth;
+            expect(barWidth).toEqual(4);
         });
     });
 });
