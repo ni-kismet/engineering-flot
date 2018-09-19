@@ -396,6 +396,8 @@ can set the default in the options.
                     }
                 };
 
+            var bypassAutoScale = true;
+
             for (var key in axes) {
                 if (!axes.hasOwnProperty(key)) {
                     continue;
@@ -424,9 +426,13 @@ can set the default in the options.
                 var offsetBelow = $.plot.saturated.saturate(navigationOffset.below - (axis.min - min));
                 var offsetAbove = $.plot.saturated.saturate(navigationOffset.above - (axis.max - max));
                 opts.offset = { below: offsetBelow, above: offsetAbove };
+
+                if (opts.min == null || opts.max == null) {
+                    bypassAutoScale = false;
+                }
             };
 
-            plot.setupGrid();
+            plot.setupGrid(bypassAutoScale);
             plot.draw();
 
             if (!args.preventEvent) {
@@ -435,6 +441,7 @@ can set the default in the options.
         };
 
         plot.pan = function(args) {
+            var bypassAutoScale = true;
             var delta = {
                 x: +args.left,
                 y: +args.top
@@ -468,10 +475,14 @@ can set the default in the options.
                         below: saturated.saturate(navigationOffsetBelow + (opts.offset.below || 0)),
                         above: saturated.saturate(navigationOffsetAbove + (opts.offset.above || 0))
                     };
+
+                    if (opts.min == null || opts.max == null) {
+                        bypassAutoScale = false;
+                    }
                 }
             });
 
-            plot.setupGrid();
+            plot.setupGrid(bypassAutoScale);
             plot.draw();
             if (!args.preventEvent) {
                 plot.getPlaceholder().trigger("plotpan", [plot, args]);
@@ -492,6 +503,17 @@ can set the default in the options.
             });
             plot.setupGrid();
             plot.draw();
+
+            // Reset min and max options to avoid snapping back to previous min and max
+            // when the plot is panned.
+            $.each(args.axes || plot.getAxes(), function(_, axis) {
+                if (args.axes) {
+                    axis.options.min = axis.min;
+                    axis.options.max = axis.max;
+                } else {
+                    axis.options.offset = { below: 0, above: 0 };
+                }
+            });
         };
 
         var shouldSnap = function(delta) {
@@ -576,6 +598,7 @@ can set the default in the options.
             }
 
             var axis, axisMin, axisMax, p, d;
+            var bypassAutoScale = true;
             Object.keys(axes).forEach(function(axisName) {
                 axis = axes[axisName];
                 axisMin = axis.min;
@@ -604,11 +627,15 @@ can set the default in the options.
 
                     axis.options.offset.below = saturated.saturate(navigationOffsetBelow + (axis.options.offset.below || 0));
                     axis.options.offset.above = saturated.saturate(navigationOffsetAbove + (axis.options.offset.above || 0));
+
+                    if (opts.min == null || opts.max == null) {
+                        bypassAutoScale = false;
+                    }
                 }
             });
 
             prevDelta = delta;
-            plot.setupGrid();
+            plot.setupGrid(bypassAutoScale);
             plot.draw();
 
             if (!preventEvent) {
