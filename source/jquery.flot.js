@@ -340,6 +340,7 @@ Licensed under the MIT license.
             overlay.clearCache();
         };
 
+        plot.autoScaleAxis = autoScaleAxis;
         plot.computeRangeForDataSeries = computeRangeForDataSeries;
         plot.adjustSeriesDataRange = adjustSeriesDataRange;
         plot.findNearbyItem = findNearbyItem;
