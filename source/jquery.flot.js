@@ -1314,7 +1314,7 @@ Licensed under the MIT license.
             }
         }
 
-        function setupGrid() {
+        function setupGrid(bypassAutoScale) {
             var i, a, axes = allAxes(),
                 showGrid = options.grid.show;
 
@@ -1341,7 +1341,7 @@ Licensed under the MIT license.
                 axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
                 setupTickFormatter(axis);
                 executeHooks(hooks.setRange, [axis]);
-                setRange(axis);
+                setRange(axis, bypassAutoScale);
             });
 
             if (showGrid) {
@@ -1356,7 +1356,7 @@ Licensed under the MIT license.
                     // make the ticks
                     setupTickGeneration(axis);
                     setMajorTicks(axis);
-                    snapRangeToTicks(axis, axis.ticks);
+                    snapRangeToTicks(axis, axis.ticks, bypassAutoScale);
 
                     //for computing the endpoints precision, transformationHelpers are needed
                     setTransformationHelpers(axis);
@@ -1440,7 +1440,7 @@ Licensed under the MIT license.
             };
         }
 
-        function autoScaleAxis(axis) {
+        function autoScaleAxis(axis, bypassAutoScale) {
             var opts = axis.options,
                 min = opts.min,
                 max = opts.max,
@@ -1454,7 +1454,7 @@ Licensed under the MIT license.
                     max = +(opts.max != null ? opts.max : datamax);
                     break;
                 case "loose":
-                    if (datamin != null && datamax != null) {
+                    if (datamin != null && datamax != null && !bypassAutoScale) {
                         min = datamin;
                         max = datamax;
                         delta = $.plot.saturated.saturate(max - min);
@@ -1499,8 +1499,8 @@ Licensed under the MIT license.
             axis.autoScaledMax = max;
         }
 
-        function setRange(axis) {
-            autoScaleAxis(axis);
+        function setRange(axis, bypassAutoScale) {
+            autoScaleAxis(axis, bypassAutoScale);
 
             var min = axis.autoScaledMin,
                 max = axis.autoScaledMax,
@@ -1736,8 +1736,8 @@ Licensed under the MIT license.
             };
         }
 
-        function snapRangeToTicks(axis, ticks) {
-            if (axis.options.autoScale === "loose" && ticks.length > 0) {
+        function snapRangeToTicks(axis, ticks, bypassAutoScale) {
+            if (axis.options.autoScale === "loose" && ticks.length > 0 && !bypassAutoScale) {
                 // snap to ticks
                 axis.min = Math.min(axis.min, ticks[0].v);
                 axis.max = Math.max(axis.max, ticks[ticks.length - 1].v);
