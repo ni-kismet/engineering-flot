@@ -54,8 +54,35 @@ charts or filled areas).
             return res;
         }
 
+        function addBottomPoints (s, datapoints) {
+            var formattedPoints = [];
+            for (var i = 0; i < datapoints.points.length; i += 2) {
+                formattedPoints.push(datapoints.points[i]);
+                formattedPoints.push(datapoints.points[i + 1]);
+                formattedPoints.push(0);
+            }
+
+            datapoints.format.push({
+                x: false,
+                y: true,
+                number: true,
+                required: false,
+                computeRange: s.yaxis.options.autoScale !== 'none',
+                defaultValue: 0
+            });
+            datapoints.points = formattedPoints;
+            datapoints.pointsize = 3;
+        }
+
         function stackData(plot, s, datapoints) {
             if (s.stack == null || s.stack === false) return;
+
+            var needsBottom = s.bars.show || (s.lines.show && s.lines.fill);
+            var hasBottom = datapoints.pointsize > 2 && (horizontal ? datapoints.format[2].x : datapoints.format[2].y);
+            // Series data is missing bottom points - need to format
+            if (needsBottom && !hasBottom) {
+                addBottomPoints(s, datapoints);
+            }
 
             var other = findMatchingSeries(s, plot.getData());
             if (!other) return;
@@ -68,7 +95,6 @@ charts or filled areas).
                 px, py, intery, qx, qy, bottom,
                 withlines = s.lines.show,
                 horizontal = s.bars.horizontal,
-                withbottom = ps > 2 && (horizontal ? datapoints.format[2].x : datapoints.format[2].y),
                 withsteps = withlines && s.lines.steps,
                 fromgap = true,
                 keyOffset = horizontal ? 1 : 0,
@@ -161,7 +187,7 @@ charts or filled areas).
 
                     fromgap = false;
 
-                    if (l !== newpoints.length && withbottom) {
+                    if (l !== newpoints.length && needsBottom) {
                         newpoints[l + 2] += bottom;
                     }
                 }
