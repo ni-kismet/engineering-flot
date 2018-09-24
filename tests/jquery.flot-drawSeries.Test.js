@@ -312,6 +312,24 @@ describe('drawSeries', function() {
             expect(ctx.lineTo).toHaveBeenCalled();
         });
 
+        it('should draw bars using bottom points if provided', function () {
+            getColorOrGradient = jasmine.createSpy().and.returnValue('rgb(10,200,10)');
+            series.bars.fill = true;
+
+            series.datapoints.points = [0, 10, 0, 1, 10, 1, 2, 10, 2];
+            series.datapoints.pointsize = 3;
+            spyOn(ctx, 'fillRect').and.callThrough();
+
+            drawSeriesBars(series, ctx, plotOffset, plotWidth, plotHeight, null, getColorOrGradient);
+
+            var barHeights = ctx.fillRect.calls.allArgs().map(function (args) {
+                return args[3];
+            });
+
+            // bottom - top
+            expect(barHeights).toEqual([-10, -9, -8]);
+        });
+
         it('should draw bars for fillTowards infinity', function () {
             series.datapoints.points = [150, 25];
             series.bars.fillTowards = Infinity;

@@ -499,13 +499,15 @@ This plugin is used by flot for drawing lines, plots, bars or area.
                 var points = datapoints.points,
                     ps = datapoints.pointsize,
                     fillTowards = series.bars.fillTowards || 0,
-                    bottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min;
+                    calculatedBottom = fillTowards > axisy.min ? Math.min(axisy.max, fillTowards) : axisy.min;
 
                 for (var i = 0; i < points.length; i += ps) {
                     if (points[i] == null) {
                         continue;
                     }
 
+                    // Use third point as bottom if pointsize is 3
+                    var bottom = ps === 3 ? points[i + 2] : calculatedBottom;
                     drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.lineWidth);
                 }
             }
