@@ -395,7 +395,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
             ctx.restore();
         }
 
-        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, lineWidth) {
+        function drawBar(x, y, b, barLeft, barRight, fillStyleCallback, axisx, axisy, c, horizontal, lineWidth) {
             var left = x + barLeft,
                 right = x + barRight,
                 bottom = b, top = y,
@@ -404,13 +404,42 @@ This plugin is used by flot for drawing lines, plots, bars or area.
 
             drawLeft = drawRight = drawTop = true;
 
-            // account for negative bars
-            if (top < bottom) {
-                tmp = top;
-                top = bottom;
-                bottom = tmp;
-                drawBottom = true;
-                drawTop = false;
+            // in horizontal mode, we start the bar from the left
+            // instead of from the bottom so it appears to be
+            // horizontal rather than vertical
+            if (horizontal) {
+                drawBottom = drawRight = drawTop = true;
+                drawLeft = false;
+                left = b;
+                right = x;
+                top = y + barLeft;
+                bottom = y + barRight;
+
+                // account for negative bars
+                if (right < left) {
+                    tmp = right;
+                    right = left;
+                    left = tmp;
+                    drawLeft = true;
+                    drawRight = false;
+                }
+            }
+            else {
+                drawLeft = drawRight = drawTop = true;
+                drawBottom = false;
+                left = x + barLeft;
+                right = x + barRight;
+                bottom = b;
+                top = y;
+
+                // account for negative bars
+                if (top < bottom) {
+                    tmp = top;
+                    top = bottom;
+                    bottom = tmp;
+                    drawBottom = true;
+                    drawTop = false;
+                }
             }
 
             // clip
@@ -508,7 +537,7 @@ This plugin is used by flot for drawing lines, plots, bars or area.
 
                     // Use third point as bottom if pointsize is 3
                     var bottom = ps === 3 ? points[i + 2] : calculatedBottom;
-                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.lineWidth);
+                    drawBar(points[i], points[i + 1], bottom, barLeft, barRight, fillStyleCallback, axisx, axisy, ctx, series.bars.horizontal, series.bars.lineWidth);
                 }
             }
 

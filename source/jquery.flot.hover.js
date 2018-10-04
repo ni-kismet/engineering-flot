@@ -332,7 +332,7 @@ the tooltip from webcharts).
         $.plot.drawSeries.drawBar(point[0], point[1], point[2] || bottom, barLeft, barLeft + barWidth,
             function() {
                 return fillStyle;
-            }, series.xaxis, series.yaxis, octx, series.bars.lineWidth);
+            }, series.xaxis, series.yaxis, octx, series.bars.horizontal, series.bars.lineWidth);
     }
 
     $.plot.plugins.push({
