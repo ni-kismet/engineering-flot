@@ -171,6 +171,7 @@ Licensed under the MIT license.
                         // barWidth: number or [number, absolute]
                         // when 'absolute' is false, 'number' is relative to the minimum distance between points for the series
                         // when 'absolute' is true, 'number' is considered to be in units of the x-axis
+                        horizontal: false,
                         barWidth: 0.8,
                         fill: true,
                         fillColor: null,
@@ -2438,8 +2439,14 @@ Licensed under the MIT license.
                         delta = -barWidth / 2;
                 }
 
-                range.xmin += delta;
-                range.xmax += delta + barWidth;
+                if (series.bars.horizontal) {
+                    range.ymin += delta;
+                    range.ymax += delta + barWidth;
+                }
+                else {
+                    range.xmin += delta;
+                    range.xmax += delta + barWidth;
+                }
             }
 
             if ((series.bars.show && series.bars.zero) || (series.lines.show && series.lines.zero)) {
