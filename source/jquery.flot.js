@@ -2495,8 +2495,9 @@ Licensed under the MIT license.
             for (i = series.length - 1; i >= 0; --i) {
                 if (!seriesFilter(i)) continue;
 
-                var s = series[i],
-                    x, y,
+                var s = series[i];
+                if (!s.datapoints) return;
+                var x, y,
                     axisx = s.xaxis,
                     axisy = s.yaxis,
                     points = s.datapoints.points,
