@@ -10,7 +10,7 @@ impression of what engineering-flot can do, and the source code of the examples 
 the fastest way to learn how to use engineering-flot.
 
 
-## Installation ##
+## Installation ## 
 
 Just include the JavaScript file after you've included jQuery.
 
