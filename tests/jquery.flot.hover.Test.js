@@ -189,7 +189,7 @@ describe("flot hover plugin", function () {
             expect(canvasData(canvas, x2 - r, y2 - r, 2 * r, 2 * r)).toContainPixelColor(rgba(10, 20, 30, 1));
         });
 
-        fit('should update the current hover point to th eplaceholder when the plot created again', function () {
+        it('should update the current hover point to th eplaceholder when the plot created again', function () {
             plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
 
             var eventHolder = plot.getEventHolder(),
@@ -205,7 +205,7 @@ describe("flot hover plugin", function () {
             jasmine.clock().tick(1000);
 
             plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
-            
+
             expect(plot.getPlaceholder()[0].lastMouseMoveEvent.originalEvent.x).toEqual(evt.x);
             expect(plot.getPlaceholder()[0].lastMouseMoveEvent.originalEvent.y).toEqual(evt.y);
         });
