@@ -48,7 +48,7 @@ the tooltip from webcharts).
             hover: 'hover'
         }
 
-        var lastMouseMoveEvent = undefined;
+        var lastMouseMoveEvent = plot.getPlaceholder()[0].lastMouseMoveEvent;
 
         plot.highlight = highlight;
         plot.unhighlight = unhighlight;
@@ -129,11 +129,13 @@ the tooltip from webcharts).
 
         function onMouseMove(e) {
             lastMouseMoveEvent = e;
+            plot.getPlaceholder()[0].lastMouseMoveEvent = e;
             doTriggerClickHoverEvent(e, eventType.hover);
         }
 
         function onMouseLeave(e) {
             lastMouseMoveEvent = undefined;
+            plot.getPlaceholder()[0].lastMouseMoveEvent = undefined;
             triggerClickHoverEvent("plothover", e,
                 function(i) {
                     return false;

@@ -188,5 +188,25 @@ describe("flot hover plugin", function () {
             expect(canvasData(canvas, x1 - r, y1 - r, 2 * r, 2 * r)).not.toContainPixelColor(rgba(10, 20, 30, 1));
             expect(canvasData(canvas, x2 - r, y2 - r, 2 * r, 2 * r)).toContainPixelColor(rgba(10, 20, 30, 1));
         });
+
+        it('should update the current hover point to th eplaceholder when the plot created again', function () {
+            plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
+
+            var eventHolder = plot.getEventHolder(),
+                offset = plot.getPlotOffset(),
+                axisx = plot.getXAxes()[0],
+                axisy = plot.getYAxes()[0],
+                x = axisx.p2c(2) + offset.left,
+                y = axisy.p2c(3) + offset.top,
+                noButton = 0;
+
+            let evt = simulate.mouseMove(eventHolder, x, y, noButton);
+            jasmine.clock().tick(1000);
+
+            plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
+
+            expect(plot.getPlaceholder()[0].lastMouseMoveEvent.originalEvent.x).toEqual(evt.x);
+            expect(plot.getPlaceholder()[0].lastMouseMoveEvent.originalEvent.y).toEqual(evt.y);
+        });
     });
 });
