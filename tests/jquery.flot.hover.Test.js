@@ -193,7 +193,6 @@ describe("flot hover plugin", function () {
             plot = $.plot(placeholder, [ [ [0, 0], [2, 3], [10, 10] ] ], options);
 
             var eventHolder = plot.getEventHolder(),
-                canvas = eventHolder,
                 offset = plot.getPlotOffset(),
                 axisx = plot.getXAxes()[0],
                 axisy = plot.getYAxes()[0],
