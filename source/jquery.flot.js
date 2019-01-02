@@ -642,7 +642,8 @@ Licensed under the MIT license.
         function fillInSeriesOptions() {
             var neededColors = series.length,
                 maxIndex = -1,
-                i;
+                i,
+                definedColors = 0;
 
             // Subtract the number of series that already have fixed colors or
             // color indexes from the number that we still need to generate.
@@ -653,6 +654,8 @@ Licensed under the MIT license.
                     neededColors--;
                     if (typeof sc === "number" && sc > maxIndex) {
                         maxIndex = sc;
+                    } else if (typeof sc === "string") {
+                        definedColors++;
                     }
                 }
             }
@@ -670,8 +673,7 @@ Licensed under the MIT license.
             var c, colors = [],
                 colorPool = options.colors,
                 colorPoolSize = colorPool.length,
-                variation = 0,
-                definedColors = series.length - neededColors;
+                variation = 0;
 
             for (i = 0; i < neededColors; i++) {
                 c = $.color.parse(colorPool[(definedColors + i) % colorPoolSize] || "#666");
