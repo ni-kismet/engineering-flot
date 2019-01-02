@@ -1,7 +1,7 @@
 /* eslint-disable */
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
-describe("flot touch navigate plugin", function () {
+fdescribe("flot touch navigate plugin", function () {
     var placeholder, plot, options;
     var minFrameDuration = 1 / 60 * 1000;
 
@@ -489,10 +489,10 @@ describe("flot touch navigate plugin", function () {
 
         //simulate drag from (1, 1) to (100, 100) sequentially
         simulate.touchstart(eventHolder, pointCoords[1].x, pointCoords[1].y);
-        
+
         for (var i = 2; i <= limit; i++) {
             simulate.touchmove(eventHolder, pointCoords[i].x, pointCoords[i].y);
-            
+
         }
         simulate.touchend(eventHolder, pointCoords[limit].x, pointCoords[limit].y);
 
