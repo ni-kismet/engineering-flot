@@ -1,7 +1,7 @@
 /* eslint-disable */
 /* global $, describe, it, xit, xdescribe, after, afterEach, expect*/
 
-fdescribe("flot touch navigate plugin", function () {
+describe("flot touch navigate plugin", function () {
     var placeholder, plot, options;
     var minFrameDuration = 1 / 60 * 1000;
 
