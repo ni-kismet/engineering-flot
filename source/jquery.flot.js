@@ -671,7 +671,7 @@ Licensed under the MIT license.
                 colorPool = options.colors,
                 colorPoolSize = colorPool.length,
                 variation = 0,
-                definedColors = series.length - neededColors;
+                definedColors = Math.max(0, series.length - neededColors);
 
             for (i = 0; i < neededColors; i++) {
                 c = $.color.parse(colorPool[(definedColors + i) % colorPoolSize] || "#666");
