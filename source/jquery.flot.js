@@ -360,7 +360,7 @@ Licensed under the MIT license.
         setupCanvases();
         parseOptions(options_);
         setData(data_);
-        setupGrid();
+        setupGrid(true);
         draw();
         bindEvents();
 
@@ -1315,7 +1315,7 @@ Licensed under the MIT license.
             }
         }
 
-        function setupGrid() {
+        function setupGrid(autoScale) {
             var i, a, axes = allAxes(),
                 showGrid = options.grid.show;
 
@@ -1341,8 +1341,8 @@ Licensed under the MIT license.
                 axis.show = axisOpts.show == null ? axis.used : axisOpts.show;
                 axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
                 setupTickFormatter(axis);
-                executeHooks(hooks.setRange, [axis]);
-                setRange(axis);
+                executeHooks(hooks.setRange, [axis, autoScale]);
+                setRange(axis, autoScale);
             });
 
             if (showGrid) {
@@ -1500,12 +1500,16 @@ Licensed under the MIT license.
             axis.autoScaledMax = max;
         }
 
-        function setRange(axis) {
-            autoScaleAxis(axis);
-
-            var min = axis.autoScaledMin,
-                max = axis.autoScaledMax,
+        function setRange(axis, autoScale) {
+            var min = typeof axis.options.min === 'number' ? axis.options.min : axis.min,
+                max = typeof axis.options.max === 'number' ? axis.options.max : axis.max,
                 plotOffset = axis.options.offset;
+
+            if (autoScale) {
+                autoScaleAxis(axis);
+                min = axis.autoScaledMin;
+                max = axis.autoScaledMax;
+            }
 
             min = (min != null ? min : -1) + (plotOffset.below || 0);
             max = (max != null ? max : 1) + (plotOffset.above || 0);

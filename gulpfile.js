@@ -36,6 +36,7 @@ gulp.task('build_engineering_flot', function() {
             presets: ['es2015']
         }))
         .pipe(concat('jquery.flot.js'))
+        .pipe(uglify())
         .pipe(maps.write('./'))
         .pipe(gulp.dest('dist/es5'));
 });
