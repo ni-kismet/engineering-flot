@@ -80,7 +80,7 @@ Example API usage:
     // zoom 200% in on the pixel (10, 20)
     plot.zoom({ amount: 2, center: { left: 10, top: 20 } });
 
-    // pan 100 pixels to the left and 20 down
+    // pan 100 pixels to the left (changing x-range in a positive way) and 20 down
     plot.pan({ left: -100, top: 20 })
 ```
 
@@ -453,8 +453,8 @@ can set the default in the options.
                 }
 
                 if (d !== 0) {
-                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) - d) - axis.c2p(axis.p2c(axis.min))),
-                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) - d) - axis.c2p(axis.p2c(axis.max)));
+                    var navigationOffsetBelow = saturated.saturate(axis.c2p(axis.p2c(axis.min) + d) - axis.c2p(axis.p2c(axis.min))),
+                        navigationOffsetAbove = saturated.saturate(axis.c2p(axis.p2c(axis.max) + d) - axis.c2p(axis.p2c(axis.max)));
 
                     if (!isFinite(navigationOffsetBelow)) {
                         navigationOffsetBelow = 0;
