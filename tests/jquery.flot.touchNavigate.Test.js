@@ -492,8 +492,8 @@ describe("flot touch navigate plugin", function () {
 
         for (var i = 2; i <= limit; i++) {
             simulate.touchmove(eventHolder, pointCoords[i].x, pointCoords[i].y);
-
         }
+
         simulate.touchend(eventHolder, pointCoords[limit].x, pointCoords[limit].y);
 
         // compare axes after sequential drag with axes after direct drag
