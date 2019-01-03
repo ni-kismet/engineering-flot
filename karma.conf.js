@@ -25,6 +25,7 @@ module.exports = function(config) {
         'source/jquery.flot.saturated.js',
         'source/jquery.flot.browser.js',
         'source/jquery.flot.drawSeries.js',
+        'source/jquery.flot.errorbars.js',
         'source/jquery.flot.uiConstants.js',
         'source/jquery.flot.logaxis.js',
         'source/jquery.flot.symbol.js',
