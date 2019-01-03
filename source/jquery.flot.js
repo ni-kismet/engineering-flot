@@ -1501,8 +1501,8 @@ Licensed under the MIT license.
         }
 
         function setRange(axis, autoScale) {
-            var min = axis.options.min !== undefined ? axis.options.min : axis.min,
-                max = axis.options.max !== undefined ? axis.options.max : axis.max,
+            var min = typeof axis.options.min === 'number' ? axis.options.min : axis.min,
+                max = typeof axis.options.max === 'number' ? axis.options.max : axis.max,
                 plotOffset = axis.options.offset;
 
             if (autoScale) {
