@@ -426,7 +426,7 @@ can set the default in the options.
                 opts.offset = { below: offsetBelow, above: offsetAbove };
             };
 
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
 
             if (!args.preventEvent) {
@@ -471,7 +471,7 @@ can set the default in the options.
                 }
             });
 
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
             if (!args.preventEvent) {
                 plot.getPlaceholder().trigger("plotpan", [plot, args]);
@@ -490,7 +490,7 @@ can set the default in the options.
                     axis.options.offset = { below: 0, above: 0 };
                 }
             });
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
         };
 
@@ -608,7 +608,7 @@ can set the default in the options.
             });
 
             prevDelta = delta;
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
 
             if (!preventEvent) {

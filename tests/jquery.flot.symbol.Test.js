@@ -39,7 +39,7 @@ describe("flot symbol plugin", function() {
             spyOn(plot.drawSymbol, shape).and.callThrough();
 
             plot.setData([[[0, 1], [1, 2]]]);
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
 
             expect(plot.drawSymbol[shape]).toHaveBeenCalledTimes(2);

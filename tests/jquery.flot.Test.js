@@ -112,7 +112,7 @@ describe('flot', function() {
             // default window size is 100
             plot = $.plot(placeholder, [[]], options);
             plot.setData([[[0, 0], [50, 50], [100, 100]]]);
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
             var axes = plot.getAxes();
 
@@ -128,7 +128,7 @@ describe('flot', function() {
             // default window size is 100
             plot = $.plot(placeholder, [[]], options);
             plot.setData([[[0, 0], [100, 100], [200, 200]]]);
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
             var axes = plot.getAxes();
 
@@ -184,7 +184,7 @@ describe('flot', function() {
 
             var axes = plot.getAxes();
             plot.setData([[[0, 1], [1, 2]]]);
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
 
             expect(axes.xaxis.min).toBe(0);
@@ -200,7 +200,7 @@ describe('flot', function() {
 
             var axes = plot.getAxes();
             plot.setData([[[0, 1], [1, 2]]]);
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
 
             expect(axes.xaxis.min).toBe(0);
@@ -216,7 +216,7 @@ describe('flot', function() {
 
             var axes = plot.getAxes();
             plot.setData([[[-0.2, -15], [10, 100]]]);
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
 
             expect(axes.xaxis.min).toBe(-1);
@@ -232,7 +232,7 @@ describe('flot', function() {
 
             var axes = plot.getAxes();
             plot.setData([[[0, 0.1], [10, 100]]]);
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
 
             expect(axes.xaxis.min).toBe(0);
