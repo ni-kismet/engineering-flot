@@ -1505,7 +1505,7 @@ Licensed under the MIT license.
                 max = typeof axis.options.max === 'number' ? axis.options.max : axis.max,
                 plotOffset = axis.options.offset;
 
-            if (autoScale || axis.options.autoScale === 'loose') {
+            if (autoScale) {
                 autoScaleAxis(axis);
                 min = axis.autoScaledMin;
                 max = axis.autoScaledMax;
