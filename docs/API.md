@@ -1167,7 +1167,7 @@ can call:
     for large datasets, almost all the time is consumed in draw()
     plotting the data so in this case don't bother.
 
- - setupGrid()
+ - setupGrid(autoScale)
 
     Recalculate and set axis scaling, ticks, legend etc.
 
@@ -1176,6 +1176,9 @@ can call:
     the labels and the legend, but not the actual tick lines because
     they're drawn on the canvas. You need to call draw() to get the
     canvas redrawn.
+
+    If autoScale is truthy then the axis will be autoscaled to the data
+    according to the axis.autoScale options
 
  - draw()
 
