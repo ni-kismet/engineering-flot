@@ -47,7 +47,7 @@ describe('A Flot chart with relative time axes', function () {
             yaxis: {}
         });
         plot.setData(data);
-        plot.setupGrid();
+        plot.setupGrid(true);
         plot.draw();
         return plot;
     };
