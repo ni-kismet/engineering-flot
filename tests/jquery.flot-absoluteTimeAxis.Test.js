@@ -30,6 +30,7 @@ describe('A Flot chart with absolute time axes', function () {
             xaxis: {
                 format: 'time',
                 timeformat: '%A' + (formatString !== undefined ? '<' + formatString + '>' : ""),
+                timeBase: 'seconds',
                 timeEpoch: timeEpoch,
                 showTickLabels: 'all'
             },
@@ -43,6 +44,7 @@ describe('A Flot chart with absolute time axes', function () {
             yaxis: {
                 format: 'time',
                 timeformat: '%A',
+                timeBase: 'seconds',
                 autoScale: 'exact',
                 showTickLabels: 'all'
             }
@@ -139,7 +141,7 @@ describe('A Flot chart with absolute time axes', function () {
         ]);
     });
 
-    it('works with vertical axes', function () {
+    fit('works with vertical axes', function () {
         plot = createPlotWithVerticalAbsoluteTimeAxis(placeholder, [[[0, 1 + tzDiff], [1, 2 + tzDiff]]]);
 
         expect(firstAndLast(plot.getAxes().yaxis.ticks)).toEqual([
