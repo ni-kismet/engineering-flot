@@ -488,6 +488,7 @@ the the second one the date in gregorian date format.
     };
 
     var timeUnitSizeMilliseconds = {
+        "millisecond": 1,
         "second": 1000,
         "minute": 60 * 1000,
         "hour": 60 * 60 * 1000,
