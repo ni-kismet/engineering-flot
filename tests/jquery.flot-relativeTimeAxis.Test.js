@@ -29,6 +29,7 @@ describe('A Flot chart with relative time axes', function () {
             xaxis: {
                 show: true,
                 format: 'time',
+                timeBase: 'seconds',
                 timeformat: '%r'
             },
             yaxis: {
@@ -42,6 +43,7 @@ describe('A Flot chart with relative time axes', function () {
             xaxis: {
                 format: 'time',
                 timeformat: '%r' + (formatString !== undefined ? '<' + formatString + '>' : ""),
+                timeBase: 'seconds',
                 showTickLabels: 'all'
             },
             yaxis: {}
@@ -59,6 +61,7 @@ describe('A Flot chart with relative time axes', function () {
             yaxis: {
                 format: 'time',
                 timeformat: '%r',
+                timeBase: 'seconds',
                 autoScaleMargin: 0,
                 autoScale: 'exact'
             }
@@ -119,7 +122,7 @@ describe('A Flot chart with relative time axes', function () {
 
         expect(firstAndLast(plot.getAxes().xaxis.ticks)).toEqual([{v: -0.002, label: '-00:00:00.002'}, {v: -0.001, label: '-00:00:00.001'}]);
     });
-    it('works with vertical axes', function () {
+    fit('works with vertical axes', function () {
         plot = createPlotWithVerticalRelativeTimeAxis(placeholder, [[[0, 0], [1, 1]]]);
 
         expect(firstAndLast(plot.getAxes().yaxis.ticks)).toEqual([{v: 0, label: '00:00:00.000'}, {v: 1, label: '00:00:01.000'}]);
@@ -129,6 +132,7 @@ describe('A Flot chart with relative time axes', function () {
         plot = $.plot(placeholder, [[[3600, 1], [4200, 2]]], {
             xaxis: {
                 format: 'time',
+                timeBase: 'seconds',
                 timeformat: '%r'
             },
             yaxis: {}
@@ -141,6 +145,7 @@ describe('A Flot chart with relative time axes', function () {
         var plot = $.plot(placeholder, [[]], {
             xaxis: {
                 format: 'time',
+                timeBase: 'seconds',
                 timeformat: '%r',
                 min: 0
             },
@@ -157,6 +162,7 @@ describe('A Flot chart with relative time axes', function () {
         plot = $.plot(placeholder, [[[4200, 1], [4800, 2]], [[3600, 1], [4200, 2]]], {
             xaxis: {
                 format: 'time',
+                timeBase: 'seconds',
                 timeformat: '%r'
             },
             yaxis: {}
@@ -173,10 +179,12 @@ describe('A Flot chart with relative time axes', function () {
             xaxis: 1}],
         {xaxes: [{
             format: 'time',
+            timeBase: 'seconds',
             timeformat: '%r'
         }, {
             position: 'top',
             format: 'time',
+            timeBase: 'seconds',
             timeformat: '%r'
         }],
         yaxis: {}

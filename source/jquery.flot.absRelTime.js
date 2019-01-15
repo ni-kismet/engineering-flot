@@ -89,6 +89,7 @@ the the second one the date in gregorian date format.
             timeformat: null, // format string to use
             twelveHourClock: false, // 12 or 24 time in time mode
             monthNames: null, // list of names of months
+            timeBase: 'seconds', // are the values in milliseconds or seconds
             // the UTC date in the form of "total milliseconds from" to use as the epoch for formatted values
             // the default will format a date of "0 milliseconds" to be "12:00:00 AM 01/01/0000"
             timeEpoch: -62135596800000
@@ -371,7 +372,14 @@ the the second one the date in gregorian date format.
 
         for (var i = 0; i < fmt.length; ++i) {
             var c = fmt.charAt(i),
-                localDateValue = d.date || d.getDate();
+                localDateValue;
+            localDateValue = d.date || d;
+            if (!axis.options.timezone || axis.options.timezone === 'utc') {
+                localDateValue = d;
+            } else if (axis.options.timezone && axis.options.timezone !== 'utc' && axis.options.timezone !== 'browser' && typeof timezoneJS !== "undefined" && typeof timezoneJS.Date !== "undefined") {
+                localDateValue = d._dateProxy;
+            }
+
             if (escape) {
                 var timeFormatStartIndex = fmt.indexOf('<');
                 var timeFormatEndIndex = fmt.indexOf('>');
@@ -402,6 +410,9 @@ the the second one the date in gregorian date format.
     // zone the client happens to be in we need a date-like object independent
     // of time zones.  This is done through a wrapper that only calls the UTC
     // versions of the accessor methods.
+    function UTCDate(date) {
+        return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    }
 
     function makeUtcWrapper(d) {
         function addProxyMethod(sourceObj, sourceMethod, targetObj, targetMethod) {
@@ -411,7 +422,8 @@ the the second one the date in gregorian date format.
         }
 
         var utc = {
-            date: d
+            date: d,
+            valueOf: function () {return UTCDate(d).valueOf();}
         };
 
         // support strftime, if found
@@ -437,7 +449,9 @@ the the second one the date in gregorian date format.
     function dateGenerator(ts, opts) {
         var maxDateValue = 8640000000000000;
 
-        ts *= 1000;
+        if (opts && opts.timeBase === 'seconds') {
+            ts *= 1000;
+        }
 
         if (ts > maxDateValue) {
             ts = maxDateValue;
@@ -462,7 +476,7 @@ the the second one the date in gregorian date format.
     }
 
     // map of app. size of time units in milliseconds
-    var timeUnitSize = {
+    var timeUnitSizeSeconds = {
         "millisecond": 0.001,
         "second": 1,
         "minute": 60,
@@ -472,6 +486,19 @@ the the second one the date in gregorian date format.
         "quarter": 3 * 30 * 24 * 60 * 60,
         "year": 365.2425 * 24 * 60 * 60
     };
+
+    var timeUnitSizeMilliseconds = {
+        "millisecond": 1,
+        "second": 1000,
+        "minute": 60 * 1000,
+        "hour": 60 * 60 * 1000,
+        "day": 24 * 60 * 60 * 1000,
+        "month": 30 * 24 * 60 * 60 * 1000,
+        "quarter": 3 * 30 * 24 * 60 * 60 * 1000,
+        "year": 365.2425 * 24 * 60 * 60 * 1000
+    };
+
+
 
     // the allowed tick sizes, after 1 year we use
     // an integer algorithm
@@ -519,7 +546,11 @@ the the second one the date in gregorian date format.
                 }
             }
 
-            axis.valueOfFirstData = minFirstPlotData * 1000;
+            if (axis.options && axis.options.timeBase === 'seconds') {
+                axis.valueOfFirstData = minFirstPlotData * 1000;
+            } else {
+                axis.valueOfFirstData = minFirstPlotData;
+            }
         }
     }
 
@@ -544,6 +575,7 @@ the the second one the date in gregorian date format.
                             (opts.minTickSize && opts.minTickSize[1] ===
                             "quarter") ? specQuarters : specMonths;
 
+                        var timeUnitSize = opts.timeBase === 'seconds' ? timeUnitSizeSeconds : timeUnitSizeMilliseconds;
                         if (opts.minTickSize !== null && opts.minTickSize !== undefined) {
                             if (typeof opts.tickSize === "number") {
                                 minSize = opts.tickSize;
@@ -652,7 +684,12 @@ the the second one the date in gregorian date format.
                         do {
                             prev = v;
                             v1000 = d.getTime();
-                            v = v1000 / 1000;
+                            if (opts && opts.timeBase === 'seconds') {
+                                v = v1000 / 1000;
+                            } else {
+                                v = v1000;
+                            }
+
                             ticks.push(v);
 
                             if (unit === "month" || unit === "quarter") {
@@ -676,7 +713,11 @@ the the second one the date in gregorian date format.
                             } else if (unit === "year") {
                                 d.setFullYear(d.getFullYear() + tickSize);
                             } else {
-                                d.setTime((v + step) * 1000);
+                                if (opts.timeBase === 'seconds') {
+                                    d.setTime((v + step) * 1000);
+                                } else {
+                                    d.setTime(v + step);
+                                }
                             }
                         } while (v < axis.max && v !== prev);
 
