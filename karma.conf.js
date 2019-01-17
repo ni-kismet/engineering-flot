@@ -34,7 +34,7 @@ module.exports = function(config) {
         'source/jquery.flot.stack.js',
         'source/jquery.flot.touchNavigate.js',
         'source/jquery.flot.touch.js',
-        'source/jquery.flot.absRelTime.js',
+        'source/jquery.flot.time.js',
         'source/jquery.flot.axislabels.js',
         'source/jquery.flot.composeImages.js',
         'source/jquery.flot.selection.js',
