@@ -28,7 +28,7 @@ function concatenateFiles(destinationPath, callback) {
         './jquery.flot.touchNavigate.js',
         './jquery.flot.hover.js',
         './jquery.flot.touch.js',
-        './jquery.flot.absRelTime.js',
+        './jquery.flot.time.js',
         './jquery.flot.axislabels.js',
         './jquery.flot.selection.js',
         './jquery.flot.composeImages.js',
