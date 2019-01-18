@@ -36,17 +36,6 @@ describe('A Flot chart with absolute time axes', function () {
         });
     };
 
-    // var createPlotWithVerticalAbsoluteTimeAxis = function (placeholder, data) {
-    //     return $.plot(placeholder, data, {
-    //         xaxis: {},
-    //         yaxis: {
-    //             format: 'time',
-    //             autoScale: 'exact',
-    //             showTickLabels: 'all',
-    //         }
-    //     });
-    // };
-
     it('shows time ticks', function () {
         plot = createPlotWithAbsoluteTimeAxis(placeholder, [[[0, 1], [1000, 2]]], '%Y/%m/%d %M:%S');
 
