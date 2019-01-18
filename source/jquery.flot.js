@@ -2666,7 +2666,7 @@ Licensed under the MIT license.
             }
             overlay.clear();
             executeHooks(hooks.drawOverlay, [octx, overlay]);
-            var event = new CustomEvent('onDrawingDone');
+            var event = new CustomEvent('onDrawingDone', { bubbles: true });
             plot.getEventHolder().dispatchEvent(event);
         }
 
