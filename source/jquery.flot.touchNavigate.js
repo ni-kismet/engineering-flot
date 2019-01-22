@@ -5,6 +5,7 @@
 
     var options = {
         pan: {
+            touchMode: 'smart',
             enableTouch: false
         }
     };
@@ -27,7 +28,8 @@
                 prevTouchedAxis: 'none',
                 currentTouchedAxis: 'none',
                 touchedAxis: null,
-                navigationConstraint: 'unconstrained'
+                navigationConstraint: 'unconstrained',
+                initialState: null,
             },
             pan, pinch, doubleTap;
 
@@ -59,15 +61,27 @@
             start: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
                 updateData(e, 'pan', gestureState, navigationState);
+
+                var point = getPoint(e, 'pan');
+                navigationState.initialState = plot.navigationState(point.x, point.y);
             },
 
             drag: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
-                plot.pan({
-                    left: -delta(e, 'pan', gestureState).x,
-                    top: -delta(e, 'pan', gestureState).y,
-                    axes: navigationState.touchedAxis
-                });
+
+                if (options.pan.touchMode.includes('smart')) {
+                    var point = getPoint(e, 'pan');
+                    plot.smartPan({
+                        x: navigationState.initialState.startPageX - point.x,
+                        y: navigationState.initialState.startPageY - point.y
+                    }, navigationState.initialState, navigationState.touchedAxis);
+                } else {
+                    plot.pan({
+                        left: -delta(e, 'pan', gestureState).x,
+                        top: -delta(e, 'pan', gestureState).y,
+                        axes: navigationState.touchedAxis
+                    });
+                }
                 updatePrevPanPosition(e, 'pan', gestureState, navigationState);
             },
 
@@ -88,6 +102,8 @@
                 presetNavigationState(e, 'pinch', gestureState);
                 setPrevDistance(e, gestureState);
                 updateData(e, 'pinch', gestureState, navigationState);
+
+                plotState = plot.navigationState(getPoint(e, ), page.Y);
             },
 
             drag: function(e) {

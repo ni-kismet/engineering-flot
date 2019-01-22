@@ -107,6 +107,7 @@ can set the default in the options.
             interactive: false,
             active: false,
             cursor: "move",
+            mode: 'smart',
             frameRate: 60
         },
         xaxis: {
