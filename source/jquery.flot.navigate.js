@@ -133,6 +133,7 @@ can set the default in the options.
         var panAxes = null;
         var canDrag = false;
         var useSmartPan = options.pan.mode.includes('smart');
+        var smartPanLock = options.pan.mode.includes('lock');
 
         function onZoomClick(e, zoomOut, amount) {
             var page = browser.getPageXY(e);
@@ -260,11 +261,11 @@ can set the default in the options.
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
 
             if (useSmartPan) {
-            plotState = plot.navigationState(page.X, page.Y);
+                plotState = plot.navigationState(page.X, page.Y);
             } else {
                 prevDragPosition.x = page.X;
                 prevDragPosition.y = page.Y;
-        }
+            }
         }
 
         function onDrag(e) {
@@ -273,10 +274,10 @@ can set the default in the options.
 
             if (frameRate === -1) {
                 if (useSmartPan) {
-                plot.smartPan({
-                    x: plotState.startPageX - page.X,
-                    y: plotState.startPageY - page.Y
-                }, plotState, panAxes);
+                    plot.smartPan({
+                        x: plotState.startPageX - page.X,
+                        y: plotState.startPageY - page.Y
+                    }, plotState, panAxes);
                 } else {
                     plot.pan({
                         left: prevDragPosition.x - page.X,
@@ -293,10 +294,10 @@ can set the default in the options.
 
             panTimeout = setTimeout(function() {
                 if (useSmartPan) {
-                plot.smartPan({
-                    x: plotState.startPageX - page.X,
-                    y: plotState.startPageY - page.Y
-                }, plotState, panAxes);
+                    plot.smartPan({
+                        x: plotState.startPageX - page.X,
+                        y: plotState.startPageY - page.Y
+                    }, plotState, panAxes);
                 } else {
                     plot.pan({
                         left: prevDragPosition.x - page.X,
@@ -323,10 +324,10 @@ can set the default in the options.
             plot.getPlaceholder().css('cursor', prevCursor);
 
             if (useSmartPan) {
-            plot.smartPan({
-                x: plotState.startPageX - page.X,
-                y: plotState.startPageY - page.Y
-            }, plotState, panAxes);
+                plot.smartPan({
+                    x: plotState.startPageX - page.X,
+                    y: plotState.startPageY - page.Y
+                }, plotState, panAxes);
                 plot.smartPan.end();
             } else {
                 prevDragPosition.x = 0;
@@ -547,6 +548,22 @@ can set the default in the options.
             return delta;
         }
 
+        var lockDirection = null;
+        var lockDeltaDirection = function(delta) {
+            if (!lockDirection && Math.max(Math.abs(delta.x), Math.abs(delta.y)) >= SNAPPING_CONSTANT) {
+                lockDirection = Math.abs(delta.x) < Math.abs(delta.y) ? 'y' : 'x';
+            }
+
+            switch (lockDirection) {
+                case 'x':
+                    return { x: delta.x, y: 0 };
+                case 'y':
+                    return { x: 0, y: delta.y };
+                default:
+                    return { x: 0, y: 0 };
+            }
+        }
+
         var isDiagonalMode = function(delta) {
             if (Math.abs(delta.x) > 0 && Math.abs(delta.y) > 0) {
                 return true;
@@ -567,10 +584,10 @@ can set the default in the options.
 
         var prevDelta = { x: 0, y: 0 };
         plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
-            var snap = shouldSnap(delta),
+            var snap = smartPanLock ? true : shouldSnap(delta),
                 axes = plot.getAxes(),
                 opts;
-            delta = adjustDeltaToSnap(delta);
+            delta = smartPanLock ? lockDeltaDirection(delta) : adjustDeltaToSnap(delta);
 
             if (isDiagonalMode(delta)) {
                 initialState.diagMode = true;
@@ -652,6 +669,7 @@ can set the default in the options.
 
         plot.smartPan.end = function() {
             panHint = null;
+            lockDirection = null;
             prevDelta = { x: 0, y: 0 };
             plot.triggerRedrawOverlay();
         }
