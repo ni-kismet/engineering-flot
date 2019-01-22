@@ -132,6 +132,7 @@ can set the default in the options.
     function init(plot) {
         var panAxes = null;
         var canDrag = false;
+        var useSmartPan = options.pan.mode.includes('smart');
 
         function onZoomClick(e, zoomOut, amount) {
             var page = browser.getPageXY(e);
@@ -175,6 +176,7 @@ can set the default in the options.
             panHint = null,
             panTimeout = null,
             plotState,
+            prevDragPosition = { x: 0, y: 0 },
             isPanAction = false;
 
         function onMouseWheel(e, delta) {
@@ -256,7 +258,13 @@ can set the default in the options.
             }
 
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
+
+            if (useSmartPan) {
             plotState = plot.navigationState(page.X, page.Y);
+            } else {
+                prevDragPosition.x = page.X;
+                prevDragPosition.y = page.Y;
+        }
         }
 
         function onDrag(e) {
@@ -264,21 +272,40 @@ can set the default in the options.
             var frameRate = plot.getOptions().pan.frameRate;
 
             if (frameRate === -1) {
+                if (useSmartPan) {
                 plot.smartPan({
                     x: plotState.startPageX - page.X,
                     y: plotState.startPageY - page.Y
                 }, plotState, panAxes);
-
+                } else {
+                    plot.pan({
+                        left: prevDragPosition.x - page.X,
+                        top: prevDragPosition.y - page.Y,
+                        axes: panAxes
+                    });
+                    prevDragPosition.x = page.X;
+                    prevDragPosition.y = page.Y;
+                }
                 return;
             }
 
             if (panTimeout || !frameRate) return;
 
             panTimeout = setTimeout(function() {
+                if (useSmartPan) {
                 plot.smartPan({
                     x: plotState.startPageX - page.X,
                     y: plotState.startPageY - page.Y
                 }, plotState, panAxes);
+                } else {
+                    plot.pan({
+                        left: prevDragPosition.x - page.X,
+                        top: prevDragPosition.y - page.Y,
+                        axes: panAxes
+                    });
+                    prevDragPosition.x = page.X;
+                    prevDragPosition.y = page.Y;
+                }
 
                 panTimeout = null;
             }, 1 / frameRate * 1000);
@@ -294,11 +321,17 @@ can set the default in the options.
             var page = browser.getPageXY(e);
 
             plot.getPlaceholder().css('cursor', prevCursor);
+
+            if (useSmartPan) {
             plot.smartPan({
                 x: plotState.startPageX - page.X,
                 y: plotState.startPageY - page.Y
             }, plotState, panAxes);
-            panHint = null;
+                plot.smartPan.end();
+            } else {
+                prevDragPosition.x = 0;
+                prevDragPosition.y = 0;
+            }
         }
 
         function onDblClick(e) {
@@ -616,6 +649,12 @@ can set the default in the options.
                 plot.getPlaceholder().trigger("plotpan", [plot, delta, panAxes, initialState]);
             }
         };
+
+        plot.smartPan.end = function() {
+            panHint = null;
+            prevDelta = { x: 0, y: 0 };
+            plot.triggerRedrawOverlay();
+        }
 
         function shutdown(plot, eventHolder) {
             eventHolder.unbind("mousewheel", onMouseWheel);

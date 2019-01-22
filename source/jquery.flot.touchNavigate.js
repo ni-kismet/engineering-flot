@@ -5,7 +5,7 @@
 
     var options = {
         pan: {
-            touchMode: 'smart',
+            touchMode: '',
             enableTouch: false
         }
     };
@@ -31,6 +31,7 @@
                 navigationConstraint: 'unconstrained',
                 initialState: null,
             },
+            useSmartPan = options.pan.touchMode.includes('smart'),
             pan, pinch, doubleTap;
 
         function bindEvents(plot, eventHolder) {
@@ -43,7 +44,7 @@
                 eventHolder[0].addEventListener('pinchstart', pinch.start, false);
                 eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
                 eventHolder[0].addEventListener('pinchend', pinch.end, false);
-                eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
+                //eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
             }
         }
 
@@ -62,14 +63,16 @@
                 presetNavigationState(e, 'pan', gestureState);
                 updateData(e, 'pan', gestureState, navigationState);
 
-                var point = getPoint(e, 'pan');
-                navigationState.initialState = plot.navigationState(point.x, point.y);
+                if (useSmartPan) {
+                    var point = getPoint(e, 'pan');
+                    navigationState.initialState = plot.navigationState(point.x, point.y);
+                }
             },
 
             drag: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
 
-                if (options.pan.touchMode.includes('smart')) {
+                if (useSmartPan) {
                     var point = getPoint(e, 'pan');
                     plot.smartPan({
                         x: navigationState.initialState.startPageX - point.x,
@@ -81,13 +84,16 @@
                         top: -delta(e, 'pan', gestureState).y,
                         axes: navigationState.touchedAxis
                     });
+                    updatePrevPanPosition(e, 'pan', gestureState, navigationState);
                 }
-                updatePrevPanPosition(e, 'pan', gestureState, navigationState);
             },
 
             end: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
-                if (wasPinchEvent(e, gestureState)) {
+
+                if (useSmartPan) {
+                    plot.smartPan.end();
+                } else if (wasPinchEvent(e, gestureState)) {
                     updateprevPanPosition(e, 'pan', gestureState, navigationState);
                 }
             }
@@ -102,8 +108,6 @@
                 presetNavigationState(e, 'pinch', gestureState);
                 setPrevDistance(e, gestureState);
                 updateData(e, 'pinch', gestureState, navigationState);
-
-                plotState = plot.navigationState(getPoint(e, ), page.Y);
             },
 
             drag: function(e) {
