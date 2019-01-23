@@ -671,7 +671,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], {
               xaxes: [{ autoScale: 'exact', plotPan: false }],
-              yaxes: [{ autoScale: 'exact' }],
+              yaxes: [{ autoScale: 'exact', plotPan: false }],
               zoom: { interactive: true, active: true, amount: 10 },
               pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
           });
@@ -692,7 +692,7 @@ describe("flot touch navigate plugin", function () {
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
 
           expect(xaxis.min).toBe(0);
-          expect(yaxis.max).toBe(10);
+          expect(xaxis.max).toBe(10);
           expect(yaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
       });
