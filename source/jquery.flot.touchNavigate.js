@@ -93,7 +93,9 @@
 
                 if (useSmartPan) {
                     plot.smartPan.end();
-                } else if (wasPinchEvent(e, gestureState)) {
+                }
+
+                if (wasPinchEvent(e, gestureState)) {
                     updateprevPanPosition(e, 'pan', gestureState, navigationState);
                 }
             }
