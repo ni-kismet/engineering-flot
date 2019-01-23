@@ -44,7 +44,7 @@
                 eventHolder[0].addEventListener('pinchstart', pinch.start, false);
                 eventHolder[0].addEventListener('pinchdrag', pinch.drag, false);
                 eventHolder[0].addEventListener('pinchend', pinch.end, false);
-                //eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
+                eventHolder[0].addEventListener('doubletap', doubleTap.recenterPlot, false);
             }
         }
 
