@@ -73,7 +73,9 @@ describe("flot navigate plugin interactions", function () {
     });
 
     it('do non-smart pans on mouse drag in non-smart pan mode', function () {
+        var oldPanMode = options.pan.mode;
         options.pan.mode = '';
+
         plot = $.plot(placeholder, [
             [[0, 0],
             [10, 10]]
@@ -105,12 +107,15 @@ describe("flot navigate plugin interactions", function () {
         expect(yaxis.min).toBe(10);
         expect(yaxis.max).toBe(20);
 
-        delete options.pan.mode;
+        options.pan.mode = oldPanMode;
     });
 
     it('lock smart pan snap direction on mouse drag in smart-lock pan mode', function () {
+        var oldPanMode = options.pan.mode;
         options.pan.mode = 'smart lock';
+        var oldFrameRate = options.pan.frameRate;
         options.pan.frameRate = -1;
+
         plot = $.plot(placeholder, [
             [[0, 0],
             [10, 10]]
@@ -144,8 +149,8 @@ describe("flot navigate plugin interactions", function () {
         expect(yaxis.min).toBe(10);
         expect(yaxis.max).toBe(20);
 
-        delete options.pan.mode;
-        delete options.pan.frameRate;
+        options.pan.mode = oldPanMode;
+        options.pan.frameRate = oldFrameRate;
     });
 
     it('zooms out on mouse scroll down', function () {
