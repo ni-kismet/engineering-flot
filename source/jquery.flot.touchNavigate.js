@@ -31,7 +31,7 @@
                 navigationConstraint: 'unconstrained',
                 initialState: null,
             },
-            useSmartPan = options.pan.touchMode.includes('smart'),
+            useSmartPan = options.pan.touchMode.split(' ').includes('smart'),
             pan, pinch, doubleTap;
 
         function bindEvents(plot, eventHolder) {

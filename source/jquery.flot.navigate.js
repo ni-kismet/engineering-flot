@@ -132,8 +132,9 @@ can set the default in the options.
     function init(plot) {
         var panAxes = null;
         var canDrag = false;
-        var useSmartPan = options.pan.mode.includes('smart');
-        var smartPanLock = options.pan.mode.includes('lock');
+        var panModes = options.pan.mode.split(' '),
+            useSmartPan = panModes.includes('smart'),
+            smartPanLock = panModes.includes('lock');
 
         function onZoomClick(e, zoomOut, amount) {
             var page = browser.getPageXY(e);
