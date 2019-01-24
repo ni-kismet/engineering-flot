@@ -21,7 +21,10 @@ The plugin supports these options:
         active: false,
         cursor: "move",     // CSS mouse cursor value used when dragging, e.g. "pointer"
         frameRate: 60,
-        mode: "smart"       // enable smart pan mode
+        mode: "smart",       // enable smart pan mode
+        enableTouch: false,
+        touchMode: ""
+
     }
 
     xaxis: {
@@ -64,6 +67,13 @@ when the drag direction is close to it;
 'smart lock' for smart mode with pan hint. The graph movement will always snap to a direction
 that the drag path start with.
 Default: 'smart'.
+
+**enableTouch** enables the touch support, including pan (to drag), pinch (to zoom and move),
+and double tap (to recenter).
+
+**touchMode** a string specifies the pan mode of touch pan. Possible values: empty string and 'smart'.
+When in smart mode, the snapping behavior (lock or not lock) depends on **mode** option.
+Default: '' (non-smart pan mode)
 
 Example API usage:
 ```js

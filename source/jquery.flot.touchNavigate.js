@@ -5,8 +5,8 @@
 
     var options = {
         pan: {
-            touchMode: '',
-            enableTouch: false
+            enableTouch: false,
+            touchMode: ''
         }
     };
 
