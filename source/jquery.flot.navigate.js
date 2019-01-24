@@ -30,8 +30,8 @@ The plugin supports these options:
         interactive: false,
         active: false,
         cursor: "move",     // CSS mouse cursor value used when dragging, e.g. "pointer"
-        frameRate: 20,
-        mode: "smart"       // enable smart pan mode
+        frameRate: 60,
+        mode: "smart"
     }
 
     xaxis: {
@@ -66,6 +66,14 @@ user when dragging.
 update itself while the user is panning around on it (set to null to disable
 intermediate pans, the plot will then not update until the mouse button is
 released).
+
+**mode** a string specifies which pan mode to be use. Possible values:
+empty string for normal mode without pan hint or direction snapping;
+'smart' for smart mode with pan hint. The graph movement will snap to one direction
+when the drag direction is close to it;
+'smart lock' for smart mode with pan hint. The graph movement will always snap to a direction
+that the drag path start with.
+Default: 'smart'.
 
 Example API usage:
 ```js
@@ -107,8 +115,8 @@ can set the default in the options.
             interactive: false,
             active: false,
             cursor: "move",
-            mode: 'smart',
-            frameRate: 60
+            frameRate: 60,
+            mode: 'smart'
         },
         xaxis: {
             axisZoom: true, //zoom axis when mouse over it is allowed
@@ -130,6 +138,10 @@ can set the default in the options.
     var PANHINT_LENGTH_CONSTANT = $.plot.uiConstants.PANHINT_LENGTH_CONSTANT;
 
     function init(plot) {
+        plot.hooks.processOptions.push(initNevigation);
+    }
+
+    function initNevigation(plot, options) {
         var panAxes = null;
         var canDrag = false;
         var panModes = options.pan.mode.split(' '),
@@ -268,11 +280,11 @@ can set the default in the options.
                 prevDragPosition.y = page.Y;
             }
         }
-
+        
         function onDrag(e) {
             var page = browser.getPageXY(e);
             var frameRate = plot.getOptions().pan.frameRate;
-
+            
             if (frameRate === -1) {
                 if (useSmartPan) {
                     plot.smartPan({
@@ -290,9 +302,9 @@ can set the default in the options.
                 }
                 return;
             }
-
+            
             if (panTimeout || !frameRate) return;
-
+            
             panTimeout = setTimeout(function() {
                 if (useSmartPan) {
                     plot.smartPan({
@@ -331,6 +343,11 @@ can set the default in the options.
                 }, plotState, panAxes);
                 plot.smartPan.end();
             } else {
+                plot.pan({
+                    left: prevDragPosition.x - page.X,
+                    top: prevDragPosition.y - page.Y,
+                    axes: panAxes
+                });
                 prevDragPosition.x = 0;
                 prevDragPosition.y = 0;
             }
