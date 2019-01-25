@@ -417,6 +417,65 @@ describe("flot touch navigate plugin", function () {
         expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
       });
 
+      it('should drag the plot with smart pan mode',function() {
+        var oldTouchMode = options.pan.touchMode;
+        options.pan.touchMode = 'smart';
+
+        plot = $.plot(placeholder, [
+            [
+                [-10, -10],
+                [120, 120]
+            ]
+        ], options);
+
+        var eventHolder = plot.getEventHolder(),
+            xaxis = plot.getXAxes()[0],
+            yaxis = plot.getYAxes()[0];
+
+        // drag almost horizontally then vertically snap to x direction
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max,
+            canvasCoords = [ { x : 1, y : 1 }, { x : 100, y : 2 }],
+            pointCoords = [
+                    getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                    getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+            ];
+        
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+        expect(xaxis.min).toBeCloseTo(initialXmin + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(xaxis.max).toBeCloseTo(initialXmax + (canvasCoords[0].x - canvasCoords[1].x), 6);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
+
+        // drag almost vertically then horizontally snap to y direction
+        plot.recenter({});
+
+        initialXmin = xaxis.min;
+        initialXmax = xaxis.max;
+        initialYmin = yaxis.min;
+        initialYmax = yaxis.max;
+        canvasCoords = [ { x : 1, y : 1 }, { x : 2, y : 100 }];
+        pointCoords = [
+                getPairOfCoords(xaxis, yaxis, canvasCoords[0].x, canvasCoords[0].y),
+                getPairOfCoords(xaxis, yaxis, canvasCoords[1].x, canvasCoords[1].y)
+        ];
+        simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
+        simulate.touchmove(eventHolder, pointCoords[1].x, pointCoords[1].y);
+        simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
+
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBeCloseTo(initialYmin + (canvasCoords[0].y - canvasCoords[1].y), 6);
+        expect(yaxis.max).toBeCloseTo(initialYmax + (canvasCoords[0].y - canvasCoords[1].y), 6);
+
+        options.pan.touchMode = oldTouchMode;
+      });
+
       it('should drag the logarithmic plot', function() {
           var d1 = [];
           for (var i = 0; i < 14; i += 0.2) {
@@ -671,7 +730,7 @@ describe("flot touch navigate plugin", function () {
               ]
           ], {
               xaxes: [{ autoScale: 'exact', plotPan: false }],
-              yaxes: [{ autoScale: 'exact' }],
+              yaxes: [{ autoScale: 'exact', plotPan: false }],
               zoom: { interactive: true, active: true, amount: 10 },
               pan: { interactive: true, active: true, frameRate: -1, enableTouch: true }
           });
@@ -682,8 +741,8 @@ describe("flot touch navigate plugin", function () {
               initialXmin = xaxis.min,
               initialXmax = xaxis.max,
               pointCoords = [
-                      { x: 0, y: 10 },
-                      { x: 5, y: 15 }
+                      { x: 0, y: 50 },
+                      { x: 50, y: 100 }
               ];
 
           simulate.touchstart(eventHolder, pointCoords[0].x, pointCoords[0].y);
@@ -692,7 +751,7 @@ describe("flot touch navigate plugin", function () {
           simulate.touchend(eventHolder, pointCoords[1].x, pointCoords[1].y);
 
           expect(xaxis.min).toBe(0);
-          expect(yaxis.max).toBe(10);
+          expect(xaxis.max).toBe(10);
           expect(yaxis.min).toBe(0);
           expect(yaxis.max).toBe(10);
       });

@@ -5,7 +5,8 @@
 
     var options = {
         pan: {
-            enableTouch: false
+            enableTouch: false,
+            touchMode: ''
         }
     };
 
@@ -27,8 +28,10 @@
                 prevTouchedAxis: 'none',
                 currentTouchedAxis: 'none',
                 touchedAxis: null,
-                navigationConstraint: 'unconstrained'
+                navigationConstraint: 'unconstrained',
+                initialState: null,
             },
+            useSmartPan = options.pan.touchMode.split(' ').includes('smart'),
             pan, pinch, doubleTap;
 
         function bindEvents(plot, eventHolder) {
@@ -59,20 +62,39 @@
             start: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
                 updateData(e, 'pan', gestureState, navigationState);
+
+                if (useSmartPan) {
+                    var point = getPoint(e, 'pan');
+                    navigationState.initialState = plot.navigationState(point.x, point.y);
+                }
             },
 
             drag: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
-                plot.pan({
-                    left: -delta(e, 'pan', gestureState).x,
-                    top: -delta(e, 'pan', gestureState).y,
-                    axes: navigationState.touchedAxis
-                });
-                updatePrevPanPosition(e, 'pan', gestureState, navigationState);
+
+                if (useSmartPan) {
+                    var point = getPoint(e, 'pan');
+                    plot.smartPan({
+                        x: navigationState.initialState.startPageX - point.x,
+                        y: navigationState.initialState.startPageY - point.y
+                    }, navigationState.initialState, navigationState.touchedAxis);
+                } else {
+                    plot.pan({
+                        left: -delta(e, 'pan', gestureState).x,
+                        top: -delta(e, 'pan', gestureState).y,
+                        axes: navigationState.touchedAxis
+                    });
+                    updatePrevPanPosition(e, 'pan', gestureState, navigationState);
+                }
             },
 
             end: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
+
+                if (useSmartPan) {
+                    plot.smartPan.end();
+                }
+
                 if (wasPinchEvent(e, gestureState)) {
                     updateprevPanPosition(e, 'pan', gestureState, navigationState);
                 }
