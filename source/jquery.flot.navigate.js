@@ -284,7 +284,7 @@ can set the default in the options.
         function onDrag(e) {
             var page = browser.getPageXY(e);
             var frameRate = plot.getOptions().pan.frameRate;
-            
+
             if (frameRate === -1) {
                 if (useSmartPan) {
                     plot.smartPan({
@@ -302,9 +302,9 @@ can set the default in the options.
                 }
                 return;
             }
-            
+
             if (panTimeout || !frameRate) return;
-            
+
             panTimeout = setTimeout(function() {
                 if (useSmartPan) {
                     plot.smartPan({
