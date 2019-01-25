@@ -17,6 +17,9 @@ API.txt for details.
             twelveHourClock: false, // 12 or 24 time in time mode
             monthNames: null, // list of names of months
             timeBase: 'seconds' // are the values in milliseconds or seconds
+        },
+        yaxis: {
+            timeBase: 'seconds'
         }
     };
 
