@@ -234,9 +234,8 @@ API.txt for details.
             }
         }
 
-        var delta = axis.delta * 2;
         for (var i = 0; i < spec.length - 1; ++i) {
-            if (delta < (spec[i][0] * timeUnitSize[spec[i][1]] +
+            if (axis.delta < (spec[i][0] * timeUnitSize[spec[i][1]] +
                 spec[i + 1][0] * timeUnitSize[spec[i + 1][1]]) / 2 &&
                 spec[i][0] * timeUnitSize[spec[i][1]] >= minSize) {
                 break;
