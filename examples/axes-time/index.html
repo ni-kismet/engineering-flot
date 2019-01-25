@@ -19,16 +19,18 @@
 
 		$("#whole").click(function () {
 			$.plot("#placeholder", [d], {
-				xaxis: { format: "time" }
+				xaxis: { mode: "time", timeBase: "milliseconds" }
 			});
 		});
 
 		$("#nineties").click(function () {
 			$.plot("#placeholder", [d], {
 				xaxis: {
-					format: "time",
+					mode: "time",
 					min: (new Date(1990, 0, 1)).getTime(),
-					max: (new Date(2000, 0, 1)).getTime()
+					max: (new Date(2000, 0, 1)).getTime(), 
+					timeBase: "milliseconds", 
+					autoScale: "none"
 				}
 			});
 		});
@@ -36,10 +38,12 @@
 		$("#latenineties").click(function () {
 			$.plot("#placeholder", [d], {
 				xaxis: {
-					format: "time",
+					mode: "time",
 					minTickSize: [1, "year"],
+					autoScale: "none",
 					min: (new Date(1996, 0, 1)).getTime(),
-					max: (new Date(2000, 0, 1)).getTime()
+					max: (new Date(2000, 0, 1)).getTime(), 
+					timeBase: "milliseconds"
 				}
 			});
 		});
@@ -47,10 +51,12 @@
 		$("#ninetyninequarters").click(function () {
 			$.plot("#placeholder", [d], {
 				xaxis: {
-					format: "time",
+					mode: "time",
 					minTickSize: [1, "quarter"],
+					autoScale: "none",
 					min: (new Date(1999, 0, 1)).getTime(),
-					max: (new Date(2000, 0, 1)).getTime()
+					max: (new Date(2000, 0, 1)).getTime(), 
+					timeBase: "milliseconds"
 				}
 			});
 		});
@@ -58,10 +64,12 @@
 		$("#ninetynine").click(function () {
 			$.plot("#placeholder", [d], {
 				xaxis: {
-					format: "time",
+					autoScale: "none",
+					mode: "time",
 					minTickSize: [1, "month"],
 					min: (new Date(1999, 0, 1)).getTime(),
-					max: (new Date(2000, 0, 1)).getTime()
+					max: (new Date(2000, 0, 1)).getTime(), 
+					timeBase: "milliseconds"
 				}
 			});
 		});
@@ -69,11 +77,13 @@
 		$("#lastweekninetynine").click(function () {
 			$.plot("#placeholder", [d], {
 				xaxis: {
-					format: "time",
+					autoScale: "none",
+					mode: "time",
 					minTickSize: [1, "day"],
 					min: (new Date(1999, 11, 25)).getTime(),
 					max: (new Date(2000, 0, 1)).getTime(),
-					timeformat: "%a"
+					timeformat: "%a", 
+					timeBase: "milliseconds"
 				}
 			});
 		});
@@ -81,11 +91,13 @@
 		$("#lastdayninetynine").click(function () {
 			$.plot("#placeholder", [d], {
 				xaxis: {
-					format: "time",
+					autoScale: "none",
+					mode: "time",
 					minTickSize: [1, "hour"],
 					min: (new Date(1999, 11, 31)).getTime(),
 					max: (new Date(2000, 0, 1)).getTime(),
-					twelveHourClock: true
+					twelveHourClock: true, 
+					timeBase: "milliseconds"
 				}
 			});
 		});
