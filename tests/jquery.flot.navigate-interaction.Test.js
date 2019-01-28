@@ -124,30 +124,36 @@ describe("flot navigate plugin interactions", function () {
         eventHolder = plot.getEventHolder();
         var xaxis = plot.getXAxes()[0];
         var yaxis = plot.getYAxes()[0];
+        var initialXmin = xaxis.min,
+            initialXmax = xaxis.max,
+            initialYmin = yaxis.min,
+            initialYmax = yaxis.max;
 
         // drag almost horizontally then vertically snap to x direction
         simulate.mouseDown(eventHolder, 50, 70);
         simulate.mouseMove(eventHolder, 50, 70);
-        simulate.mouseMove(eventHolder, 50 + plot.width(), 80);
+        simulate.mouseMove(eventHolder, 50 + plot.width() / 2, 80);
         simulate.mouseMove(eventHolder, 50 + plot.width(), 70 + plot.height());
         simulate.mouseUp(eventHolder, 50 + plot.width(), 70 + plot.height());
 
-        expect(xaxis.min).toBe(-10);
-        expect(xaxis.max).toBe(0);
-        expect(yaxis.min).toBe(0);
-        expect(yaxis.max).toBe(10);
+        expect(xaxis.min).toBeLessThan(initialXmin);
+        expect(xaxis.max).toBeLessThan(initialXmax);
+        expect(yaxis.min).toBe(initialYmin);
+        expect(yaxis.max).toBe(initialYmax);
 
         // drag almost vertically then horizontally snap to y direction
+        plot.recenter({});
+
         simulate.mouseDown(eventHolder, 50, 70);
         simulate.mouseMove(eventHolder, 50, 70);
         simulate.mouseMove(eventHolder, 60, 70 + plot.height());
         simulate.mouseMove(eventHolder, 50 + plot.width(), 70 + plot.height());
         simulate.mouseUp(eventHolder, 50 + plot.width(), 70 + plot.height());
 
-        expect(xaxis.min).toBe(-10);
-        expect(xaxis.max).toBe(0);
-        expect(yaxis.min).toBe(10);
-        expect(yaxis.max).toBe(20);
+        expect(xaxis.min).toBe(initialXmin);
+        expect(xaxis.max).toBe(initialXmax);
+        expect(yaxis.min).toBeGreaterThan(initialYmin);
+        expect(yaxis.max).toBeGreaterThan(initialYmax);
 
         options.pan.mode = oldPanMode;
         options.pan.frameRate = oldFrameRate;
