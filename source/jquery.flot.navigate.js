@@ -67,13 +67,12 @@ update itself while the user is panning around on it (set to null to disable
 intermediate pans, the plot will then not update until the mouse button is
 released).
 
-**mode** a string specifies which pan mode to be use. Possible values:
-empty string for normal mode without pan hint or direction snapping;
-'smart' for smart mode with pan hint. The graph movement will snap to one direction
-when the drag direction is close to it;
-'smart lock' for smart mode with pan hint. The graph movement will always snap to a direction
-that the drag path start with.
-Default: 'smart'.
+**mode** a string specifies the pan mode for mouse interaction. Accepted values:
+empty string for normal mode: no pan hint or direction snapping;
+'smart': The graph shows pan hint bar and the pan movement will snap
+to one direction when the drag direction is close to it;
+'smartLock'. The graph shows pan hint bar and the pan movement will always
+snap to a direction that the drag diorection started with.
 
 Example API usage:
 ```js
@@ -144,9 +143,8 @@ can set the default in the options.
     function initNevigation(plot, options) {
         var panAxes = null;
         var canDrag = false;
-        var panModes = options.pan.mode.split(' '),
-            useSmartPan = panModes.includes('smart'),
-            smartPanLock = panModes.includes('lock');
+        var smartPanLock = options.pan.mode === 'smartLock',
+            useSmartPan = smartPanLock || options.pan.mode === 'smart';
 
         function onZoomClick(e, zoomOut, amount) {
             var page = browser.getPageXY(e);
@@ -290,7 +288,7 @@ can set the default in the options.
                     plot.smartPan({
                         x: plotState.startPageX - page.X,
                         y: plotState.startPageY - page.Y
-                    }, plotState, panAxes);
+                    }, plotState, panAxes, false, smartPanLock);
                 } else {
                     plot.pan({
                         left: prevDragPosition.x - page.X,
@@ -310,7 +308,7 @@ can set the default in the options.
                     plot.smartPan({
                         x: plotState.startPageX - page.X,
                         y: plotState.startPageY - page.Y
-                    }, plotState, panAxes);
+                    }, plotState, panAxes, false, smartPanLock);
                 } else {
                     plot.pan({
                         left: prevDragPosition.x - page.X,
@@ -340,7 +338,7 @@ can set the default in the options.
                 plot.smartPan({
                     x: plotState.startPageX - page.X,
                     y: plotState.startPageY - page.Y
-                }, plotState, panAxes);
+                }, plotState, panAxes, false, smartPanLock);
                 plot.smartPan.end();
             } else {
                 plot.pan({
@@ -566,13 +564,13 @@ can set the default in the options.
             return delta;
         }
 
-        var lockDirection = null;
+        var lockedDirection = null;
         var lockDeltaDirection = function(delta) {
-            if (!lockDirection && Math.max(Math.abs(delta.x), Math.abs(delta.y)) >= SNAPPING_CONSTANT) {
-                lockDirection = Math.abs(delta.x) < Math.abs(delta.y) ? 'y' : 'x';
+            if (!lockedDirection && Math.max(Math.abs(delta.x), Math.abs(delta.y)) >= SNAPPING_CONSTANT) {
+                lockedDirection = Math.abs(delta.x) < Math.abs(delta.y) ? 'y' : 'x';
             }
 
-            switch (lockDirection) {
+            switch (lockedDirection) {
                 case 'x':
                     return { x: delta.x, y: 0 };
                 case 'y':
@@ -601,11 +599,11 @@ can set the default in the options.
         }
 
         var prevDelta = { x: 0, y: 0 };
-        plot.smartPan = function(delta, initialState, panAxes, preventEvent) {
-            var snap = smartPanLock ? true : shouldSnap(delta),
+        plot.smartPan = function(delta, initialState, panAxes, preventEvent, smartLock) {
+            var snap = smartLock ? true : shouldSnap(delta),
                 axes = plot.getAxes(),
                 opts;
-            delta = smartPanLock ? lockDeltaDirection(delta) : adjustDeltaToSnap(delta);
+            delta = smartLock ? lockDeltaDirection(delta) : adjustDeltaToSnap(delta);
 
             if (isDiagonalMode(delta)) {
                 initialState.diagMode = true;
@@ -687,7 +685,7 @@ can set the default in the options.
 
         plot.smartPan.end = function() {
             panHint = null;
-            lockDirection = null;
+            lockedDirection = null;
             prevDelta = { x: 0, y: 0 };
             plot.triggerRedrawOverlay();
         }

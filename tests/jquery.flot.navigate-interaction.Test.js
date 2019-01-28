@@ -112,7 +112,7 @@ describe("flot navigate plugin interactions", function () {
 
     it('lock smart pan snap direction on mouse drag in smart-lock pan mode', function () {
         var oldPanMode = options.pan.mode;
-        options.pan.mode = 'smart lock';
+        options.pan.mode = 'smartLock';
         var oldFrameRate = options.pan.frameRate;
         options.pan.frameRate = -1;
 
