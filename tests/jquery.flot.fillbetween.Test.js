@@ -6,7 +6,7 @@ describe('fillbetween plugin', function() {
 
     beforeEach(function() {
         dataset = [
-			{ data: [[0, 2], [1, 2], [2, 4]], lines: { show: true }, color: "rgb(255,50,50)", id: "fillToPlot" },
+            { data: [[0, 2], [1, 2], [2, 4]], lines: { show: true }, color: "rgb(255,50,50)", id: "fillToPlot" },
             { data: [[0, 3], [1, 3], [2, 1]], lines: { show: true, lineWidth: 0, fill: 0.2 }, fillBetween: "fillToPlot", color: "rgb(255,50,50)" }
         ];
 
