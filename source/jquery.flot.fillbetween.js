@@ -57,6 +57,10 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
         }
 
         function computeFormat(plot, s, data, datapoints) {
+            if (s.fillBetween == null) {
+                return;
+            }
+            
             format = datapoints.format;
             var plotHasId = function(id) {
                 var plotData = plot.getData();
@@ -71,7 +75,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 
             if (!format) {
                 format = [];
-                
+
                 format.push({ 
                     x: true, 
                     number: true, 
