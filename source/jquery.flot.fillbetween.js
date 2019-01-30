@@ -58,10 +58,20 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
 
         function computeFormat(plot, s, data, datapoints) {
             format = datapoints.format;
+            var plotHasId = function(id) {
+                var plotData = plot.getData();
+                for (i = 0; i < plotData.length; i++) {
+                    if (plotData[i].id === id) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
 
             if (!format) {
                 format = [];
-                // find out how to copy
+                
                 format.push({ 
                     x: true, 
                     number: true, 
@@ -75,18 +85,15 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
                     required: true 
                 });
 
-                if (s.bars.show || (s.lines.show && s.lines.fill)) {
-                    var expectedPs = s.datapoints.pointsize != null ? s.datapoints.pointsize : (!s.lines.fill && s.data && s.data[0] && s.data[0].length ? s.data[0].length : 3);
-                    if (expectedPs > 2) {
-                        format.push({
-                            x: false,
-                            y: true,
-                            number: true,
-                            required: false,
-                            computeRange: s.yaxis.options.autoScale !== 'none',
-                            defaultValue: 0
-                        });
-                    }
+                if (s.fillBetween !== undefined && s.fillBetween !== '' && plotHasId(s.fillBetween) && s.fillBetween !== s.id) {
+                    format.push({
+                        x: false,
+                        y: true,
+                        number: true,
+                        required: false,
+                        computeRange: s.yaxis.options.autoScale !== 'none',
+                        defaultValue: 0
+                    });
                 }
 
                 datapoints.format = format;
