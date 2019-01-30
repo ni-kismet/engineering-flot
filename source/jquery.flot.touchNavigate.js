@@ -64,8 +64,8 @@
             drag: function(e) {
                 presetNavigationState(e, 'pan', gestureState);
                 plot.pan({
-                    left: delta(e, 'pan', gestureState).x,
-                    top: delta(e, 'pan', gestureState).y,
+                    left: -delta(e, 'pan', gestureState).x,
+                    top: -delta(e, 'pan', gestureState).y,
                     axes: navigationState.touchedAxis
                 });
                 updatePrevPanPosition(e, 'pan', gestureState, navigationState);
@@ -97,8 +97,8 @@
                 pinchDragTimeout = setTimeout(function() {
                     presetNavigationState(e, 'pinch', gestureState);
                     plot.pan({
-                        left: delta(e, 'pinch', gestureState).x,
-                        top: delta(e, 'pinch', gestureState).y,
+                        left: -delta(e, 'pinch', gestureState).x,
+                        top: -delta(e, 'pinch', gestureState).y,
                         axes: navigationState.touchedAxis
                     });
                     updatePrevPanPosition(e, 'pinch', gestureState, navigationState);

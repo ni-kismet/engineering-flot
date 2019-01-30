@@ -15,6 +15,7 @@ gulp.task('build_engineering_flot', function() {
         './source/jquery.flot.saturated.js',
         './source/jquery.flot.browser.js',
         './source/jquery.flot.drawSeries.js',
+        './source/jquery.flot.errorbars.js',
         './source/jquery.flot.uiConstants.js',
         './source/jquery.flot.logaxis.js',
         './source/jquery.flot.symbol.js',
@@ -26,7 +27,7 @@ gulp.task('build_engineering_flot', function() {
         './source/jquery.flot.touchNavigate.js',
         './source/jquery.flot.hover.js',
         './source/jquery.flot.touch.js',
-        './source/jquery.flot.absRelTime.js',
+        './source/jquery.flot.time.js',
         './source/jquery.flot.axislabels.js',
         './source/jquery.flot.selection.js',
         './source/jquery.flot.composeImages.js',
@@ -37,6 +38,7 @@ gulp.task('build_engineering_flot', function() {
             presets: ['es2015']
         }))
         .pipe(concat('jquery.flot.js'))
+        .pipe(uglify())
         .pipe(maps.write('./'))
         .pipe(gulp.dest('dist/es5'));
 });
