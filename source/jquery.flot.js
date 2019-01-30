@@ -360,7 +360,7 @@ Licensed under the MIT license.
         setupCanvases();
         parseOptions(options_);
         setData(data_);
-        setupGrid();
+        setupGrid(true);
         draw();
         bindEvents();
 
@@ -671,7 +671,7 @@ Licensed under the MIT license.
                 colorPool = options.colors,
                 colorPoolSize = colorPool.length,
                 variation = 0,
-                definedColors = series.length - neededColors;
+                definedColors = Math.max(0, series.length - neededColors);
 
             for (i = 0; i < neededColors; i++) {
                 c = $.color.parse(colorPool[(definedColors + i) % colorPoolSize] || "#666");
@@ -1315,7 +1315,7 @@ Licensed under the MIT license.
             }
         }
 
-        function setupGrid() {
+        function setupGrid(autoScale) {
             var i, a, axes = allAxes(),
                 showGrid = options.grid.show;
 
@@ -1341,8 +1341,8 @@ Licensed under the MIT license.
                 axis.show = axisOpts.show == null ? axis.used : axisOpts.show;
                 axis.reserveSpace = axisOpts.reserveSpace == null ? axis.show : axisOpts.reserveSpace;
                 setupTickFormatter(axis);
-                executeHooks(hooks.setRange, [axis]);
-                setRange(axis);
+                executeHooks(hooks.setRange, [axis, autoScale]);
+                setRange(axis, autoScale);
             });
 
             if (showGrid) {
@@ -1500,12 +1500,16 @@ Licensed under the MIT license.
             axis.autoScaledMax = max;
         }
 
-        function setRange(axis) {
-            autoScaleAxis(axis);
-
-            var min = axis.autoScaledMin,
-                max = axis.autoScaledMax,
+        function setRange(axis, autoScale) {
+            var min = typeof axis.options.min === 'number' ? axis.options.min : axis.min,
+                max = typeof axis.options.max === 'number' ? axis.options.max : axis.max,
                 plotOffset = axis.options.offset;
+
+            if (autoScale) {
+                autoScaleAxis(axis);
+                min = axis.autoScaledMin;
+                max = axis.autoScaledMax;
+            }
 
             min = (min != null ? min : -1) + (plotOffset.below || 0);
             max = (max != null ? max : 1) + (plotOffset.above || 0);
@@ -1635,14 +1639,18 @@ Licensed under the MIT license.
             // like flot.time.js.
 
             if (!axis.tickGenerator) {
-                axis.tickGenerator = defaultTickGenerator;
+                if (typeof opts.tickGenerator === 'function') {
+                    axis.tickGenerator = opts.tickGenerator;
+                } else {
+                    axis.tickGenerator = defaultTickGenerator;
+                }
             }
 
             if (opts.alignTicksWithAxis != null) {
                 var otherAxis = (axis.direction === "x" ? xaxes : yaxes)[opts.alignTicksWithAxis - 1];
                 if (otherAxis && otherAxis.used && otherAxis !== axis) {
                     // consider snapping min/max to outermost nice ticks
-                    var niceTicks = axis.tickGenerator(axis);
+                    var niceTicks = axis.tickGenerator(axis, plot);
                     if (niceTicks.length > 0) {
                         if (opts.min == null) {
                             axis.min = Math.min(axis.min, niceTicks[0]);
@@ -1669,7 +1677,7 @@ Licensed under the MIT license.
                     // ticks don't necessarily fit naturally
                     if (!axis.mode && opts.tickDecimals == null) {
                         var extraDec = Math.max(0, -Math.floor(Math.log(axis.delta) / Math.LN10) + 1),
-                            ts = axis.tickGenerator(axis);
+                            ts = axis.tickGenerator(axis, plot);
 
                         // only proceed if the tick interval rounded
                         // with an extra decimal doesn't give us a
@@ -1686,7 +1694,7 @@ Licensed under the MIT license.
             var oticks = axis.options.ticks,
                 ticks = [];
             if (oticks == null || (typeof oticks === "number" && oticks > 0)) {
-                ticks = axis.tickGenerator(axis);
+                ticks = axis.tickGenerator(axis, plot);
             } else if (oticks) {
                 if ($.isFunction(oticks)) {
                 // generate the ticks
