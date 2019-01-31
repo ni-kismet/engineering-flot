@@ -56,6 +56,54 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
             return null;
         }
 
+        function computeFormat(plot, s, data, datapoints) {
+            if (s.fillBetween == null) {
+                return;
+            }
+            
+            format = datapoints.format;
+            var plotHasId = function(id) {
+                var plotData = plot.getData();
+                for (i = 0; i < plotData.length; i++) {
+                    if (plotData[i].id === id) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            if (!format) {
+                format = [];
+
+                format.push({ 
+                    x: true, 
+                    number: true, 
+                    computeRange: s.xaxis.options.autoScale !== 'none',
+                    required: true 
+                });
+                format.push({ 
+                    y: true, 
+                    number: true, 
+                    computeRange: s.yaxis.options.autoScale !== 'none',
+                    required: true 
+                });
+
+                if (s.fillBetween !== undefined && s.fillBetween !== '' && plotHasId(s.fillBetween) && s.fillBetween !== s.id) {
+                    format.push({
+                        x: false,
+                        y: true,
+                        number: true,
+                        required: false,
+                        computeRange: s.yaxis.options.autoScale !== 'none',
+                        defaultValue: 0
+                    });
+                }
+
+                datapoints.format = format;
+            }
+        }
+
         function computeFillBottoms(plot, s, datapoints) {
             if (s.fillBetween == null) {
                 return;
@@ -193,6 +241,7 @@ jquery.flot.stack.js plugin, possibly some code could be shared.
             datapoints.points = newpoints;
         }
 
+        plot.hooks.processRawData.push(computeFormat);
         plot.hooks.processDatapoints.push(computeFillBottoms);
     }
 
