@@ -30,7 +30,7 @@ The plugin supports these options:
         interactive: false,
         active: false,
         cursor: "move",     // CSS mouse cursor value used when dragging, e.g. "pointer"
-        frameRate: 20,
+        frameRate: 60,
         mode: "smart"       // enable smart pan mode
     }
 
