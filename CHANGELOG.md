@@ -47,7 +47,7 @@ After:
             minTickSize: [1, "year"],
             autoScale: "none",
             min: (new Date(1996, 0, 1)).getTime(),
-            max: (new Date(2000, 0, 1)).getTime(), 
+            max: (new Date(2000, 0, 1)).getTime(),
             timeBase: "milliseconds"
         }
     });
@@ -56,7 +56,7 @@ Note: A new capability allows for data (and min/max settings of axes) to be spec
 
 ### Script Locations:
 
-All scripts have been moved under the 'source' folder, so you will need to update all reference scripts to point to new location.
+All scripts have been moved under the 'source' folder, so you will need to update all reference scripts to point to new location. Or you can use the file dist/es5/jquery.flot.js which is all source combined and minified.
 
 ### SVG rendering:
 
