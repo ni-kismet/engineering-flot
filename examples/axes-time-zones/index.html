@@ -55,24 +55,24 @@
 
 		var plot = $.plot("#placeholderUTC", [d], {
 			xaxis: {
-				format: "time",
-				timeformat: "%A"
+				mode: "time",
+				timeBase: "milliseconds"
 			}
 		});
 
 		var plot = $.plot("#placeholderLocal", [d], {
 			xaxis: {
-				format: "time",
-				timeformat: "%A",
-				timezone: "browser"
+				mode: "time",
+				timezone: "browser",
+				timeBase: "milliseconds"
 			}
 		});
 
 		var plot = $.plot("#placeholderChicago", [d], {
 			xaxis: {
-				format: "time",
-				timeformat: "%A",
-				timezone: "America/Chicago"
+				mode: "time",
+				timezone: "America/Chicago",
+				timeBase: "milliseconds"
 			}
 		});
 

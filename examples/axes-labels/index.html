@@ -54,7 +54,7 @@
                 { data: generate(index, index + 10, function (x) { return Math.cos(x);}), xaxis: 1, yaxis:1, lines: { show: true}}
             ];
             plot.setData(data);
-            plot.setupGrid();
+            plot.setupGrid(true);
             plot.draw();
             window.requestAnimationFrame(update);
         }
