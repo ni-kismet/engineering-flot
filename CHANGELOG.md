@@ -1,6 +1,97 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.1]
+
+## Notable Breaking Changes For Existing flot Users
+### Series Options:
+Before:
+
+    var plot = $.plot(placeholder, data, {
+        bars: { show: true, barWidth: 0.5, fill: 0.9 },
+        xaxis: { ticks: [], autoscaleMargin: 0.02 },
+        yaxis: { min: -2, max: 2 },
+        grid: { markings: markings }
+    });
+
+After:
+
+    var plot = $.plot(placeholder, data, {
+        series: {
+            bars: { show: true, barWidth: 0.5, fill: 0.9 }
+        },
+        xaxis: { show: false },
+        yaxis: { min: -2, max: 2, autoScale: "none" },
+        grid: { markings: markings }
+    });
+
+Note: Backwards compatibility was removed such that we require series options to be encapsulated.
+
+### Time Formatting:
+Before:
+
+    $.plot("#placeholder", [d], {
+        xaxis: {
+            mode: "time",
+            minTickSize: [1, "year"],
+            min: (new Date(1996, 0, 1)).getTime(),
+            max: (new Date(2000, 0, 1)).getTime()
+        }
+    });
+
+After:
+
+    $.plot("#placeholder", [d], {
+        xaxis: {
+            mode: "time",
+            minTickSize: [1, "year"],
+            autoScale: "none",
+            min: (new Date(1996, 0, 1)).getTime(),
+            max: (new Date(2000, 0, 1)).getTime(), 
+            timeBase: "milliseconds"
+        }
+    });
+
+Note: A new capability allows for data (and min/max settings of axes) to be specified with a `timeBase` of either seconds or milliseconds. So, a range from 1-10 can either represent 9 milliseconds of data, or 9 seconds of data, depending on the setting of `timeBase` (whose default is "seconds").
+
+### Script Locations:
+
+All scripts have been moved under the 'source' folder, so you will need to update all reference scripts to point to new location.
+
+### SVG rendering:
+
+We now render axes and the legend through SVG. Any CSS targeting specific DOM objects related to these will now be broken.
+
+## New Features:
+
+### Auto-scaling options (`autoScale` property of axes)
+- Allows for various ways to auto-scale the axes in response to plotting new data (see API.md).
+- The public method `setupGrid` now takes a boolean argument to indicate whether or not to perform an autoScale according to the current setting on the axes.
+
+### Tick Label visibility options
+- Allows a user to specify whether to show tick labels on all major ticks, at endpoints only, all (major ticks and endpoints), or none at all.
+
+### Axis inversion
+- An axis now be inverted (swap min/max positions) through the `inverted` option on the axes.
+
+### Axis grid lines
+- Grid lines can now be turned off or on for individual axes.
+
+### Axis `boxPosition`
+- Allows a user to specify the position an axis is rendered within its box.
+
+### New `barWidth` options
+
+- Allows for the number supplied as the width to be treated either as a relative value related to the minimum distance between consecutive points, or as an absolute value in terms of units on the axis.
+
+### New logaxis plugin!
+- Example is provided
+
+### Touch navigation!
+- Use the touchNavigate plugin to access touch panning gestures
+
+## Numerous bug fixes
+
 ## [1.1.5]
 
 ### Bug fixes ###
