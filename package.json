@@ -39,6 +39,6 @@
     "karma-spec-reporter": "0.0.32",
     "ljs": "^0.3.2",
     "tmp": "0.0.33",
-    "webcharts-development-settings": "^1.0.9"
+    "webcharts-development-settings": "^2.0.0"
   }
 }
